@@ -170,8 +170,10 @@ public class StargateRenderer {
 							lockSoundPlayed = true;
 							
 							// Play final chevron lock sound
-							if (dialingComplete)
+							if (dialingComplete) {
+								moveFinalChevron();
 								AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.PLAY_LOCK_SOUND, 0, te.getPos()) );
+							}
 						}
 						
 						if ( tickDecel <= maxTick ) {
@@ -279,7 +281,15 @@ public class StargateRenderer {
 		activation = 0;
 	}
 	
-	private void renderChevron(double x, double y, double z, int index) {
+	public void moveFinalChevron() {
+		finalChevronStart = 0;
+		finalChevronMove = true;
+	}
+	
+	private float finalChevronStart;
+	private boolean finalChevronMove;
+	
+	private void renderChevron(double x, double y, double z, int index, double partialTicks) {
 		Model ChevronLight = Aunis.modelLoader.getModel( EnumModel.ChevronLight );
 		Model ChevronFrame = Aunis.modelLoader.getModel( EnumModel.ChevronFrame );
 		Model ChevronMoving = Aunis.modelLoader.getModel( EnumModel.ChevronMoving );
@@ -291,22 +301,49 @@ public class StargateRenderer {
 			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
 			
 			int angularPosition = EnumChevron.getRotation(index);
-			// angularPosition *= -1;
-			/*if (horizontalRotation == 0 || horizontalRotation == 90)
-				
-			
-			if (horizontalRotation == 90 || horizontalRotation == 270)
-				GlStateManager.rotate(angularPosition, 1, 0, 0);
-			else */
 			GlStateManager.rotate(angularPosition, 0, 0, 1);
-			
-			
-			
-			ModelLoader.bindTexture( chevronTextureList.get(index) );
 
-			ChevronLight.render();
-			ChevronFrame.render();
-			ChevronMoving.render();
+			ModelLoader.bindTexture( chevronTextureList.get(index) );
+			
+			if (index == 8 && finalChevronMove) {
+				if (finalChevronStart == 0)
+					finalChevronStart = te.getWorld().getTotalWorldTime();
+				
+				float tick = (float) (te.getWorld().getTotalWorldTime() - finalChevronStart + partialTicks);
+				float arg = tick / 6.0f;
+				
+				float finalChevronOffset = 0;
+				
+				if (arg <= Math.PI/2)
+					finalChevronOffset = MathHelper.sin( arg ) / 12f;
+				
+				else if (arg <= Math.PI)
+					finalChevronOffset = 0.08333f; // 1 / 12
+				
+				else if (arg <= 3*Math.PI/2)
+					finalChevronOffset = -MathHelper.cos( arg ) / 12f;
+				
+				else {
+					finalChevronOffset = 0;
+					finalChevronMove = false;
+				}
+			
+				// Aunis.info("arg: " + arg + ",  finalChevronOffset: "+finalChevronOffset);
+								
+				ChevronFrame.render();
+				
+				GlStateManager.translate(0, finalChevronOffset, 0);
+				ChevronLight.render();
+			
+				GlStateManager.translate(0, -2*finalChevronOffset, 0);
+				ChevronMoving.render();
+			}
+			
+			else {
+				ChevronLight.render();	
+				ChevronFrame.render();
+				ChevronMoving.render();
+			}
 			
 			GlStateManager.popMatrix();
 		}
@@ -314,7 +351,7 @@ public class StargateRenderer {
 	
 	private void renderChevrons(double x, double y, double z, double partialTicks) {
 		for (int i=0; i<9; i++) {
-			renderChevron(x, y, z, i);
+			renderChevron(x, y, z, i, partialTicks);
 		}
 		
 		if (activation != -1) {
