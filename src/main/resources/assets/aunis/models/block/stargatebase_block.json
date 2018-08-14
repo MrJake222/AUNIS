@@ -1,0 +1,12 @@
+{
+	"parent": "block/cube_all",
+	"textures": {
+		"particle": "aunis:blocks/nauqadah_block",
+		"north": "aunis:blocks/stargatebase_front",
+		"south": "aunis:blocks/nauqadah_block",
+		"west": "aunis:blocks/nauqadah_block",
+		"east": "aunis:blocks/nauqadah_block",
+		"up": "aunis:blocks/nauqadah_block",
+		"down": "aunis:blocks/nauqadah_block"
+	}
+}

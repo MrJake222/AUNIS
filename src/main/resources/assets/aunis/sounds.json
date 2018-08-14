@@ -1,0 +1,40 @@
+{
+  "dhd_press": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.dhd_press",
+    "sounds": [
+      "aunis:dhd/press_1",
+      "aunis:dhd/press_2",
+      "aunis:dhd/press_3",
+      "aunis:dhd/press_4",
+      "aunis:dhd/press_5",
+      "aunis:dhd/press_6",
+      "aunis:dhd/press_7"
+    ]
+  },
+  
+  "dhd_brb": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.dhd_press_brb",
+    "sounds": [
+      "aunis:dhd/press_brb"
+    ]
+  },
+  
+  "gate_open": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.gate_open",
+    "sounds": [
+      "aunis:gate/open"
+    ]
+  },
+  
+  "gate_close": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.gate_close",
+    "sounds": [
+      "aunis:gate/close"
+    ]
+  }
+}
+
