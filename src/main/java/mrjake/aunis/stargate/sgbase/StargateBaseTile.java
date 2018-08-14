@@ -38,12 +38,12 @@ public class StargateBaseTile extends TileEntity {
 	}
 	
 	public void engageGate() {
-		Aunis.info("Initiating connection with "+dialedAddress.toString());
+		Aunis.log("Initiating connection with "+dialedAddress.toString());
 		isEngaged = true;
 	}
 	
 	public void disconnectGate() {
-		Aunis.info("Disconnecting gate");
+		Aunis.log("Disconnecting gate");
 		isEngaged = false;
 	}
 	
@@ -58,12 +58,18 @@ public class StargateBaseTile extends TileEntity {
 		return renderer;
 	}
 	
-	public int getMaxChevrons() {
+	public int getMaxSymbols() {
 		return maxChevrons;
 	}
 	
-	public int getDialedChevrons() {
+	public int getEnteredSymbolsCount() {
 		return dialedAddress.size();
+	}
+	
+	public boolean checkForPointOfOrigin() {
+		EnumSymbol last = dialedAddress.get( dialedAddress.size() - 1 );
+		
+		return last.equals( EnumSymbol.ORIGIN );
 	}
 	
 	public DHDTile getLinkedDHD(World world) {
@@ -85,7 +91,7 @@ public class StargateBaseTile extends TileEntity {
 		BlockPos dhd;
 		
 		if (linkedDHD == null) {
-			Aunis.info("linkedDHD is null!");
+			Aunis.log("linkedDHD is null!");
 			dhd = new BlockPos(0,0,0);
 		}
 		else
@@ -108,7 +114,7 @@ public class StargateBaseTile extends TileEntity {
 		
 		BlockPos pos = new BlockPos(x,y,z);
 
-		Aunis.info("Relinking to Stargate at " + pos.toString());
+		Aunis.log("Relinking to Stargate at " + pos.toString());
 		linkedDHD = pos;
 	}
 	

@@ -78,7 +78,7 @@ public class Loader {
 		}
 		
 		String[] path = filename.split("/");
-		Aunis.logger.info(String.format("Finished loading mesh %s: v:%d t:%d n:%d vertexMap:%d indices:%d", path[path.length-1], vertices.size(), textures.size(), normals.size(), vertexIndexMap.size(), indices.size() ));
+		Aunis.log(String.format("Finished loading mesh %s: v:%d t:%d n:%d vertexMap:%d indices:%d", path[path.length-1], vertices.size(), textures.size(), normals.size(), vertexIndexMap.size(), indices.size() ));
 
 		// ----------------------------------------------------------------------------------
 		

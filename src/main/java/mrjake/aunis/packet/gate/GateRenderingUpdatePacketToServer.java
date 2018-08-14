@@ -10,6 +10,7 @@ import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.dhd.DHDTile;
 import mrjake.aunis.stargate.sgbase.StargateBaseTile;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,7 +19,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-// Send from client to server
 public class GateRenderingUpdatePacketToServer implements IMessage {
 	public GateRenderingUpdatePacketToServer() {}
 	
@@ -49,8 +49,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 	}
 
 	
-	public static class DHDButtonClickedHandler implements IMessageHandler<GateRenderingUpdatePacketToServer, IMessage>{
-		
+	public static class DHDButtonClickedHandler implements IMessageHandler<GateRenderingUpdatePacketToServer, IMessage> {
 		@Override
 		public IMessage onMessage(GateRenderingUpdatePacketToServer message, MessageContext ctx) {
 			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {
@@ -60,79 +59,129 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 				BlockPos pos = message.blockPos;
 				
 				if ( world.isBlockLoaded(pos) ) {
-					if ( message.packetID == EnumPacket.ENGAGE_GATE.packetID ) {
-						StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
-						
-						gateTile.engageGate();
-						world.playSound(null, pos, AunisSoundEvents.gateOpen, SoundCategory.BLOCKS, 1.0f, 1.0f);
+					TargetPoint point = new TargetPoint(ctx.getServerHandler().player.getEntityWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64);
+					
+					TileEntity te = world.getTileEntity(pos);
+					StargateBaseTile gateTile;
+					DHDTile dhdTile;
+					
+					if ( te instanceof StargateBaseTile ) {
+						gateTile = (StargateBaseTile) te;
+						dhdTile = gateTile.getLinkedDHD(world);
 					}
 					
-					else if ( message.packetID == EnumPacket.CLOSE_GATE.packetID ) {
-						StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
-						
-						gateTile.disconnectGate();
-						gateTile.clearAddress();
-						
-						TargetPoint point = new TargetPoint(ctx.getServerHandler().player.getEntityWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64);
-						AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHDButton.packetID, -1, gateTile.getLinkedDHD(world).getPos()), point );
-						
-						world.playSound(null, pos, AunisSoundEvents.gateClose, SoundCategory.BLOCKS, 1.0f, 1.0f);
+					else if  ( te instanceof DHDTile ) {
+						dhdTile = (DHDTile) te;
+						gateTile = dhdTile.getLinkedGate(world);
 					}
 					
 					else {
-						if ( world.getTileEntity(pos) instanceof DHDTile ) {		
-							DHDTile te = (DHDTile) world.getTileEntity(pos);
-							BlockPos gate = te.getLinkedGate();
+						// Bad BlockPos given
+						
+						return;
+					}
+				
+					switch ( EnumPacket.valueOf(message.packetID) ) {
+						case PLAY_ENGAGE_SOUND:							
+							world.playSound(null, pos, AunisSoundEvents.gateOpen, SoundCategory.BLOCKS, 1.0f, 1.0f);
 							
-							if (gate != null) {
-								StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(gate);
-								
-								EnumSymbol symbol = EnumSymbol.values()[message.objectID];
-								
-								TargetPoint point = new TargetPoint(ctx.getServerHandler().player.getEntityWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64);
-								
+							break;
+						
+						case ENGAGE_GATE:
+							gateTile.engageGate();
+							
+							break;
+						
+						case CLEAR_DHD_BUTTONS:							
+							// Clear DHD buttons, Chevrons are cleared in StargateRenderer
+							AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
+							
+							break;
+							
+						case PLAY_LOCK_SOUND:
+							world.playSound(null, pos, AunisSoundEvents.chevronLockDHD, SoundCategory.BLOCKS, 1.0f, 1.0f);
+							
+							break;
+							
+						case PLAY_ROLL_SOUND:
+							AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.PLAY_ROLL_SOUND, 0, gateTile), point );
+							
+							break;
+							
+						case STOP_ROLL_SOUND:
+							AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.STOP_ROLL_SOUND, 0, gateTile), point );
+							
+							break;
+							
+						default:							
+							if (dhdTile != null && gateTile != null) {								
+								EnumSymbol symbol = EnumSymbol.valueOf(message.objectID);
+																
 								if ( symbol == EnumSymbol.BRB ) {						
-									if (gateTile.isEngaged()/* ||  gateTile.getDialedChevrons() != gateTile.getMaxChevrons()*/) {
-										//if ( gateTile.isEngaged() ) {
-											//gateTile.disconnectGate();
-										//}
+									if ( gateTile.isEngaged() ) {
+										Aunis.log("Gate is engaged, closing...");
 										
-										Aunis.info("Gate is engaged, closing...");
+										// clear connection and address, play closing sound, start animation 
+										gateTile.disconnectGate();
+										gateTile.clearAddress();
 										
-										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.Chevron.packetID, EnumGateAction.CLOSE_GATE.actionID, gate),  point );
+										world.playSound(null, pos, AunisSoundEvents.gateClose, SoundCategory.BLOCKS, 1.0f, 1.0f);
+										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, gateTile), point );
 									}
 									
 									else {
-										world.playSound(null, pos, AunisSoundEvents.dhdPressBRB, SoundCategory.BLOCKS, 1.0f, 1.0f);
-										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHDButton.packetID, message.objectID, pos), point );
+										// Gate is closed, BRB pressed
 										
+										// Check if symbols entered match the range, and last is ORIGIN
+										// TODO: Check if target gate exists
+										int symbolCount = gateTile.getEnteredSymbolsCount();
 										
-										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.Chevron.packetID, EnumGateAction.OPEN_GATE.actionID, gate), point );
-									}
+										if ( symbolCount >= 7 && symbolCount <= gateTile.getMaxSymbols() && gateTile.checkForPointOfOrigin() ) {
+											// All check, play BRB sound, light it up, start gate animation
+											world.playSound(null, pos, AunisSoundEvents.dhdPressBRB, SoundCategory.BLOCKS, 1.0f, 1.0f);
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE.packetID, message.objectID, dhdTile.getPos()), point );
+											
+											// We can't play sound here(like while closing) because renderer must wait some time (SG canon)
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, gateTile), point );
+										}
+										
+										else {
+											// TODO: Fail sound
+										}
+									}	
+									
 								}
 								
+								// Not BRB, some glyph pressed
 								else {
 									if ( gateTile.addSymbolToAddress(symbol) ) {
-										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHDButton.packetID, message.objectID, pos), point );
+										// We can still add glyphs(no limit reached)
 										
-										if (gateTile.getMaxChevrons() > gateTile.getDialedChevrons()) {
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.Chevron.packetID, EnumGateAction.ACTIVATE_NEXT.actionID, gate),  point );
+										// Update the DHD's renderer
+										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, message.objectID, dhdTile), point );
+										
+										// Limit not reached, activating in order
+										if ( gateTile.getMaxSymbols() > gateTile.getEnteredSymbolsCount() ) {
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.ACTIVATE_NEXT, gateTile), point );
 										}
 										
-										else if (gateTile.getMaxChevrons() == gateTile.getDialedChevrons()) {
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.Chevron.packetID, EnumGateAction.ACTIVATE_FINAL.actionID, gate),  point );
+										// Limit reached, activate the top one
+										else if ( gateTile.getMaxSymbols() == gateTile.getEnteredSymbolsCount() ) {
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.ACTIVATE_FINAL, gateTile), point );
 										}
 										
+										// Play sound of glyph pressed
 										world.playSound(null, pos, AunisSoundEvents.dhdPress, SoundCategory.BLOCKS, 1.0f, 1.0f);
-									}
-								}
-							}				
-						}
-					}
-				}
-			});
+									} // add symbol if
+								} // not brb else
+							} // gateTile not null if
+							
+							break;
+					} // switch
+				} // block loaded if
+			}); // runnable
 
 			return null;
-		}
-	}
+		} // IMessage onMessage end
+	} // Handler end
 }

@@ -149,7 +149,7 @@ public class DHDActivation {
 			//Aunis.info("Button: " + button);
 			player.swingArm(EnumHand.MAIN_HAND);
 			
-			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.DHDButton, button, pos) );
+			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.DHD_RENDERER_UPDATE, button, pos) );
 			//AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.Chevron, button, pos) );
 		}
 	}

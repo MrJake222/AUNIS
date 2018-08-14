@@ -1,17 +1,37 @@
 package mrjake.aunis.packet.gate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class GateRenderingUpdatePacket {
 	
 	public enum EnumPacket {
-		DHDButton(0),
-		Chevron(1),
+		DHD_RENDERER_UPDATE(0),
+		GATE_RENDERER_UPDATE(1),
 		ENGAGE_GATE(2),
-		CLOSE_GATE(3);
+		
+		CLEAR_DHD_BUTTONS(3),
+		
+		PLAY_ROLL_SOUND(4),
+		STOP_ROLL_SOUND(5),
+		PLAY_ENGAGE_SOUND(6),
+		PLAY_LOCK_SOUND(7);
 		
 		public int packetID;
+		private static Map<Integer, EnumPacket> map = new HashMap<Integer, EnumPacket>();
 		
 		EnumPacket(int packetID) {
 			this.packetID = packetID;
+		}
+		
+		static {
+			for (EnumPacket packet : EnumPacket.values()) {
+				map.put(packet.packetID, packet);
+			}
+		}
+		
+		public static EnumPacket valueOf(int packetID) {
+			return map.get(packetID);
 		}
 	}
 	
@@ -23,9 +43,20 @@ public class GateRenderingUpdatePacket {
 		CLOSE_GATE(4);
 		
 		public int actionID;
+		private static Map<Integer, EnumGateAction> map = new HashMap<Integer, EnumGateAction>();
 		
 		private EnumGateAction(int actionID) {
 			this.actionID = actionID;
+		}
+		
+		static {
+			for (EnumGateAction action : EnumGateAction.values()) {
+				map.put(action.actionID, action);
+			}
+		}
+		
+		public static EnumGateAction valueOf(int packetID) {
+			return map.get(packetID);
 		}
 	}
 }

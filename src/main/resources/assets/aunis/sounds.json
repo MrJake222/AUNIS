@@ -35,6 +35,22 @@
     "sounds": [
       "aunis:gate/close"
     ]
+  },
+  
+  "ring_roll": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.ring_roll",
+    "sounds": [
+      "aunis:gate/roll"
+    ]
+  },
+  
+  "chevron_lock_dhd": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.chevron_lock_dhd",
+    "sounds": [
+      "aunis:gate/chevron_lock_dhd"
+    ]
   }
 }
 

@@ -30,8 +30,7 @@ public class AunisClientEventHandler {
 			}
 		}
     }
-	
-	
+
 	@SubscribeEvent
 	public static void onRightClickBlock(RightClickBlock event) {	
 		onRightClick(event);

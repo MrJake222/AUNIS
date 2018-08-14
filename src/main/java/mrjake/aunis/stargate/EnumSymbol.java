@@ -1,5 +1,8 @@
 package mrjake.aunis.stargate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum EnumSymbol {
 	SCULPTOR(0, "Sculptor"),
 	SCORPIUS(1, "Scorpius"),
@@ -43,10 +46,25 @@ public enum EnumSymbol {
 	
 	public int id;
 	public String name;
+	private static Map<Integer, EnumSymbol> map = new HashMap<Integer, EnumSymbol>();
 	
 	EnumSymbol(int id, String name) {
 		this.id = id;
 		this.name = name;
+	}
+	
+	static {
+		for (EnumSymbol symbol : EnumSymbol.values()) {
+			map.put(symbol.id, symbol);
+		}
+	}
+	
+	public static EnumSymbol valueOf(int packetID) {
+		return map.get(packetID);
+	}
+	
+	public boolean equals(EnumSymbol symbol) {
+		return symbol.id == this.id;
 	}
 }
 

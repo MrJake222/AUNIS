@@ -33,7 +33,7 @@ public class DHDTile extends TileEntity {
 		BlockPos gate;
 		
 		if (linkedGate == null) {
-			Aunis.info("linkedGate is null!");
+			Aunis.log("linkedGate is null!");
 			gate = new BlockPos(0,0,0);
 		}
 		else
@@ -56,7 +56,7 @@ public class DHDTile extends TileEntity {
 		
 		BlockPos pos = new BlockPos(x,y,z);
 
-		Aunis.info("Relinking to Stargate at " + pos.toString());
+		Aunis.log("Relinking to Stargate at " + pos.toString());
 		linkedGate = pos;
 	}
 	
