@@ -6,14 +6,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockRotated;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class DHDRenderer {
+	//private DHDTile te;
+	private World world;
+	private BlockPos pos;
+	
 	private float rotation;
-	private DHDTile te;
 	
 	private Map<String, String> buttonTexture = new HashMap<String, String>();
 	
@@ -25,7 +31,9 @@ public class DHDRenderer {
 	
 	public DHDRenderer(DHDTile te) {
 		this.rotation = te.getWorld().getBlockState(te.getPos()).getValue(BlockRotated.ROTATE) * -22.5f;
-		this.te = te;
+		//this.te = te;
+		this.world = te.getWorld();
+		this.pos = te.getPos();
 		
 		for (int i=0; i<38; i++)
 			buttonTexture.put("b"+i, "dhd/symbol/symbol0.png");
@@ -34,6 +42,11 @@ public class DHDRenderer {
 	}
 	
 	public void activateButton(int buttonID) {
+		if ( buttonID == 38 )
+			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.dhdPressBRB);
+		else
+			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.dhdPress);
+		
 		if (activation == -1) {
 				
 			/*if ( buttonID == 38 && !buttonTexture.get(EnumModel.BRB.getName()).contains("0") ) {
@@ -47,7 +60,7 @@ public class DHDRenderer {
 				else
 					textureTemplate = "dhd/symbol/symbol";
 				
-				activationStateChange = te.getWorld().getTotalWorldTime();
+				activationStateChange = world.getTotalWorldTime();
 				activation = buttonID;
 			// }
 		}
@@ -55,7 +68,7 @@ public class DHDRenderer {
 	
 	public void clearButtons() {		
 		clearingButtons = true;
-		activationStateChange = te.getWorld().getTotalWorldTime();
+		activationStateChange = world.getTotalWorldTime();
 		
 		activation = 0;
 	}
@@ -69,9 +82,9 @@ public class DHDRenderer {
 				int stage;
 				
 				if (activation < 38)
-					stage = (int) ((te.getWorld().getTotalWorldTime() - activationStateChange + partialTicks) * 2);
+					stage = (int) ((world.getTotalWorldTime() - activationStateChange + partialTicks) * 2);
 				else
-					stage = (int) (te.getWorld().getTotalWorldTime() - activationStateChange + partialTicks);
+					stage = (int) (world.getTotalWorldTime() - activationStateChange + partialTicks);
 				
 				if (stage < 6) {
 					if (clearingButtons) {

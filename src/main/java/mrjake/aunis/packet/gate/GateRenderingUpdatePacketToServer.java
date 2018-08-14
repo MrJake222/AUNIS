@@ -2,7 +2,6 @@ package mrjake.aunis.packet.gate;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumPacket;
@@ -11,7 +10,6 @@ import mrjake.aunis.stargate.dhd.DHDTile;
 import mrjake.aunis.stargate.sgbase.StargateBaseTile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
@@ -82,11 +80,6 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 					}
 				
 					switch ( EnumPacket.valueOf(message.packetID) ) {
-						case PLAY_ENGAGE_SOUND:							
-							world.playSound(null, pos, AunisSoundEvents.gateOpen, SoundCategory.BLOCKS, 1.0f, 1.0f);
-							
-							break;
-						
 						case ENGAGE_GATE:
 							gateTile.engageGate();
 							
@@ -95,21 +88,6 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 						case CLEAR_DHD_BUTTONS:							
 							// Clear DHD buttons, Chevrons are cleared in StargateRenderer
 							AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
-							
-							break;
-							
-						case PLAY_LOCK_SOUND:
-							world.playSound(null, pos, AunisSoundEvents.chevronLockDHD, SoundCategory.BLOCKS, 1.0f, 1.0f);
-							
-							break;
-							
-						case PLAY_ROLL_SOUND:
-							AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.PLAY_ROLL_SOUND, 0, gateTile), point );
-							
-							break;
-							
-						case STOP_ROLL_SOUND:
-							AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.STOP_ROLL_SOUND, 0, gateTile), point );
 							
 							break;
 							
@@ -126,7 +104,6 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 										gateTile.disconnectGate();
 										gateTile.clearAddress();
 										
-										world.playSound(null, pos, AunisSoundEvents.gateClose, SoundCategory.BLOCKS, 1.0f, 1.0f);
 										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, gateTile), point );
 									}
 									
@@ -137,25 +114,20 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 										// TODO: Check if target gate exists
 										
 										if ( symbolCount >= 7 && symbolCount <= gateTile.getMaxSymbols() && gateTile.checkForPointOfOrigin() ) {
-											// All check, play BRB sound, light it up, start gate animation
-											world.playSound(null, pos, AunisSoundEvents.dhdPressBRB, SoundCategory.BLOCKS, 1.0f, 1.0f);
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE.packetID, message.objectID, dhdTile.getPos()), point );
+											// All check, light it up, start gate animation
 											
-											// We can't play sound here(like while closing) because renderer must wait some time (SG canon)
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE.packetID, message.objectID, dhdTile.getPos()), point );
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, gateTile), point );
 										}
 										
 										else {
 											// Address malformed, dialing failed
 											// Clear address, clear DHD buttons and chevrons
-											// Stop roll sound, stop ring spin, play fail sound
-											gateTile.clearAddress();
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.STOP_ROLL_SOUND, 0, gateTile), point );
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.STOP_RING_SPIN, gateTile), point );
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLEAR_CHEVRONS, gateTile), point );
+											// stop ring spin
 											
-											world.playSound(null, pos, AunisSoundEvents.gateDialFail, SoundCategory.BLOCKS, 1.0f, 1.0f);
+											gateTile.clearAddress();
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.GATE_DIAL_FAILED, gateTile), point );
 										}
 									}	
 									
@@ -180,8 +152,6 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.ACTIVATE_FINAL, gateTile), point );
 										}
 										
-										// Play sound of glyph pressed
-										world.playSound(null, pos, AunisSoundEvents.dhdPress, SoundCategory.BLOCKS, 1.0f, 1.0f);
 									} // add symbol if
 								} // not brb else
 							} // gateTile not null if

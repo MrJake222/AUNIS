@@ -17,8 +17,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-
-
 public class DHDActivation {
 	private static List<Vector3f> dhdVertices = Arrays.asList(
 			new Vector3f( 0.194732f, 0.41862f, 0.734536f ),
@@ -148,7 +146,7 @@ public class DHDActivation {
 		if (button != -1) {
 			//Aunis.info("Button: " + button);
 			player.swingArm(EnumHand.MAIN_HAND);
-			
+
 			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.DHD_RENDERER_UPDATE, button, pos) );
 			//AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.Chevron, button, pos) );
 		}

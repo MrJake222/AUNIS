@@ -1,17 +1,14 @@
 package mrjake.aunis.packet.gate;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.stargate.dhd.DHDTile;
 import mrjake.aunis.stargate.sgbase.StargateBaseTile;
 import mrjake.aunis.stargate.sgbase.StargateRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -69,6 +66,8 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 			EntityPlayer player = Minecraft.getMinecraft().player;
 			World world = player.getEntityWorld();
 			
+			//Aunis.info("Received GateRenderingUpdatePacketToClient, message.packetID = "+message.packetID);
+			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				TileEntity te = world.getTileEntity( message.blockPos );
 				StargateBaseTile gateTile = null;
@@ -87,8 +86,6 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 					return;
 				}
 				
-				PositionedSoundRecord sound = AunisSoundEvents.ringRollSoundMap.get( message.blockPos );
-				
 				switch ( EnumPacket.valueOf(message.packetID) ) {
 					case DHD_RENDERER_UPDATE:						
 						if (message.objectID == -1) 
@@ -101,23 +98,6 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 						
 					case GATE_RENDERER_UPDATE:
 						gateRendererUpdate(EnumGateAction.valueOf(message.objectID), gateTile.getRenderer());
-						
-						break;
-						
-					case PLAY_ROLL_SOUND:						
-						if ( sound == null ) {
-							sound = new PositionedSoundRecord(AunisSoundEvents.ringRoll, SoundCategory.BLOCKS, 1.0f, 1.0f, message.blockPos);
-							AunisSoundEvents.ringRollSoundMap.put(message.blockPos, sound);
-						}
-						
-						Minecraft.getMinecraft().getSoundHandler().playSound( sound );
-						
-						break;
-						
-					case STOP_ROLL_SOUND:						
-						if ( sound != null ) {
-							Minecraft.getMinecraft().getSoundHandler().stopSound( sound );
-						}
 						
 						break;
 				}
@@ -145,13 +125,10 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 					renderer.closeGate();
 					break;
 					
-				// Used, when dialing failed
-				case CLEAR_CHEVRONS:
-					renderer.clearChevrons();
-					
-				case STOP_RING_SPIN:
+				case GATE_DIAL_FAILED:
 					renderer.setRingSpin(false, false);
-					
+					renderer.clearChevrons();
+					break;
 			}
 		}
 	}

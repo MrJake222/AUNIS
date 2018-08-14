@@ -5,8 +5,10 @@ import java.util.Map;
 
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class AunisSoundEvents {
 	public static SoundEvent dhdPress;
@@ -19,10 +21,11 @@ public class AunisSoundEvents {
 	public static SoundEvent ringRoll;
 	public static SoundEvent chevronLockDHD;
 	
+	public static Map<BlockPos, PositionedSoundRecord> ringRollSoundMap;
 	
-	public static Map<BlockPos, PositionedSoundRecord> ringRollSoundMap = new HashMap<BlockPos, PositionedSoundRecord>();
-	
-	static {
+	static {		
+		ringRollSoundMap = new HashMap<BlockPos, PositionedSoundRecord>();
+		
 		dhdPress = new SoundEvent( new ResourceLocation("aunis", "dhd_press") );
 		dhdPressBRB = new SoundEvent( new ResourceLocation("aunis", "dhd_brb") );
 		
@@ -31,7 +34,10 @@ public class AunisSoundEvents {
 		gateDialFail = new SoundEvent( new ResourceLocation("aunis", "gate_dial_fail") );
 		
 		ringRoll = new SoundEvent( new ResourceLocation("aunis", "ring_roll") );
-		chevronLockDHD = new SoundEvent( new ResourceLocation("aunis", "chevron_lock_dhd") );
-		
+		chevronLockDHD = new SoundEvent( new ResourceLocation("aunis", "chevron_lock_dhd") );	
+	}
+	
+	public static void playSound(World world, BlockPos pos, SoundEvent soundEvent) {
+		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEvent, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
 	}
 }

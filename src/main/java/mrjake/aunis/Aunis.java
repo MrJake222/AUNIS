@@ -52,6 +52,7 @@ public class Aunis {
     	Aunis.info("postinit");
     }
 
+    
 	public static void log(String msg) {
 		if (DEBUG) {
 			logger.info(msg);

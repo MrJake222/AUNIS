@@ -10,12 +10,7 @@ public class GateRenderingUpdatePacket {
 		GATE_RENDERER_UPDATE(1),
 		ENGAGE_GATE(2),
 		
-		CLEAR_DHD_BUTTONS(3),
-		
-		PLAY_ROLL_SOUND(4),
-		STOP_ROLL_SOUND(5),
-		PLAY_ENGAGE_SOUND(6),
-		PLAY_LOCK_SOUND(7);
+		CLEAR_DHD_BUTTONS(3);
 		
 		public int packetID;
 		private static Map<Integer, EnumPacket> map = new HashMap<Integer, EnumPacket>();
@@ -41,8 +36,7 @@ public class GateRenderingUpdatePacket {
 		ACTIVATE_FINAL(2),
 		OPEN_GATE(3),
 		CLOSE_GATE(4),
-		CLEAR_CHEVRONS(5),
-		STOP_RING_SPIN(6);
+		GATE_DIAL_FAILED(5);
 		
 		public int actionID;
 		private static Map<Integer, EnumGateAction> map = new HashMap<Integer, EnumGateAction>();

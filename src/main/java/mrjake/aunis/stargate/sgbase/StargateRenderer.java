@@ -9,6 +9,7 @@ import java.util.Random;
 import static org.lwjgl.opengl.GL11.*;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
@@ -16,15 +17,20 @@ import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumPacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class StargateRenderer {
-	private StargateBaseTile te;
+	// private StargateBaseTile te;
+	private World world;
+	private BlockPos pos;
 	
 	private static final Vec3d ringLoc = new Vec3d(0.0, -0.122333, -0.000597);
 	private int horizontalRotation;
@@ -46,10 +52,10 @@ public class StargateRenderer {
 	}
 	
 	public StargateRenderer(StargateBaseTile te) {
-		World world = te.getWorld();
-		BlockPos pos = te.getPos();
+		// this.te = te;
+		this.world = te.getWorld();
+		this.pos = te.getPos();
 		
-		this.te = te;
 		this.ringAngularRotation = 0;
 		
 		EnumFacing facing = world.getBlockState(pos).getValue(BlockFaced.FACING);
@@ -63,7 +69,6 @@ public class StargateRenderer {
 			chevronTextureList.add(textureTemplate + "0.png");
 		}
 		
-		Aunis.info("init!");
 		initEventHorizon();
 		initKawoosh();
 	}
@@ -113,13 +118,36 @@ public class StargateRenderer {
 	private boolean lockSoundPlayed;
 	private boolean dialingComplete;
 	
+	private void rollSound(boolean play) {
+		PositionedSoundRecord sound = AunisSoundEvents.ringRollSoundMap.get( pos );
+				
+		if (play) {			
+			if ( sound == null ) {			
+				sound = new PositionedSoundRecord(AunisSoundEvents.ringRoll, SoundCategory.BLOCKS, 1.0f, 1.0f, pos);
+				
+				AunisSoundEvents.ringRollSoundMap.put(pos, sound);
+			}
+			
+			Minecraft.getMinecraft().getSoundHandler().playSound( sound );
+		}
+		
+		else {					
+			if ( sound != null ) {
+				Minecraft.getMinecraft().getSoundHandler().stopSound( sound );
+			}
+		}
+	}
+	
 	public void setRingSpin(boolean spin, boolean dialingComplete) {
 		this.dialingComplete = dialingComplete;
 		
+		if (!dialingComplete)
+			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateDialFail);
+		
 		if (spin) {
-			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.PLAY_ROLL_SOUND, 0, te.getPos()) );
+			rollSound(true);
 			
-			ringSpinStart = te.getWorld().getTotalWorldTime();
+			ringSpinStart = world.getTotalWorldTime();
 			lastTick = -1;
 			
 			ringDecelerating = false;
@@ -128,7 +156,7 @@ public class StargateRenderer {
 		}
 		
 		else {
-			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.STOP_ROLL_SOUND, 0, te.getPos()) );
+			rollSound(false);
 			
 			lockSoundPlayed = false;
 			ringDecelFirst = true;
@@ -144,7 +172,7 @@ public class StargateRenderer {
 		if (ringModel != null) {
 			
 			if (ringSpin) {
-				float tick = (float) (te.getWorld().getTotalWorldTime() - ringSpinStart + partialTicks);
+				float tick = (float) (world.getTotalWorldTime() - ringSpinStart + partialTicks);
 				float anglePerTick = targetAnglePerTick;
 				
 				if (ringAccelerating) {
@@ -172,7 +200,7 @@ public class StargateRenderer {
 							// Play final chevron lock sound
 							if (dialingComplete) {
 								moveFinalChevron();
-								AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.PLAY_LOCK_SOUND, 0, te.getPos()) );
+								AunisSoundEvents.playSound(world, pos, AunisSoundEvents.chevronLockDHD);
 							}
 						}
 						
@@ -251,7 +279,7 @@ public class StargateRenderer {
 	}
 	
 	public void activateFinalChevron() {
-		activationStateChange = te.getWorld().getTotalWorldTime();
+		activationStateChange = world.getTotalWorldTime();
 		activation = 8;
 		
 		setRingSpin( false, true );
@@ -259,9 +287,9 @@ public class StargateRenderer {
 	
 	public void activateNextChevron() { 
 		if (activation == -1) {			
-			activationStateChange = te.getWorld().getTotalWorldTime();
+			activationStateChange = world.getTotalWorldTime();
 			activation = activeChevrons;
-			
+						
 			if (activeChevrons == 0) {
 				setRingSpin( true, true );
 			}
@@ -273,10 +301,10 @@ public class StargateRenderer {
 	
 	public void clearChevrons() {
 		clearingChevrons = true;
-		activationStateChange = te.getWorld().getTotalWorldTime() + 15;
+		activationStateChange = world.getTotalWorldTime() + 15;
 				
 		if (!dialingComplete)
-			activationStateChange += 20;
+			activationStateChange += 15;
 		
 		activation = 0;
 	}
@@ -307,9 +335,9 @@ public class StargateRenderer {
 			
 			if (index == 8 && finalChevronMove) {
 				if (finalChevronStart == 0)
-					finalChevronStart = te.getWorld().getTotalWorldTime();
+					finalChevronStart = world.getTotalWorldTime();
 				
-				float tick = (float) (te.getWorld().getTotalWorldTime() - finalChevronStart + partialTicks);
+				float tick = (float) (world.getTotalWorldTime() - finalChevronStart + partialTicks);
 				float arg = tick / 6.0f;
 				
 				float finalChevronOffset = 0;
@@ -327,9 +355,7 @@ public class StargateRenderer {
 					finalChevronOffset = 0;
 					finalChevronMove = false;
 				}
-			
-				// Aunis.info("arg: " + arg + ",  finalChevronOffset: "+finalChevronOffset);
-								
+											
 				ChevronFrame.render();
 				
 				GlStateManager.translate(0, finalChevronOffset, 0);
@@ -355,7 +381,7 @@ public class StargateRenderer {
 		}
 		
 		if (activation != -1) {
-			int stage = (int) (((te.getWorld().getTotalWorldTime() - activationStateChange) + partialTicks) * 3);
+			int stage = (int) (((world.getTotalWorldTime() - activationStateChange) + partialTicks) * 3);
 
 			if (stage < 0) return;
 			
@@ -375,7 +401,7 @@ public class StargateRenderer {
 				
 			else {
 				if (clearingChevrons) {
-					closeGate();
+					// closeGate();
 					clearingChevrons = false;
 					activeChevrons = 0;
 				}
@@ -397,10 +423,6 @@ public class StargateRenderer {
 	private QuadStrip backStrip;
 	private boolean backStripClamp;
 	
-	// private float kawooshScaleFactor = 0;
-
-	
-	
 	private boolean doEventHorizonRender = false;
 	private boolean closingFirstRun;
 	private Float whiteOverlayAlpha;
@@ -416,7 +438,7 @@ public class StargateRenderer {
 	
 	
 	public void openGate() {
-		gateWaitStart = te.getWorld().getTotalWorldTime();
+		gateWaitStart = world.getTotalWorldTime();
 		soundPlayed = false;
 		
 		zeroAlphaSet = false;
@@ -431,7 +453,8 @@ public class StargateRenderer {
 	}
 	
 	public void closeGate() {
-		gateWaitClose = te.getWorld().getTotalWorldTime();
+		AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateClose);
+		gateWaitClose = world.getTotalWorldTime();
 		// closingSoundPlayed = false;
 		
 		vortexState = EnumVortexState.CLOSING;
@@ -445,8 +468,6 @@ public class StargateRenderer {
 		float end   = 0.545f;
 		
 		float rng = end - begin;
-		// kawooshScaleFactor = kawooshSize / rng;
-		// kawooshScaleFactor = 1;
 
 		float step = rng / kawooshSections;
 		boolean first = true;
@@ -528,24 +549,24 @@ public class StargateRenderer {
 	private EnumVortexState vortexState;
 	
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
-		if ( (te.getWorld().getTotalWorldTime() - gateWaitStart) < 25 )
+		if ( (world.getTotalWorldTime() - gateWaitStart) < 25 )
 			return;
 		
 		// This must be done here, because we wait a little before playing any sound
 		if (!soundPlayed) {
 			soundPlayed = true;
 			
-			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.PLAY_ENGAGE_SOUND, 0, te.getPos()) );
+			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateOpen);
 		}
 		
 		// Waiting for sound sync
-		if ( (te.getWorld().getTotalWorldTime() - gateWaitStart) < 44 ) {
+		if ( (world.getTotalWorldTime() - gateWaitStart) < 44 ) {
 			return;
 		}
 		
 		else {
 			if ( kawooshStart == 0 )
-				kawooshStart = te.getWorld().getTotalWorldTime();
+				kawooshStart = world.getTotalWorldTime();
 		}
 			
 		GlStateManager.pushMatrix();
@@ -555,7 +576,7 @@ public class StargateRenderer {
 		
 		ModelLoader.bindTexture( "event_horizon_by_mclatchyt_2.jpg" );
 			
-		float tick = (float) (te.getWorld().getTotalWorldTime() - kawooshStart + partialTicks);
+		float tick = (float) (world.getTotalWorldTime() - kawooshStart + partialTicks);
 		float mul = 1;
 		
 		float inner = eventHorizonRadius - tick/3.957f;
@@ -610,7 +631,7 @@ public class StargateRenderer {
 							vortexState = EnumVortexState.STILL;
 							
 							// Gate is open, engage it on server
-							AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.ENGAGE_GATE, 0, te.getPos()) );
+							AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.ENGAGE_GATE, 0, pos) );
 						}
 						
 						if ( vortexState.equals(EnumVortexState.FULL) ) {				
@@ -668,14 +689,14 @@ public class StargateRenderer {
 							doEventHorizonRender = false;
 							clearChevrons();
 							
-							AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.CLEAR_DHD_BUTTONS, 0, te.getPos()) );
+							AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.CLEAR_DHD_BUTTONS, 0, pos) );
 						}
 					}
 				} // not closing if
 				
 				else {					
 					// Fading out the event horizon, closing the gate
-					if ( (te.getWorld().getTotalWorldTime() - gateWaitClose) > 29 ) {
+					if ( (world.getTotalWorldTime() - gateWaitClose) > 29 ) {
 						if (closingFirstRun) {
 							closingFirstRun = false;
 							vortexStart = tick;
@@ -764,7 +785,7 @@ public class StargateRenderer {
 			quadStrips.add( new QuadStrip(i) );
 		}
 
-		horizonStateChange = te.getWorld().getTotalWorldTime();
+		horizonStateChange = world.getTotalWorldTime();
 	}
 	
 	
@@ -775,7 +796,7 @@ public class StargateRenderer {
 	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly) {			
 		ModelLoader.bindTexture( "event_horizon_by_mclatchyt_2.jpg" );
 		
-		float tick = (float) (te.getWorld().getTotalWorldTime() - horizonStateChange + partialTicks);	
+		float tick = (float) (world.getTotalWorldTime() - horizonStateChange + partialTicks);	
 		
 		glEnable(GL_BLEND);
 		
