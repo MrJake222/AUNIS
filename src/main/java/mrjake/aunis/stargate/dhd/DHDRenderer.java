@@ -34,8 +34,6 @@ public class DHDRenderer {
 	}
 	
 	public void activateButton(int buttonID) {
-		activationStateChange = te.getWorld().getTotalWorldTime();
-		
 		if (activation == -1) {
 				
 			/*if ( buttonID == 38 && !buttonTexture.get(EnumModel.BRB.getName()).contains("0") ) {
@@ -48,7 +46,8 @@ public class DHDRenderer {
 					textureTemplate = "dhd/brb/brb";
 				else
 					textureTemplate = "dhd/symbol/symbol";
-					
+				
+				activationStateChange = te.getWorld().getTotalWorldTime();
 				activation = buttonID;
 			// }
 		}
@@ -66,37 +65,14 @@ public class DHDRenderer {
 		Model brbModel = Aunis.modelLoader.getModel(EnumModel.BRB);
 		
 		if (dhdModel != null && brbModel != null) {
-			glPushMatrix();
-			
-			glTranslated(x+0.5, y, z+0.5);
-			glRotatef(rotation, 0, 1, 0);
-			
-			ModelLoader.bindTexture( EnumModel.DHD_MODEL );
-			dhdModel.render();
-			
-			ModelLoader.bindTexture( buttonTexture.get( EnumModel.BRB.getName() ) );
-			brbModel.render();
-
-			EnumModel[] buttons = EnumModel.values();			
-			for (int i=0; i<38; i++) {
-				Model b = Aunis.modelLoader.getModel(buttons[i]);
-				
-				if (b != null) {
-					ModelLoader.bindTexture( buttonTexture.get( buttons[i].getName() ) );
-					b.render();
-				}	
-			}
-			
-			glPopMatrix();
-			
 			if (activation != -1) {
 				int stage;
 				
 				if (activation < 38)
-					stage = (int) (((te.getWorld().getTotalWorldTime() - activationStateChange) + partialTicks) * 2);
+					stage = (int) ((te.getWorld().getTotalWorldTime() - activationStateChange + partialTicks) * 2);
 				else
-					stage = (int) ((te.getWorld().getTotalWorldTime() - activationStateChange) + partialTicks);
-								
+					stage = (int) (te.getWorld().getTotalWorldTime() - activationStateChange + partialTicks);
+				
 				if (stage < 6) {
 					if (clearingButtons) {
 						for (int i=0; i<39; i++) {
@@ -120,6 +96,29 @@ public class DHDRenderer {
 					activation = -1;
 				}
 			}
+			
+			glPushMatrix();
+			
+			glTranslated(x+0.5, y, z+0.5);
+			glRotatef(rotation, 0, 1, 0);
+			
+			ModelLoader.bindTexture( EnumModel.DHD_MODEL );
+			dhdModel.render();
+			
+			ModelLoader.bindTexture( buttonTexture.get( EnumModel.BRB.getName() ) );
+			brbModel.render();
+
+			EnumModel[] buttons = EnumModel.values();			
+			for (int i=0; i<38; i++) {
+				Model b = Aunis.modelLoader.getModel(buttons[i]);
+				
+				if (b != null) {
+					ModelLoader.bindTexture( buttonTexture.get( buttons[i].getName() ) );
+					b.render();
+				}	
+			}
+			
+			glPopMatrix();
 		}
 	}
 }

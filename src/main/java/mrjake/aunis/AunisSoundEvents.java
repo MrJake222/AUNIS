@@ -14,9 +14,11 @@ public class AunisSoundEvents {
 	
 	public static SoundEvent gateOpen;
 	public static SoundEvent gateClose;
+	public static SoundEvent gateDialFail;
 	
 	public static SoundEvent ringRoll;
 	public static SoundEvent chevronLockDHD;
+	
 	
 	public static Map<BlockPos, PositionedSoundRecord> ringRollSoundMap = new HashMap<BlockPos, PositionedSoundRecord>();
 	
@@ -26,9 +28,10 @@ public class AunisSoundEvents {
 		
 		gateOpen = new SoundEvent( new ResourceLocation("aunis", "gate_open") );
 		gateClose = new SoundEvent( new ResourceLocation("aunis", "gate_close") );
+		gateDialFail = new SoundEvent( new ResourceLocation("aunis", "gate_dial_fail") );
 		
 		ringRoll = new SoundEvent( new ResourceLocation("aunis", "ring_roll") );
-		
 		chevronLockDHD = new SoundEvent( new ResourceLocation("aunis", "chevron_lock_dhd") );
+		
 	}
 }

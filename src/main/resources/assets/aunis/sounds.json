@@ -51,6 +51,14 @@
     "sounds": [
       "aunis:gate/chevron_lock_dhd"
     ]
+  },
+  
+  "gate_dial_fail": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.gate_dial_fail",
+    "sounds": [
+      "aunis:gate/dial_fail"
+    ]
   }
 }
 

@@ -40,7 +40,9 @@ public class GateRenderingUpdatePacket {
 		ACTIVATE_NEXT(1),
 		ACTIVATE_FINAL(2),
 		OPEN_GATE(3),
-		CLOSE_GATE(4);
+		CLOSE_GATE(4),
+		CLEAR_CHEVRONS(5),
+		STOP_RING_SPIN(6);
 		
 		public int actionID;
 		private static Map<Integer, EnumGateAction> map = new HashMap<Integer, EnumGateAction>();

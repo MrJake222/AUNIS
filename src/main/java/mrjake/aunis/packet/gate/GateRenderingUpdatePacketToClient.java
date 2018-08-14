@@ -6,6 +6,7 @@ import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.stargate.dhd.DHDTile;
 import mrjake.aunis.stargate.sgbase.StargateBaseTile;
+import mrjake.aunis.stargate.sgbase.StargateRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.player.EntityPlayer;
@@ -99,7 +100,7 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 						break;
 						
 					case GATE_RENDERER_UPDATE:
-						gateRendererUpdate(EnumGateAction.valueOf(message.objectID), gateTile);
+						gateRendererUpdate(EnumGateAction.valueOf(message.objectID), gateTile.getRenderer());
 						
 						break;
 						
@@ -126,23 +127,31 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 		}
 		
 		@SuppressWarnings("incomplete-switch")
-		private void gateRendererUpdate(EnumGateAction action, StargateBaseTile gateTile) {
+		private void gateRendererUpdate(EnumGateAction action, StargateRenderer renderer) {
 			switch ( action ) {
 				case ACTIVATE_NEXT:
-					gateTile.getRenderer().activateNextChevron();
+					renderer.activateNextChevron();
 					break;
 				
 				case ACTIVATE_FINAL:
-					gateTile.getRenderer().activateFinalChevron();
+					renderer.activateFinalChevron();
 					break;
 					
 				case OPEN_GATE:
-					gateTile.getRenderer().openGate();
+					renderer.openGate();
 					break;
 					
 				case CLOSE_GATE:
-					gateTile.getRenderer().closeGate();
+					renderer.closeGate();
 					break;
+					
+				// Used, when dialing failed
+				case CLEAR_CHEVRONS:
+					renderer.clearChevrons();
+					
+				case STOP_RING_SPIN:
+					renderer.setRingSpin(false, false);
+					
 			}
 		}
 	}

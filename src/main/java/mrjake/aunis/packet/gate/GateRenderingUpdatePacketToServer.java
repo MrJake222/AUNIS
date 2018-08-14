@@ -116,7 +116,8 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 						default:							
 							if (dhdTile != null && gateTile != null) {								
 								EnumSymbol symbol = EnumSymbol.valueOf(message.objectID);
-																
+								int symbolCount = gateTile.getEnteredSymbolsCount();
+								
 								if ( symbol == EnumSymbol.BRB ) {						
 									if ( gateTile.isEngaged() ) {
 										Aunis.log("Gate is engaged, closing...");
@@ -134,7 +135,6 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 										
 										// Check if symbols entered match the range, and last is ORIGIN
 										// TODO: Check if target gate exists
-										int symbolCount = gateTile.getEnteredSymbolsCount();
 										
 										if ( symbolCount >= 7 && symbolCount <= gateTile.getMaxSymbols() && gateTile.checkForPointOfOrigin() ) {
 											// All check, play BRB sound, light it up, start gate animation
@@ -146,7 +146,16 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 										}
 										
 										else {
-											// TODO: Fail sound
+											// Address malformed, dialing failed
+											// Clear address, clear DHD buttons and chevrons
+											// Stop roll sound, stop ring spin, play fail sound
+											gateTile.clearAddress();
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.STOP_ROLL_SOUND, 0, gateTile), point );
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.STOP_RING_SPIN, gateTile), point );
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLEAR_CHEVRONS, gateTile), point );
+											
+											world.playSound(null, pos, AunisSoundEvents.gateDialFail, SoundCategory.BLOCKS, 1.0f, 1.0f);
 										}
 									}	
 									
@@ -156,17 +165,18 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 								else {
 									if ( gateTile.addSymbolToAddress(symbol) ) {
 										// We can still add glyphs(no limit reached)
+										symbolCount++;										
 										
 										// Update the DHD's renderer
 										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, message.objectID, dhdTile), point );
 										
 										// Limit not reached, activating in order
-										if ( gateTile.getMaxSymbols() > gateTile.getEnteredSymbolsCount() ) {
+										if ( gateTile.getMaxSymbols() > symbolCount ) {
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.ACTIVATE_NEXT, gateTile), point );
 										}
 										
 										// Limit reached, activate the top one
-										else if ( gateTile.getMaxSymbols() == gateTile.getEnteredSymbolsCount() ) {
+										else if ( gateTile.getMaxSymbols() == symbolCount ) {
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.ACTIVATE_FINAL, gateTile), point );
 										}
 										

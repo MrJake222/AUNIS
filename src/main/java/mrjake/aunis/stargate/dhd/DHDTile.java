@@ -14,7 +14,7 @@ public class DHDTile extends TileEntity {
 	private BlockPos linkedGate;
 		
 	public void establishLinkToStargate(BlockPos gate) {
-		Aunis.info("Linking to gate at " + gate.toString());
+		Aunis.log("Linking to gate at " + gate.toString());
 		
 		this.linkedGate = gate;
 		markDirty();

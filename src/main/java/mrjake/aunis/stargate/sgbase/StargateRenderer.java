@@ -63,6 +63,7 @@ public class StargateRenderer {
 			chevronTextureList.add(textureTemplate + "0.png");
 		}
 		
+		Aunis.info("init!");
 		initEventHorizon();
 		initKawoosh();
 	}
@@ -110,9 +111,10 @@ public class StargateRenderer {
 	private float ringDecelStart;
 	
 	private boolean lockSoundPlayed;
+	private boolean dialingComplete;
 	
-	public void setRingSpin(boolean spin) {
-		// Aunis.info("Setting ring spin to: " + spin);
+	public void setRingSpin(boolean spin, boolean dialingComplete) {
+		this.dialingComplete = dialingComplete;
 		
 		if (spin) {
 			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.PLAY_ROLL_SOUND, 0, te.getPos()) );
@@ -120,6 +122,7 @@ public class StargateRenderer {
 			ringSpinStart = te.getWorld().getTotalWorldTime();
 			lastTick = -1;
 			
+			ringDecelerating = false;
 			ringAccelerating = true;
 			ringSpin = true;
 		}
@@ -129,6 +132,8 @@ public class StargateRenderer {
 			
 			lockSoundPlayed = false;
 			ringDecelFirst = true;
+			
+			ringAccelerating = false;
 			ringDecelerating = true;
 		}
 	}
@@ -165,7 +170,8 @@ public class StargateRenderer {
 							lockSoundPlayed = true;
 							
 							// Play final chevron lock sound
-							AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.PLAY_LOCK_SOUND, 0, te.getPos()) );
+							if (dialingComplete)
+								AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.PLAY_LOCK_SOUND, 0, te.getPos()) );
 						}
 						
 						if ( tickDecel <= maxTick ) {
@@ -230,7 +236,7 @@ public class StargateRenderer {
 		
 		EnumChevron(int index) {
 			this.index = index;
-			this.rotation = 40*index;
+			this.rotation = -40*index;
 		}
 		
 		public static int toGlobal(int index) {
@@ -246,7 +252,7 @@ public class StargateRenderer {
 		activationStateChange = te.getWorld().getTotalWorldTime();
 		activation = 8;
 		
-		setRingSpin(false);
+		setRingSpin( false, true );
 	}
 	
 	public void activateNextChevron() { 
@@ -255,7 +261,7 @@ public class StargateRenderer {
 			activation = activeChevrons;
 			
 			if (activeChevrons == 0) {
-				setRingSpin( true );
+				setRingSpin( true, true );
 			}
 			
 			if (activeChevrons < 8)
@@ -265,7 +271,10 @@ public class StargateRenderer {
 	
 	public void clearChevrons() {
 		clearingChevrons = true;
-		activationStateChange = te.getWorld().getTotalWorldTime();
+		activationStateChange = te.getWorld().getTotalWorldTime() + 15;
+				
+		if (!dialingComplete)
+			activationStateChange += 20;
 		
 		activation = 0;
 	}
@@ -279,18 +288,19 @@ public class StargateRenderer {
 			GlStateManager.pushMatrix();
 			
 			GlStateManager.translate(x, y, z);
+			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
 			
 			int angularPosition = EnumChevron.getRotation(index);
-			
-			if (horizontalRotation == 0 || horizontalRotation == 90)
-				angularPosition *= -1;
+			// angularPosition *= -1;
+			/*if (horizontalRotation == 0 || horizontalRotation == 90)
+				
 			
 			if (horizontalRotation == 90 || horizontalRotation == 270)
 				GlStateManager.rotate(angularPosition, 1, 0, 0);
-			else 
-				GlStateManager.rotate(angularPosition, 0, 0, 1);
+			else */
+			GlStateManager.rotate(angularPosition, 0, 0, 1);
 			
-			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
+			
 			
 			ModelLoader.bindTexture( chevronTextureList.get(index) );
 
@@ -309,7 +319,9 @@ public class StargateRenderer {
 		
 		if (activation != -1) {
 			int stage = (int) (((te.getWorld().getTotalWorldTime() - activationStateChange) + partialTicks) * 3);
-							
+
+			if (stage < 0) return;
+			
 			if (stage < 11) {
 				if (clearingChevrons) {
 					for (int i=0; i<9; i++) {
@@ -362,6 +374,7 @@ public class StargateRenderer {
 	private boolean soundPlayed;
 	
 	private float gateWaitClose = 0;
+	private boolean zeroAlphaSet;
 	// private boolean closingSoundPlayed;
 	
 	
@@ -369,6 +382,7 @@ public class StargateRenderer {
 		gateWaitStart = te.getWorld().getTotalWorldTime();
 		soundPlayed = false;
 		
+		zeroAlphaSet = false;
 		backStripClamp = true;
 		closingFirstRun = true;
 		whiteOverlayAlpha = 1.0f;
@@ -511,9 +525,14 @@ public class StargateRenderer {
 		
 		// Fading in the unstable vortex
 		float tick2 = tick/4f;
-		if ( tick2 <= Math.PI/2 ) {
+		if ( tick2 <= Math.PI/2 )
 			whiteOverlayAlpha = MathHelper.cos( tick2 );
-			Aunis.info("whiteOverlayAlpha: "+ whiteOverlayAlpha);
+		
+		else {
+			if (!zeroAlphaSet) {
+				zeroAlphaSet = true;
+				whiteOverlayAlpha = 0.0f;
+			}
 		}
 		
 		// Going center
@@ -619,7 +638,7 @@ public class StargateRenderer {
 				
 				else {					
 					// Fading out the event horizon, closing the gate
-					if ( (te.getWorld().getTotalWorldTime() - gateWaitClose) > 24 ) {
+					if ( (te.getWorld().getTotalWorldTime() - gateWaitClose) > 29 ) {
 						if (closingFirstRun) {
 							closingFirstRun = false;
 							vortexStart = tick;
