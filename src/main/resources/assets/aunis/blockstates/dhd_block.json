@@ -1,0 +1,74 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "aunis:dhd_handheld.obj"
+	},
+	"variants": {
+		"normal": [{
+			
+		}],
+		"inventory": [{
+			"transform": {
+				"gui": {
+					"scale": 0.4,
+					"rotation": [ 22.5, 160, 0 ],
+					"translation": [ -0.12, 0, 0.06 ]
+				},
+				
+				"firstperson_righthand": {
+					"scale": 0.5,
+					"rotation": [ 0, 140, -6 ],
+					"translation": [ -0.2, 0.0, -0.05  ]
+				},
+				
+				"firstperson_lefthand": {
+					"scale": 0.45,
+					"rotation": [ 0, 140, -6 ],
+					"translation": [ 0.10, 0.1, 0.32  ]
+				},
+				
+				"thirdperson_righthand": {
+					"scale": 0.65,
+					"rotation": [ 20, 140, -6 ],
+					"translation": [ 0, 0, -0.25  ]
+				},
+				
+				"thirdperson_lefthand": {
+					"scale": 0.65,
+					"rotation": [ 20, 140, -6 ],
+					"translation": [ 0.4, 0, 0.1  ]
+				},
+				
+				"fixed": {
+					"scale": 0.5,
+					"rotation": [ -45, 0, 0 ],
+					"translation": [ 0.25, 0.08, 0.25 ]
+				},
+				
+				"ground": {
+					"scale": 0.5,
+					"rotation": [ 0, 0, 0 ],
+					"translation": [ 0.25, 0, 0.25 ]
+				}
+			}
+		}],
+		"rotate": {
+			"0": {},
+			"1": {},
+			"2": {},
+			"3": {},
+			"4": {},
+			"5": {},
+			"6": {},
+			"7": {},
+			"8": {},
+			"9": {},
+			"10": {},
+			"11": {},
+			"12": {},
+			"13": {},
+			"14": {},
+			"15": {}
+		}
+	}
+}

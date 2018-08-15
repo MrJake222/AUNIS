@@ -41,7 +41,10 @@
     "category": "block",
     "subtitle": "aunis.subtitle.ring_roll",
     "sounds": [
-      "aunis:gate/roll"
+      {
+      	"name": "aunis:gate/roll",
+      	"stream": true
+      }
     ]
   },
   

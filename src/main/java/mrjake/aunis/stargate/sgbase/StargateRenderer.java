@@ -1,6 +1,7 @@
 package mrjake.aunis.stargate.sgbase;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,12 +16,15 @@ import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumPacket;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.ITextureObject;
+import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -33,17 +37,7 @@ public class StargateRenderer {
 	private BlockPos pos;
 	
 	private static final Vec3d ringLoc = new Vec3d(0.0, -0.122333, -0.000597);
-	private int horizontalRotation;
-	private float ringAngularRotation;
-	
-	private List<String> chevronTextureList = new ArrayList<String>();
-	private static final String textureTemplate = "chevron/chevron";
-	
-	private int activation = -1;
-	private long activationStateChange = 0;
-	
-	private int activeChevrons = 0;
-	private boolean clearingChevrons = false;
+	private int horizontalRotation;	
 	
 	Random rand = new Random();
 	
@@ -65,6 +59,14 @@ public class StargateRenderer {
 		else
 			horizontalRotation = (int) facing.getHorizontalAngle();
 		
+		// Load chevron textures
+		for (int i=0; i<=10; i++) {
+			ResourceLocation resource = new ResourceLocation( "aunis:stargate/textures/chevron/chevron"+i+".png" );
+			
+			ITextureObject itextureobject = new SimpleTexture(resource);
+			Minecraft.getMinecraft().getTextureManager().loadTexture(resource, itextureobject);
+		}
+		
 		for (int i=0; i<9; i++) {
 			chevronTextureList.add(textureTemplate + "0.png");
 		}
@@ -73,7 +75,7 @@ public class StargateRenderer {
 		initKawoosh();
 	}
 	
-	public void render(double x, double y, double z, double partialTicks) {		
+	public void render(double x, double y, double z, double partialTicks) {
 		renderGate(x, y, z);
 		renderRing(x, y, z, partialTicks);
 		renderChevrons(x, y, z, partialTicks);
@@ -104,8 +106,10 @@ public class StargateRenderer {
 	private final float accelerationMul = 1.0f / 16.0f;
 	private final float maxTick = (float) (Math.PI / accelerationMul / 2);
 
-	private boolean ringSpin;
-	private long ringSpinStart;
+	public float ringAngularRotation;
+	
+	public boolean ringSpin;
+	public long ringSpinStart;
 	
 	private float lastTick;
 	
@@ -120,11 +124,11 @@ public class StargateRenderer {
 	
 	private void rollSound(boolean play) {
 		PositionedSoundRecord sound = AunisSoundEvents.ringRollSoundMap.get( pos );
-				
+			
 		if (play) {			
-			if ( sound == null ) {			
+			if ( sound == null ) {
 				sound = new PositionedSoundRecord(AunisSoundEvents.ringRoll, SoundCategory.BLOCKS, 1.0f, 1.0f, pos);
-				
+								
 				AunisSoundEvents.ringRollSoundMap.put(pos, sound);
 			}
 			
@@ -278,6 +282,20 @@ public class StargateRenderer {
 		}
 	}
 	
+	private List<String> chevronTextureList = new ArrayList<String>();
+	private static final String textureTemplate = "chevron/chevron";
+	
+	private int activation = -1;
+	private long activationStateChange = 0;
+	
+	private int activeChevrons = 0;
+	private boolean clearingChevrons = false;
+	
+	private float finalChevronStart;
+	private boolean finalChevronMove;
+	
+	private boolean dhdButtonsCleared;
+	
 	public void activateFinalChevron() {
 		activationStateChange = world.getTotalWorldTime();
 		activation = 8;
@@ -299,12 +317,15 @@ public class StargateRenderer {
 		}
 	}
 	
-	public void clearChevrons() {
+	public void clearChevrons() {	
+		dhdButtonsCleared = false;
 		clearingChevrons = true;
-		activationStateChange = world.getTotalWorldTime() + 15;
+		activationStateChange = world.getTotalWorldTime();
 				
-		if (!dialingComplete)
-			activationStateChange += 15;
+		if (dialingComplete)
+			activationStateChange += 10;
+		else
+			activationStateChange += 30;
 		
 		activation = 0;
 	}
@@ -313,9 +334,6 @@ public class StargateRenderer {
 		finalChevronStart = 0;
 		finalChevronMove = true;
 	}
-	
-	private float finalChevronStart;
-	private boolean finalChevronMove;
 	
 	private void renderChevron(double x, double y, double z, int index, double partialTicks) {
 		Model ChevronLight = Aunis.modelLoader.getModel( EnumModel.ChevronLight );
@@ -330,7 +348,7 @@ public class StargateRenderer {
 			
 			int angularPosition = EnumChevron.getRotation(index);
 			GlStateManager.rotate(angularPosition, 0, 0, 1);
-
+			
 			ModelLoader.bindTexture( chevronTextureList.get(index) );
 			
 			if (index == 8 && finalChevronMove) {
@@ -376,14 +394,19 @@ public class StargateRenderer {
 	}
 	
 	private void renderChevrons(double x, double y, double z, double partialTicks) {
-		for (int i=0; i<9; i++) {
+		for (int i=0; i<9; i++)
 			renderChevron(x, y, z, i, partialTicks);
-		}
 		
 		if (activation != -1) {
 			int stage = (int) (((world.getTotalWorldTime() - activationStateChange) + partialTicks) * 3);
 
 			if (stage < 0) return;
+			else {
+				if (!dhdButtonsCleared && clearingChevrons) {
+					dhdButtonsCleared = true;
+					AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.CLEAR_DHD_BUTTONS, 0, pos) );
+				}
+			}
 			
 			if (stage < 11) {
 				if (clearingChevrons) {
@@ -411,6 +434,37 @@ public class StargateRenderer {
 		}
 	}
 	
+	public List<Boolean> getActiveChevronsList() {
+		List<Boolean> out = new ArrayList<Boolean>();
+		
+		for ( String val : chevronTextureList ) {
+			if ( val.equals("chevron/chevron0.png") )
+				out.add(false);
+			else
+				out.add(true);
+		}
+		
+		return out;
+	}
+	
+	public void setActiveChevrons(List<Boolean> list) {
+		chevronTextureList.clear();
+		activeChevrons = 0;
+		
+		for (int i=0; i<9; i++) {	
+			String tex = textureTemplate;
+			
+			if ( list.get(i) ) {
+				tex += "10.png";
+				activeChevrons++;
+			}
+			else
+				tex += "0.png";
+			
+			chevronTextureList.add(tex);
+		}
+	}
+	
 	private long kawooshStart;
 	private float vortexStart;
 	
@@ -423,14 +477,14 @@ public class StargateRenderer {
 	private QuadStrip backStrip;
 	private boolean backStripClamp;
 	
-	private boolean doEventHorizonRender = false;
+	public boolean doEventHorizonRender = false;
 	private boolean closingFirstRun;
 	private Float whiteOverlayAlpha;
 	
 	// private float shrinkStart;
 	
 	private float gateWaitStart = 0;
-	private boolean soundPlayed;
+	public boolean soundPlayed;
 	
 	private float gateWaitClose = 0;
 	private boolean zeroAlphaSet;
@@ -527,7 +581,7 @@ public class StargateRenderer {
 		}
 	}
 	
-	private enum EnumVortexState {
+	public enum EnumVortexState {
 		FORMING(0),
 		FULL(1),
 		DECREASING(2),
@@ -536,6 +590,7 @@ public class StargateRenderer {
 		SHRINKING(5);
 		
 		public int index;
+		private static Map<Integer, EnumVortexState> map = new HashMap<Integer, EnumVortexState>();
 		
 		EnumVortexState(int index) {
 			this.index = index;
@@ -544,9 +599,19 @@ public class StargateRenderer {
 		public boolean equals(EnumVortexState state) {
 			return this.index == state.index;
 		}
+		
+		static {
+			for (EnumVortexState packet : EnumVortexState.values()) {
+				map.put(packet.index, packet);
+			}
+		}
+		
+		public static EnumVortexState valueOf(int index) {
+			return map.get(index);
+		}
 	}
 	
-	private EnumVortexState vortexState;
+	public EnumVortexState vortexState = EnumVortexState.FORMING;;
 	
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
 		if ( (world.getTotalWorldTime() - gateWaitStart) < 25 )
@@ -689,7 +754,7 @@ public class StargateRenderer {
 							doEventHorizonRender = false;
 							clearChevrons();
 							
-							AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.CLEAR_DHD_BUTTONS, 0, pos) );
+							// AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.CLEAR_DHD_BUTTONS, 0, pos) );
 						}
 					}
 				} // not closing if

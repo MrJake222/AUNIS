@@ -1,4 +1,4 @@
-package mrjake.aunis.packet.gate;
+package mrjake.aunis.packet.gate.renderingUpdate;
 
 import java.util.HashMap;
 import java.util.Map;

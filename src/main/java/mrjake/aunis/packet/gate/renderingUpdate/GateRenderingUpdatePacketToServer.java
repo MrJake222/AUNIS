@@ -1,10 +1,10 @@
-package mrjake.aunis.packet.gate;
+package mrjake.aunis.packet.gate.renderingUpdate;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumGateAction;
-import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumPacket;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.dhd.DHDTile;
 import mrjake.aunis.stargate.sgbase.StargateBaseTile;
@@ -47,7 +47,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 	}
 
 	
-	public static class DHDButtonClickedHandler implements IMessageHandler<GateRenderingUpdatePacketToServer, IMessage> {
+	public static class GateRenderingUpdatePacketToServerHandler implements IMessageHandler<GateRenderingUpdatePacketToServer, IMessage> {
 		@Override
 		public IMessage onMessage(GateRenderingUpdatePacketToServer message, MessageContext ctx) {
 			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {
@@ -126,7 +126,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											// stop ring spin
 											
 											gateTile.clearAddress();
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
+											// AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.GATE_DIAL_FAILED, gateTile), point );
 										}
 									}	

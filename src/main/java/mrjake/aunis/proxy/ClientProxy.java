@@ -9,6 +9,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -37,6 +38,8 @@ public class ClientProxy implements IProxy {
 	
 	@Override
 	public void registerRenderers() {
+		OBJLoader.INSTANCE.addDomain("aunis");
+		
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateBaseTile.class, new StargateTESR());
 		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, new DHD_TESR());
 	}

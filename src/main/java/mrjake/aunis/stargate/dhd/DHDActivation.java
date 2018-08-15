@@ -9,8 +9,8 @@ import org.lwjgl.util.vector.Vector3f;
 
 import mrjake.aunis.block.BlockRotated;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumPacket;
-import mrjake.aunis.packet.gate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;

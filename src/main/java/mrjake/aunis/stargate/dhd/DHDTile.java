@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 public class DHDTile extends TileEntity {
 	
 	private DHDRenderer renderer;
-	private BlockPos linkedGate;
+	private BlockPos linkedGate = null;
 		
 	public void establishLinkToStargate(BlockPos gate) {
 		Aunis.log("Linking to gate at " + gate.toString());
@@ -25,7 +25,10 @@ public class DHDTile extends TileEntity {
 	}
 	
 	public StargateBaseTile getLinkedGate(World world) {
-		return (StargateBaseTile) world.getTileEntity(linkedGate);
+		if (linkedGate == null)
+			return null;
+		else
+			return (StargateBaseTile) world.getTileEntity(linkedGate);
 	}
 	
 	@Override

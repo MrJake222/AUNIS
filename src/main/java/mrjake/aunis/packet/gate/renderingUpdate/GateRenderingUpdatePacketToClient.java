@@ -1,8 +1,8 @@
-package mrjake.aunis.packet.gate;
+package mrjake.aunis.packet.gate.renderingUpdate;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumGateAction;
-import mrjake.aunis.packet.gate.GateRenderingUpdatePacket.EnumPacket;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.stargate.dhd.DHDTile;
 import mrjake.aunis.stargate.sgbase.StargateBaseTile;
 import mrjake.aunis.stargate.sgbase.StargateRenderer;
@@ -58,7 +58,7 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 	}
 
 	
-	public static class DHDActivateButtonHandler implements IMessageHandler<GateRenderingUpdatePacketToClient, IMessage>{
+	public static class GateRenderingUpdatePacketToClientHandler implements IMessageHandler<GateRenderingUpdatePacketToClient, IMessage>{
 		
 		@SuppressWarnings("incomplete-switch")
 		@Override

@@ -44,12 +44,12 @@ public class Aunis {
  
     @EventHandler
     public void init(FMLInitializationEvent event) {
-    	Aunis.info("init");
+
     }
  
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-    	Aunis.info("postinit");
+
     }
 
     
