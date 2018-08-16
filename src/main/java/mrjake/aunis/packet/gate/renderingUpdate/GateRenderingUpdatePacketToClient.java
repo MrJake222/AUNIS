@@ -3,7 +3,7 @@ package mrjake.aunis.packet.gate.renderingUpdate;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
-import mrjake.aunis.render.StargateRenderer;
+import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;

@@ -50,12 +50,14 @@ public class ModelLoader {
 		
 		BRB("b38", "dhd/BRB.obj", null),
 		
-		GATE_MODEL("GateModel", "gate/gate.obj", "darkmetal2048.png"),
-		RING_MODEL("RingModel", "gate/ring.obj", "texturering.png"),
 		DHD_MODEL("DHDModel", "dhd/DHD.obj", "dhd/dhd.png"),
-		ChevronLight("ChevronLight", "chevron/chevronLight.obj", "chevron/chevmap0.png"),
-		ChevronFrame("ChevronFrame", "chevron/chevronFrame.obj", "chevron/chevmap10.png"),
-		ChevronMoving("ChevronMoving", "chevron/chevronMoving.obj", "chevron/chevmap10.png");
+		
+		GATE_MODEL("GateModel", "stargate/gate.obj", "stargate/darkmetal2048.png"),
+		RING_MODEL("RingModel", "stargate/ring.obj", "stargate/texturering.png"),
+		
+		ChevronLight("ChevronLight", "stargate/chevron/chevronLight.obj", "stargate/chevron/chevmap0.png"),
+		ChevronFrame("ChevronFrame", "stargate/chevron/chevronFrame.obj", "stargate/chevron/chevmap10.png"),
+		ChevronMoving("ChevronMoving", "stargate/chevron/chevronMoving.obj", "stargate/chevron/chevmap10.png");
 		
 		private String name;
 		private String modelPath;
@@ -63,7 +65,7 @@ public class ModelLoader {
 		
 		private EnumModel(String name, String path, String texturePath) {
 			this.name = name;
-			this.modelPath = "assets/aunis/stargate/models/" + path;
+			this.modelPath = "assets/aunis/models/" + path;
 			this.texturePath = texturePath;
 		}
 		
@@ -81,11 +83,11 @@ public class ModelLoader {
 	}
 	
 	public static void bindTexture(EnumModel model) {
-		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation( "aunis:stargate/textures/" + model.getTexturePath() ));
+		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation( "aunis:textures/tesr/" + model.getTexturePath() ));
 	}
 	
 	public static void bindTexture(String texture) {
-		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation( "aunis:stargate/textures/" + texture ));
+		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation( "aunis:textures/tesr/" + texture ));
 	}
 	
 	private Map<String, Boolean> loadAttempted = new HashMap<>();

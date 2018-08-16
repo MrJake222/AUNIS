@@ -1,4 +1,4 @@
-package mrjake.aunis.render;
+package mrjake.aunis.renderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class StargateRenderer {
 		
 		// Load chevron textures
 		for (int i=0; i<=10; i++) {
-			ResourceLocation resource = new ResourceLocation( "aunis:stargate/textures/chevron/chevron"+i+".png" );
+			ResourceLocation resource = new ResourceLocation( "aunis:textures/tesr/stargate/chevron/chevron"+i+".png" );
 			
 			ITextureObject itextureobject = new SimpleTexture(resource);
 			Minecraft.getMinecraft().getTextureManager().loadTexture(resource, itextureobject);
@@ -284,7 +284,7 @@ public class StargateRenderer {
 	}
 	
 	private List<String> chevronTextureList = new ArrayList<String>();
-	private static final String textureTemplate = "chevron/chevron";
+	private static final String textureTemplate = "stargate/chevron/chevron";
 	
 	private int activation = -1;
 	private long activationStateChange = 0;
@@ -640,7 +640,7 @@ public class StargateRenderer {
 		GlStateManager.rotate(horizontalRotation, 0, 1, 0);
 		GlStateManager.translate(0, 0, 0.1);
 		
-		ModelLoader.bindTexture( "event_horizon_by_mclatchyt_2.jpg" );
+		ModelLoader.bindTexture( "stargate/event_horizon_by_mclatchyt_2.jpg" );
 			
 		float tick = (float) (world.getTotalWorldTime() - kawooshStart + partialTicks);
 		float mul = 1;
@@ -859,9 +859,7 @@ public class StargateRenderer {
 		return MathHelper.sin( tick/4f + offsetList.get(index) ) / 24f;
 	}
 	
-	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly) {			
-		ModelLoader.bindTexture( "event_horizon_by_mclatchyt_2.jpg" );
-		
+	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly) {		
 		float tick = (float) (world.getTotalWorldTime() - horizonStateChange + partialTicks);	
 		
 		glEnable(GL_BLEND);

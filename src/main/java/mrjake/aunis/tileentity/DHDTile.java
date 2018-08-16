@@ -1,7 +1,7 @@
 package mrjake.aunis.tileentity;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.render.DHDRenderer;
+import mrjake.aunis.renderer.DHDRenderer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;

@@ -1,4 +1,4 @@
-package mrjake.aunis.render;
+package mrjake.aunis.renderer;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -52,7 +52,7 @@ public class DHDRenderer {
 				tex = "brb";
 			
 			for (int i=0; i<=5; i++) {
-				ResourceLocation resource = new ResourceLocation( "aunis:stargate/textures/dhd/"+tex+"/"+tex+i+".png" );
+				ResourceLocation resource = new ResourceLocation( "aunis:textures/tesr/dhd/"+tex+"/"+tex+i+".png" );
 					
 				ITextureObject itextureobject = new SimpleTexture(resource);
 				Minecraft.getMinecraft().getTextureManager().loadTexture(resource, itextureobject);

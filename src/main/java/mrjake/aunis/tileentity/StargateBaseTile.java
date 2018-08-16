@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.render.StargateRenderer;
+import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.render.StargateRenderer;
-import mrjake.aunis.render.StargateRenderer.EnumVortexState;
+import mrjake.aunis.renderer.StargateRenderer;
+import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.util.math.BlockPos;
 
