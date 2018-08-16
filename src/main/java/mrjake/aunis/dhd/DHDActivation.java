@@ -1,4 +1,4 @@
-package mrjake.aunis.stargate.dhd;
+package mrjake.aunis.dhd;
 
 import java.util.ArrayList;
 import java.util.Arrays;

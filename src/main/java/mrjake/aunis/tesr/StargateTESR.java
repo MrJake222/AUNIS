@@ -1,5 +1,6 @@
-package mrjake.aunis.stargate.sgbase;
+package mrjake.aunis.tesr;
 
+import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
 public class StargateTESR extends TileEntitySpecialRenderer<StargateBaseTile> {

@@ -1,9 +1,9 @@
 package mrjake.aunis.proxy;
 
-import mrjake.aunis.stargate.dhd.DHDTile;
-import mrjake.aunis.stargate.dhd.DHD_TESR;
-import mrjake.aunis.stargate.sgbase.StargateBaseTile;
-import mrjake.aunis.stargate.sgbase.StargateTESR;
+import mrjake.aunis.tesr.DHD_TESR;
+import mrjake.aunis.tesr.StargateTESR;
+import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;

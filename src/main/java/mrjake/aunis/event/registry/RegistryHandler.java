@@ -1,7 +1,7 @@
 package mrjake.aunis.event.registry;
 
-import mrjake.aunis.init.AunisBlocks;
-import mrjake.aunis.init.AunisItems;
+import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.item.AunisItems;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.event.RegistryEvent.Register;
@@ -25,7 +25,6 @@ public class RegistryHandler {
     	GameRegistry.registerTileEntity(AunisBlocks.DHDBlock.getTileEntityClass(), AunisBlocks.DHDBlock.getRegistryName().toString());
     	
     }
-	
 	
     @SubscribeEvent
     public static void registerItems(Register<Item> event) {

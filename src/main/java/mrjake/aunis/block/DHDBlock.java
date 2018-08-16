@@ -1,10 +1,10 @@
-package mrjake.aunis.stargate.dhd;
+package mrjake.aunis.block;
 
 import javax.annotation.Nullable;
 
 import mrjake.aunis.AunisConfig;
-import mrjake.aunis.stargate.sgbase.StargateBaseBlock;
-import mrjake.aunis.stargate.sgbase.StargateBaseTile;
+import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.TileEntityRotated;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;

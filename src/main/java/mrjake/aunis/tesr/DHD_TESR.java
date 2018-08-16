@@ -1,5 +1,6 @@
-package mrjake.aunis.stargate.dhd;
+package mrjake.aunis.tesr;
 
+import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
 public class DHD_TESR extends TileEntitySpecialRenderer<DHDTile> {

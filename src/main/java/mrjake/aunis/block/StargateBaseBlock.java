@@ -1,5 +1,6 @@
-package mrjake.aunis.stargate.sgbase;
+package mrjake.aunis.block;
 
+import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.TileEntityFaced;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;

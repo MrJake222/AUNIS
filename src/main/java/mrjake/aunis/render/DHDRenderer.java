@@ -1,4 +1,4 @@
-package mrjake.aunis.stargate.dhd;
+package mrjake.aunis.render;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -13,6 +13,7 @@ import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockRotated;
+import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;

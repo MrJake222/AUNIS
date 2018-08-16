@@ -3,12 +3,12 @@ package mrjake.aunis.event;
 import java.util.ArrayList;
 import java.util.List;
 
-import mrjake.aunis.init.AunisBlocks;
+import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.block.DHDBlock;
+import mrjake.aunis.block.StargateBaseBlock;
+import mrjake.aunis.dhd.DHDActivation;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.onLoadUpdate.OnLoadUpdateRequest;
-import mrjake.aunis.stargate.dhd.DHDActivation;
-import mrjake.aunis.stargate.dhd.DHDBlock;
-import mrjake.aunis.stargate.sgbase.StargateBaseBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;

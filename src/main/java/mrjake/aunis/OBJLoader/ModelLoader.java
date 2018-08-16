@@ -111,23 +111,6 @@ public class ModelLoader {
 		}
 	}
 	
-	/*public void insertModelPath(EnumModel model, String path) {
-		if (modelPaths == null)
-			modelPaths = new HashMap<>();
-		
-		modelPaths.put(model.getIndex(), path);
-	}*/
-	
-	/*public boolean checkForModelPath(EnumModel model) {
-		if (modelPaths == null)
-			return false;
-		
-		if (modelPaths.get(model.getIndex()) == null)
-			return false;
-		
-		return true;
-	}*/
-	
 	public void loadModel(EnumModel model) {
 		String name = model.getName();
 		

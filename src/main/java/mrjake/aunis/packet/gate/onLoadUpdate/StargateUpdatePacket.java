@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.stargate.sgbase.StargateBaseTile;
-import mrjake.aunis.stargate.sgbase.StargateRenderer;
-import mrjake.aunis.stargate.sgbase.StargateRenderer.EnumVortexState;
+import mrjake.aunis.render.StargateRenderer;
+import mrjake.aunis.render.StargateRenderer.EnumVortexState;
+import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.util.math.BlockPos;
 
 public class StargateUpdatePacket {

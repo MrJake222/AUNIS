@@ -1,7 +1,4 @@
-package mrjake.aunis.init;
-
-import mrjake.aunis.stargate.dhd.DHDBlock;
-import mrjake.aunis.stargate.sgbase.StargateBaseBlock;
+package mrjake.aunis.block;
 
 public class AunisBlocks {
 	public static StargateBaseBlock stargateBaseBlock = new StargateBaseBlock();

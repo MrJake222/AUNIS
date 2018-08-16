@@ -5,8 +5,8 @@ import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.stargate.dhd.DHDTile;
-import mrjake.aunis.stargate.sgbase.StargateBaseTile;
+import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;

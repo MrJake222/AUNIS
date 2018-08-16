@@ -1,11 +1,11 @@
-package mrjake.aunis.stargate.sgbase;
+package mrjake.aunis.tileentity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.render.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.dhd.DHDTile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;

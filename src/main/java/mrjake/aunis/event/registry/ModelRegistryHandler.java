@@ -1,7 +1,7 @@
 package mrjake.aunis.event.registry;
 
-import mrjake.aunis.init.AunisBlocks;
-import mrjake.aunis.init.AunisItems;
+import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.item.AunisItems;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;

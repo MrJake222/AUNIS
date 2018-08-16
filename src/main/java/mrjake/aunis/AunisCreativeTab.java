@@ -1,6 +1,6 @@
 package mrjake.aunis;
 
-import mrjake.aunis.init.AunisItems;
+import mrjake.aunis.item.AunisItems;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 

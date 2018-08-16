@@ -1,7 +1,6 @@
-package mrjake.aunis.init;
+package mrjake.aunis.item;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.item.ItemBase;
 
 public class AunisItems {
 	public static ItemBase naquadahItem = new ItemBase("naquadah_item", Aunis.aunisCreativeTab);

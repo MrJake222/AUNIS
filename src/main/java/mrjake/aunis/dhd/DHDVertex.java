@@ -1,4 +1,4 @@
-package mrjake.aunis.stargate.dhd;
+package mrjake.aunis.dhd;
 
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;

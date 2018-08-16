@@ -5,7 +5,7 @@ import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
-import mrjake.aunis.stargate.dhd.DHDTile;
+import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.util.math.BlockPos;
 
 public class DHDUpdatePacket {
