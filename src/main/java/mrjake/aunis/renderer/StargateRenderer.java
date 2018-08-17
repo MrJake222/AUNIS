@@ -39,7 +39,7 @@ public class StargateRenderer {
 	
 	private static final Vec3d ringLoc = new Vec3d(0.0, -0.122333, -0.000597);
 	private int horizontalRotation;	
-	
+
 	Random rand = new Random();
 	
 	private float getRandomFloat() {

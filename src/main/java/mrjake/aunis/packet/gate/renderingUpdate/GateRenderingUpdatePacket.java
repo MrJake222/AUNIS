@@ -11,7 +11,7 @@ public class GateRenderingUpdatePacket {
 		ENGAGE_GATE(2),
 		
 		CLEAR_DHD_BUTTONS(3);
-		
+				
 		public int packetID;
 		private static Map<Integer, EnumPacket> map = new HashMap<Integer, EnumPacket>();
 		

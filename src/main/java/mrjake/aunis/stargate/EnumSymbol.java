@@ -59,12 +59,16 @@ public enum EnumSymbol {
 		}
 	}
 	
-	public static EnumSymbol valueOf(int packetID) {
-		return map.get(packetID);
+	public static EnumSymbol valueOf(int id) {
+		return map.get(id);
 	}
 	
 	public boolean equals(EnumSymbol symbol) {
 		return symbol.id == this.id;
+	}
+	
+	public String toString() {
+		return name;
 	}
 }
 

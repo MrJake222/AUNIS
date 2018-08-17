@@ -158,6 +158,7 @@ public class DHDActivation {
 		return current.rotate( rotation ).localToGlobal(pos).calculateDiffrence(player).getViewport( player.getLookVec() );
 	}
 	
+	// Ray = set of 3 vertices
 	private static List<Vector2f> getTransposedRay(int rayIndex, float rotation, BlockPos pos, EntityPlayer player) {
 		List<Vector2f> out = new ArrayList<Vector2f>();
 		

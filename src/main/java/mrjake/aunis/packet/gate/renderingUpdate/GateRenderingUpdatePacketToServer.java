@@ -34,16 +34,16 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(packetID);
 		buf.writeInt(objectID);
-		buf.writeInt(blockPos.getX());
-		buf.writeInt(blockPos.getY());
-		buf.writeInt(blockPos.getZ());
+		
+		buf.writeLong( blockPos.toLong() );
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		packetID = buf.readInt();
 		objectID = buf.readInt();
-		blockPos = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
+
+		blockPos = BlockPos.fromLong( buf.readLong() );
 	}
 
 	
@@ -57,7 +57,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 				BlockPos pos = message.blockPos;
 				
 				if ( world.isBlockLoaded(pos) ) {
-					TargetPoint point = new TargetPoint(ctx.getServerHandler().player.getEntityWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64);
+					TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64);
 					
 					TileEntity te = world.getTileEntity(pos);
 					StargateBaseTile gateTile;
