@@ -3,7 +3,10 @@ package mrjake.aunis.packet.gate.renderingUpdate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jcraft.jorbis.Block;
+
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
@@ -19,8 +22,8 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 	private BlockPos dhdPos;
 	private List<Integer> dialedAddress;
 	
-	public DHDIncomingWormholePacketToClient(DHDTile dhdTile, List<EnumSymbol> dialedAddress) {		
-		this.dhdPos = dhdTile.getPos();
+	public DHDIncomingWormholePacketToClient(BlockPos dhdPos, List<EnumSymbol> dialedAddress) {		
+		this.dhdPos = dhdPos;
 		this.dialedAddress = new ArrayList<Integer>();
 		
 		for (EnumSymbol symbol : dialedAddress) {
@@ -56,10 +59,12 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 		public IMessage onMessage(DHDIncomingWormholePacketToClient message, MessageContext ctx) {
 			World world = Minecraft.getMinecraft().world;
 			
+			Aunis.info("Received DHDIncomingWormholePacketToClient:  dhdPos: " + message.dhdPos.toString() + ",  dialedAddress: " + message.dialedAddress.toString());
+			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				DHDTile te = (DHDTile) world.getTileEntity( message.dhdPos );
 				
-				te.getRenderer().setActiveButtons(message.dialedAddress);
+				te.getRenderer().smoothlyActivateButtons(message.dialedAddress);
 			});
 			
 			return null;

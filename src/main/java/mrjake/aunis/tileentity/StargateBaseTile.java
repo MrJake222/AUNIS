@@ -79,6 +79,10 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 		return last.equals( EnumSymbol.ORIGIN );
 	}
 	
+	public BlockPos getLinkedDHD() {
+		return linkedDHD;
+	}
+	
 	public DHDTile getLinkedDHD(World world) {
 		return (DHDTile) world.getTileEntity(linkedDHD);
 	}
@@ -110,7 +114,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 		BlockPos dhd;
 		
 		if (linkedDHD == null) {
-			Aunis.log("linkedDHD is null!");
+			Aunis.info(pos.toString()+":  linkedDHD is null!");
 			dhd = new BlockPos(0,0,0);
 		}
 		else
@@ -131,7 +135,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 	public void readFromNBT(NBTTagCompound compound) {				
 		BlockPos pos = BlockPos.fromLong( compound.getLong("linkedDHD") );
 
-		Aunis.log("Relinking to DHD at " + pos.toString());
+		Aunis.info(pos.toString()+": Relinking to DHD at " + pos.toString());
 		linkedDHD = pos;
 		
 		boolean compoundHasAddress = compound.hasKey("symbol0");

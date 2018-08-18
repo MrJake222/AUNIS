@@ -71,7 +71,7 @@ public class StargateRenderer {
 		for (int i=0; i<9; i++) {
 			chevronTextureList.add(textureTemplate + "0.png");
 		}
-		
+				
 		initEventHorizon();
 		initKawoosh();
 	}
@@ -301,6 +301,8 @@ public class StargateRenderer {
 	
 	public void activateFinalChevron() {
 		activationStateChange = world.getTotalWorldTime();
+		
+		// chevronActiveList.set(8, true);
 		activation = 8;
 		
 		setRingSpin( false, true );
@@ -309,6 +311,8 @@ public class StargateRenderer {
 	public void activateNextChevron() { 
 		if (activation == -1) {			
 			activationStateChange = world.getTotalWorldTime();
+			
+			// chevronActiveList.set(activeChevrons, true);
 			activation = activeChevrons;
 						
 			if (activeChevrons == 0) {
@@ -415,6 +419,8 @@ public class StargateRenderer {
 		}
 	}
 	
+	// private List<Boolean> LastChevronActiveList;
+	
 	private void renderChevrons(double x, double y, double z, double partialTicks) {
 		for (int i=0; i<9; i++)
 			renderChevron(x, y, z, i, partialTicks);
@@ -455,13 +461,30 @@ public class StargateRenderer {
 				
 			else {
 				if (changingChevrons) {
-					// closeGate();
 					changingChevrons = false;
+					
 					if (clearingChevrons)
 						activeChevrons = 0;
 					else
 						activeChevrons = chevronsToLightUp+1;
 					
+					// This is needed because if the gate isn't rendered(player not looking at it)
+					// render code isn't running and gate can't perform any animation(not necessary in this case)
+					// So we need to check if chevron's states didn't change and perform correction
+					
+					for (int i=0; i<9; i++) {
+						String tex = textureTemplate;
+					
+						if (clearingChevrons)
+							tex += "0.png";
+						else
+							tex += "10.png";
+						
+						if ( !chevronTextureList.get(i).equals(tex) ) {
+							Aunis.info("Correcting chevron "+i+" to tex: "+tex);
+							chevronTextureList.set(i, tex);
+						}
+					}
 				}
 				
 				activation = -1;

@@ -1,5 +1,7 @@
 package mrjake.aunis.packet.gate.renderingUpdate;
 
+import java.util.List;
+
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -118,7 +120,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 										
 										// Check if symbols entered match the range, last is ORIGIN, target gate exists, and if not dialing self
 										
-										Aunis.info("Dialing address: " + gateTile.dialedAddress.toString());
+										Aunis.log("Dialing address: " + gateTile.dialedAddress.toString());
 										
 										if ( symbolCount >= 7 && symbolCount <= gateTile.getMaxSymbols() && gateTile.checkForPointOfOrigin() && StargateNetwork.get(world).checkForStargate(gateTile.dialedAddress) 
 												&& !gateTile.dialedAddress.equals(gateTile.gateAddress) ) {
@@ -129,6 +131,12 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											
 											// Open target gate
 											BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
+											StargateBaseTile targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
+											BlockPos targetDhd = targetTile.getLinkedDHD();
+											
+											if (targetDhd != null)
+												AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE.packetID, message.objectID, targetDhd), point );
+											
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, targetPos), point );
 										}
 										
@@ -165,17 +173,20 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 										}
 										
 										// Light up target gate, if exists
-										if ( symbol == EnumSymbol.ORIGIN && StargateNetwork.get(world).checkForStargate(gateTile.dialedAddress) ) {
-											Aunis.info("Origin dialed, target gate present, light it up!");
-											
+										if ( symbol == EnumSymbol.ORIGIN && StargateNetwork.get(world).checkForStargate(gateTile.dialedAddress) ) {											
 											BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
 											StargateBaseTile targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
 											
 											TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);								
 											
 											// To renderer: light up chevrons and target dhd glyphs
-											if (targetTile.getLinkedDHD(world) != null)
-												AunisPacketHandler.INSTANCE.sendToAllAround( new DHDIncomingWormholePacketToClient(targetTile.getLinkedDHD(world), gateTile.dialedAddress), targetPoint );
+											BlockPos targetDhd = targetTile.getLinkedDHD();
+											
+											List<EnumSymbol> sourceAddress = gateTile.gateAddress;
+											sourceAddress.add(EnumSymbol.ORIGIN);
+											
+											if (targetDhd != null)
+												AunisPacketHandler.INSTANCE.sendToAllAround( new DHDIncomingWormholePacketToClient(targetDhd, sourceAddress), targetPoint );
 											
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.LIGHT_UP_ALL_CHEVRONS, targetPos), targetPoint );
 										}

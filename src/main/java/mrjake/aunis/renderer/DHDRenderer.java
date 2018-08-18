@@ -100,7 +100,7 @@ public class DHDRenderer {
 	
 	private List<Integer> toActivate;
 	
-	public void activateButtons(List<Integer> toActivate) {
+	public void smoothlyActivateButtons(List<Integer> toActivate) {
 		this.toActivate = toActivate;
 		
 		clearingButtons = false;
@@ -174,7 +174,7 @@ public class DHDRenderer {
 					stage =  (int) (tick * 2);
 				else
 					stage = (int) tick;
-								
+				
 				if (stage < 6) {
 					if (stage < 0)
 						stage = 0;
@@ -206,7 +206,16 @@ public class DHDRenderer {
 				else {
 					if (changingButtons) {
 						changingButtons = false;
+						
+						if (!clearingButtons) {
+							setActiveButtons(toActivate);
+						}
 					}
+					
+					// When activating remotely, we need to take into account that gate will not be rendered at the time
+					// hence manual activation
+					if (activation == 38)
+						buttonTexture.put("b38", "dhd/brb/brb5.png");
 					
 					activation = -1;
 				}
