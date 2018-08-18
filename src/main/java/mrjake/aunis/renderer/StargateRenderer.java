@@ -268,11 +268,11 @@ public class StargateRenderer {
 		
 		public int index;
 		public int rotation;
-		
+				
 		EnumChevron(int index) {
 			this.index = index;
 			this.rotation = -40*index;
-		}
+		}		
 		
 		public static int toGlobal(int index) {
 			return values()[index].index;
@@ -290,7 +290,9 @@ public class StargateRenderer {
 	private long activationStateChange = 0;
 	
 	private int activeChevrons = 0;
-	private boolean clearingChevrons = false;
+	private boolean changingChevrons = false;
+	private boolean clearingChevrons;
+	private int chevronsToLightUp;
 	
 	private float finalChevronStart;
 	private boolean finalChevronMove;
@@ -318,15 +320,34 @@ public class StargateRenderer {
 		}
 	}
 	
-	public void clearChevrons() {	
+	public void clearChevrons() {
+		changeChevrons(true);
+	}
+	
+	public void lightUpChevrons(int chevronsToLightUp) {
+		AunisSoundEvents.playSound(world, pos, AunisSoundEvents.chevronIncoming);
+		Aunis.info("renderer: lighting up!");
+		
+		this.chevronsToLightUp = chevronsToLightUp;
+		this.dialingComplete = true;
+		
+		changeChevrons(false);
+	}
+	
+	public void changeChevrons(boolean clear) {	
 		dhdButtonsCleared = false;
-		clearingChevrons = true;
+		changingChevrons = true;
+		
+		clearingChevrons = clear;
+		
 		activationStateChange = world.getTotalWorldTime();
-				
-		if (dialingComplete)
-			activationStateChange += 10;
-		else
-			activationStateChange += 30;
+		
+		if (clearingChevrons) {
+			if (dialingComplete)
+				activationStateChange += 10;
+			else
+				activationStateChange += 30;
+		}
 		
 		activation = 0;
 	}
@@ -410,10 +431,19 @@ public class StargateRenderer {
 			}
 			
 			if (stage < 11) {
-				if (clearingChevrons) {
+				if (changingChevrons) {
 					for (int i=0; i<9; i++) {
-						if ( !chevronTextureList.get(i).contains("n0") ) {
-							chevronTextureList.set(i, textureTemplate+(10-stage)+".png");
+						
+						if (clearingChevrons) {
+							if ( !chevronTextureList.get(i).contains("n0") ) {
+								chevronTextureList.set(i, textureTemplate+(10-stage)+".png");
+							}
+						}
+						
+						else {
+							if ( !chevronTextureList.get(i).contains("10") && (i < chevronsToLightUp || i == 8) ) {
+								chevronTextureList.set(i, textureTemplate+stage+".png");
+							}
 						}
 					}
 				}
@@ -424,10 +454,14 @@ public class StargateRenderer {
 			}
 				
 			else {
-				if (clearingChevrons) {
+				if (changingChevrons) {
 					// closeGate();
-					clearingChevrons = false;
-					activeChevrons = 0;
+					changingChevrons = false;
+					if (clearingChevrons)
+						activeChevrons = 0;
+					else
+						activeChevrons = chevronsToLightUp+1;
+					
 				}
 				
 				activation = -1;
@@ -439,10 +473,9 @@ public class StargateRenderer {
 		List<Boolean> out = new ArrayList<Boolean>();
 		
 		for ( String val : chevronTextureList ) {
-			if ( val.equals("chevron/chevron0.png") )
-				out.add(false);
-			else
-				out.add(true);
+			out.add( val.equals("chevron/chevron10.png") );
+			
+			Aunis.info("tex: " + val);
 		}
 		
 		return out;
@@ -461,6 +494,8 @@ public class StargateRenderer {
 			}
 			else
 				tex += "0.png";
+			
+			Aunis.info("Setting tex: " + tex);
 			
 			chevronTextureList.add(tex);
 		}
@@ -681,6 +716,7 @@ public class StargateRenderer {
 			
 			boolean first = true;
 			
+			// TODO: Remove EnumVortexState and replace it with states based on <arg>
 			if ( !vortexState.equals(EnumVortexState.STILL) ) {
 				float arg = (tick - vortexStart) / speedFactor;
 				

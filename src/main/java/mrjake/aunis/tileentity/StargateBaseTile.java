@@ -9,13 +9,15 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
 import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateNetwork;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class StargateBaseTile extends TileEntity {
+public class StargateBaseTile extends TileEntity implements ITickable {
 	
 	private static final int maxChevrons = 7;
 	
@@ -114,9 +116,7 @@ public class StargateBaseTile extends TileEntity {
 		else
 			dhd = linkedDHD;
 		
-		compound.setInteger("linkedDHDX", dhd.getX());
-		compound.setInteger("linkedDHDY", dhd.getY());
-		compound.setInteger("linkedDHDZ", dhd.getZ());
+		compound.setLong("linkedDHD", dhd.toLong());
 		
 		if (gateAddress != null) {
 			for (int i=0; i<maxChevrons-1; i++) {
@@ -129,18 +129,10 @@ public class StargateBaseTile extends TileEntity {
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {				
-		int x = compound.getInteger("linkedDHDX");
-		int y = compound.getInteger("linkedDHDY");
-		int z = compound.getInteger("linkedDHDZ");
-		
-		BlockPos pos = new BlockPos(x,y,z);
+		BlockPos pos = BlockPos.fromLong( compound.getLong("linkedDHD") );
 
 		Aunis.log("Relinking to DHD at " + pos.toString());
 		linkedDHD = pos;
-		
-		// Aunis.info("Reading from NBT... side:"+FMLCommonHandler.instance.getEffectiveSide());
-		
-		//Aunis.proxy.generateAddress(this, compound);
 		
 		boolean compoundHasAddress = compound.hasKey("symbol0");
 
@@ -158,29 +150,53 @@ public class StargateBaseTile extends TileEntity {
 		super.readFromNBT(compound);
 	}
 	
+	private boolean firstTick = true;
+	
 	@Override
-	public void onLoad() {
-		// Server
-		if ( !world.isRemote && gateAddress == null ) {
-			Random rand = new Random();
-			List<EnumSymbol> address = new ArrayList<EnumSymbol>(); 
-				
-			// for (int i=0; i<maxChevrons; i++) {
-			while (address.size() < maxChevrons-1) {
-				EnumSymbol symbol = EnumSymbol.valueOf( rand.nextInt(38) );
-					
-				if ( !address.contains(symbol) ) {
-					address.add(symbol);
-				}
-			}
-						
-			gateAddress = address;
-			markDirty();
+	public void update() {
+		
+		// Can't do this in onLoad(), because in that method, world isn't fully loaded
+		if (firstTick) {
+			firstTick = false;
 			
-			Aunis.info("Generated address "+address.toString());
+			onLoaded();
 		}
 		
-		super.onLoad();
+	}
+	
+	public void onLoaded() {
+		
+		// Server
+		if ( !world.isRemote ) {			
+			if ( gateAddress == null ) {
+				Random rand = new Random();
+				List<EnumSymbol> address = new ArrayList<EnumSymbol>(); 
+					
+				while (true) {
+					while (address.size() < maxChevrons-1) {
+						EnumSymbol symbol = EnumSymbol.valueOf( rand.nextInt(38) );
+							
+						if ( !address.contains(symbol) ) {
+							address.add(symbol);
+						}
+					}
+					
+					// Check if SOMEHOW Stargate with the same address doesn't exists
+					if ( !StargateNetwork.get(world).checkForStargate(address) )
+						break;
+				}
+							
+				gateAddress = address;
+				markDirty();
+				
+				Aunis.log("Adding new gate, Generated address "+address.toString());
+				
+				// Add Stargate to the "network" - WorldSavedData
+				StargateNetwork.get(world).addStargate(gateAddress, pos);
+				
+				// Possibly TODO: Add region, so if we break the stargate and place it nearby, it keeps the address
+			}			
+		}
 	}
 	
 	@Override

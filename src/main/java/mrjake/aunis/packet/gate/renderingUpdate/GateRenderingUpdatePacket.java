@@ -36,7 +36,8 @@ public class GateRenderingUpdatePacket {
 		ACTIVATE_FINAL(2),
 		OPEN_GATE(3),
 		CLOSE_GATE(4),
-		GATE_DIAL_FAILED(5);
+		GATE_DIAL_FAILED(5),
+		LIGHT_UP_ALL_CHEVRONS(6);
 		
 		public int actionID;
 		private static Map<Integer, EnumGateAction> map = new HashMap<Integer, EnumGateAction>();

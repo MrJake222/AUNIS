@@ -6,6 +6,7 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.entity.player.EntityPlayer;
@@ -87,7 +88,8 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 						
 						case CLEAR_DHD_BUTTONS:							
 							// Clear DHD buttons, Chevrons are cleared in StargateRenderer
-							AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
+							if (dhdTile != null)
+								AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
 							
 							break;
 							
@@ -100,24 +102,34 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									if ( gateTile.isEngaged() ) {
 										Aunis.log("Gate is engaged, closing...");
 										
-										// clear connection and address, play closing sound, start animation 
-										gateTile.disconnectGate();
-										gateTile.clearAddress();
+										// clear connection and address, start animation 
+										BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
+										TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
 										
 										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, gateTile), point );
+										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, targetPos), targetPoint );
+										
+										gateTile.disconnectGate();
+										gateTile.clearAddress();
 									}
 									
 									else {
 										// Gate is closed, BRB pressed
 										
-										// Check if symbols entered match the range, and last is ORIGIN
-										// TODO: Check if target gate exists
+										// Check if symbols entered match the range, last is ORIGIN, target gate exists, and if not dialing self
 										
-										if ( symbolCount >= 7 && symbolCount <= gateTile.getMaxSymbols() && gateTile.checkForPointOfOrigin() ) {
-											// All check, light it up, start gate animation
+										Aunis.info("Dialing address: " + gateTile.dialedAddress.toString());
+										
+										if ( symbolCount >= 7 && symbolCount <= gateTile.getMaxSymbols() && gateTile.checkForPointOfOrigin() && StargateNetwork.get(world).checkForStargate(gateTile.dialedAddress) 
+												&& !gateTile.dialedAddress.equals(gateTile.gateAddress) ) {
+											// All check, light it up and start gate animation
 											
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE.packetID, message.objectID, dhdTile.getPos()), point );
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, gateTile), point );
+											
+											// Open target gate
+											BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, targetPos), point );
 										}
 										
 										else {
@@ -150,6 +162,22 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 										// Limit reached, activate the top one
 										else if ( gateTile.getMaxSymbols() == symbolCount ) {
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.ACTIVATE_FINAL, gateTile), point );
+										}
+										
+										// Light up target gate, if exists
+										if ( symbol == EnumSymbol.ORIGIN && StargateNetwork.get(world).checkForStargate(gateTile.dialedAddress) ) {
+											Aunis.info("Origin dialed, target gate present, light it up!");
+											
+											BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
+											StargateBaseTile targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
+											
+											TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);								
+											
+											// To renderer: light up chevrons and target dhd glyphs
+											if (targetTile.getLinkedDHD(world) != null)
+												AunisPacketHandler.INSTANCE.sendToAllAround( new DHDIncomingWormholePacketToClient(targetTile.getLinkedDHD(world), gateTile.dialedAddress), targetPoint );
+											
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.LIGHT_UP_ALL_CHEVRONS, targetPos), targetPoint );
 										}
 										
 									} // add symbol if

@@ -97,7 +97,7 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 						break;
 						
 					case GATE_RENDERER_UPDATE:
-						gateRendererUpdate(EnumGateAction.valueOf(message.objectID), gateTile.getRenderer());
+						gateRendererUpdate(EnumGateAction.valueOf(message.objectID), gateTile);
 						
 						break;
 				}
@@ -107,7 +107,9 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 		}
 		
 		@SuppressWarnings("incomplete-switch")
-		private void gateRendererUpdate(EnumGateAction action, StargateRenderer renderer) {
+		private void gateRendererUpdate(EnumGateAction action, StargateBaseTile gateTile) {
+			StargateRenderer renderer = gateTile.getRenderer();
+			
 			switch ( action ) {
 				case ACTIVATE_NEXT:
 					renderer.activateNextChevron();
@@ -128,6 +130,11 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 				case GATE_DIAL_FAILED:
 					renderer.setRingSpin(false, false);
 					renderer.clearChevrons();
+					break;
+					
+				case LIGHT_UP_ALL_CHEVRONS:
+					// TODO: Check how many symbols dialed on initiating gate
+					renderer.lightUpChevrons( gateTile.getMaxSymbols() - 1 );
 					break;
 			}
 		}

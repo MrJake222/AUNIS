@@ -1,6 +1,7 @@
 package mrjake.aunis.stargate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public enum EnumSymbol {
@@ -62,6 +63,27 @@ public enum EnumSymbol {
 	public static EnumSymbol valueOf(int id) {
 		return map.get(id);
 	}
+	
+	// Serialize address to long
+	public static long toLong(List<EnumSymbol> address) {
+		long out = 0;
+		int size = address.size();
+		
+		if (address.get(size-1) == EnumSymbol.ORIGIN) {
+			size--;
+		}
+		
+		for (int i=0; i<size; i++) {
+			int id = address.get(i).id;
+			
+			out |= id << i*6;
+		}
+		
+		return out;
+	}
+	
+	// Deserialize address
+	// public static List<EnumSymbol> 
 	
 	public boolean equals(EnumSymbol symbol) {
 		return symbol.id == this.id;

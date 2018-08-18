@@ -34,6 +34,7 @@ public class DHDRenderer {
 	private long activationStateChange = 0;
 	private String textureTemplate;
 	
+	private boolean changingButtons = false;
 	private boolean clearingButtons = false;
 	
 	public DHDRenderer(DHDTile te) {
@@ -59,44 +60,51 @@ public class DHDRenderer {
 			}
 		}
 		
+		initTextureList();
+	}
+	
+	private void initTextureList() {
 		for (int i=0; i<38; i++)
 			buttonTexture.put("b"+i, "dhd/symbol/symbol0.png");
 			
 		buttonTexture.put("b38", "dhd/brb/brb0.png");
 	}
 	
-	public List<Boolean> getActiveButtonList() {
-		List<Boolean> out = new ArrayList<Boolean>();
+	public List<Integer> getActiveButtons() {
+		List<Integer> out = new ArrayList<Integer>();
 		
 		for (int i=0; i<=38; i++) {
 			String val = buttonTexture.get("b"+i);
 			
-			if ( val.equals("dhd/symbol/symbol0.png") || val.equals("dhd/brb/brb0.png") )
-				out.add(false);
-			else
-				out.add(true);
+			if ( !val.equals("dhd/symbol/symbol0.png") && !val.equals("dhd/brb/brb0.png") )
+				out.add(i);
+			
 		}
 		
 		return out;
 	}
 	
-	public void setActiveButtons(List<Boolean> list) {
-		buttonTexture.clear();
+	public void setActiveButtons(List<Integer> list) {
+		initTextureList();
 		String template;
 		
-		for (int i=0; i<=38; i++) {
-			if (i == 38)
-				template = "dhd/brb/brb";
+		for (int id : list) {
+			if (id == 38)
+				template = "dhd/brb/brb5.png";
 			else
-				template = "dhd/symbol/symbol";
+				template = "dhd/symbol/symbol5.png";
 			
-			if ( list.get(i) )
-				template += "5.png";
-			else
-				template += "0.png";
-			
-			buttonTexture.put("b"+i, template);
+			buttonTexture.put("b"+id, template);
 		}
+	}
+	
+	private List<Integer> toActivate;
+	
+	public void activateButtons(List<Integer> toActivate) {
+		this.toActivate = toActivate;
+		
+		clearingButtons = false;
+		changeButtons();
 	}
 	
 	public void activateButton(int buttonID) {
@@ -116,8 +124,14 @@ public class DHDRenderer {
 		}
 	}
 	
-	public void clearButtons() {		
+	public void clearButtons() {
 		clearingButtons = true;
+		changeButtons();
+	}
+	
+	private void changeButtons() {		
+		changingButtons = true;
+		
 		activationStateChange = world.getTotalWorldTime();
 		
 		activation = 0;
@@ -165,13 +179,22 @@ public class DHDRenderer {
 					if (stage < 0)
 						stage = 0;
 					
-					if (clearingButtons) {
+					if (changingButtons) {
 						for (int i=0; i<=38; i++) {
 							if (i < 38) textureTemplate = "dhd/symbol/symbol";
 							else textureTemplate = "dhd/brb/brb";
 							
-							if (!buttonTexture.get("b"+i).contains("0"))
-								buttonTexture.put("b"+i, textureTemplate+(5-stage)+".png");
+							if (clearingButtons) {
+								if (!buttonTexture.get("b"+i).contains("0")) {
+									buttonTexture.put("b"+i, textureTemplate+(5-stage)+".png");
+								}
+							}
+							
+							else {
+								if ( toActivate.contains(i) ) {
+									buttonTexture.put("b"+i, textureTemplate+stage+".png");
+								}
+							}	
 						}
 					}
 					
@@ -181,8 +204,8 @@ public class DHDRenderer {
 				}
 				
 				else {
-					if (clearingButtons) {
-						clearingButtons = false;
+					if (changingButtons) {
+						changingButtons = false;
 					}
 					
 					activation = -1;

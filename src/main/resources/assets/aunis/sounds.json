@@ -62,6 +62,14 @@
     "sounds": [
       "aunis:gate/dial_fail"
     ]
+  },
+  
+   "chevron_incoming": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.gate_dial_fail",
+    "sounds": [
+      "aunis:gate/chevron_incoming"
+    ]
   }
 }
 

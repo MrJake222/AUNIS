@@ -51,9 +51,12 @@ public class GateAddressPacketToClient implements IMessage {
 		@Override
 		public IMessage onMessage(GateAddressPacketToClient message, MessageContext ctx) {
 			World world = Minecraft.getMinecraft().world;
-			StargateBaseTile te = (StargateBaseTile) world.getTileEntity( message.gatePos );
 			
-			te.gateAddress = message.gateAddress;
+			Minecraft.getMinecraft().addScheduledTask(() -> {
+				StargateBaseTile te = (StargateBaseTile) world.getTileEntity( message.gatePos );
+				
+				te.gateAddress = message.gateAddress;
+			});
 			
 			return null;
 		}

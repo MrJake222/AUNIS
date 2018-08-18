@@ -21,6 +21,8 @@ public class AunisSoundEvents {
 	public static SoundEvent ringRoll;
 	public static SoundEvent chevronLockDHD;
 	
+	public static SoundEvent chevronIncoming;
+	
 	public static Map<BlockPos, PositionedSoundRecord> ringRollSoundMap;
 	
 	static {		
@@ -35,6 +37,8 @@ public class AunisSoundEvents {
 		
 		ringRoll = new SoundEvent( new ResourceLocation("aunis", "ring_roll") );
 		chevronLockDHD = new SoundEvent( new ResourceLocation("aunis", "chevron_lock_dhd") );	
+		
+		chevronIncoming = new SoundEvent( new ResourceLocation("aunis", "chevron_incoming") );	
 	}
 	
 	public static void playSound(World world, BlockPos pos, SoundEvent soundEvent) {

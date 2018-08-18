@@ -2,6 +2,7 @@ package mrjake.aunis.block;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.gui.StargateGUI;
+import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.TileEntityFaced;
 import net.minecraft.block.SoundType;
@@ -34,13 +35,16 @@ public class StargateBaseBlock extends TileEntityFaced<StargateBaseTile> {
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		
 		super.onBlockPlacedBy(world, pos, state, placer, stack);
-	}
+	}*/
 	
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-				
+		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+		
+		StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
+		
 		super.breakBlock(world, pos, state);
-	}*/
+	}
 	
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
@@ -54,8 +58,8 @@ public class StargateBaseBlock extends TileEntityFaced<StargateBaseTile> {
 		}
 		
 		else {
-			StargateBaseTile te = (StargateBaseTile) world.getTileEntity(pos);
-			Aunis.info("Address: " +  te.gateAddress);
+			//StargateNetwork.get(world).clear();
+			Aunis.info("gates: "+StargateNetwork.get(world).toString());
 		}
 		
 		return true;

@@ -12,19 +12,15 @@ public class DHDUpdatePacket {
 	BlockPos pos;
 	
 	// Chevrons
-	private List<Boolean> activeButtons;
+	private List<Integer> activeButtons;
 	
 	public DHDUpdatePacket(DHDTile te) {
 		this.pos = te.getPos();
 		
-		this.activeButtons = te.getRenderer().getActiveButtonList();
+		this.activeButtons = te.getRenderer().getActiveButtons();
 		
 		Aunis.info("Getting active buttons: " +activeButtons.toString());
 	}
-	
-	/*public DHDUpdatePacket(List<Boolean> activeButtons) {
-		this.activeButtons = activeButtons;
-	}*/
 	
 	public void set(DHDTile te) {
 		Aunis.info("Setting active buttons: " +activeButtons.toString());
@@ -34,18 +30,23 @@ public class DHDUpdatePacket {
 	public void toBytes(ByteBuf buf) {
 		buf.writeLong( pos.toLong() );
 		
-		for (Boolean state : activeButtons)
-			buf.writeBoolean(state);
+		int size = activeButtons.size();
+		buf.writeInt(size);
+		
+		for (int i=0; i<size; i++)
+			buf.writeInt( activeButtons.get(i) );	
 		
 	}
 	
 	public DHDUpdatePacket (ByteBuf buf) {
 		this.pos = BlockPos.fromLong( buf.readLong() );
 		
-		this.activeButtons = new ArrayList<Boolean>();
+		this.activeButtons = new ArrayList<Integer>();
+		int size = buf.readInt();
 		
-		for (int i=0; i<=38; i++)
-			this.activeButtons.add( buf.readBoolean() );
+		for (int i=0; i<size; i++)
+			this.activeButtons.add( buf.readInt() );
+		
 	}
 	
 }
