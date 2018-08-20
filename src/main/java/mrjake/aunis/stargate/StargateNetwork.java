@@ -51,7 +51,7 @@ public class StargateNetwork extends WorldSavedData {
 			stargateMap.put(key, value);
 		}
 		
-		Aunis.info("Read gates from NBT: " + stargateMap.toString());
+		Aunis.log("Read gates from NBT: " + stargateMap.toString());
 	}
 		
 	public void addStargate(List<EnumSymbol> address, BlockPos pos) {	

@@ -142,11 +142,9 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 										
 										else {
 											// Address malformed, dialing failed
-											// Clear address, clear DHD buttons and chevrons
-											// stop ring spin
+											// Execute GATE_DIAL_FAILED
 											
 											gateTile.clearAddress();
-											// AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.GATE_DIAL_FAILED, gateTile), point );
 										}
 									}	
@@ -190,7 +188,6 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.LIGHT_UP_ALL_CHEVRONS, targetPos), targetPoint );
 										}
-										
 									} // add symbol if
 								} // not brb else
 							} // gateTile not null if

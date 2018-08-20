@@ -114,7 +114,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 		BlockPos dhd;
 		
 		if (linkedDHD == null) {
-			Aunis.info(pos.toString()+":  linkedDHD is null!");
+			Aunis.log(pos.toString()+":  linkedDHD is null!");
 			dhd = new BlockPos(0,0,0);
 		}
 		else
@@ -135,7 +135,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 	public void readFromNBT(NBTTagCompound compound) {				
 		BlockPos pos = BlockPos.fromLong( compound.getLong("linkedDHD") );
 
-		Aunis.info(pos.toString()+": Relinking to DHD at " + pos.toString());
+		Aunis.log(pos.toString()+": Relinking to DHD at " + pos.toString());
 		linkedDHD = pos;
 		
 		boolean compoundHasAddress = compound.hasKey("symbol0");
@@ -148,7 +148,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 				gateAddress.add( EnumSymbol.valueOf(id) );
 			}
 			
-			Aunis.info("Read address: "+gateAddress.toString());
+			Aunis.log("Read address: "+gateAddress.toString());
 		}
 		
 		super.readFromNBT(compound);

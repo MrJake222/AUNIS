@@ -324,27 +324,33 @@ public class StargateRenderer {
 		}
 	}
 	
+	public void clearChevrons(Long stateChange) {
+		changeChevrons(true, stateChange);
+	}
+	
 	public void clearChevrons() {
-		changeChevrons(true);
+		clearChevrons(null);
 	}
 	
 	public void lightUpChevrons(int chevronsToLightUp) {
 		AunisSoundEvents.playSound(world, pos, AunisSoundEvents.chevronIncoming);
-		Aunis.info("renderer: lighting up!");
 		
 		this.chevronsToLightUp = chevronsToLightUp;
 		this.dialingComplete = true;
 		
-		changeChevrons(false);
+		changeChevrons(false, null);
 	}
 	
-	public void changeChevrons(boolean clear) {	
+	public void changeChevrons(boolean clear, Long stateChange) {	
 		dhdButtonsCleared = false;
 		changingChevrons = true;
 		
 		clearingChevrons = clear;
 		
-		activationStateChange = world.getTotalWorldTime();
+		if (stateChange != null)
+			activationStateChange = stateChange;
+		else
+			activationStateChange = world.getTotalWorldTime();
 		
 		if (clearingChevrons) {
 			if (dialingComplete)
@@ -481,7 +487,6 @@ public class StargateRenderer {
 							tex += "10.png";
 						
 						if ( !chevronTextureList.get(i).equals(tex) ) {
-							Aunis.info("Correcting chevron "+i+" to tex: "+tex);
 							chevronTextureList.set(i, tex);
 						}
 					}
@@ -495,11 +500,8 @@ public class StargateRenderer {
 	public List<Boolean> getActiveChevronsList() {
 		List<Boolean> out = new ArrayList<Boolean>();
 		
-		for ( String val : chevronTextureList ) {
+		for ( String val : chevronTextureList )
 			out.add( val.equals("chevron/chevron10.png") );
-			
-			Aunis.info("tex: " + val);
-		}
 		
 		return out;
 	}
@@ -517,9 +519,7 @@ public class StargateRenderer {
 			}
 			else
 				tex += "0.png";
-			
-			Aunis.info("Setting tex: " + tex);
-			
+						
 			chevronTextureList.add(tex);
 		}
 	}
@@ -537,18 +537,13 @@ public class StargateRenderer {
 	private boolean backStripClamp;
 	
 	public boolean doEventHorizonRender = false;
-	private boolean closingFirstRun;
 	private Float whiteOverlayAlpha;
-	
-	// private float shrinkStart;
 	
 	private float gateWaitStart = 0;
 	public boolean soundPlayed;
 	
-	private float gateWaitClose = 0;
-	private boolean zeroAlphaSet;
-	// private boolean closingSoundPlayed;
-	
+	private long gateWaitClose = 0;
+	private boolean zeroAlphaSet;	
 	
 	public void openGate() {
 		gateWaitStart = world.getTotalWorldTime();
@@ -556,12 +551,11 @@ public class StargateRenderer {
 		
 		zeroAlphaSet = false;
 		backStripClamp = true;
-		closingFirstRun = true;
 		whiteOverlayAlpha = 1.0f;
 		
 		vortexState = EnumVortexState.FORMING;
 		
-		kawooshStart = 0;
+		kawooshStart = world.getTotalWorldTime();
 		doEventHorizonRender = true;
 	}
 	
@@ -670,29 +664,30 @@ public class StargateRenderer {
 		}
 	}
 	
-	public EnumVortexState vortexState = EnumVortexState.FORMING;;
+	public EnumVortexState vortexState = EnumVortexState.FORMING;
 	
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
-		if ( (world.getTotalWorldTime() - gateWaitStart) < 25 )
+		float gateWait = world.getTotalWorldTime() - gateWaitStart;
+		
+		if ( gateWait < 25 )
 			return;
 		
 		// This must be done here, because we wait a little before playing any sound
-		if (!soundPlayed) {
+		if ( !soundPlayed && gateWait < 30 ) {
 			soundPlayed = true;
 			
 			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateOpen);
 		}
 		
 		// Waiting for sound sync
-		if ( (world.getTotalWorldTime() - gateWaitStart) < 44 ) {
+		if ( gateWait < 44 ) {
 			return;
 		}
 		
-		else {
-			if ( kawooshStart == 0 )
-				kawooshStart = world.getTotalWorldTime();
-		}
-			
+		kawooshStart = (long) (gateWaitStart + 44);
+		
+		GlStateManager.disableLighting();
+		
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
 		GlStateManager.rotate(horizontalRotation, 0, 1, 0);
@@ -727,11 +722,19 @@ public class StargateRenderer {
 				// Clamping to the desired size
 				backStripClamp = false;
 				backStrip = new QuadStrip(0, kawooshRadius - 0.2f, eventHorizonRadius, null);
-
-				vortexState = EnumVortexState.FORMING;
-				vortexStart = tick;
 				
-				// whiteOverlayAlpha = 0.0f;
+				vortexStart = 5.275f;
+				
+				float argState = (tick - vortexStart) / speedFactor;
+								
+				if (argState < 1.342f)
+					vortexState = EnumVortexState.FORMING;
+				else if (argState < 4.15f)
+					vortexState = EnumVortexState.FULL;
+				else if (argState < 5.898f)
+					vortexState = EnumVortexState.DECREASING;
+				else
+					vortexState = EnumVortexState.STILL;
 			}
 
 			float prevZ = 0;
@@ -739,10 +742,9 @@ public class StargateRenderer {
 			
 			boolean first = true;
 			
-			// TODO: Remove EnumVortexState and replace it with states based on <arg>
 			if ( !vortexState.equals(EnumVortexState.STILL) ) {
 				float arg = (tick - vortexStart) / speedFactor;
-				
+								
 				if ( !vortexState.equals(EnumVortexState.CLOSING) ) {
 					if ( !vortexState.equals(EnumVortexState.SHRINKING) ) {
 						if ( vortexState.equals(EnumVortexState.FORMING) && arg >= 1.342f ) {
@@ -750,7 +752,7 @@ public class StargateRenderer {
 						}
 						
 						// Offset of the end of the function domain used to generate vortex 
-						float end = 0.5f;
+						float end = 0.75f;
 						
 						if ( vortexState.equals(EnumVortexState.DECREASING) && arg >= 5.398+end ) {
 							vortexState = EnumVortexState.STILL;
@@ -804,17 +806,16 @@ public class StargateRenderer {
 					
 					else {
 						// Going outwards, closing the gate
-						float inner2 = arg*speedFactor/3f;
-
-						if (inner2 < eventHorizonRadius+0.1f) {
-							backStrip = new QuadStrip(0, inner2, eventHorizonRadius, tick);
+						long stateChange = gateWaitClose + 29;
+						float arg2 = (float) ((world.getTotalWorldTime() - stateChange + partialTicks) / 3f) - 1.0f;
+						
+						if (arg2 < eventHorizonRadius+0.1f) {
+							backStrip = new QuadStrip(0, arg2, eventHorizonRadius, tick);
 						}
 						
 						else {
-							doEventHorizonRender = false;
-							clearChevrons();
-							
-							// AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.CLEAR_DHD_BUTTONS, 0, pos) );
+							doEventHorizonRender = false;							
+							clearChevrons(stateChange + 14);
 						}
 					}
 				} // not closing if
@@ -822,23 +823,12 @@ public class StargateRenderer {
 				else {					
 					// Fading out the event horizon, closing the gate
 					if ( (world.getTotalWorldTime() - gateWaitClose) > 29 ) {
-						if (closingFirstRun) {
-							closingFirstRun = false;
-							vortexStart = tick;
-						}
-						
-						else {
-							float arg2 = arg/2f;
-							
-							if ( arg2 <= Math.PI/6 ) {
-								whiteOverlayAlpha = MathHelper.sin( arg2 );
-							}
-							
-							else {
-								vortexState = EnumVortexState.SHRINKING;
-								vortexStart = tick - ( 2.0f * 3 );
-							}
-						}
+						float arg2 = (float) ((world.getTotalWorldTime() - (gateWaitClose+29) + partialTicks) / speedFactor / 2f);
+												
+						if ( arg2 <= Math.PI/6 )
+							whiteOverlayAlpha = MathHelper.sin( arg2 );
+						else
+							vortexState = EnumVortexState.SHRINKING;
 					}
 				}
 			} // not still if
@@ -854,6 +844,7 @@ public class StargateRenderer {
 					renderEventHorizon(x, y, z, partialTicks, false, null, false);
 				
 				GlStateManager.popMatrix();
+				GlStateManager.enableLighting();
 				return;
 			}
 		}
@@ -866,7 +857,8 @@ public class StargateRenderer {
 			
 			GlStateManager.disableBlend();
 		}
-			
+		
+		GlStateManager.enableLighting();
 		GlStateManager.popMatrix();
 	}
 	
