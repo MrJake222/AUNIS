@@ -8,6 +8,8 @@ import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClien
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.TeleportPlayerToClient;
 import mrjake.aunis.packet.gate.teleportPlayer.UnlockPlayerToServer;
+import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
+import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -31,5 +33,8 @@ public class AunisPacketHandler {
 		
 		INSTANCE.registerMessage(TeleportPlayerToClient.TeleportPlayerToClientHandler.class, TeleportPlayerToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(UnlockPlayerToServer.UnlockPlayerHandler.class, UnlockPlayerToServer.class, id, Side.SERVER); id++;
+		
+		INSTANCE.registerMessage(TileUpdateRequestToServer.TileUpdateServerHandler.class, TileUpdateRequestToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(TileUpdatePacketToClient.TileUpdateClientHandler.class, TileUpdatePacketToClient.class, id, Side.CLIENT); id++;
 	}
 }

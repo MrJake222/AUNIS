@@ -42,7 +42,7 @@ public class AunisClientEventHandler {
 			}
 		}
     }
-
+	
 	@SubscribeEvent
 	public static void onPlayerLoggedIn(PlayerLoggedInEvent event) {
 		EntityPlayer player = event.player;

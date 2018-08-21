@@ -95,24 +95,13 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 					}*/
 				
 					switch ( EnumPacket.valueOf(message.packetID) ) {
-						case ENGAGE_GATE:
-							Aunis.log(gateTile.getPos()+": Engaging gate, target address: "+gateTile.dialedAddress);
-							
-							BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
-							StargateBaseTile targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
-							
-							targetTile.engageGate(false);
-							gateTile.engageGate(true);
-							
-							break;
-						
-						case CLEAR_DHD_BUTTONS:							
+						/*case CLEAR_DHD_BUTTONS:							
 							// Clear DHD buttons, Chevrons are cleared in StargateRenderer
 							if (dhdTile != null)
 								AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, -1, dhdTile), point );
 							
 							break;
-							
+							*/
 						default:							
 							if (dhdTile != null && gateTile != null) {								
 								EnumSymbol symbol = EnumSymbol.valueOf(message.objectID);
@@ -122,14 +111,12 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									if ( gateTile.isEngaged() ) {
 										Aunis.log("Gate is engaged, closing...");
 										
-										targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
-										targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
+										BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
+										StargateBaseTile targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
 										
 										// clear connection and address, start animation 
 										TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
-										
-										Aunis.info("Sending CLOSE_GATE tick:"+world.getTotalWorldTime());
-										
+																				
 										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, gateTile), point );
 										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, targetPos), targetPoint );
 										
@@ -153,14 +140,13 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 										if ( symbolCount >= 7 && symbolCount <= gateTile.getMaxSymbols() && gateTile.checkForPointOfOrigin() && StargateNetwork.get(world).checkForStargate(gateTile.dialedAddress) 
 												&& !gateTile.dialedAddress.equals(address) ) {
 											// All check, light it up and start gate animation
-											
-											Aunis.info("Sending OPEN_GATE_INITIATING tick:"+world.getTotalWorldTime());
-											
+																						
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE.packetID, message.objectID, dhdTile.getPos()), point );
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE_INITIATING, gateTile), point );
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, gateTile), point );
+											gateTile.openGate(true);
 											
-											targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
-											targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
+											BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
+											StargateBaseTile targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
 											
 											BlockPos targetDhd = targetTile.getLinkedDHD();
 											
@@ -168,7 +154,8 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											if (targetDhd != null)
 												AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE.packetID, message.objectID, targetDhd), point );
 											
-											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE_RECEIVING, targetPos), point );
+											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, targetPos), point );
+											targetTile.openGate(false);
 										}
 										
 										else {
@@ -205,8 +192,8 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 																				
 										// Light up target gate, if exists
 										if ( symbol == EnumSymbol.ORIGIN && network.checkForStargate(gateTile.dialedAddress) ) {
-											targetPos = network.getStargate( gateTile.dialedAddress );
-											targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
+											BlockPos targetPos = network.getStargate( gateTile.dialedAddress );
+											StargateBaseTile targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
 											BlockPos targetDhd = targetTile.getLinkedDHD();
 											
 											TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);

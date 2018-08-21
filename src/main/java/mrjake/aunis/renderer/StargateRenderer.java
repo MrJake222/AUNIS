@@ -15,9 +15,6 @@ import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockFaced;
-import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -34,7 +31,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class StargateRenderer {
-	// private StargateBaseTile te;
+	private StargateBaseTile te;
 	private World world;
 	private BlockPos pos;
 	
@@ -48,7 +45,7 @@ public class StargateRenderer {
 	}
 	
 	public StargateRenderer(StargateBaseTile te) {
-		// this.te = te;
+		this.te = te;
 		this.world = te.getWorld();
 		this.pos = te.getPos();
 		
@@ -437,10 +434,11 @@ public class StargateRenderer {
 
 			if (stage < 0) return;
 			else {
+				// TODO: Clear buttons here
+				
 				if (!dhdButtonsCleared && clearingChevrons) {
 					dhdButtonsCleared = true;
-					Aunis.info("Sending CLEAR_DHD_BUTTONS tick:"+world.getTotalWorldTime());
-					AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.CLEAR_DHD_BUTTONS, 0, pos) );
+					te.getLinkedDHD(world).getRenderer().clearButtons();
 				}
 			}
 			
@@ -546,13 +544,10 @@ public class StargateRenderer {
 	
 	private long gateWaitClose = 0;
 	private boolean zeroAlphaSet;	
-	
-	private boolean isInitiatingGate;
-	
-	public void openGate(boolean intiating) {
+		
+	public void openGate() {
 		gateWaitStart = world.getTotalWorldTime();
 		soundPlayed = false;
-		this.isInitiatingGate = intiating;
 		
 		zeroAlphaSet = false;
 		backStripClamp = true;
@@ -775,12 +770,6 @@ public class StargateRenderer {
 						
 						if ( vortexState.equals(EnumVortexState.DECREASING) && arg >= 5.398+end ) {
 							vortexState = EnumVortexState.STILL;
-							
-							// Gate is open, engage it on server
-							if (isInitiatingGate) {
-								Aunis.info("Sending ENGAGE_GATE tick:"+world.getTotalWorldTime());
-								AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.ENGAGE_GATE, 0, pos) );
-							}
 							
 							wormholeSound(true);
 						}

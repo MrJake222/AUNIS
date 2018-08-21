@@ -12,6 +12,7 @@ import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.TeleportPlayerToClient;
+import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
@@ -37,6 +38,9 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 	private boolean isEngaged;
 	private boolean isInitiating;
 	
+	private long waitForEngage;
+	private boolean unstableVortex;
+	
 	public List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
 	
@@ -55,9 +59,17 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 		dialedAddress.clear();
 	}
 	
-	public void engageGate(boolean initiaing) {
+	public void openGate(boolean initiating) {
+		isInitiating = initiating;
+		
+		unstableVortex = true;
+		waitForEngage = world.getTotalWorldTime();
+	}
+	
+	public void engageGate() {
 		Aunis.log("Initiating connection with "+dialedAddress.toString());
-		isInitiating = initiaing;
+		
+		unstableVortex = false;
 		isEngaged = true;
 	}
 	
@@ -195,8 +207,14 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 		if (firstTick) {
 			firstTick = false;
 			
+			// Aunis.info("linkedDHD: "+linkedDHD);
+			
+			// Sync linkedDHD to client for use in renderer
+			if (world.isRemote)
+				AunisPacketHandler.INSTANCE.sendToServer( new TileUpdateRequestToServer(pos) );
+			
 			// Can't do this in onLoad(), because in that method, world isn't fully loaded
-			onLoaded();		
+			generateAddress();		
 			
 			// Load WorldSavedData to avoid further lags
 			// StargateNetwork.get(world);
@@ -277,9 +295,13 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 			
 			//tickWait = 0;
 		}
+		
+		if (unstableVortex && world.getTotalWorldTime()-waitForEngage >= 86) {
+			engageGate();
+		}
 	}
 	
-	public void onLoaded() {
+	public void generateAddress() {
 		
 		// Server
 		if ( !world.isRemote ) {			

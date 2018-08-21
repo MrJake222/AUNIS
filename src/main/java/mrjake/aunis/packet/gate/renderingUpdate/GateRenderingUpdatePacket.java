@@ -7,10 +7,10 @@ public class GateRenderingUpdatePacket {
 	
 	public enum EnumPacket {
 		DHD_RENDERER_UPDATE(0),
-		GATE_RENDERER_UPDATE(1),
-		ENGAGE_GATE(2),
+		GATE_RENDERER_UPDATE(1);
+		//ENGAGE_GATE(2),
 		
-		CLEAR_DHD_BUTTONS(3);
+		//CLEAR_DHD_BUTTONS(3);
 				
 		public int packetID;
 		private static Map<Integer, EnumPacket> map = new HashMap<Integer, EnumPacket>();
@@ -34,11 +34,11 @@ public class GateRenderingUpdatePacket {
 		CLEAR(0),
 		ACTIVATE_NEXT(1),
 		ACTIVATE_FINAL(2),
-		OPEN_GATE_INITIATING(3),
+		OPEN_GATE(3),
 		CLOSE_GATE(4),
 		GATE_DIAL_FAILED(5),
-		LIGHT_UP_ALL_CHEVRONS(6),
-		OPEN_GATE_RECEIVING(7);
+		LIGHT_UP_ALL_CHEVRONS(6);
+		//OPEN_GATE_RECEIVING(7);
 		
 		public int actionID;
 		private static Map<Integer, EnumGateAction> map = new HashMap<Integer, EnumGateAction>();
