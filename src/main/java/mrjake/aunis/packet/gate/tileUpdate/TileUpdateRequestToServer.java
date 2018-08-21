@@ -1,7 +1,6 @@
 package mrjake.aunis.packet.gate.tileUpdate;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -37,19 +36,11 @@ public class TileUpdateRequestToServer implements IMessage {
 			WorldServer world = ctx.getServerHandler().player.getServerWorld();
 			
 			
-			if ( world.isBlockLoaded(message.tilePos) ) {
-				
-				/*world.addScheduledTask(() -> {
-					BlockPos linkedDHD;
-					
-					
-				});*/
-				
+			if ( world.isBlockLoaded(message.tilePos) ) {				
 				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.tilePos);
 				
-				Aunis.info("Sending TileUpdatePacketToClient");
-				
-				return new TileUpdatePacketToClient(message.tilePos, gateTile.getLinkedDHD());				
+				if (gateTile != null)					
+					return new TileUpdatePacketToClient(message.tilePos, gateTile.getLinkedDHD());
 			}
 			
 			return null;

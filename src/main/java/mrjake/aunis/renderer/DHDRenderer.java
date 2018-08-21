@@ -36,6 +36,7 @@ public class DHDRenderer {
 	
 	private boolean changingButtons = false;
 	private boolean clearingButtons = false;
+	public boolean brbToActivate = false;
 	
 	public DHDRenderer(DHDTile te) {
 		this.rotation = te.getWorld().getBlockState(te.getPos()).getValue(BlockRotated.ROTATE) * -22.5f;
@@ -124,7 +125,7 @@ public class DHDRenderer {
 		}
 	}
 	
-	public void clearButtons() {
+	public void clearButtons() {	
 		clearingButtons = true;
 		changeButtons();
 	}
@@ -214,8 +215,10 @@ public class DHDRenderer {
 					
 					// When activating remotely, we need to take into account that gate will not be rendered at the time
 					// hence manual activation
-					if (activation == 38)
+					if (brbToActivate) {
+						brbToActivate = false;
 						buttonTexture.put("b38", "dhd/brb/brb5.png");
+					}
 					
 					activation = -1;
 				}

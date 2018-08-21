@@ -4,6 +4,8 @@ import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
+import mrjake.aunis.block.DHDBlock;
+import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
@@ -11,6 +13,7 @@ import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -59,7 +62,9 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 				World world = player.getEntityWorld();
 				BlockPos pos = message.blockPos;
 				
-				if ( world.isBlockLoaded(pos) ) {
+				Block block = world.getBlockState(pos).getBlock();
+				
+				if ( block instanceof StargateBaseBlock || block instanceof DHDBlock ) {
 					TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64);
 					
 					TileEntity te = world.getTileEntity(pos);

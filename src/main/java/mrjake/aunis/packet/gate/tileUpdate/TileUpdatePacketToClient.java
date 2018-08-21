@@ -1,7 +1,6 @@
 package mrjake.aunis.packet.gate.tileUpdate;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -44,8 +43,6 @@ public class TileUpdatePacketToClient implements IMessage {
 			World world = player.getEntityWorld();
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
-				
-				Aunis.info("Updating "+message.tilePos+" with dhd="+message.linkedDHD);
 				
 				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.tilePos);
 				gateTile.setLinkedDHD(message.linkedDHD);

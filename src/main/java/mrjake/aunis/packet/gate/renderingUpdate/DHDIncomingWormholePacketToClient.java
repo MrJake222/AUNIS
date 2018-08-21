@@ -3,7 +3,6 @@ package mrjake.aunis.packet.gate.renderingUpdate;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;

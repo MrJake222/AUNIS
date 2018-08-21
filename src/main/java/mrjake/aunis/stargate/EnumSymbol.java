@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import mrjake.aunis.Aunis;
-
 public enum EnumSymbol {
 	SCULPTOR(0, "Sculptor"),
 	SCORPIUS(1, "Scorpius"),

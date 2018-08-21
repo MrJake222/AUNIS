@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.renderer.StargateRenderer;
+import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
@@ -91,8 +92,12 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 						if (message.objectID == -1) 
 							dhdTile.getRenderer().clearButtons();
 						
-						else 
+						else {
+							if (message.objectID == EnumSymbol.BRB.id)
+								dhdTile.getRenderer().brbToActivate = true;
+							
 							dhdTile.getRenderer().activateButton(message.objectID);
+						}
 						
 						break;
 						

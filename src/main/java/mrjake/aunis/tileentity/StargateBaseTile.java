@@ -1,21 +1,26 @@
 package mrjake.aunis.tileentity;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.Set;
+
+import javax.vecmath.Vector2f;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
-import mrjake.aunis.packet.gate.teleportPlayer.TeleportPlayerToClient;
+import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
+import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
+import mrjake.aunis.stargate.TeleportHelper;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -27,6 +32,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class StargateBaseTile extends TileEntity implements ITickable {
 	
@@ -118,6 +124,12 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 	public void setLinkedDHD(BlockPos dhdPos) {
 		this.linkedDHD = dhdPos;
 		
+		if (!world.isRemote) {
+			TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64);
+			
+			AunisPacketHandler.INSTANCE.sendToAllAround(new TileUpdatePacketToClient(pos, linkedDHD), point);
+		}
+		
 		markDirty();
 	}
 
@@ -184,7 +196,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 	private final float placement = 0.5f;
 	
 	// How wide it should be
-	private final float delta = 0.1f;
+	private final float delta = 0.2f;
 	
 	// Other dimensions
 	private final float left = -2;
@@ -196,10 +208,40 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 	
 	// private int tickWait = 0;
 	
-	private Set<Integer> playerLockedTeleportingSet = new HashSet<Integer>();
+	public static class TeleportPacket {
+		private BlockPos sourceGatePos;
+		private BlockPos targetGatePos;
+		
+		private float rotation;
+		private String sourceAxisName;
+		
+		public Vector2f motionVector;
+		/*public float oldMotionX;
+		public float oldMotionZ;*/
+		
+		public TeleportPacket(BlockPos source, BlockPos target, float rot, EnumFacing.Axis sourceAxis) {
+			sourceGatePos = source;
+			targetGatePos = target;
+			
+			rotation = rot;
+			sourceAxisName = sourceAxis.getName();
+		}
+		
+		public void teleport(EntityPlayer player) {
+			TeleportHelper.teleportServer(player, sourceGatePos, targetGatePos, rotation, sourceAxisName, motionVector);
+			
+			player.getEntityWorld().playSound(null, targetGatePos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+		}
+	}
 	
-	public void unlockPlayer(int entityId) {
-		playerLockedTeleportingSet.remove(entityId);
+	// Map<PlayerID, TeleportPacket>
+	public Map<Integer, TeleportPacket> scheduledTeleportMap = new HashMap<Integer, TeleportPacket>();
+	
+	public void teleportPlayer(int entityId) {
+		EntityPlayerMP player = (EntityPlayerMP) world.getEntityByID(entityId);
+		scheduledTeleportMap.get(entityId).teleport(player);
+		
+		scheduledTeleportMap.remove(entityId);
 	}
 	
 	@Override
@@ -207,17 +249,12 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 		if (firstTick) {
 			firstTick = false;
 			
-			// Aunis.info("linkedDHD: "+linkedDHD);
-			
 			// Sync linkedDHD to client for use in renderer
 			if (world.isRemote)
 				AunisPacketHandler.INSTANCE.sendToServer( new TileUpdateRequestToServer(pos) );
 			
 			// Can't do this in onLoad(), because in that method, world isn't fully loaded
-			generateAddress();		
-			
-			// Load WorldSavedData to avoid further lags
-			// StargateNetwork.get(world);
+			generateAddress();
 			
 			if (!world.isRemote) {
 				EnumFacing sourceGateFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
@@ -256,7 +293,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 			for (EntityPlayerMP player : players) {
 				int entId = player.getEntityId();
 				
-				if ( !playerLockedTeleportingSet.contains(entId) ) {
+				if ( !scheduledTeleportMap.containsKey(entId) ) {
 					BlockPos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
 					
 					EnumFacing sourceFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
@@ -278,13 +315,12 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 					
 					// Player entered front side of event horizon
 					if ( (direction == AxisDirection.POSITIVE && axisDiff < 0) || (direction == AxisDirection.NEGATIVE && axisDiff > 0) ) {		
-						Aunis.info("Front");
+						// Aunis.info("Front");
 						
-						playerLockedTeleportingSet.add(entId);
-						AunisPacketHandler.INSTANCE.sendTo(new TeleportPlayerToClient(pos, targetPos, rotation, sourceFacing.getAxis()), player);
+						scheduledTeleportMap.put( entId, new TeleportPacket(pos, targetPos, rotation, sourceFacing.getAxis()) );
+						AunisPacketHandler.INSTANCE.sendTo(new RetrieveMotionToClient(pos), player);
 						
-						world.playSound(player, pos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
-						world.playSound(player, targetPos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+						world.playSound(null, pos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
 					}
 					
 					else {

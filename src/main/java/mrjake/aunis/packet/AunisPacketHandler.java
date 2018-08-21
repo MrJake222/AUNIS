@@ -6,8 +6,8 @@ import mrjake.aunis.packet.gate.onLoadUpdate.OnLoadUpdateRequest;
 import mrjake.aunis.packet.gate.renderingUpdate.DHDIncomingWormholePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.gate.teleportPlayer.TeleportPlayerToClient;
-import mrjake.aunis.packet.gate.teleportPlayer.UnlockPlayerToServer;
+import mrjake.aunis.packet.gate.teleportPlayer.MotionToServer;
+import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -31,8 +31,9 @@ public class AunisPacketHandler {
 		
 		INSTANCE.registerMessage(DHDIncomingWormholePacketToClient.DHDIncomingWormholePacketToClientHandler.class, DHDIncomingWormholePacketToClient.class, id, Side.CLIENT); id++;
 		
-		INSTANCE.registerMessage(TeleportPlayerToClient.TeleportPlayerToClientHandler.class, TeleportPlayerToClient.class, id, Side.CLIENT); id++;
-		INSTANCE.registerMessage(UnlockPlayerToServer.UnlockPlayerHandler.class, UnlockPlayerToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(RetrieveMotionToClient.RetrieveMotionClientHandler.class, RetrieveMotionToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(MotionToServer.MotionServerHandler.class, MotionToServer.class, id, Side.SERVER); id++;
+		// INSTANCE.registerMessage(PropelPlayerToClient.PropelPlayerClientHandler.class, PropelPlayerToClient.class, id, Side.CLIENT); id++;
 		
 		INSTANCE.registerMessage(TileUpdateRequestToServer.TileUpdateServerHandler.class, TileUpdateRequestToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(TileUpdatePacketToClient.TileUpdateClientHandler.class, TileUpdatePacketToClient.class, id, Side.CLIENT); id++;
