@@ -92,7 +92,7 @@ public class StargateNetwork extends WorldSavedData {
 	public static StargateNetwork get(World world) {
 		MapStorage storage = world.getMapStorage();
 		StargateNetwork instance = (StargateNetwork) storage.getOrLoadData(StargateNetwork.class, DATA_NAME);
-		
+				
 		if (instance == null) {
 			instance = new StargateNetwork();
 			storage.setData(DATA_NAME, instance);

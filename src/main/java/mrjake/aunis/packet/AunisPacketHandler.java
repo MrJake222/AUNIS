@@ -6,6 +6,8 @@ import mrjake.aunis.packet.gate.onLoadUpdate.OnLoadUpdateRequest;
 import mrjake.aunis.packet.gate.renderingUpdate.DHDIncomingWormholePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.gate.teleportPlayer.TeleportPlayerToClient;
+import mrjake.aunis.packet.gate.teleportPlayer.UnlockPlayerToServer;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -26,5 +28,8 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(GateAddressPacketToClient.GateAddressPacketToClientHandler.class, GateAddressPacketToClient.class, id, Side.CLIENT); id++;
 		
 		INSTANCE.registerMessage(DHDIncomingWormholePacketToClient.DHDIncomingWormholePacketToClientHandler.class, DHDIncomingWormholePacketToClient.class, id, Side.CLIENT); id++;
+		
+		INSTANCE.registerMessage(TeleportPlayerToClient.TeleportPlayerToClientHandler.class, TeleportPlayerToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(UnlockPlayerToServer.UnlockPlayerHandler.class, UnlockPlayerToServer.class, id, Side.SERVER); id++;
 	}
 }

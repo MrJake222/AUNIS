@@ -70,6 +70,29 @@
     "sounds": [
       "aunis:gate/chevron_incoming"
     ]
+  },
+  
+  "wormhole_loop": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.wormhole_loop",
+    "sounds": [
+      "aunis:gate/wormhole_loop"
+    ]
+  },
+  
+  "wormhole_go": {
+    "category": "block",
+    "subtitle": "aunis.subtitle.wormhole_go",
+    "sounds": [
+      "aunis:eh/eh_go_1",
+      "aunis:eh/eh_go_2",
+      "aunis:eh/eh_go_3",
+      "aunis:eh/eh_go_4",
+      "aunis:eh/eh_go_5",
+      "aunis:eh/eh_go_6",
+      "aunis:eh/eh_go_7",
+      "aunis:eh/eh_go_8"
+    ]
   }
 }
 

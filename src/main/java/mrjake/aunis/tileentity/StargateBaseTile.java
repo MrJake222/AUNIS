@@ -1,18 +1,28 @@
 package mrjake.aunis.tileentity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisSoundEvents;
+import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
+import mrjake.aunis.packet.gate.teleportPlayer.TeleportPlayerToClient;
 import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -25,6 +35,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 	private BlockPos linkedDHD = null;
 	
 	private boolean isEngaged;
+	private boolean isInitiating;
 	
 	public List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
@@ -44,8 +55,9 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 		dialedAddress.clear();
 	}
 	
-	public void engageGate() {
+	public void engageGate(boolean initiaing) {
 		Aunis.log("Initiating connection with "+dialedAddress.toString());
+		isInitiating = initiaing;
 		isEngaged = true;
 	}
 	
@@ -156,16 +168,115 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 	
 	private boolean firstTick = true;
 	
+	// Where to place event horizon
+	private final float placement = 0.5f;
+	
+	// How wide it should be
+	private final float delta = 0.1f;
+	
+	// Other dimensions
+	private final float left = -2;
+	private final float right = 3;
+	private final float up = 8;
+	
+	// Calculated box
+	public AxisAlignedBB horizonBoundingBox;
+	
+	// private int tickWait = 0;
+	
+	private Set<Integer> playerLockedTeleportingSet = new HashSet<Integer>();
+	
+	public void unlockPlayer(int entityId) {
+		playerLockedTeleportingSet.remove(entityId);
+	}
+	
 	@Override
 	public void update() {
-		
-		// Can't do this in onLoad(), because in that method, world isn't fully loaded
 		if (firstTick) {
 			firstTick = false;
 			
-			onLoaded();
+			// Can't do this in onLoad(), because in that method, world isn't fully loaded
+			onLoaded();		
+			
+			// Load WorldSavedData to avoid further lags
+			// StargateNetwork.get(world);
+			
+			if (!world.isRemote) {
+				EnumFacing sourceGateFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
+				
+				int x = pos.getX();
+				int y = pos.getY();
+				int z = pos.getZ();
+				
+				if (sourceGateFacing.getAxis().getName() == "z") {
+					// North - South
+					// Stargate divided on X axis
+					
+					float z1 = placement - delta;
+					float z2 = placement + delta;
+					
+					horizonBoundingBox = new AxisAlignedBB(x+left, y+1, z+z1,  x+right, y+up, z+z2);
+				}
+					
+				else {
+					// West - East
+					//  Stargate divided on Z axis
+						
+					float x1 = placement - delta;
+					float x2 = placement + delta;
+					
+					horizonBoundingBox = new AxisAlignedBB(x+x1, y+1, z+left,  x+x2, y+up, z+right);
+				}
+				
+				// Aunis.info(pos.toString()+": horizonBoundingBox: "+horizonBoundingBox.toString());
+			}
 		}
 		
+		if (!world.isRemote && horizonBoundingBox != null /*&& pos.equals( new BlockPos(-117, 69, 165) )*/ && isEngaged && isInitiating) {
+			List<EntityPlayerMP> players = world.getEntitiesWithinAABB(EntityPlayerMP.class, horizonBoundingBox);
+			
+			for (EntityPlayerMP player : players) {
+				int entId = player.getEntityId();
+				
+				if ( !playerLockedTeleportingSet.contains(entId) ) {
+					BlockPos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
+					
+					EnumFacing sourceFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
+					EnumFacing targetFacing = world.getBlockState(targetPos).getValue(BlockFaced.FACING);
+					
+					float rotation = (float) Math.toRadians( sourceFacing.getHorizontalAngle() - targetFacing.getHorizontalAngle() );
+					
+					float axisDiff = 0;
+					
+					if (sourceFacing.getAxis() == Axis.X)
+						axisDiff = (float) (pos.getX()+0.5 - player.posX);
+					else
+						axisDiff = (float) (pos.getZ()+0.5 - player.posZ);
+					
+					// Block is oriented to positive numbers and player is standing in front of it
+					// player pos is greater, so diff is negative
+					
+					AxisDirection direction = sourceFacing.getAxisDirection();
+					
+					// Player entered front side of event horizon
+					if ( (direction == AxisDirection.POSITIVE && axisDiff < 0) || (direction == AxisDirection.NEGATIVE && axisDiff > 0) ) {		
+						Aunis.info("Front");
+						
+						playerLockedTeleportingSet.add(entId);
+						AunisPacketHandler.INSTANCE.sendTo(new TeleportPlayerToClient(pos, targetPos, rotation, sourceFacing.getAxis()), player);
+						
+						world.playSound(player, pos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+						world.playSound(player, targetPos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+					}
+					
+					else {
+						Aunis.info("Back side");
+					}
+				}
+			}
+			
+			//tickWait = 0;
+		}
 	}
 	
 	public void onLoaded() {
@@ -180,7 +291,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 					while (address.size() < maxChevrons-1) {
 						EnumSymbol symbol = EnumSymbol.valueOf( rand.nextInt(38) );
 							
-						if ( !address.contains(symbol) ) {
+						if ( !address.contains(symbol) && symbol != EnumSymbol.ORIGIN ) {
 							address.add(symbol);
 						}
 					}

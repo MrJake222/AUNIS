@@ -1,6 +1,5 @@
 package mrjake.aunis.packet.gate.renderingUpdate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
@@ -18,37 +17,23 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 	public DHDIncomingWormholePacketToClient() {}
 	
 	private BlockPos dhdPos;
-	private List<Integer> dialedAddress;
+	private long dialedAddress;
 	
 	public DHDIncomingWormholePacketToClient(BlockPos dhdPos, List<EnumSymbol> dialedAddress) {		
 		this.dhdPos = dhdPos;
-		this.dialedAddress = new ArrayList<Integer>();
-		
-		for (EnumSymbol symbol : dialedAddress) {
-			this.dialedAddress.add( symbol.id );
-		}
+		this.dialedAddress = EnumSymbol.toLong(dialedAddress);
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeLong( dhdPos.toLong() );
-		buf.writeInt( dialedAddress.size() );
-		
-		for (int id : dialedAddress) {
-			buf.writeInt(id);
-		}
+		buf.writeLong( dialedAddress );
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		dhdPos = BlockPos.fromLong( buf.readLong() );
-		
-		int len = buf.readInt();
-		dialedAddress = new ArrayList<Integer>();
-		
-		for (int i=0; i<len; i++) {
-			dialedAddress.add( buf.readInt() );
-		}
+		dialedAddress = buf.readLong();
 	}
 
 	public static class DHDIncomingWormholePacketToClientHandler implements IMessageHandler<DHDIncomingWormholePacketToClient, IMessage> {
@@ -57,12 +42,16 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 		public IMessage onMessage(DHDIncomingWormholePacketToClient message, MessageContext ctx) {
 			World world = Minecraft.getMinecraft().world;
 			
-			Aunis.log("Received DHDIncomingWormholePacketToClient:  dhdPos: " + message.dhdPos.toString() + ",  dialedAddress: " + message.dialedAddress.toString());
+			// Aunis.log("Received DHDIncomingWormholePacketToClient:  dhdPos: " + message.dhdPos.toString() + ",  dialedAddress: " + message.dialedAddress.toString());
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				DHDTile te = (DHDTile) world.getTileEntity( message.dhdPos );
 				
-				te.getRenderer().smoothlyActivateButtons(message.dialedAddress);
+				// message.dialedAddress.add( EnumSymbol.ORIGIN.id );
+				List<Integer> address = EnumSymbol.fromLong(message.dialedAddress);
+				address.add(EnumSymbol.ORIGIN.id);
+				
+				te.getRenderer().smoothlyActivateButtons(address);
 			});
 			
 			return null;

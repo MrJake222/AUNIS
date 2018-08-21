@@ -21,6 +21,7 @@ import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPa
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
@@ -438,6 +439,7 @@ public class StargateRenderer {
 			else {
 				if (!dhdButtonsCleared && clearingChevrons) {
 					dhdButtonsCleared = true;
+					Aunis.info("Sending CLEAR_DHD_BUTTONS tick:"+world.getTotalWorldTime());
 					AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.CLEAR_DHD_BUTTONS, 0, pos) );
 				}
 			}
@@ -545,9 +547,12 @@ public class StargateRenderer {
 	private long gateWaitClose = 0;
 	private boolean zeroAlphaSet;	
 	
-	public void openGate() {
+	private boolean isInitiatingGate;
+	
+	public void openGate(boolean intiating) {
 		gateWaitStart = world.getTotalWorldTime();
 		soundPlayed = false;
+		this.isInitiatingGate = intiating;
 		
 		zeroAlphaSet = false;
 		backStripClamp = true;
@@ -559,7 +564,21 @@ public class StargateRenderer {
 		doEventHorizonRender = true;
 	}
 	
+	private PositionedSoundRecord wormholeSound;
+	
+	private void wormholeSound(boolean active) {
+		if (wormholeSound == null)
+			wormholeSound = new PositionedSoundRecord(new ResourceLocation("aunis", "wormhole_loop"), SoundCategory.BLOCKS, 1.0f, 1.0f, true, 0, AttenuationType.LINEAR, pos.getX(), pos.getY(), pos.getZ());
+		
+		if (active)
+			Minecraft.getMinecraft().getSoundHandler().playSound(wormholeSound);
+		else
+			Minecraft.getMinecraft().getSoundHandler().stopSound(wormholeSound);
+	}
+	
 	public void closeGate() {
+		wormholeSound(false);
+		
 		AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateClose);
 		gateWaitClose = world.getTotalWorldTime();
 		// closingSoundPlayed = false;
@@ -733,7 +752,7 @@ public class StargateRenderer {
 					vortexState = EnumVortexState.FULL;
 				else if (argState < 5.898f)
 					vortexState = EnumVortexState.DECREASING;
-				else
+				else if ( vortexState != EnumVortexState.CLOSING )
 					vortexState = EnumVortexState.STILL;
 			}
 
@@ -758,7 +777,12 @@ public class StargateRenderer {
 							vortexState = EnumVortexState.STILL;
 							
 							// Gate is open, engage it on server
-							AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.ENGAGE_GATE, 0, pos) );
+							if (isInitiatingGate) {
+								Aunis.info("Sending ENGAGE_GATE tick:"+world.getTotalWorldTime());
+								AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.ENGAGE_GATE, 0, pos) );
+							}
+							
+							wormholeSound(true);
 						}
 						
 						if ( vortexState.equals(EnumVortexState.FULL) ) {				
@@ -833,7 +857,7 @@ public class StargateRenderer {
 				}
 			} // not still if
 		}
-		
+				
 		// Rendering proper event horizon or the <backStrip> for vortex
 		if (vortexState != null) {
 			if ( vortexState.equals(EnumVortexState.STILL) || vortexState.equals(EnumVortexState.CLOSING) ) {
@@ -845,6 +869,9 @@ public class StargateRenderer {
 				
 				GlStateManager.popMatrix();
 				GlStateManager.enableLighting();
+				
+				
+				
 				return;
 			}
 		}
@@ -913,7 +940,7 @@ public class StargateRenderer {
 	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly) {		
 		float tick = (float) (world.getTotalWorldTime() - horizonStateChange + partialTicks);	
 		
-		glEnable(GL_BLEND);
+		GlStateManager.enableBlend();
 		
 		int k;
 		
@@ -952,7 +979,7 @@ public class StargateRenderer {
 			}
 		}
 		
-		glDisable(GL_BLEND);
+		GlStateManager.disableBlend();
 	}
 	
 	private float toUV(float coord) {

@@ -119,8 +119,12 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 					renderer.activateFinalChevron();
 					break;
 					
-				case OPEN_GATE:
-					renderer.openGate();
+				case OPEN_GATE_INITIATING:
+					renderer.openGate(true);
+					break;
+					
+				case OPEN_GATE_RECEIVING:
+					renderer.openGate(false);
 					break;
 					
 				case CLOSE_GATE:

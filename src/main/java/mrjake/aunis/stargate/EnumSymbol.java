@@ -1,8 +1,11 @@
 package mrjake.aunis.stargate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import mrjake.aunis.Aunis;
 
 public enum EnumSymbol {
 	SCULPTOR(0, "Sculptor"),
@@ -74,16 +77,27 @@ public enum EnumSymbol {
 		}
 		
 		for (int i=0; i<size; i++) {
-			int id = address.get(i).id;
+			long id = (long)(address.get(i).id) << i*6;
 			
-			out |= id << i*6;
+			out |= id;
 		}
 		
 		return out;
 	}
 	
 	// Deserialize address
-	// public static List<EnumSymbol> 
+	public static List<Integer> fromLong(long address) {
+		List<Integer> out = new ArrayList<Integer>();
+				
+		// TODO: Check for length
+		for (int i=0; i<6; i++) {
+			int id = (int) ((address >>> i*6) & 0x3F); // 0b00111111
+			
+			out.add( id );
+		}
+		
+		return out;
+	}
 	
 	public boolean equals(EnumSymbol symbol) {
 		return symbol.id == this.id;

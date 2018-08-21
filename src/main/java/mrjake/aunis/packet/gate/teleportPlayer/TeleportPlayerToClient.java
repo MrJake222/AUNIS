@@ -5,6 +5,7 @@ import javax.vecmath.Vector2f;
 import org.lwjgl.util.vector.Matrix2f;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.packet.AunisPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -102,6 +103,10 @@ public class TeleportPlayerToClient implements IMessage {
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				EntityPlayer player = Minecraft.getMinecraft().player;
+				
+				AunisSoundEvents.playSound(player.getEntityWorld(), message.sourceGatePos, AunisSoundEvents.wormholeGo);
+				AunisSoundEvents.playSound(player.getEntityWorld(), message.targetGatePos, AunisSoundEvents.wormholeGo);
+				
 				Vec3d lookVec = player.getLookVec();
 				Vector2f lookVec2f = new Vector2f( (float)(lookVec.x), (float)(lookVec.z) );
 				
@@ -131,8 +136,6 @@ public class TeleportPlayerToClient implements IMessage {
 				
 				float y = (float) (message.targetGatePos.getY() + ( player.posY - message.sourceGatePos.getY() ));
 				player.setPositionAndUpdate(playerPosition.x, y, playerPosition.y);
-				
-				//TeleportationHelper.teleportClient(player, message.sourceGatePos, message.targetGatePos, message.rotation, message.sourceAxisName);
 				
 				// Player teleported, unlock it on the server
 				AunisPacketHandler.INSTANCE.sendToServer( new UnlockPlayerToServer(player.getEntityId(), message.sourceGatePos) );
