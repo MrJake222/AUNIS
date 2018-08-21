@@ -29,10 +29,6 @@ public class AunisSoundEvents {
 	static {		
 		ringRollSoundMap = new HashMap<BlockPos, PositionedSoundRecord>();
 		
-		loadSounds();
-	}
-	
-	private static void loadSounds() {
 		dhdPress = new SoundEvent( new ResourceLocation("aunis", "dhd_press") );
 		dhdPressBRB = new SoundEvent( new ResourceLocation("aunis", "dhd_brb") );
 		
@@ -48,9 +44,6 @@ public class AunisSoundEvents {
 	}
 	
 	public static void playSound(World world, BlockPos pos, SoundEvent soundEvent) {
-		if (soundEvent == null)
-			loadSounds();
-		
 		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEvent, SoundCategory.BLOCKS, 1.0f, 1.0f, false);
 	}
 }

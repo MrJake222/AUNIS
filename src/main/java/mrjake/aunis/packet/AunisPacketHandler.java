@@ -7,6 +7,7 @@ import mrjake.aunis.packet.gate.renderingUpdate.DHDIncomingWormholePacketToClien
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.MotionToServer;
+import mrjake.aunis.packet.gate.teleportPlayer.PlayWormholeSoundPacketToClient;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
@@ -33,7 +34,7 @@ public class AunisPacketHandler {
 		
 		INSTANCE.registerMessage(RetrieveMotionToClient.RetrieveMotionClientHandler.class, RetrieveMotionToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(MotionToServer.MotionServerHandler.class, MotionToServer.class, id, Side.SERVER); id++;
-		// INSTANCE.registerMessage(PropelPlayerToClient.PropelPlayerClientHandler.class, PropelPlayerToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(PlayWormholeSoundPacketToClient.PlayWormholeSoundClientHandler.class, PlayWormholeSoundPacketToClient.class, id, Side.CLIENT); id++;
 		
 		INSTANCE.registerMessage(TileUpdateRequestToServer.TileUpdateServerHandler.class, TileUpdateRequestToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(TileUpdatePacketToClient.TileUpdateClientHandler.class, TileUpdatePacketToClient.class, id, Side.CLIENT); id++;

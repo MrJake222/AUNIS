@@ -13,6 +13,7 @@ import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
+import mrjake.aunis.packet.gate.teleportPlayer.PlayWormholeSoundPacketToClient;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
@@ -20,7 +21,6 @@ import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.TeleportHelper;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -227,10 +227,12 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 			sourceAxisName = sourceAxis.getName();
 		}
 		
-		public void teleport(EntityPlayer player) {
+		public void teleport(EntityPlayerMP player) {
 			TeleportHelper.teleportServer(player, sourceGatePos, targetGatePos, rotation, sourceAxisName, motionVector);
 			
-			player.getEntityWorld().playSound(null, targetGatePos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+			player.getEntityWorld().playSound(player, targetGatePos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+			
+			AunisPacketHandler.INSTANCE.sendTo(new PlayWormholeSoundPacketToClient(targetGatePos), player);
 		}
 	}
 	
@@ -320,7 +322,7 @@ public class StargateBaseTile extends TileEntity implements ITickable {
 						scheduledTeleportMap.put( entId, new TeleportPacket(pos, targetPos, rotation, sourceFacing.getAxis()) );
 						AunisPacketHandler.INSTANCE.sendTo(new RetrieveMotionToClient(pos), player);
 						
-						world.playSound(null, pos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+						world.playSound(player, pos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
 					}
 					
 					else {
