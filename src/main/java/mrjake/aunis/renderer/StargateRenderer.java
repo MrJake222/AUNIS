@@ -15,6 +15,8 @@ import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockFaced;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.gate.stateUpdate.StargateStateUpdateToServer;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -74,6 +76,26 @@ public class StargateRenderer {
 		initKawoosh();
 	}
 	
+	public void setState(StargateRendererState state) {
+		setActiveChevrons(state.activeChevrons, state.isFinalActive);
+		
+		ringAngularRotation = state.ringAngularRotation;
+		ringSpin = state.ringSpin;
+		ringSpinStart = state.ringSpinStart;
+		
+		vortexState = state.vortexState;
+		soundPlayed = state.soundPlayed;
+		doEventHorizonRender = state.doEventHorizonRender;
+		dialingComplete = state.dialingComplete;
+		
+		wormholeSound(vortexState == EnumVortexState.STILL);
+		rollSound(ringSpin);
+	}
+	
+	public StargateRendererState getState() {
+		return new StargateRendererState(pos, getActiveChevrons(), isLastChevronActive(), ringAngularRotation, ringSpin, ringSpinStart, doEventHorizonRender, vortexState, lockSoundPlayed, dialingComplete);
+	}
+	
 	public void render(double x, double y, double z, double partialTicks) {
 		renderGate(x, y, z);
 		renderRing(x, y, z, partialTicks);
@@ -105,10 +127,9 @@ public class StargateRenderer {
 	private final float accelerationMul = 1.0f / 16.0f;
 	private final float maxTick = (float) (Math.PI / accelerationMul / 2);
 
-	public float ringAngularRotation;
-	
-	public boolean ringSpin;
-	public long ringSpinStart;
+	private float ringAngularRotation;
+	private boolean ringSpin;
+	private long ringSpinStart;
 	
 	private float lastTick;
 	
@@ -302,6 +323,7 @@ public class StargateRenderer {
 		
 		// chevronActiveList.set(8, true);
 		activation = 8;
+		activeChevrons++;
 		
 		setRingSpin( false, true );
 	}
@@ -434,8 +456,6 @@ public class StargateRenderer {
 
 			if (stage < 0) return;
 			else {
-				// TODO: Clear buttons here
-				
 				if (!dhdButtonsCleared && clearingChevrons) {
 					dhdButtonsCleared = true;
 					te.getLinkedDHD(world).getRenderer().clearButtons();
@@ -474,6 +494,10 @@ public class StargateRenderer {
 					else
 						activeChevrons = chevronsToLightUp+1;
 					
+					// TODO
+					// Sync state to server after chevrons fade out
+					AunisPacketHandler.INSTANCE.sendToServer( new StargateStateUpdateToServer(getState()) );
+					
 					// This is needed because if the gate isn't rendered(player not looking at it)
 					// render code isn't running and gate can't perform any animation(not necessary in this case)
 					// So we need to check if chevron's states didn't change and perform correction
@@ -497,26 +521,26 @@ public class StargateRenderer {
 		}
 	}
 	
-	public List<Boolean> getActiveChevronsList() {
-		List<Boolean> out = new ArrayList<Boolean>();
-		
-		for ( String val : chevronTextureList )
-			out.add( val.equals("chevron/chevron10.png") );
-		
-		return out;
+	public boolean isLastChevronActive() {
+		return chevronTextureList.get(8).contains("10");
 	}
 	
-	public void setActiveChevrons(List<Boolean> list) {
+	public int getActiveChevrons() {
+		if ( isLastChevronActive() )
+			return activeChevrons - 1;
+		else
+			return activeChevrons;
+	}
+	
+	public void setActiveChevrons(int activeChevrons, boolean lastChevronActive) {
 		chevronTextureList.clear();
-		activeChevrons = 0;
+		this.activeChevrons = activeChevrons;
 		
 		for (int i=0; i<9; i++) {	
 			String tex = textureTemplate;
 			
-			if ( list.get(i) ) {
+			if ( i < activeChevrons || (i == 8 && lastChevronActive) )
 				tex += "10.png";
-				activeChevrons++;
-			}
 			else
 				tex += "0.png";
 						
@@ -536,11 +560,11 @@ public class StargateRenderer {
 	private QuadStrip backStrip;
 	private boolean backStripClamp;
 	
-	public boolean doEventHorizonRender = false;
+	private boolean doEventHorizonRender = false;
 	private Float whiteOverlayAlpha;
 	
 	private float gateWaitStart = 0;
-	public boolean soundPlayed;
+	private boolean soundPlayed;
 	
 	private long gateWaitClose = 0;
 	private boolean zeroAlphaSet;	
@@ -678,7 +702,21 @@ public class StargateRenderer {
 		}
 	}
 	
-	public EnumVortexState vortexState = EnumVortexState.FORMING;
+	private EnumVortexState vortexState = EnumVortexState.FORMING;
+	
+	private void engageGate() {
+		vortexState = EnumVortexState.STILL;
+		wormholeSound(true);
+		
+		
+		
+		//StargateRendererState rendererState = ;
+		//Aunis.info("Gate engaged, sending StargateStateUpdateToServer: "+rendererState);
+		
+		// Gate engaged, sync state to server
+		// TODO Sync state to server
+		AunisPacketHandler.INSTANCE.sendToServer( new StargateStateUpdateToServer(getState()) );
+	}
 	
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
 		float gateWait = world.getTotalWorldTime() - gateWaitStart;
@@ -748,7 +786,7 @@ public class StargateRenderer {
 				else if (argState < 5.898f)
 					vortexState = EnumVortexState.DECREASING;
 				else if ( vortexState != EnumVortexState.CLOSING )
-					vortexState = EnumVortexState.STILL;
+					engageGate();
 			}
 
 			float prevZ = 0;
@@ -769,9 +807,7 @@ public class StargateRenderer {
 						float end = 0.75f;
 						
 						if ( vortexState.equals(EnumVortexState.DECREASING) && arg >= 5.398+end ) {
-							vortexState = EnumVortexState.STILL;
-							
-							wormholeSound(true);
+							engageGate();
 						}
 						
 						if ( vortexState.equals(EnumVortexState.FULL) ) {				
@@ -840,8 +876,12 @@ public class StargateRenderer {
 												
 						if ( arg2 <= Math.PI/6 )
 							whiteOverlayAlpha = MathHelper.sin( arg2 );
-						else
+						else {
+							if (backStrip == null)
+								backStrip = new QuadStrip(0, arg2, eventHorizonRadius, tick);
+							
 							vortexState = EnumVortexState.SHRINKING;
+						}
 					}
 				}
 			} // not still if
@@ -868,7 +908,8 @@ public class StargateRenderer {
 		if (whiteOverlayAlpha != null) {
 			GlStateManager.enableBlend();
 			
-			backStrip.render(tick, 0f, null, false, 1.0f - whiteOverlayAlpha);
+			if (backStrip != null)
+				backStrip.render(tick, 0f, null, false, 1.0f - whiteOverlayAlpha);
 			renderEventHorizon(x, y, z, partialTicks, false, 0f, true);
 			
 			GlStateManager.disableBlend();

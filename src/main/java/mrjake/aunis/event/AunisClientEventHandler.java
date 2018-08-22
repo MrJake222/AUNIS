@@ -8,7 +8,6 @@ import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.dhd.DHDActivation;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.onLoadUpdate.OnLoadUpdateRequest;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -43,7 +42,7 @@ public class AunisClientEventHandler {
 		}
     }
 	
-	@SubscribeEvent
+	/*@SubscribeEvent
 	public static void onPlayerLoggedIn(PlayerLoggedInEvent event) {
 		EntityPlayer player = event.player;
 		BlockPos pos = player.getPosition();
@@ -81,7 +80,7 @@ public class AunisClientEventHandler {
 						
 			AunisPacketHandler.INSTANCE.sendTo(new OnLoadUpdateRequest(player.getEntityId(), true, stargatesToUpdate, dhdsToUpdate), (EntityPlayerMP) targetPlayer);			
 		}
-	}
+	}*/
 	
 	@SubscribeEvent
 	public static void onRightClickBlock(RightClickBlock event) {	

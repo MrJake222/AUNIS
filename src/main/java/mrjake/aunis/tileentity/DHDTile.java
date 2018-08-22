@@ -2,6 +2,8 @@ package mrjake.aunis.tileentity;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.DHDRenderer;
+import mrjake.aunis.renderer.DHDRendererState;
+import mrjake.aunis.renderer.StargateRendererState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -11,6 +13,8 @@ import net.minecraft.world.World;
 public class DHDTile extends TileEntity {
 	
 	private DHDRenderer renderer;
+	private DHDRendererState rendererState;
+	
 	private BlockPos linkedGate = null;
 		
 	public void establishLinkToStargate(BlockPos gate) {
@@ -31,6 +35,20 @@ public class DHDTile extends TileEntity {
 			return (StargateBaseTile) world.getTileEntity(linkedGate);
 	}
 	
+	public void setRendererState(DHDRendererState rendererState) {
+		this.rendererState = rendererState;
+		Aunis.info("DHDRendererState synced: "+rendererState.toString());
+		
+		markDirty();
+	}
+	
+	public DHDRendererState getRendererState() {
+		if (rendererState == null)
+			rendererState = new DHDRendererState(pos);
+		
+		return rendererState;
+	}
+	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		BlockPos gate;
@@ -42,25 +60,20 @@ public class DHDTile extends TileEntity {
 		else
 			gate = linkedGate;
 		
-		compound.setInteger("linkedGateX", gate.getX());
-		compound.setInteger("linkedGateY", gate.getY());
-		compound.setInteger("linkedGateZ", gate.getZ());
+		compound.setLong("linkedGate", gate.toLong());
+		
+		getRendererState().toNBT(compound);
 		
 		return super.writeToNBT(compound);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
+		rendererState = new DHDRendererState(compound);
+		
+		linkedGate = BlockPos.fromLong( compound.getLong("linkedGate") );
+		
 		super.readFromNBT(compound);
-		
-		int x = compound.getInteger("linkedGateX");
-		int y = compound.getInteger("linkedGateY");
-		int z = compound.getInteger("linkedGateZ");
-		
-		BlockPos pos = new BlockPos(x,y,z);
-
-		Aunis.log("Relinking to Stargate at " + pos.toString());
-		linkedGate = pos;
 	}
 	
 	public DHDRenderer getRenderer() {

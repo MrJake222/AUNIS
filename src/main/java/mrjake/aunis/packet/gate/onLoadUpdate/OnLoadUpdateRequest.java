@@ -1,4 +1,4 @@
-package mrjake.aunis.packet.gate.onLoadUpdate;
+/*package mrjake.aunis.packet.gate.onLoadUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,6 +105,7 @@ public class OnLoadUpdateRequest implements IMessage {
 		}
 		
 	}
+	
 	public static class onLoadUpdateRequestToClientHandler implements IMessageHandler<OnLoadUpdateRequest, IMessage> {
 
 		@Override
@@ -120,8 +121,8 @@ public class OnLoadUpdateRequest implements IMessage {
 						List<StargateUpdatePacket> stargateUpdatePackets = new ArrayList<StargateUpdatePacket>();
 						List<DHDUpdatePacket> dhdUpdatePackets = new ArrayList<DHDUpdatePacket>();
 						
-						/*Aunis.info("stargatesToUpdate: " + message.stargatesToUpdate);
-						Aunis.info("dhdsToUpdate: " + message.dhdsToUpdate);*/
+						Aunis.info("stargatesToUpdate: " + message.stargatesToUpdate);
+						Aunis.info("dhdsToUpdate: " + message.dhdsToUpdate);
 						
 						for ( BlockPos sg : message.stargatesToUpdate ) {
 							if ( world.isBlockLoaded(sg) ) {
@@ -222,3 +223,4 @@ public class OnLoadUpdateRequest implements IMessage {
 		}
 	}
 }
+*/

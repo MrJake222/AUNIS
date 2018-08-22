@@ -1,30 +1,30 @@
-package mrjake.aunis.packet.gate.onLoadUpdate;
+package mrjake.aunis.renderer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.tileentity.DHDTile;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
-public class DHDUpdatePacket {
-	BlockPos pos;
+public class DHDRendererState extends RendererState {
 	
-	// Chevrons
+	// Buttons
 	private List<Integer> activeButtons;
 	
-	public DHDUpdatePacket(DHDTile te) {
-		this.pos = te.getPos();
+	public DHDRendererState(BlockPos pos) {
+		super(pos);
 		
-		this.activeButtons = te.getRenderer().getActiveButtons();
-		
-		Aunis.info("Getting active buttons: " +activeButtons.toString());
+		this.activeButtons = new ArrayList<Integer>();
 	}
 	
-	public void set(DHDTile te) {
-		Aunis.info("Setting active buttons: " +activeButtons.toString());
-		te.getRenderer().setActiveButtons(activeButtons);
+	public DHDRendererState(BlockPos pos, List<Integer> activeButtons) {
+		super(pos);
+		
+		this.activeButtons = activeButtons;
 	}
 	
 	public void toBytes(ByteBuf buf) {
@@ -38,7 +38,7 @@ public class DHDUpdatePacket {
 		
 	}
 	
-	public DHDUpdatePacket (ByteBuf buf) {
+	public void fromBytes(ByteBuf buf) {
 		this.pos = BlockPos.fromLong( buf.readLong() );
 		
 		this.activeButtons = new ArrayList<Integer>();
@@ -46,7 +46,5 @@ public class DHDUpdatePacket {
 		
 		for (int i=0; i<size; i++)
 			this.activeButtons.add( buf.readInt() );
-		
 	}
-	
 }

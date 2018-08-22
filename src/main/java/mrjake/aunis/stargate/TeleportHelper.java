@@ -61,10 +61,25 @@ public class TeleportHelper {
 		player.rotationYaw = (float) Math.toDegrees(MathHelper.atan2(lookVec2f.x, lookVec2f.y));		
 	}
 	
+	/*private boolean equal(float a, float b) {
+		return MathHelper.abs(a-b) < 0.01f;
+	}*/
+	
 	public static void setMotion(EntityPlayer player, float rotation, String sourceAxisName, Vector2f motionVec2f) {		
-		// Vector2f motionVec2f = new Vector2f( (float)(player.motionX), (float)(player.motionZ) );
-		rotateAround00(motionVec2f, rotation, null);
+		// 0 to 180
+		if (rotation == 0)
+			rotation = (float) Math.PI; // 180 deg
 		
+		// 180 to 0
+		else if ( MathHelper.epsilonEquals(MathHelper.abs(rotation), (float) Math.PI) )
+			rotation = 0;
+		
+		// 90 to -90, -90 to 90
+		else
+			rotation *= -1;
+
+		rotateAround00(motionVec2f, rotation, null);
+				
 		player.motionX = motionVec2f.x;
 		player.motionZ = motionVec2f.y;
 		player.velocityChanged = true;

@@ -123,6 +123,8 @@ public class DHDRenderer {
 			activationStateChange = world.getTotalWorldTime();
 			activation = buttonID;
 		}
+		
+		// TODO Sync to server
 	}
 	
 	public void clearButtons() {	
@@ -136,6 +138,8 @@ public class DHDRenderer {
 		activationStateChange = world.getTotalWorldTime();
 		
 		activation = 0;
+		
+		// TODO Sync to server
 	}
 	
 	public void render(double x, double y, double z, double partialTicks) {
