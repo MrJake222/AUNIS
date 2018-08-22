@@ -28,11 +28,11 @@ public abstract class RendererState {
 		byte[] dst = new byte[buf.readableBytes()];
 		buf.readBytes(dst);
 		
-		compound.setByteArray("dhdRendererState", dst);
+		compound.setByteArray("rendererState", dst);
 	}
 	
 	public RendererState(NBTTagCompound compound) {
-		byte[] dst = compound.getByteArray("dhdRendererState");
+		byte[] dst = compound.getByteArray("rendererState");
 		
 		if (dst != null && dst.length > 0) {
 			ByteBuf buf = Unpooled.copiedBuffer(dst);

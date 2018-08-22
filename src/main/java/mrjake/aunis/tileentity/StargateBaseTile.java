@@ -12,19 +12,19 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.PlayWormholeSoundPacketToClient;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
-import mrjake.aunis.packet.gate.tileUpdate.StargateTileUpdatePacketToClient;
-import mrjake.aunis.packet.gate.tileUpdate.StargateTileUpdateRequestToServer;
+import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
+import mrjake.aunis.renderer.Renderer;
+import mrjake.aunis.renderer.RendererState;
 import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.renderer.StargateRendererState;
+import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.TeleportHelper;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumFacing.AxisDirection;
@@ -33,22 +33,20 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	
 	private static final int maxChevrons = 7;
-	
-	private StargateRenderer renderer;
-	// private StargateRendererState rendererState;
-	
+
 	private BlockPos linkedDHD = null;
 	
 	private boolean isEngaged;
 	private boolean isInitiating;
 	
 	private long waitForEngage;
+	private long waitForClose;
 	private boolean unstableVortex;
+	private boolean isClosing;
 	
 	public List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
@@ -64,7 +62,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		return true;
 	}
 	
-	public void clearAddress() {
+	public void clearAddress() {		
 		dialedAddress.clear();
 	}
 	
@@ -75,25 +73,45 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		waitForEngage = world.getTotalWorldTime();
 	}
 	
-	public void engageGate() {	
+	private void engageGate() {	
 		unstableVortex = false;
 		isEngaged = true;
+		
+		markDirty();
 	}
 	
-	public void disconnectGate() {
-		Aunis.log("Disconnecting gate");
+	public void closeGate() {
+		waitForClose = world.getTotalWorldTime();
+		
+		isClosing = true;
 		isEngaged = false;
+	}
+	
+	private void disconnectGate() {
+		isClosing = false;
+		
+		markDirty();
 	}
 	
 	public boolean isEngaged() {
 		return isEngaged;
 	}
 
-	public StargateRenderer getRenderer() {
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Renderer getRenderer() {
 		if (renderer == null)
 			renderer = new StargateRenderer(this);
 		
-		return renderer;
+		return (StargateRenderer) renderer;
+	}
+	
+	@Override
+	public RendererState getRendererState() {	
+		if (rendererState == null)
+			rendererState = new StargateRendererState(pos);
+		
+		return rendererState;
 	}
 	
 	public int getMaxSymbols() {
@@ -125,28 +143,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	public void setLinkedDHD(BlockPos dhdPos) {
 		this.linkedDHD = dhdPos;
 		
-		if (!world.isRemote) {
-			TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64);
-			
-			AunisPacketHandler.INSTANCE.sendToAllAround(new StargateTileUpdatePacketToClient(getRendererState(), linkedDHD), point);
-		}
-		
 		markDirty();
 	}
-
-	public List<EnumSymbol> getAddress() {
-		
-		// Client and address null 
-		if (world.isRemote && gateAddress == null) {
-			AunisPacketHandler.INSTANCE.sendToServer( new GateAddressRequestToServer(pos) );
-			
-			return null;
-		}
-		
-		else return gateAddress;
-	}
-	
-	
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
@@ -169,17 +167,13 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		compound.setBoolean("isEngaged", isEngaged);
 		compound.setBoolean("isInitiating", isInitiating);
-		
-		compound.setLong("waitForEngage", waitForEngage);
-		compound.setBoolean("unstableVortex", unstableVortex);
-		
-		if ((unstableVortex || isEngaged) && isInitiating) {
+
+		if (isEngaged && isInitiating) {
 			for (int i=0; i<maxChevrons-1; i++) {
 				compound.setInteger("dialedSymbol"+i, dialedAddress.get(i).id);
 			}
 		}
 		
-		// Aunis.info("rendererState: "+getRendererState());
 		getRendererState().toNBT(compound);
 		
 		return super.writeToNBT(compound);
@@ -207,11 +201,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		isEngaged = compound.getBoolean("isEngaged");
 		isInitiating = compound.getBoolean("isInitiating");
-		
-		waitForEngage = compound.getLong("waitForEngage");
-		unstableVortex = compound.getBoolean("unstableVortex");
-		
-		if (unstableVortex || isEngaged) {
+
+		if (isEngaged && isInitiating) {
 			dialedAddress.clear();
 			
 			for (int i=0; i<maxChevrons-1; i++) {
@@ -219,7 +210,17 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			}
 		}
 		
-		rendererState = new StargateRendererState(compound);
+		StargateRendererState rendererState = new StargateRendererState(compound);
+		
+		// If gate wasn't open on the server, negate renderer's info
+		if (!isEngaged) {
+			rendererState.activeChevrons = 0;
+			rendererState.isFinalActive = false;
+			rendererState.vortexState = EnumVortexState.FORMING;
+			rendererState.doEventHorizonRender = false;
+		}
+		
+		this.rendererState = rendererState;
 		
 		super.readFromNBT(compound);
 	}
@@ -250,8 +251,6 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		private String sourceAxisName;
 		
 		public Vector2f motionVector;
-		/*public float oldMotionX;
-		public float oldMotionZ;*/
 		
 		public TeleportPacket(BlockPos source, BlockPos target, float rot, EnumFacing.Axis sourceAxis) {
 			sourceGatePos = source;
@@ -285,12 +284,10 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		if (firstTick) {
 			firstTick = false;
 			
-			// TODO Send rendererState to client's renderer
-			
 			// Client loaded region, need to update
-			// Sync linkedDHD to client for use in renderer
+			// Send rendererState to client's renderer
 			if (world.isRemote)
-				AunisPacketHandler.INSTANCE.sendToServer( new StargateTileUpdateRequestToServer(pos) );
+				AunisPacketHandler.INSTANCE.sendToServer( new TileUpdateRequestToServer(pos) );
 			
 			// Can't do this in onLoad(), because in that method, world isn't fully loaded
 			generateAddress();
@@ -326,7 +323,10 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			}
 		}
 		
-		if (!world.isRemote && horizonBoundingBox != null /*&& pos.equals( new BlockPos(-117, 69, 165) )*/ && isEngaged && isInitiating) {
+		/*if (!world.isRemote)
+			Aunis.info(pos+":  "+isEngaged+", "+isInitiating);*/
+		
+		if (!world.isRemote && horizonBoundingBox != null && isEngaged && isInitiating) {
 			List<EntityPlayerMP> players = world.getEntitiesWithinAABB(EntityPlayerMP.class, horizonBoundingBox);
 			
 			for (EntityPlayerMP player : players) {
@@ -338,8 +338,9 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 					EnumFacing sourceFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
 					EnumFacing targetFacing = world.getBlockState(targetPos).getValue(BlockFaced.FACING);
 					
-					float rotation = (float) Math.toRadians( targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle() );
-										
+					float rotation = targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle();
+					rotation = (float) Math.toRadians( EnumFacing.fromAngle(rotation).getOpposite().getHorizontalAngle() );
+
 					float axisDiff = 0;
 					
 					if (sourceFacing.getAxis() == Axis.X)
@@ -371,8 +372,12 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			//tickWait = 0;
 		}
 		
-		if (unstableVortex && world.getTotalWorldTime()-waitForEngage >= 86) {
-			engageGate();
+		if (unstableVortex) {
+			if (world.getTotalWorldTime()-waitForEngage >= 86 && !isClosing)
+				engageGate();
+				
+			if (world.getTotalWorldTime()-waitForClose >= 53 && isClosing) 
+				disconnectGate();
 		}
 	}
 	

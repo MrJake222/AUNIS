@@ -13,6 +13,8 @@ import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockRotated;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.ITextureObject;
@@ -21,7 +23,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class DHDRenderer {
+public class DHDRenderer implements Renderer<DHDRendererState> {
 	//private DHDTile te;
 	private World world;
 	private BlockPos pos;
@@ -62,6 +64,16 @@ public class DHDRenderer {
 		}
 		
 		initTextureList();
+	}
+	
+	@Override
+	public DHDRendererState getState() {
+		return new DHDRendererState(pos, getActiveButtons());
+	}
+	
+	@Override
+	public void setState(DHDRendererState rendererState) {
+		setActiveButtons(rendererState.activeButtons);
 	}
 	
 	private void initTextureList() {
@@ -123,8 +135,6 @@ public class DHDRenderer {
 			activationStateChange = world.getTotalWorldTime();
 			activation = buttonID;
 		}
-		
-		// TODO Sync to server
 	}
 	
 	public void clearButtons() {	
@@ -138,10 +148,9 @@ public class DHDRenderer {
 		activationStateChange = world.getTotalWorldTime();
 		
 		activation = 0;
-		
-		// TODO Sync to server
 	}
 	
+	@Override
 	public void render(double x, double y, double z, double partialTicks) {
 		Model dhdModel = Aunis.modelLoader.getModel(EnumModel.DHD_MODEL);
 		Model brbModel = Aunis.modelLoader.getModel(EnumModel.BRB);
@@ -215,6 +224,8 @@ public class DHDRenderer {
 						if (!clearingButtons) {
 							setActiveButtons(toActivate);
 						}
+						
+						AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
 					}
 					
 					// When activating remotely, we need to take into account that gate will not be rendered at the time
@@ -222,6 +233,8 @@ public class DHDRenderer {
 					if (brbToActivate) {
 						brbToActivate = false;
 						buttonTexture.put("b38", "dhd/brb/brb5.png");
+						
+						AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
 					}
 					
 					activation = -1;

@@ -1,22 +1,48 @@
 package mrjake.aunis.tileentity;
 
+import java.util.ArrayList;
+
 import mrjake.aunis.Aunis;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.DHDRendererState;
-import mrjake.aunis.renderer.StargateRendererState;
+import mrjake.aunis.renderer.Renderer;
+import mrjake.aunis.renderer.RendererState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class DHDTile extends TileEntity {
+public class DHDTile extends RenderedTileEntity implements ITickable {
 	
-	private DHDRenderer renderer;
-	private DHDRendererState rendererState;
+	private boolean isLinkedGateEngaged;
+	
+	public void setLinkedGateEngagement(boolean engaged) {
+		isLinkedGateEngaged = engaged;
+		
+		markDirty();
+	}
 	
 	private BlockPos linkedGate = null;
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Renderer getRenderer() {
+		if (renderer == null)
+			renderer = new DHDRenderer(this);
 		
+		return (DHDRenderer) renderer;
+	}	
+	@Override
+	public RendererState getRendererState() {	
+		if (rendererState == null)
+			rendererState = new DHDRendererState(pos);
+		
+		return rendererState;
+	}
+	
 	public void establishLinkToStargate(BlockPos gate) {
 		Aunis.log("Linking to gate at " + gate.toString());
 		
@@ -24,29 +50,13 @@ public class DHDTile extends TileEntity {
 		markDirty();
 	}
 	
-	public BlockPos getLinkedGate() {
-		return linkedGate;
-	}
+
 	
 	public StargateBaseTile getLinkedGate(World world) {
 		if (linkedGate == null)
 			return null;
 		else
 			return (StargateBaseTile) world.getTileEntity(linkedGate);
-	}
-	
-	public void setRendererState(DHDRendererState rendererState) {
-		this.rendererState = rendererState;
-		Aunis.info("DHDRendererState synced: "+rendererState.toString());
-		
-		markDirty();
-	}
-	
-	public DHDRendererState getRendererState() {
-		if (rendererState == null)
-			rendererState = new DHDRendererState(pos);
-		
-		return rendererState;
 	}
 	
 	@Override
@@ -61,6 +71,7 @@ public class DHDTile extends TileEntity {
 			gate = linkedGate;
 		
 		compound.setLong("linkedGate", gate.toLong());
+		compound.setBoolean("isLinkedGateEngaged", isLinkedGateEngaged);
 		
 		getRendererState().toNBT(compound);
 		
@@ -69,19 +80,34 @@ public class DHDTile extends TileEntity {
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
-		rendererState = new DHDRendererState(compound);
+		DHDRendererState rendererState = new DHDRendererState(compound);
+		isLinkedGateEngaged = compound.getBoolean("isLinkedGateEngaged");
+		
+		if (!isLinkedGateEngaged)
+			rendererState.activeButtons = new ArrayList<Integer>();
+		
+		this.rendererState = rendererState;
 		
 		linkedGate = BlockPos.fromLong( compound.getLong("linkedGate") );
 		
 		super.readFromNBT(compound);
 	}
 	
-	public DHDRenderer getRenderer() {
-		if (renderer == null)
-			renderer = new DHDRenderer(this);
+	private boolean firstTick = true;
+	
+	@Override
+	public void update() {
 		
-		return renderer;
+		// Can't do this in onLoad() because then world is not fully loaded
+		if (firstTick) {
+			firstTick = false;
+			
+			if (world.isRemote)
+				AunisPacketHandler.INSTANCE.sendToServer( new TileUpdateRequestToServer(pos) );
+				
+		}
 	}
+	
     @Override
 	public AxisAlignedBB getRenderBoundingBox() {
 		return new AxisAlignedBB(getPos().add(-1, 0, -1), getPos().add(1, 2, 1));

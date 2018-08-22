@@ -2,6 +2,7 @@ package mrjake.aunis.renderer;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
 public class StargateRendererState extends RendererState {
@@ -50,6 +51,10 @@ public class StargateRendererState extends RendererState {
 	
 	public StargateRendererState(ByteBuf buf) {
 		super(buf);
+	}
+	
+	public StargateRendererState(NBTTagCompound compound) {
+		super(compound);
 	}
 	
 	public void toBytes(ByteBuf buf) {

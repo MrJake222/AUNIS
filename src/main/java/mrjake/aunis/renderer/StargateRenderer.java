@@ -16,7 +16,8 @@ import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.stateUpdate.StargateStateUpdateToServer;
+import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
+import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -32,8 +33,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class StargateRenderer {
-	private StargateBaseTile te;
+public class StargateRenderer implements Renderer<StargateRendererState> {
+	// private StargateBaseTile te;
 	private World world;
 	private BlockPos pos;
 	
@@ -47,7 +48,7 @@ public class StargateRenderer {
 	}
 	
 	public StargateRenderer(StargateBaseTile te) {
-		this.te = te;
+		// this.te = te;
 		this.world = te.getWorld();
 		this.pos = te.getPos();
 		
@@ -76,6 +77,7 @@ public class StargateRenderer {
 		initKawoosh();
 	}
 	
+	@Override
 	public void setState(StargateRendererState state) {
 		setActiveChevrons(state.activeChevrons, state.isFinalActive);
 		
@@ -92,10 +94,12 @@ public class StargateRenderer {
 		rollSound(ringSpin);
 	}
 	
+	@Override
 	public StargateRendererState getState() {
 		return new StargateRendererState(pos, getActiveChevrons(), isLastChevronActive(), ringAngularRotation, ringSpin, ringSpinStart, doEventHorizonRender, vortexState, lockSoundPlayed, dialingComplete);
 	}
 	
+	@Override
 	public void render(double x, double y, double z, double partialTicks) {
 		renderGate(x, y, z);
 		renderRing(x, y, z, partialTicks);
@@ -316,8 +320,6 @@ public class StargateRenderer {
 	private float finalChevronStart;
 	private boolean finalChevronMove;
 	
-	private boolean dhdButtonsCleared;
-	
 	public void activateFinalChevron() {
 		activationStateChange = world.getTotalWorldTime();
 		
@@ -362,7 +364,6 @@ public class StargateRenderer {
 	}
 	
 	public void changeChevrons(boolean clear, Long stateChange) {	
-		dhdButtonsCleared = false;
 		changingChevrons = true;
 		
 		clearingChevrons = clear;
@@ -458,7 +459,7 @@ public class StargateRenderer {
 			else {
 				if (!dhdButtonsCleared && clearingChevrons) {
 					dhdButtonsCleared = true;
-					te.getLinkedDHD(world).getRenderer().clearButtons();
+					AunisPacketHandler.INSTANCE.sendToServer( new ClearLinkedDHDButtons(pos) );
 				}
 			}
 			
@@ -494,9 +495,8 @@ public class StargateRenderer {
 					else
 						activeChevrons = chevronsToLightUp+1;
 					
-					// TODO
 					// Sync state to server after chevrons fade out
-					AunisPacketHandler.INSTANCE.sendToServer( new StargateStateUpdateToServer(getState()) );
+					AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
 					
 					// This is needed because if the gate isn't rendered(player not looking at it)
 					// render code isn't running and gate can't perform any animation(not necessary in this case)
@@ -568,8 +568,11 @@ public class StargateRenderer {
 	
 	private long gateWaitClose = 0;
 	private boolean zeroAlphaSet;	
+	
+	private boolean dhdButtonsCleared;
 		
 	public void openGate() {
+		dhdButtonsCleared = false;
 		gateWaitStart = world.getTotalWorldTime();
 		soundPlayed = false;
 		
@@ -589,10 +592,16 @@ public class StargateRenderer {
 		if (wormholeSound == null)
 			wormholeSound = new PositionedSoundRecord(new ResourceLocation("aunis", "wormhole_loop"), SoundCategory.BLOCKS, 1.0f, 1.0f, true, 0, AttenuationType.LINEAR, pos.getX(), pos.getY(), pos.getZ());
 		
-		if (active)
-			Minecraft.getMinecraft().getSoundHandler().playSound(wormholeSound);
-		else
-			Minecraft.getMinecraft().getSoundHandler().stopSound(wormholeSound);
+		try {
+			if (active)
+				Minecraft.getMinecraft().getSoundHandler().playSound(wormholeSound);
+			else
+				Minecraft.getMinecraft().getSoundHandler().stopSound(wormholeSound);
+		}
+		
+		catch (IllegalArgumentException exception) {
+			Aunis.info("IllegalArgumentException when playing wormhole loop");
+		}
 	}
 	
 	public void closeGate() {
@@ -708,14 +717,8 @@ public class StargateRenderer {
 		vortexState = EnumVortexState.STILL;
 		wormholeSound(true);
 		
-		
-		
-		//StargateRendererState rendererState = ;
-		//Aunis.info("Gate engaged, sending StargateStateUpdateToServer: "+rendererState);
-		
 		// Gate engaged, sync state to server
-		// TODO Sync state to server
-		AunisPacketHandler.INSTANCE.sendToServer( new StargateStateUpdateToServer(getState()) );
+		AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
 	}
 	
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {

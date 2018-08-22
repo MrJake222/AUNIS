@@ -66,7 +66,7 @@ public class TeleportHelper {
 	}*/
 	
 	public static void setMotion(EntityPlayer player, float rotation, String sourceAxisName, Vector2f motionVec2f) {		
-		// 0 to 180
+		/*// 0 to 180
 		if (rotation == 0)
 			rotation = (float) Math.PI; // 180 deg
 		
@@ -76,7 +76,7 @@ public class TeleportHelper {
 		
 		// 90 to -90, -90 to 90
 		else
-			rotation *= -1;
+			rotation *= -1;*/
 
 		rotateAround00(motionVec2f, rotation, null);
 				

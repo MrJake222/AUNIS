@@ -1,25 +1,23 @@
 package mrjake.aunis.tileentity;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.renderer.Renderer;
 import mrjake.aunis.renderer.RendererState;
-import mrjake.aunis.renderer.StargateRendererState;
 import net.minecraft.tileentity.TileEntity;
 
+@SuppressWarnings("rawtypes")
 public abstract class RenderedTileEntity extends TileEntity {
 	
-	private RendererState rendererState;
+	protected Renderer renderer;
+	protected RendererState rendererState;
+	
+	public abstract Renderer getRenderer();
+	public abstract RendererState getRendererState();
 	
 	public void setRendererState(RendererState rendererState) {
 		this.rendererState = rendererState;
-		Aunis.info("StargateRendererState synced: "+rendererState.toString());
+		Aunis.info("rendererState synced: "+rendererState.toString());
 		
 		markDirty();
-	}
-	
-	public RendererState getRendererState() {
-		if (rendererState == null)
-			rendererState = new StargateRendererState(pos);
-		
-		return rendererState;
 	}
 }

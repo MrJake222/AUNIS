@@ -4,16 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import mrjake.aunis.Aunis;
-import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
 public class DHDRendererState extends RendererState {
 	
 	// Buttons
-	private List<Integer> activeButtons;
+	public List<Integer> activeButtons;
 	
 	public DHDRendererState(BlockPos pos) {
 		super(pos);
@@ -25,6 +22,19 @@ public class DHDRendererState extends RendererState {
 		super(pos);
 		
 		this.activeButtons = activeButtons;
+	}
+	
+	public DHDRendererState(ByteBuf buf) {
+		super(buf);
+	}
+	
+	public DHDRendererState(NBTTagCompound compound) {
+		super(compound);
+	}
+	
+	@Override
+	public String toString() {
+		return pos+":  activeButtons: " + activeButtons;
 	}
 	
 	public void toBytes(ByteBuf buf) {

@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.renderer.StargateRenderer;
+import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
@@ -88,15 +89,17 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 				}
 				
 				switch ( EnumPacket.valueOf(message.packetID) ) {
-					case DHD_RENDERER_UPDATE:						
+					case DHD_RENDERER_UPDATE:
+						DHDRenderer dhdRenderer = (DHDRenderer) dhdTile.getRenderer();
+						
 						if (message.objectID == -1) 
-							dhdTile.getRenderer().clearButtons();
+							dhdRenderer.clearButtons();
 						
 						else {
 							if (message.objectID == EnumSymbol.BRB.id)
-								dhdTile.getRenderer().brbToActivate = true;
+								dhdRenderer.brbToActivate = true;
 							
-							dhdTile.getRenderer().activateButton(message.objectID);
+							dhdRenderer.activateButton(message.objectID);
 						}
 						
 						break;
@@ -113,7 +116,7 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 		
 		@SuppressWarnings("incomplete-switch")
 		private void gateRendererUpdate(EnumGateAction action, StargateBaseTile gateTile) {
-			StargateRenderer renderer = gateTile.getRenderer();
+			StargateRenderer renderer = (StargateRenderer) gateTile.getRenderer();
 			
 			switch ( action ) {
 				case ACTIVATE_NEXT:
