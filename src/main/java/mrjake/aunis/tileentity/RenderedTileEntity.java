@@ -1,23 +1,23 @@
 package mrjake.aunis.tileentity;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.Renderer;
-import mrjake.aunis.renderer.RendererState;
+import mrjake.aunis.renderer.state.RendererState;
 import net.minecraft.tileentity.TileEntity;
 
 @SuppressWarnings("rawtypes")
 public abstract class RenderedTileEntity extends TileEntity {
 	
 	protected Renderer renderer;
-	protected RendererState rendererState;
+	protected RendererState rendererState = null;
 	
 	public abstract Renderer getRenderer();
 	public abstract RendererState getRendererState();
+	public abstract void setRendererState(RendererState rendererState);
 	
-	public void setRendererState(RendererState rendererState) {
+	/*public void setRendererState(RendererState rendererState) {
 		this.rendererState = rendererState;
-		Aunis.info("rendererState synced: "+rendererState.toString());
+		// Aunis.info("rendererState synced: "+rendererState.toString());
 		
 		markDirty();
-	}
+	}*/
 }

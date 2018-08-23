@@ -1,9 +1,9 @@
 package mrjake.aunis.packet.gate.tileUpdate;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.renderer.DHDRendererState;
-import mrjake.aunis.renderer.RendererState;
-import mrjake.aunis.renderer.StargateRendererState;
+import mrjake.aunis.renderer.state.DHDRendererState;
+import mrjake.aunis.renderer.state.RendererState;
+import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.tileentity.RenderedTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -22,7 +22,7 @@ public class TileUpdatePacketToClient implements IMessage {
 	}
 	
 	@Override
-	public void toBytes(ByteBuf buf) {
+	public void toBytes(ByteBuf buf) {		
 		buf.writeInt( EnumTile.fromObject(rendererState) );		
 		rendererState.toBytes(buf);	
 	}
@@ -33,7 +33,7 @@ public class TileUpdatePacketToClient implements IMessage {
 		
 		if (tile == EnumTile.GATE_TILE)
 			rendererState = new StargateRendererState(buf);
-		else
+		else if (tile == EnumTile.DHD_TILE)
 			rendererState = new DHDRendererState(buf);
 	}
 	

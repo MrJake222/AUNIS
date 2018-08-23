@@ -1,4 +1,4 @@
-package mrjake.aunis.renderer;
+package mrjake.aunis.renderer.state;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +31,10 @@ public class DHDRendererState extends RendererState {
 	public DHDRendererState(NBTTagCompound compound) {
 		super(compound);
 	}
-	
+
 	@Override
 	public String toString() {
-		return pos+":  activeButtons: " + activeButtons;
+		return pos+": activeButtons: " + activeButtons;
 	}
 	
 	public void toBytes(ByteBuf buf) {

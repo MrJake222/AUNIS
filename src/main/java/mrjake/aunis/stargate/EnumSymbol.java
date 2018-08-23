@@ -65,6 +65,20 @@ public enum EnumSymbol {
 		return map.get(id);
 	}
 	
+	
+	// Convert List of EnumSymbols to list of IDs
+	public static List<Integer> toIntegerList(List<EnumSymbol> list, EnumSymbol... toBeAddded) {
+		List<Integer> out = new ArrayList<Integer>();
+		
+		for (EnumSymbol symbol : list)
+			out.add(symbol.id);
+		
+		for (EnumSymbol add : toBeAddded)
+			out.add(add.id);
+		
+		return out;
+	}
+	
 	// Serialize address to long
 	public static long toLong(List<EnumSymbol> address) {
 		long out = 0;

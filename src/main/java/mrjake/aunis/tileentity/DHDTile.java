@@ -6,9 +6,9 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRenderer;
-import mrjake.aunis.renderer.DHDRendererState;
 import mrjake.aunis.renderer.Renderer;
-import mrjake.aunis.renderer.RendererState;
+import mrjake.aunis.renderer.state.DHDRendererState;
+import mrjake.aunis.renderer.state.RendererState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -34,7 +34,12 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 			renderer = new DHDRenderer(this);
 		
 		return (DHDRenderer) renderer;
-	}	
+	}
+	
+	public DHDRendererState getDHDRendererState() {
+		return (DHDRendererState) getRendererState();
+	}
+	
 	@Override
 	public RendererState getRendererState() {	
 		if (rendererState == null)
@@ -43,14 +48,17 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 		return rendererState;
 	}
 	
+	@Override
+	public void setRendererState(RendererState rendererState) {
+		this.rendererState = rendererState;
+	}
+	
 	public void establishLinkToStargate(BlockPos gate) {
 		Aunis.log("Linking to gate at " + gate.toString());
 		
 		this.linkedGate = gate;
 		markDirty();
 	}
-	
-
 	
 	public StargateBaseTile getLinkedGate(World world) {
 		if (linkedGate == null)

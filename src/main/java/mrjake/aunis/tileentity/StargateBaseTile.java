@@ -16,10 +16,11 @@ import mrjake.aunis.packet.gate.teleportPlayer.PlayWormholeSoundPacketToClient;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.Renderer;
-import mrjake.aunis.renderer.RendererState;
 import mrjake.aunis.renderer.StargateRenderer;
-import mrjake.aunis.renderer.StargateRendererState;
 import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
+import mrjake.aunis.renderer.state.LimitedStargateRendererState;
+import mrjake.aunis.renderer.state.RendererState;
+import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.TeleportHelper;
@@ -38,6 +39,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	
 	private static final int maxChevrons = 7;
 
+	private LimitedStargateRendererState limitedState;
 	private BlockPos linkedDHD = null;
 	
 	private boolean isEngaged;
@@ -59,6 +61,10 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			return false;
 		
 		dialedAddress.add(symbol);
+		
+		getStargateRendererState().activeChevrons++;
+		getStargateRendererState().isFinalActive = dialedAddress.size() == maxChevrons;
+		
 		return true;
 	}
 	
@@ -77,6 +83,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		unstableVortex = false;
 		isEngaged = true;
 		
+		setRendererState();
+		
 		markDirty();
 	}
 	
@@ -87,14 +95,30 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		isEngaged = false;
 	}
 	
-	private void disconnectGate() {
+	private void disconnectGate() {	
 		isClosing = false;
+		
+		setRendererState();
 		
 		markDirty();
 	}
 	
 	public boolean isEngaged() {
 		return isEngaged;
+	}
+	
+	private void setRendererState() {
+		if (isEngaged)
+			rendererState = new StargateRendererState(pos, maxChevrons, true, getLimitedState().ringAngularRotation, true, EnumVortexState.STILL, true, true);
+		else
+			rendererState = new StargateRendererState(pos, 0, false, getLimitedState().ringAngularRotation, false, EnumVortexState.FORMING, false, false);
+	}
+	
+	private LimitedStargateRendererState getLimitedState() {
+		if (limitedState == null)
+			limitedState = new LimitedStargateRendererState(pos);
+		
+		return limitedState;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -106,12 +130,25 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		return (StargateRenderer) renderer;
 	}
 	
+	public StargateRendererState getStargateRendererState() {
+		return (StargateRendererState) getRendererState();
+	}
+	
 	@Override
-	public RendererState getRendererState() {	
+	public RendererState getRendererState() {
 		if (rendererState == null)
-			rendererState = new StargateRendererState(pos);
-		
+			setRendererState();
+				
 		return rendererState;
+	}
+	
+	@Override
+	public void setRendererState(RendererState rendererState) {
+		if (rendererState instanceof LimitedStargateRendererState) {
+			float ringAngularRotation = ((LimitedStargateRendererState) rendererState).ringAngularRotation;
+			
+			getStargateRendererState().ringAngularRotation = ringAngularRotation;
+		}
 	}
 	
 	public int getMaxSymbols() {
@@ -174,17 +211,16 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			}
 		}
 		
-		getRendererState().toNBT(compound);
+		getLimitedState().toNBT(compound);
 		
 		return super.writeToNBT(compound);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
-		BlockPos pos = BlockPos.fromLong( compound.getLong("linkedDHD") );
+		this.linkedDHD = BlockPos.fromLong( compound.getLong("linkedDHD") );
 
-		Aunis.log(pos.toString()+": Relinking to DHD at " + pos.toString());
-		linkedDHD = pos;
+		Aunis.log(pos.toString()+": Relinking to DHD at " + linkedDHD.toString());
 		
 		boolean compoundHasAddress = compound.hasKey("symbol0");
 
@@ -210,17 +246,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			}
 		}
 		
-		StargateRendererState rendererState = new StargateRendererState(compound);
-		
-		// If gate wasn't open on the server, negate renderer's info
-		if (!isEngaged) {
-			rendererState.activeChevrons = 0;
-			rendererState.isFinalActive = false;
-			rendererState.vortexState = EnumVortexState.FORMING;
-			rendererState.doEventHorizonRender = false;
-		}
-		
-		this.rendererState = rendererState;
+		limitedState = new LimitedStargateRendererState(compound);
 		
 		super.readFromNBT(compound);
 	}
@@ -240,9 +266,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	
 	// Calculated box
 	public AxisAlignedBB horizonBoundingBox;
-	
-	// private int tickWait = 0;
-	
+		
 	public static class TeleportPacket {
 		private BlockPos sourceGatePos;
 		private BlockPos targetGatePos;
@@ -269,7 +293,6 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		}
 	}
 	
-	// Map<PlayerID, TeleportPacket>
 	public Map<Integer, TeleportPacket> scheduledTeleportMap = new HashMap<Integer, TeleportPacket>();
 	
 	public void teleportPlayer(int entityId) {
@@ -318,13 +341,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 					
 					horizonBoundingBox = new AxisAlignedBB(x+x1, y+1, z+left,  x+x2, y+up, z+right);
 				}
-				
-				// Aunis.info(pos.toString()+": horizonBoundingBox: "+horizonBoundingBox.toString());
 			}
 		}
-		
-		/*if (!world.isRemote)
-			Aunis.info(pos+":  "+isEngaged+", "+isInitiating);*/
 		
 		if (!world.isRemote && horizonBoundingBox != null && isEngaged && isInitiating) {
 			List<EntityPlayerMP> players = world.getEntitiesWithinAABB(EntityPlayerMP.class, horizonBoundingBox);
@@ -375,8 +393,10 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		if (unstableVortex) {
 			if (world.getTotalWorldTime()-waitForEngage >= 86 && !isClosing)
 				engageGate();
-				
-			if (world.getTotalWorldTime()-waitForClose >= 53 && isClosing) 
+		}
+		
+		if (isClosing) {
+			if (world.getTotalWorldTime()-waitForClose >= 56 && isClosing) 
 				disconnectGate();
 		}
 	}

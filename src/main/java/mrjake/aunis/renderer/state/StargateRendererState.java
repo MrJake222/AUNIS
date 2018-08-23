@@ -1,4 +1,4 @@
-package mrjake.aunis.renderer;
+package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
@@ -13,8 +13,8 @@ public class StargateRendererState extends RendererState {
 
 	// Ring
 	public float ringAngularRotation;
-	public boolean ringSpin;
-	public long ringSpinStart;
+	/*public boolean ringSpin;
+	public long ringSpinStart;*/
 
 	// Gate
 	public boolean doEventHorizonRender;
@@ -24,24 +24,24 @@ public class StargateRendererState extends RendererState {
 	
 	@Override
 	public String toString() {
-		return String.format(pos+":  activeChevrons: %d, isFinalActive: %b, doEventHorizonRender: %b, vortexState: %s, soundPlayed: %b", activeChevrons, isFinalActive,
+		return String.format(pos+": activeChevrons: %d, isFinalActive: %b, doEventHorizonRender: %b, vortexState: %s, soundPlayed: %b", activeChevrons, isFinalActive,
 				doEventHorizonRender, vortexState.toString(), soundPlayed);
 	}
 	
 	// Default state
 	public StargateRendererState(BlockPos pos) {
-		this(pos, 0, false, 0, false, 0, false, EnumVortexState.FORMING, false, false);
+		this(pos, 0, false, 0, false, EnumVortexState.FORMING, false, false);
 	}
 	
-	public StargateRendererState(BlockPos pos, int activeChevrons, boolean isFinalActive, float ringAngularRotation, boolean ringSpin, long ringSpinStart, boolean doEventHorizonRender, EnumVortexState vortexState, boolean soundPlayed, boolean dialingComplete) {
+	public StargateRendererState(BlockPos pos, int activeChevrons, boolean isFinalActive, float ringAngularRotation, /*boolean ringSpin, long ringSpinStart, */boolean doEventHorizonRender, EnumVortexState vortexState, boolean soundPlayed, boolean dialingComplete) {
 		super(pos);
 		
 		this.activeChevrons = activeChevrons;
 		this.isFinalActive = isFinalActive;
 		
 		this.ringAngularRotation = ringAngularRotation;
-		this.ringSpin = ringSpin;
-		this.ringSpinStart = ringSpinStart;
+		/*this.ringSpin = ringSpin;
+		this.ringSpinStart = ringSpinStart;*/
 		
 		this.doEventHorizonRender = doEventHorizonRender;
 		this.vortexState = vortexState;
@@ -64,8 +64,8 @@ public class StargateRendererState extends RendererState {
 		buf.writeBoolean(isFinalActive);
 		
 		buf.writeFloat(ringAngularRotation);
-		buf.writeBoolean(ringSpin);
-		buf.writeLong(ringSpinStart);
+		/*buf.writeBoolean(ringSpin);
+		buf.writeLong(ringSpinStart);*/
 		
 		buf.writeBoolean(doEventHorizonRender);
 		buf.writeInt(vortexState.index);
@@ -80,8 +80,8 @@ public class StargateRendererState extends RendererState {
 		isFinalActive = buf.readBoolean();
 		
 		ringAngularRotation = buf.readFloat();
-		ringSpin = buf.readBoolean();
-		ringSpinStart = buf.readLong();
+		/*ringSpin = buf.readBoolean();
+		ringSpinStart = buf.readLong();*/
 		
 		doEventHorizonRender = buf.readBoolean();
 		vortexState = EnumVortexState.valueOf( buf.readInt() );

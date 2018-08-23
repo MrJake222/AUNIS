@@ -2,6 +2,7 @@ package mrjake.aunis.event;
 
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.DHDBlock;
+import mrjake.aunis.chunk.AunisChunkLoader;
 import mrjake.aunis.dhd.DHDActivation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
@@ -12,6 +13,7 @@ import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -30,6 +32,16 @@ public class AunisClientEventHandler {
 			}
 		}
     }
+	
+	@SubscribeEvent
+	public static void onWorldLoad(WorldEvent.Load event) {
+		AunisChunkLoader.genTicketForWorld( event.getWorld() );
+	}
+	
+	@SubscribeEvent
+	public static void onWorldUnload(WorldEvent.Unload event) {
+		AunisChunkLoader.removeTicketForWorld( event.getWorld() );
+	}
 	
 	@SubscribeEvent
 	public static void onRightClickBlock(RightClickBlock event) {	

@@ -1,11 +1,15 @@
 package mrjake.aunis.packet.gate.tileUpdate;
 
-import mrjake.aunis.renderer.RendererState;
-import mrjake.aunis.renderer.StargateRendererState;
+import mrjake.aunis.Aunis;
+import mrjake.aunis.renderer.state.DHDRendererState;
+import mrjake.aunis.renderer.state.LimitedStargateRendererState;
+import mrjake.aunis.renderer.state.RendererState;
+import mrjake.aunis.renderer.state.StargateRendererState;
 
 public enum EnumTile {
 	GATE_TILE(0),
-	DHD_TILE(1);
+	LIMITED_GATE_TILE(1),
+	DHD_TILE(2);
 		
 	public int id;
 		
@@ -16,8 +20,12 @@ public enum EnumTile {
 	public static int fromObject(RendererState rendererState) {
 		if (rendererState instanceof StargateRendererState)
 			return GATE_TILE.id;
-		else
+		else if (rendererState instanceof LimitedStargateRendererState)
+			return LIMITED_GATE_TILE.id;
+		else if (rendererState instanceof DHDRendererState)
 			return DHD_TILE.id;
+		
+		return -1;
 	}
 		
 	public static EnumTile fromInt(int readInt) {

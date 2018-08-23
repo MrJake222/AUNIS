@@ -4,6 +4,7 @@ bin/
 config/
 crash-reports/
 logs/
+mods/
 options.txt
 saves/
 screenshots/

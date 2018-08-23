@@ -4,9 +4,8 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.packet.gate.tileUpdate.EnumTile;
-import mrjake.aunis.renderer.DHDRendererState;
-import mrjake.aunis.renderer.RendererState;
-import mrjake.aunis.renderer.StargateRendererState;
+import mrjake.aunis.renderer.state.LimitedStargateRendererState;
+import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.tileentity.RenderedTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.world.WorldServer;
@@ -33,10 +32,13 @@ public class StateUpdateToServer implements IMessage {
 	public void fromBytes(ByteBuf buf) {
 		EnumTile tile = EnumTile.fromInt(buf.readInt());
 		
-		if (tile == EnumTile.GATE_TILE)
+		if (tile == EnumTile.LIMITED_GATE_TILE)
+			rendererState = new LimitedStargateRendererState(buf);
+		
+		/*if (tile == EnumTile.GATE_TILE)
 			rendererState = new StargateRendererState(buf);
 		else
-			rendererState = new DHDRendererState(buf);
+			rendererState = new DHDRendererState(buf);*/
 	}
 	
 	public static class StateUpdateServerHandler implements IMessageHandler<StateUpdateToServer, IMessage> {

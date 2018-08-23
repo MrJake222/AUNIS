@@ -1,4 +1,4 @@
-package mrjake.aunis.renderer;
+package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

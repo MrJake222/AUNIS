@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldSavedData;
 
-public class StargateNetwork extends WorldSavedData {
+public class StargateNetwork extends WorldSavedData {	
 	public static final String DATA_NAME = Aunis.ModID + "_StargateNetworkData";
 	
 	public StargateNetwork() {

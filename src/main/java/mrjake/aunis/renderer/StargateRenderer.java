@@ -2,12 +2,8 @@ package mrjake.aunis.renderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-
-import static org.lwjgl.opengl.GL11.*;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisSoundEvents;
@@ -18,16 +14,12 @@ import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
+import mrjake.aunis.renderer.RendererInit.QuadStrip;
+import mrjake.aunis.renderer.state.LimitedStargateRendererState;
+import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.tileentity.StargateBaseTile;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.texture.ITextureObject;
-import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -40,15 +32,11 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	
 	private static final Vec3d ringLoc = new Vec3d(0.0, -0.122333, -0.000597);
 	private int horizontalRotation;	
-
-	Random rand = new Random();
-	
-	private float getRandomFloat() {
-		return rand.nextFloat()*2-1;
-	}
 	
 	public StargateRenderer(StargateBaseTile te) {
 		// this.te = te;
+		long start = System.nanoTime();
+		
 		this.world = te.getWorld();
 		this.pos = te.getPos();
 		
@@ -61,20 +49,13 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		else
 			horizontalRotation = (int) facing.getHorizontalAngle();
 		
-		// Load chevron textures
-		for (int i=0; i<=10; i++) {
-			ResourceLocation resource = new ResourceLocation( "aunis:textures/tesr/stargate/chevron/chevron"+i+".png" );
-			
-			ITextureObject itextureobject = new SimpleTexture(resource);
-			Minecraft.getMinecraft().getTextureManager().loadTexture(resource, itextureobject);
-		}
-		
 		for (int i=0; i<9; i++) {
 			chevronTextureList.add(textureTemplate + "0.png");
 		}
-				
-		initEventHorizon();
-		initKawoosh();
+		
+		long end = System.nanoTime();
+		
+		Aunis.info("StargateRenderer took "+(end-start)/1000000f+"ms to construct");
 	}
 	
 	@Override
@@ -82,22 +63,22 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		setActiveChevrons(state.activeChevrons, state.isFinalActive);
 		
 		ringAngularRotation = state.ringAngularRotation;
-		ringSpin = state.ringSpin;
-		ringSpinStart = state.ringSpinStart;
+		/*ringSpin = state.ringSpin;
+		ringSpinStart = state.ringSpinStart;*/
 		
 		vortexState = state.vortexState;
 		soundPlayed = state.soundPlayed;
 		doEventHorizonRender = state.doEventHorizonRender;
 		dialingComplete = state.dialingComplete;
 		
-		wormholeSound(vortexState == EnumVortexState.STILL);
-		rollSound(ringSpin);
+		AunisSoundEvents.playPositionedSound("wormhole", pos, vortexState == EnumVortexState.STILL);
+		AunisSoundEvents.playPositionedSound("ringRoll", pos, ringSpin);
 	}
 	
-	@Override
+	/*@Override
 	public StargateRendererState getState() {
-		return new StargateRendererState(pos, getActiveChevrons(), isLastChevronActive(), ringAngularRotation, ringSpin, ringSpinStart, doEventHorizonRender, vortexState, lockSoundPlayed, dialingComplete);
-	}
+		return new StargateRendererState(pos, getActiveChevrons(), isLastChevronActive(), ringAngularRotation, doEventHorizonRender, vortexState, lockSoundPlayed, dialingComplete);
+	}*/
 	
 	@Override
 	public void render(double x, double y, double z, double partialTicks) {
@@ -146,26 +127,6 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	private boolean lockSoundPlayed;
 	private boolean dialingComplete;
 	
-	private void rollSound(boolean play) {
-		PositionedSoundRecord sound = AunisSoundEvents.ringRollSoundMap.get( pos );
-			
-		if (play) {			
-			if ( sound == null ) {
-				sound = new PositionedSoundRecord(AunisSoundEvents.ringRoll, SoundCategory.BLOCKS, 1.0f, 1.0f, pos);
-								
-				AunisSoundEvents.ringRollSoundMap.put(pos, sound);
-			}
-			
-			Minecraft.getMinecraft().getSoundHandler().playSound( sound );
-		}
-		
-		else {					
-			if ( sound != null ) {
-				Minecraft.getMinecraft().getSoundHandler().stopSound( sound );
-			}
-		}
-	}
-	
 	public void setRingSpin(boolean spin, boolean dialingComplete) {
 		this.dialingComplete = dialingComplete;
 		
@@ -173,7 +134,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateDialFail);
 		
 		if (spin) {
-			rollSound(true);
+			AunisSoundEvents.playPositionedSound("ringRoll", pos, true);
 			
 			ringSpinStart = world.getTotalWorldTime();
 			lastTick = -1;
@@ -184,7 +145,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		}
 		
 		else {
-			rollSound(false);
+			AunisSoundEvents.playPositionedSound("ringRoll", pos, false);
 			
 			lockSoundPlayed = false;
 			ringDecelFirst = true;
@@ -240,6 +201,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 							ringDecelerating = false;
 							ringSpin = false;
 							lastTick = -1;
+							
+							AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(new LimitedStargateRendererState(pos, ringAngularRotation)) );
 						}
 					}
 				}
@@ -474,7 +437,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 						}
 						
 						else {
-							if ( !chevronTextureList.get(i).contains("10") && (i < chevronsToLightUp || i == 8) ) {
+							if ( !chevronTextureList.get(i).contains("10") && (i < chevronsToLightUp-1 || i == 8) ) {
 								chevronTextureList.set(i, textureTemplate+stage+".png");
 							}
 						}
@@ -493,10 +456,12 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 					if (clearingChevrons)
 						activeChevrons = 0;
 					else
-						activeChevrons = chevronsToLightUp+1;
+						activeChevrons = chevronsToLightUp;
 					
 					// Sync state to server after chevrons fade out
-					AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
+					// AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
+					
+					Aunis.info("chevrons faded out, tick: "+world.getTotalWorldTime());		
 					
 					// This is needed because if the gate isn't rendered(player not looking at it)
 					// render code isn't running and gate can't perform any animation(not necessary in this case)
@@ -551,10 +516,6 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	private long kawooshStart;
 	private float vortexStart;
 	
-	private final float kawooshRadius = 2.5f;
-	private final float kawooshSize = 7f;
-	private final float kawooshSections = 128; 
-	
 	private final float speedFactor = 6f;
 	
 	private QuadStrip backStrip;
@@ -586,99 +547,14 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		doEventHorizonRender = true;
 	}
 	
-	private PositionedSoundRecord wormholeSound;
-	
-	private void wormholeSound(boolean active) {
-		if (wormholeSound == null)
-			wormholeSound = new PositionedSoundRecord(new ResourceLocation("aunis", "wormhole_loop"), SoundCategory.BLOCKS, 1.0f, 1.0f, true, 0, AttenuationType.LINEAR, pos.getX(), pos.getY(), pos.getZ());
-		
-		try {
-			if (active)
-				Minecraft.getMinecraft().getSoundHandler().playSound(wormholeSound);
-			else
-				Minecraft.getMinecraft().getSoundHandler().stopSound(wormholeSound);
-		}
-		
-		catch (IllegalArgumentException exception) {
-			Aunis.info("IllegalArgumentException when playing wormhole loop");
-		}
-	}
-	
 	public void closeGate() {
-		wormholeSound(false);
+		AunisSoundEvents.playPositionedSound("wormhole", pos, false);
 		
 		AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateClose);
 		gateWaitClose = world.getTotalWorldTime();
 		// closingSoundPlayed = false;
 		
 		vortexState = EnumVortexState.CLOSING;
-	}
-	
-	private Map<Float, Float> Z_RadiusMap = new LinkedHashMap<Float, Float>();
-	
-	// Generate kawoosh shape using 4 functions
-	private void initKawoosh() {
-		float begin = 0;
-		float end   = 0.545f;
-		
-		float rng = end - begin;
-
-		float step = rng / kawooshSections;
-		boolean first = true;
-		
-		float scaleX = kawooshSize / rng;
-		float scaleY = 1;
-		
-		for (int i=0; i<=kawooshSections; i++) {
-			float x = begin + step*i;
-			float y = 0;
-			
-			float border1 = 0.2575f;
-			float border2 = 0.4241f;
-			float border3 = 0.4577f;
-			
-			
-			if ( x >= 0 && x <= border1 ) {
-				float a = 2f;
-				float b = -4.7f;
-				float c = 2.1f;
-				
-				float p = x + (b/20f);
-				y = (a/2f) * (p*p) + (c/30f);
-				
-				if (first) {
-					first = false;
-					scaleY = kawooshRadius / y;
-					// Aunis.info("radius: " + kawooshRadius + "  y: " + y + "  scale: "+kawooshScaleFactor);
-				}
-			}
-			
-			else if ( x > border1 && x <= border2 ) {
-				float a = 1.4f;
-				float b = -4.3f;
-				float c = 1.4f;
-				
-				float p = x + (b/20f);
-				y = (a/5f) * (p*p) + (c/20f);
-			}
-			
-			else if ( x > border2 && x <= border3 ) {
-				float a = -7.4f;
-				float b = -8.6f;
-				float c = 3.3f;
-				
-				float p = x + (b/20f);
-				y = a * (p*p) + (c/40f);
-			}
-			
-			else if ( x > border3 && x <= 0.545f ) {
-				float a = 5.2f;
-				
-				y = (float) (a/20f * Math.sqrt( 0.545f - x ));
-			}
-			
-			Z_RadiusMap.put(x*scaleX, y*scaleY);
-		}
 	}
 	
 	public enum EnumVortexState {
@@ -715,10 +591,11 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	
 	private void engageGate() {
 		vortexState = EnumVortexState.STILL;
-		wormholeSound(true);
+		AunisSoundEvents.playPositionedSound("wormhole", pos, true);
 		
 		// Gate engaged, sync state to server
-		AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
+		// AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
+		Aunis.info("engageGate, tick: "+world.getTotalWorldTime());		
 	}
 	
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
@@ -753,7 +630,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		float tick = (float) (world.getTotalWorldTime() - kawooshStart + partialTicks);
 		float mul = 1;
 		
-		float inner = eventHorizonRadius - tick/3.957f;
+		float inner = Aunis.getRendererInit().eventHorizonRadius - tick/3.957f;
 		
 		// Fading in the unstable vortex
 		float tick2 = tick/4f;
@@ -768,15 +645,15 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		}
 		
 		// Going center
-		if (inner >= kawooshRadius) {
-			backStrip = new QuadStrip(0, inner - 0.2f, eventHorizonRadius, tick);
+		if (inner >= Aunis.getRendererInit().kawooshRadius) {
+			backStrip = Aunis.getRendererInit().new QuadStrip(0, inner - 0.2f, Aunis.getRendererInit().eventHorizonRadius, tick);
 		}
 		
 		else {
 			if (backStripClamp) {
 				// Clamping to the desired size
 				backStripClamp = false;
-				backStrip = new QuadStrip(0, kawooshRadius - 0.2f, eventHorizonRadius, null);
+				backStrip = Aunis.getRendererInit().new QuadStrip(0, Aunis.getRendererInit().kawooshRadius - 0.2f, Aunis.getRendererInit().eventHorizonRadius, null);
 				
 				vortexStart = 5.275f;
 				
@@ -836,7 +713,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 						}
 						
 						// Rendering the vortex
-						for ( Map.Entry<Float, Float> e : Z_RadiusMap.entrySet() ) {
+						for ( Map.Entry<Float, Float> e : Aunis.getRendererInit().Z_RadiusMap.entrySet() ) {
 							if (first) {
 								first = false;
 								prevZ = e.getKey();
@@ -847,8 +724,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 								float zOffset = e.getKey();
 								float rad = e.getValue();
 								
-								// new QuadStrip(0, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul);
-								new QuadStrip(0, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul, false, 1.0f - whiteOverlayAlpha);
+								// Aunis.getRendererInit().new QuadStrip(0, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul);
+								Aunis.getRendererInit().new QuadStrip(0, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul, false, 1.0f - whiteOverlayAlpha);
 								
 								prevZ = zOffset;
 								prevRad = rad;
@@ -861,8 +738,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 						long stateChange = gateWaitClose + 29;
 						float arg2 = (float) ((world.getTotalWorldTime() - stateChange + partialTicks) / 3f) - 1.0f;
 						
-						if (arg2 < eventHorizonRadius+0.1f) {
-							backStrip = new QuadStrip(0, arg2, eventHorizonRadius, tick);
+						if (arg2 < Aunis.getRendererInit().eventHorizonRadius+0.1f) {
+							backStrip = Aunis.getRendererInit().new QuadStrip(0, arg2, Aunis.getRendererInit().eventHorizonRadius, tick);
 						}
 						
 						else {
@@ -881,7 +758,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 							whiteOverlayAlpha = MathHelper.sin( arg2 );
 						else {
 							if (backStrip == null)
-								backStrip = new QuadStrip(0, arg2, eventHorizonRadius, tick);
+								backStrip = Aunis.getRendererInit().new QuadStrip(0, arg2, Aunis.getRendererInit().eventHorizonRadius, tick);
 							
 							vortexState = EnumVortexState.SHRINKING;
 						}
@@ -922,56 +799,12 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		GlStateManager.popMatrix();
 	}
 	
-	private final float eventHorizonRadius = 3.790975f;
 	
-	private final int quads = 16;
-	private final int sections = 36 * 2;
-	private final float sectionAngle = (float) (2*Math.PI/sections);
 	
-	private final float innerCircleRadius = 0.25f;
-	private final float quadStep = (eventHorizonRadius - innerCircleRadius) / quads;
-	
-	private List<Float> offsetList = new ArrayList<Float>();
-	private long horizonStateChange = 0;
-	
-	private List<Float> sin = new ArrayList<Float>();
-	private List<Float> cos = new ArrayList<Float>();
-	
-	private List<Float> quadRadius = new ArrayList<Float>();
-	
-	private InnerCircle innerCircle;
-	private List<QuadStrip> quadStrips = new ArrayList<QuadStrip>();
-		
-	private void initEventHorizon() {
-		for (int i=0; i<sections*(quads+1); i++) {
-			offsetList.add( getRandomFloat() * 3 );
-		}
-		
-		for (int i=0; i<=sections; i++) {
-			sin.add( MathHelper.sin(sectionAngle * i) );
-			cos.add( MathHelper.cos(sectionAngle * i) );
-		}
-		
-		innerCircle = new InnerCircle();
-		
-		for (int i=0; i<=quads; i++) {
-			quadRadius.add( innerCircleRadius + quadStep*i );
-		}
-		
-		for (int i=0; i<quads; i++) {
-			quadStrips.add( new QuadStrip(i) );
-		}
 
-		horizonStateChange = world.getTotalWorldTime();
-	}
-	
-	
-	private float getOffset(int index, float tick) {
-		return MathHelper.sin( tick/4f + offsetList.get(index) ) / 24f;
-	}
 	
 	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly) {		
-		float tick = (float) (world.getTotalWorldTime() - horizonStateChange + partialTicks);	
+		float tick = (float) (world.getTotalWorldTime()/* - horizonStateChange*/ + partialTicks);	
 		
 		GlStateManager.enableBlend();
 		
@@ -1000,11 +833,11 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 			
 			
 			if (white)
-				innerCircle.render(tick, true, alpha);
+				Aunis.getRendererInit().innerCircle.render(tick, true, alpha);
 			
-			innerCircle.render(tick, false, 1.0f-alpha);
+			Aunis.getRendererInit().innerCircle.render(tick, false, 1.0f-alpha);
 			
-			for ( QuadStrip strip : quadStrips ) {
+			for ( QuadStrip strip : Aunis.getRendererInit().quadStrips ) {
 				if (white)
 					strip.render(tick, true, alpha);
 				
@@ -1014,169 +847,5 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		
 		GlStateManager.disableBlend();
 	}
-	
-	private float toUV(float coord) {
-		return (coord + 1) / 2f;
-	}
-	
-	class InnerCircle {
-		private List<Float> x = new ArrayList<Float>();
-		private List<Float> y = new ArrayList<Float>();
-		
-		private List<Float> tx = new ArrayList<Float>();
-		private List<Float> ty = new ArrayList<Float>();
-		
-		public InnerCircle() {
-			float texMul = (innerCircleRadius / eventHorizonRadius);
-			
-			for (int i=0; i<sections; i++) {			
-				x.add( sin.get(i) * innerCircleRadius );
-				y.add( cos.get(i) * innerCircleRadius );
-				
-				tx.add( toUV( sin.get(i) * texMul ) );
-				ty.add( toUV( cos.get(i) * texMul ) );
-			}
-		}
-		
-		public void render(float tick) {
-			render(tick, false, null);
-		}
-		
-		public void render(float tick, boolean white, Float alpha) {
-			if (white) {
-				GlStateManager.disableTexture2D();
-				if (alpha > 0.5f)
-					alpha = 1.0f - alpha;
-			}
-			
-			glBegin(GL_TRIANGLE_FAN);
-			
-			if (alpha != null) glColor4f(1.0f, 1.0f, 1.0f, alpha.floatValue());
-			if (!white) glTexCoord2f(0.5f, 0.5f);
-			
-			glVertex3f(0, 0, 0);
-			
-			int index = 0;
-			for (int i=sections; i>=0; i--) {
-				if (i == sections)
-					index = 0;
-				else
-					index = i;
-				
-				if (!white) glTexCoord2f( tx.get(index), ty.get(index) );
-				glVertex3f( x.get(index), y.get(index), getOffset(index, tick) );
-			}
 
-			glEnd();
-			
-			if (alpha != null) glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			if (white) GlStateManager.enableTexture2D();
-		}
-	}
-	
-	class QuadStrip {
-		private List<Float> x = new ArrayList<Float>();
-		private List<Float> y = new ArrayList<Float>();
-		
-		private List<Float> tx = new ArrayList<Float>();
-		private List<Float> ty = new ArrayList<Float>();
-		
-		private int quadStripIndex;
-		
-		public QuadStrip(int quadStripIndex) {
-			// this(quadStripIndex, quadRadius.get(quadStripIndex), quadRadius.get(quadStripIndex+1), false, 0);
-			this( quadStripIndex, quadRadius.get(quadStripIndex), quadRadius.get(quadStripIndex+1), null );
-		}
-		
-		public QuadStrip(int quadStripIndex, float innerRadius, float outerRadius/*, boolean randomizeRadius*/, Float tick) {
-			this.quadStripIndex = quadStripIndex; 
-			recalculate(innerRadius, outerRadius, tick);
-		}
-		
-		public void recalculate(float innerRadius, float outerRadius, Float tick) {
-			//this.quadStripIndex = quadStripIndex; 
-			
-			List<Float> radius = new ArrayList<Float>();
-			List<Float> texMul = new ArrayList<Float>();
-			
-			/*radius.add( quadRadius.get( quadStripIndex   ) ); // Inner
-			  radius.add( quadRadius.get( quadStripIndex+1 ) ); // Outer */
-			
-			radius.add( innerRadius );
-			radius.add( outerRadius );
-			
-			for (int i=0; i<2; i++)
-				texMul.add( radius.get(i) / eventHorizonRadius );
-			
-			for (int k=0; k<2; k++) {
-				for (int i=0; i<sections; i++) {
-					float rad = radius.get(k);
-					
-					if (tick != null) {
-						rad += getOffset(i, tick) * 2;
-					}
-					
-					x.add( rad * sin.get(i) );
-					y.add( rad * cos.get(i) );
-					
-					tx.add( toUV( sin.get(i) * texMul.get(k) ) );
-					ty.add( toUV( cos.get(i) * texMul.get(k) ) );
-				}
-			}
-		}
-		
-		public void render(float tick) {
-			render(tick, false, null);
-		}
-		
-		public void render(float tick, boolean white, Float alpha) {
-			render(tick, null, null, white, alpha);
-		}
-		
-		public void render(float tick, Float outerZ, Float innerZ) {
-			render(tick, outerZ, innerZ, false, null);
-		}
-		
-		public void render(float tick, Float outerZ, Float innerZ, boolean white, Float alpha) {
-			if (white) {
-				GlStateManager.disableTexture2D();
-				if (alpha > 0.5f)
-					alpha = 1.0f - alpha;
-			}
-			
-			if (alpha != null) glColor4f(1.0f, 1.0f, 1.0f, alpha.floatValue());
-			
-			glBegin(GL_QUAD_STRIP);
-			
-			int index = 0;
-			
-			for (int i=sections; i>=0; i--) {
-				if (i == sections)
-					index = 0;
-				else
-					index = i;
-				
-				float z;
-				
-				if (outerZ != null) z = outerZ.floatValue();
-				else z = getOffset(index + sections*quadStripIndex, tick);
-				
-				if (!white) glTexCoord2f( tx.get(index), ty.get(index) );
-				glVertex3f( x.get(index), y.get(index),  z );
-				
-				index = index + sections;
-				
-				if (innerZ != null) z = innerZ.floatValue();
-				else z = getOffset(index + sections*quadStripIndex, tick);
-				
-				if (!white) glTexCoord2f( tx.get(index), ty.get(index) );
-				glVertex3f( x.get(index), y.get(index), z );
-			}
-			
-			glEnd();
-			
-			if (white) GlStateManager.enableTexture2D();
-			if (alpha != null) glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		}
-	}
 }

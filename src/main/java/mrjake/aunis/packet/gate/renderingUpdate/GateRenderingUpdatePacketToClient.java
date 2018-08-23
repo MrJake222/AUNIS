@@ -3,8 +3,8 @@ package mrjake.aunis.packet.gate.renderingUpdate;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
-import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.renderer.DHDRenderer;
+import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
@@ -146,7 +146,7 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 					
 				case LIGHT_UP_ALL_CHEVRONS:
 					// TODO: Check how many symbols dialed on initiating gate
-					renderer.lightUpChevrons( gateTile.getMaxSymbols() - 1 );
+					renderer.lightUpChevrons( gateTile.getMaxSymbols() );
 					break;
 			}
 		}

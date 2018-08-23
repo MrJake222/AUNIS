@@ -44,6 +44,7 @@ public class TileUpdateRequestToServer implements IMessage {
 				
 				if (te != null)
 					return new TileUpdatePacketToClient(te.getRendererState());
+				
 			}
 			
 			return null;

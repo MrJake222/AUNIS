@@ -13,8 +13,7 @@ import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockRotated;
-import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
+import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.ITextureObject;
@@ -66,10 +65,10 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 		initTextureList();
 	}
 	
-	@Override
+	/*@Override
 	public DHDRendererState getState() {
 		return new DHDRendererState(pos, getActiveButtons());
-	}
+	}*/
 	
 	@Override
 	public void setState(DHDRendererState rendererState) {
@@ -225,7 +224,7 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 							setActiveButtons(toActivate);
 						}
 						
-						AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
+						// AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
 					}
 					
 					// When activating remotely, we need to take into account that gate will not be rendered at the time
@@ -234,7 +233,7 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 						brbToActivate = false;
 						buttonTexture.put("b38", "dhd/brb/brb5.png");
 						
-						AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
+						// AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
 					}
 					
 					activation = -1;
