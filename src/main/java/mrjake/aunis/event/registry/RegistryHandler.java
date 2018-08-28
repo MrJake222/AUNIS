@@ -17,24 +17,30 @@ public class RegistryHandler {
     public static void registerBlocks(Register<Block> event) {
     	final Block[] blocks = {
     			AunisBlocks.stargateBaseBlock,
-    			AunisBlocks.DHDBlock,
+    			AunisBlocks.ringBlock,
+    			AunisBlocks.chevronBlock,
+    			AunisBlocks.dhdBlock
     	};
     	
     	event.getRegistry().registerAll(blocks);
     	GameRegistry.registerTileEntity(AunisBlocks.stargateBaseBlock.getTileEntityClass(), AunisBlocks.stargateBaseBlock.getRegistryName().toString());
-    	GameRegistry.registerTileEntity(AunisBlocks.DHDBlock.getTileEntityClass(), AunisBlocks.DHDBlock.getRegistryName().toString());
+    	GameRegistry.registerTileEntity(AunisBlocks.dhdBlock.getTileEntityClass(), AunisBlocks.dhdBlock.getRegistryName().toString());
     	
     }
 	
     @SubscribeEvent
     public static void registerItems(Register<Item> event) {
         final Item[] items = {
-        		AunisItems.naquadahItem
+        		AunisItems.naquadahOreShard,
+        		AunisItems.pureNaquadahOre,
+        		AunisItems.refinedNaquadah
         };
         
         final Item[] ItemBlocks = {
         		AunisBlocks.stargateBaseBlock.getItemBlock(),
-        		AunisBlocks.DHDBlock.getItemBlock()
+        		AunisBlocks.ringBlock.getItemBlock(),
+        		AunisBlocks.chevronBlock.getItemBlock(),
+        		AunisBlocks.dhdBlock.getItemBlock()
         };
         
         event.getRegistry().registerAll(items);

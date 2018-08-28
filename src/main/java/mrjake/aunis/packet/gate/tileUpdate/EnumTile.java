@@ -1,6 +1,5 @@
 package mrjake.aunis.packet.gate.tileUpdate;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.RendererState;

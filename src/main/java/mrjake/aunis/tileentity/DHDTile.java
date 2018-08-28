@@ -53,7 +53,7 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 		this.rendererState = rendererState;
 	}
 	
-	public void establishLinkToStargate(BlockPos gate) {
+	public void setLinkedGate(BlockPos gate) {
 		Aunis.log("Linking to gate at " + gate.toString());
 		
 		this.linkedGate = gate;

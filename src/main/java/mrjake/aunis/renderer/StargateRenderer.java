@@ -1,6 +1,7 @@
 package mrjake.aunis.renderer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,18 +12,22 @@ import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockFaced;
+import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
 import mrjake.aunis.renderer.RendererInit.QuadStrip;
 import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
+import mrjake.aunis.stargate.merge.BlockPosition;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
 public class StargateRenderer implements Renderer<StargateRendererState> {
@@ -34,15 +39,13 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	private int horizontalRotation;	
 	
 	public StargateRenderer(StargateBaseTile te) {
-		// this.te = te;
-		long start = System.nanoTime();
-		
+		// this.te = te;		
 		this.world = te.getWorld();
 		this.pos = te.getPos();
 		
 		this.ringAngularRotation = 0;
 		
-		EnumFacing facing = world.getBlockState(pos).getValue(BlockFaced.FACING);
+		EnumFacing facing = world.getBlockState(pos).getValue(BlockTESRMember.FACING);
 		
 		if ( facing.getAxis().getName() == "x" )
 			horizontalRotation = (int) facing.getOpposite().getHorizontalAngle();
@@ -52,10 +55,6 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		for (int i=0; i<9; i++) {
 			chevronTextureList.add(textureTemplate + "0.png");
 		}
-		
-		long end = System.nanoTime();
-		
-		Aunis.info("StargateRenderer took "+(end-start)/1000000f+"ms to construct");
 	}
 	
 	@Override
@@ -75,13 +74,42 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		AunisSoundEvents.playPositionedSound("ringRoll", pos, ringSpin);
 	}
 	
-	/*@Override
-	public StargateRendererState getState() {
-		return new StargateRendererState(pos, getActiveChevrons(), isLastChevronActive(), ringAngularRotation, doEventHorizonRender, vortexState, lockSoundPlayed, dialingComplete);
-	}*/
+	private int skyLight;
+	private int blockLight;
+	
+	public static List<BlockPosition> chevronBlocks = Arrays.asList(
+			new BlockPosition(-4, 2, 0), 
+			new BlockPosition(-5, 5, 0), 
+			new BlockPosition(5, 5, 0), 
+			new BlockPosition(4, 2, 0) ); 
+	
+	private void calculateLightMap(float partialTicks) {
+		int subt = world.calculateSkylightSubtracted(partialTicks);
+		skyLight = 0;
+		blockLight = 0;
+		
+		for (int i=0; i<chevronBlocks.size(); i++) {
+			BlockPos blockPos = chevronBlocks.get(i).rotateAndGlobal((int) world.getBlockState(pos).getValue(BlockFaced.FACING).getHorizontalAngle(), pos);
+			
+			skyLight += world.getLightFor(EnumSkyBlock.SKY, blockPos) - subt;
+			blockLight += world.getLightFor(EnumSkyBlock.BLOCK, blockPos);
+		}
+		
+		skyLight /= 4;
+		blockLight /= 4;
+	}
 	
 	@Override
 	public void render(double x, double y, double z, double partialTicks) {
+		if (world.getBlockState(pos).getValue(BlockTESRMember.RENDER))
+			return;
+		
+		calculateLightMap((float) partialTicks);
+		
+		int clamped = MathHelper.clamp(skyLight+blockLight, 0, 15);
+		
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, blockLight * 16, clamped * 16);
+		
 		renderGate(x, y, z);
 		renderRing(x, y, z, partialTicks);
 		renderChevrons(x, y, z, partialTicks);
@@ -458,11 +486,6 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 					else
 						activeChevrons = chevronsToLightUp;
 					
-					// Sync state to server after chevrons fade out
-					// AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
-					
-					Aunis.info("chevrons faded out, tick: "+world.getTotalWorldTime());		
-					
 					// This is needed because if the gate isn't rendered(player not looking at it)
 					// render code isn't running and gate can't perform any animation(not necessary in this case)
 					// So we need to check if chevron's states didn't change and perform correction
@@ -592,13 +615,11 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	private void engageGate() {
 		vortexState = EnumVortexState.STILL;
 		AunisSoundEvents.playPositionedSound("wormhole", pos, true);
-		
-		// Gate engaged, sync state to server
-		// AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
-		Aunis.info("engageGate, tick: "+world.getTotalWorldTime());		
 	}
 	
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
+		
 		float gateWait = world.getTotalWorldTime() - gateWaitStart;
 		
 		if ( gateWait < 25 )
@@ -799,12 +820,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		GlStateManager.popMatrix();
 	}
 	
-	
-	
-
-	
-	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly) {		
-		float tick = (float) (world.getTotalWorldTime()/* - horizonStateChange*/ + partialTicks);	
+	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly) {			
+		float tick = (float) (world.getTotalWorldTime() + partialTicks);	
 		
 		GlStateManager.enableBlend();
 		

@@ -10,11 +10,8 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -41,13 +38,13 @@ public class DHDBlock extends TileEntityRotated<DHDTile> {
 			DHDTile dhd = (DHDTile) world.getTileEntity(pos);
 			
 			for ( BlockPos sg : BlockPos.getAllInBox(pos.subtract(range), pos.add(range)) ) {
+				IBlockState gateState = world.getBlockState(sg);
 				
-				if ( world.getBlockState(sg).getBlock() instanceof StargateBaseBlock) {
-					
-					StargateBaseTile stargateBaseTile = (StargateBaseTile) world.getTileEntity(sg);
-					if ( !stargateBaseTile.isLinked() ) {
-						dhd.establishLinkToStargate(sg);
-						stargateBaseTile.setLinkedDHD(pos);
+				if ( gateState.getBlock() instanceof StargateBaseBlock) {		
+					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(sg);					
+					if ( !gateTile.isLinked() && !gateState.getValue(BlockTESRMember.RENDER) ) {
+						dhd.setLinkedGate(sg);
+						gateTile.setLinkedDHD(pos);
 						break;
 					}
 				}
@@ -56,24 +53,6 @@ public class DHDBlock extends TileEntityRotated<DHDTile> {
 		
 
 		
-	}
-	
-	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
-		
-		/*if ( !world.isRemote ) {
-			DHDTile te = (DHDTile) world.getTileEntity(pos);
-			
-			Aunis.info("DHDTile.getpos: " + te.getPos().toString());
-			
-			if (te.getLinkedGate() == null)
-				Aunis.info("No linked gate");
-			else
-				Aunis.info("Linked gate: "+te.getLinkedGate().toString());
-		}*/
-		
-		
-		return true;
 	}
 	
 	@Override

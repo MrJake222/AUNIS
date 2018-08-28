@@ -1,21 +1,22 @@
 package mrjake.aunis.block;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.gui.StargateGUI;
 import mrjake.aunis.stargate.StargateNetwork;
+import mrjake.aunis.stargate.merge.MergeHelper;
 import mrjake.aunis.tileentity.StargateBaseTile;
-import mrjake.aunis.tileentity.TileEntityFaced;
+import mrjake.aunis.tileentity.TileEntityTESRMember;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class StargateBaseBlock extends TileEntityFaced<StargateBaseTile> {
+public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 
 	public StargateBaseBlock() {
 		super(Material.IRON, SoundType.METAL, "stargatebase_block");
@@ -31,17 +32,12 @@ public class StargateBaseBlock extends TileEntityFaced<StargateBaseTile> {
 		return new StargateBaseTile();
 	}
 	
-	/*@Override
-	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-		
-		super.onBlockPlacedBy(world, pos, state, placer, stack);
-	}*/
-	
 	@Override
-	public void breakBlock(World world, BlockPos pos, IBlockState state) {
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {		
 		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
 		
 		StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
+		MergeHelper.updateChevRingMergeState(gateTile, state, false);
 		
 		super.breakBlock(world, pos, state);
 	}
@@ -57,18 +53,18 @@ public class StargateBaseBlock extends TileEntityFaced<StargateBaseTile> {
 			Minecraft.getMinecraft().displayGuiScreen( new StargateGUI(gateTile) );
 		}
 		
-		else {
-			//StargateNetwork.get(world).clear();
-			Aunis.info("gates: "+StargateNetwork.get(world).toString());
-		}
-		
 		return true;
 	}
 	
-	/*@Override
+	@Override
 	public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
-    }*/
+		// Client side
+		
+		if ( state.getValue(BlockTESRMember.RENDER) )
+			return EnumBlockRenderType.MODEL;
+		else
+			return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
+    }
 	
 	@Override
 	public boolean isOpaqueCube(IBlockState state) {
@@ -77,11 +73,11 @@ public class StargateBaseBlock extends TileEntityFaced<StargateBaseTile> {
 	
 	@Override
 	public boolean isFullCube(IBlockState state) {
-		return false;
+		return state.getValue(BlockTESRMember.RENDER);
 	}
 	
 	@Override
 	public boolean isFullBlock(IBlockState state) {
-		return false;
+		return state.getValue(BlockTESRMember.RENDER);
 	}
 }

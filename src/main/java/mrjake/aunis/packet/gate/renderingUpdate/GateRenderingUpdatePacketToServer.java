@@ -16,9 +16,10 @@ import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -60,7 +61,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 		public IMessage onMessage(GateRenderingUpdatePacketToServer message, MessageContext ctx) {
 			ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {
 			
-				EntityPlayer player = ctx.getServerHandler().player;
+				EntityPlayerMP player = ctx.getServerHandler().player;
 				World world = player.getEntityWorld();
 				BlockPos pos = message.blockPos;
 				
@@ -94,29 +95,35 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 						
 						if ( symbol == EnumSymbol.BRB ) {						
 							if ( gateTile.isEngaged() ) {
-								Aunis.log("Gate is engaged, closing...");
-								
-								BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
-								StargateBaseTile targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
-								
-								// clear connection and address, start animation 
-								TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
-								
-								AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, gateTile), point );
-								AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, targetPos), targetPoint );
-								
-								DHDTile targetDhdTile = targetTile.getLinkedDHD(world);
-								
-								// Open target gate
-								if (targetDhdTile != null) {
-									targetDhdTile.setLinkedGateEngagement(false);
+								if ( gateTile.isInitiating() ) {
+									Aunis.log("Gate is engaged, closing...");
+									
+									BlockPos targetPos = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
+									StargateBaseTile targetTile = (StargateBaseTile) world.getTileEntity(targetPos);
+									
+									// clear connection and address, start animation 
+									TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
+									
+									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, gateTile), point );
+									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, targetPos), targetPoint );
+									
+									DHDTile targetDhdTile = targetTile.getLinkedDHD(world);
+									
+									// Open target gate
+									if (targetDhdTile != null) {
+										targetDhdTile.setLinkedGateEngagement(false);
+									}
+									
+									dhdTile.setLinkedGateEngagement(false);
+									
+									targetTile.closeGate();
+									gateTile.closeGate();
+									gateTile.clearAddress();
 								}
 								
-								dhdTile.setLinkedGateEngagement(false);
-								
-								targetTile.closeGate();
-								gateTile.closeGate();
-								gateTile.clearAddress();
+								else {
+									player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.incoming_wormhole_warn")), true);
+								}
 							}
 							
 							else {
@@ -211,7 +218,13 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 								}
 							} // add symbol if
 						} // not brb else
-					} // gateTile not null if
+					} // gateTile and dhdTile not null if
+					
+					else {
+						// DHD is not linked
+						player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.not_linked_warn")), true);
+					}
+					
 				} // block loaded if
 			}); // runnable
 

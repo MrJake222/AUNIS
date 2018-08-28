@@ -11,6 +11,7 @@ import javax.vecmath.Vector2f;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.block.BlockFaced;
+import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.teleportPlayer.PlayWormholeSoundPacketToClient;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
@@ -24,6 +25,8 @@ import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.TeleportHelper;
+import mrjake.aunis.stargate.merge.MergeHelper;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -49,7 +52,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	private long waitForClose;
 	private boolean unstableVortex;
 	private boolean isClosing;
-	
+		
 	public List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
 	
@@ -107,6 +110,17 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		return isEngaged;
 	}
 	
+	public boolean isInitiating() {
+		return isInitiating;
+	}
+	
+	public void updateMergeState(boolean isMerged) {
+		IBlockState state = world.getBlockState(pos);
+		
+		world.setBlockState( pos, state.withProperty(BlockTESRMember.RENDER, !isMerged) );
+		MergeHelper.updateChevRingMergeState(this, state, isMerged);
+	}
+
 	private void setRendererState() {
 		if (isEngaged)
 			rendererState = new StargateRendererState(pos, maxChevrons, true, getLimitedState().ringAngularRotation, true, EnumVortexState.STILL, true, true);
@@ -195,7 +209,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			dhd = linkedDHD;
 		
 		compound.setLong("linkedDHD", dhd.toLong());
-		
+				
 		if (gateAddress != null) {
 			for (int i=0; i<maxChevrons-1; i++) {
 				compound.setInteger("symbol"+i, gateAddress.get(i).id);
@@ -204,7 +218,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		compound.setBoolean("isEngaged", isEngaged);
 		compound.setBoolean("isInitiating", isInitiating);
-
+		
 		if (isEngaged && isInitiating) {
 			for (int i=0; i<maxChevrons-1; i++) {
 				compound.setInteger("dialedSymbol"+i, dialedAddress.get(i).id);
@@ -223,7 +237,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		Aunis.log(pos.toString()+": Relinking to DHD at " + linkedDHD.toString());
 		
 		boolean compoundHasAddress = compound.hasKey("symbol0");
-
+		
 		if (compoundHasAddress) {		
 			gateAddress = new ArrayList<EnumSymbol>();
 			
@@ -237,7 +251,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		isEngaged = compound.getBoolean("isEngaged");
 		isInitiating = compound.getBoolean("isInitiating");
-
+				
 		if (isEngaged && isInitiating) {
 			dialedAddress.clear();
 			
@@ -314,6 +328,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			
 			// Can't do this in onLoad(), because in that method, world isn't fully loaded
 			generateAddress();
+			
+			updateMergeState(MergeHelper.checkBlocks(this));
 			
 			if (!world.isRemote) {
 				EnumFacing sourceGateFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
@@ -434,6 +450,14 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 				// Possibly TODO: Add region, so if we break the stargate and place it nearby, it keeps the address
 			}			
 		}
+	}
+	
+	@Override
+	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
+		if (oldState.getBlock() == newSate.getBlock())
+			return oldState.withProperty(BlockTESRMember.RENDER, false) != newSate.withProperty(BlockTESRMember.RENDER, false);
+		
+		return true;
 	}
 	
 	@Override

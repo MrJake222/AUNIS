@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "aunis:items/naquadah_item"
+        "layer0": "aunis:items/naquadah_ore_shard"
     }
 }

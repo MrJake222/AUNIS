@@ -1,9 +1,13 @@
 package mrjake.aunis.event;
 
-import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.DHDBlock;
+import mrjake.aunis.block.StargateBaseBlock;
+import mrjake.aunis.block.StargateMemberBlock;
 import mrjake.aunis.chunk.AunisChunkLoader;
 import mrjake.aunis.dhd.DHDActivation;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -26,10 +30,15 @@ public class AunisClientEventHandler {
 		RayTraceResult target = event.getTarget();
 		
 		if ( target.typeOfHit == RayTraceResult.Type.BLOCK ) {
+			IBlockState blockState = event.getPlayer().world.getBlockState( target.getBlockPos() );
+			Block block = blockState.getBlock();
 			
-			if ( event.getPlayer().world.getBlockState( target.getBlockPos() ).getBlock() == AunisBlocks.DHDBlock ) {
-				event.setCanceled(true);
-			}
+			boolean cancelled = false;
+			
+			cancelled |= block instanceof DHDBlock;
+			cancelled |= (block instanceof StargateMemberBlock || block instanceof StargateBaseBlock) && !blockState.getValue(BlockTESRMember.RENDER);
+			
+			event.setCanceled(cancelled);
 		}
     }
 	

@@ -62,7 +62,6 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 	
 	public static class GateRenderingUpdatePacketToClientHandler implements IMessageHandler<GateRenderingUpdatePacketToClient, IMessage>{
 		
-		@SuppressWarnings("incomplete-switch")
 		@Override
 		public IMessage onMessage(GateRenderingUpdatePacketToClient message, MessageContext ctx) {	
 			EntityPlayer player = Minecraft.getMinecraft().player;

@@ -1,6 +1,6 @@
 package mrjake.aunis;
 
-import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.block.AunisBlocks;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 
@@ -14,6 +14,6 @@ public class AunisCreativeTab extends CreativeTabs {
 	@Override
 	public ItemStack getTabIconItem() {
 		
-		return new ItemStack(AunisItems.naquadahItem);
+		return new ItemStack(AunisBlocks.stargateBaseBlock);
 	}
 }
