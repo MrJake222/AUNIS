@@ -4,7 +4,10 @@ import javax.vecmath.Vector2f;
 
 import org.lwjgl.util.vector.Matrix2f;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -46,13 +49,13 @@ public class TeleportHelper {
 		v.y += dest.y;
 	}
 	
-	public static void teleportServer(EntityPlayer player, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, String sourceAxisName, Vector2f motionVector) {
+	public static void teleportServer(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, String sourceAxisName, Vector2f motionVector) {
 		setRotation(player, rotation, sourceAxisName);
 		teleport(player, sourceGatePos, targetGatePos, rotation, sourceAxisName);
 		setMotion(player, rotation, sourceAxisName, motionVector);
 	}
 	
-	public static void setRotation(EntityPlayer player, float rotation, String sourceAxisName) {
+	public static void setRotation(Entity player, float rotation, String sourceAxisName) {
 		Vec3d lookVec = player.getLookVec();
 		Vector2f lookVec2f = new Vector2f( (float)(lookVec.x), (float)(lookVec.z) );
 		
@@ -61,31 +64,34 @@ public class TeleportHelper {
 		player.rotationYaw = (float) Math.toDegrees(MathHelper.atan2(lookVec2f.x, lookVec2f.y));		
 	}
 	
-	/*private boolean equal(float a, float b) {
-		return MathHelper.abs(a-b) < 0.01f;
-	}*/
-	
-	public static void setMotion(EntityPlayer player, float rotation, String sourceAxisName, Vector2f motionVec2f) {		
-		/*// 0 to 180
-		if (rotation == 0)
-			rotation = (float) Math.PI; // 180 deg
-		
-		// 180 to 0
-		else if ( MathHelper.epsilonEquals(MathHelper.abs(rotation), (float) Math.PI) )
-			rotation = 0;
-		
-		// 90 to -90, -90 to 90
-		else
-			rotation *= -1;*/
-
-		rotateAround00(motionVec2f, rotation, null);
-				
-		player.motionX = motionVec2f.x;
-		player.motionZ = motionVec2f.y;
-		player.velocityChanged = true;
+	public static void setMotion(Entity player, float rotation, String sourceAxisName, Vector2f motionVec2f) {		
+		if (motionVec2f != null) {		
+			rotateAround00(motionVec2f, rotation, null);
+					
+			player.motionX = motionVec2f.x;
+			player.motionZ = motionVec2f.y;
+			player.velocityChanged = true;
+		}
 	}
 	
-	public static void teleport(EntityPlayer player, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, String sourceAxisName) {
+	public static boolean frontSide(EnumFacing sourceFacing, Vector2f motionVec) {
+		Axis axis = sourceFacing.getAxis();
+		AxisDirection direction = sourceFacing.getAxisDirection();
+		float motion;
+		
+		if (axis == Axis.X)
+			motion = motionVec.x;			
+		else
+			motion = motionVec.y;
+				
+		// If facing positive, then player should move negative
+		if (direction == AxisDirection.POSITIVE)
+			return motion <= 0;
+		else
+			return motion >= 0;
+	}
+	
+	public static void teleport(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, String sourceAxisName) {
 		Vector2f sourceCenter = new Vector2f( sourceGatePos.getX()+0.5f, sourceGatePos.getZ()+0.5f );
 		Vector2f destCenter = new Vector2f( targetGatePos.getX()+0.5f, targetGatePos.getZ()+0.5f );
 		Vector2f playerPosition = new Vector2f( (float)(player.posX), (float)(player.posZ) );  

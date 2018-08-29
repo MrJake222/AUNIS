@@ -13,7 +13,6 @@ import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.teleportPlayer.PlayWormholeSoundPacketToClient;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.Renderer;
@@ -27,11 +26,10 @@ import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.stargate.merge.MergeHelper;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumFacing.Axis;
-import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -288,7 +286,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		private float rotation;
 		private String sourceAxisName;
 		
-		public Vector2f motionVector;
+		private Vector2f motionVector;
 		
 		public TeleportPacket(BlockPos source, BlockPos target, float rot, EnumFacing.Axis sourceAxis) {
 			sourceGatePos = source;
@@ -298,21 +296,32 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			sourceAxisName = sourceAxis.getName();
 		}
 		
-		public void teleport(EntityPlayerMP player) {
-			TeleportHelper.teleportServer(player, sourceGatePos, targetGatePos, rotation, sourceAxisName, motionVector);
+		public void teleport(Entity entity) {
+			TeleportHelper.teleportServer(entity, sourceGatePos, targetGatePos, rotation, sourceAxisName, motionVector);
 			
-			player.getEntityWorld().playSound(player, targetGatePos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+			if (entity instanceof EntityPlayerMP)
+				entity.getEntityWorld().playSound(null, targetGatePos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
 			
-			AunisPacketHandler.INSTANCE.sendTo(new PlayWormholeSoundPacketToClient(targetGatePos), player);
+			// AunisPacketHandler.INSTANCE.sendTo(new PlayWormholeSoundPacketToClient(targetGatePos), player);
+		}
+
+		public TeleportPacket setMotion(Vector2f motion) {
+			this.motionVector = motion;
+			
+			return this;
 		}
 	}
 	
 	public Map<Integer, TeleportPacket> scheduledTeleportMap = new HashMap<Integer, TeleportPacket>();
 	
-	public void teleportPlayer(int entityId) {
-		EntityPlayerMP player = (EntityPlayerMP) world.getEntityByID(entityId);
-		scheduledTeleportMap.get(entityId).teleport(player);
+	public void teleportEntity(int entityId) {
+		Entity entity = world.getEntityByID(entityId);
+		scheduledTeleportMap.get(entityId).teleport(entity);
 		
+		removeEntityFromTeleportList(entityId);
+	}
+	
+	public void removeEntityFromTeleportList(int entityId) {		
 		scheduledTeleportMap.remove(entityId);
 	}
 	
@@ -361,10 +370,10 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		}
 		
 		if (!world.isRemote && horizonBoundingBox != null && isEngaged && isInitiating) {
-			List<EntityPlayerMP> players = world.getEntitiesWithinAABB(EntityPlayerMP.class, horizonBoundingBox);
+			List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, horizonBoundingBox);
 			
-			for (EntityPlayerMP player : players) {
-				int entId = player.getEntityId();
+			for (Entity entity : entities) {
+				int entId = entity.getEntityId();
 				
 				if ( !scheduledTeleportMap.containsKey(entId) ) {
 					BlockPos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
@@ -374,36 +383,28 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 					
 					float rotation = targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle();
 					rotation = (float) Math.toRadians( EnumFacing.fromAngle(rotation).getOpposite().getHorizontalAngle() );
-
-					float axisDiff = 0;
 					
-					if (sourceFacing.getAxis() == Axis.X)
-						axisDiff = (float) (pos.getX()+0.5 - player.posX);
-					else
-						axisDiff = (float) (pos.getZ()+0.5 - player.posZ);
+					TeleportPacket packet = new TeleportPacket(pos, targetPos, rotation, sourceFacing.getAxis());
 					
-					// Block is oriented to positive numbers and player is standing in front of it
-					// player pos is greater, so diff is negative
-					
-					AxisDirection direction = sourceFacing.getAxisDirection();
-					
-					// Player entered front side of event horizon
-					if ( (direction == AxisDirection.POSITIVE && axisDiff < 0) || (direction == AxisDirection.NEGATIVE && axisDiff > 0) ) {		
-						// Aunis.info("Front");
-						
-						scheduledTeleportMap.put( entId, new TeleportPacket(pos, targetPos, rotation, sourceFacing.getAxis()) );
-						AunisPacketHandler.INSTANCE.sendTo(new RetrieveMotionToClient(pos), player);
-						
-						world.playSound(player, pos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+					if (entity instanceof EntityPlayerMP) {
+						scheduledTeleportMap.put(entId, packet);
+						AunisPacketHandler.INSTANCE.sendTo(new RetrieveMotionToClient(pos), (EntityPlayerMP) entity);
 					}
 					
 					else {
-						Aunis.info("Back side");
+						Vector2f motion = new Vector2f( (float)entity.motionX, (float)entity.motionZ );
+						
+						if (TeleportHelper.frontSide(sourceFacing, motion)) {
+							scheduledTeleportMap.put(entId, packet.setMotion(motion) );
+							teleportEntity(entId);
+						}
+						
+						else {
+							entity.onKillCommand();
+						}
 					}
 				}
 			}
-			
-			//tickWait = 0;
 		}
 		
 		if (unstableVortex) {

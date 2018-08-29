@@ -13,6 +13,7 @@ import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
+import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
@@ -21,6 +22,7 @@ import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.stargate.merge.BlockPosition;
 import mrjake.aunis.tileentity.StargateBaseTile;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.EnumFacing;
@@ -101,21 +103,25 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	
 	@Override
 	public void render(double x, double y, double z, double partialTicks) {
-		if (world.getBlockState(pos).getValue(BlockTESRMember.RENDER))
-			return;
+		IBlockState state = world.getBlockState(pos);
 		
-		calculateLightMap((float) partialTicks);
-		
-		int clamped = MathHelper.clamp(skyLight+blockLight, 0, 15);
-		
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, blockLight * 16, clamped * 16);
-		
-		renderGate(x, y, z);
-		renderRing(x, y, z, partialTicks);
-		renderChevrons(x, y, z, partialTicks);
-		
-		if (doEventHorizonRender) {
-			renderKawoosh(x, y, z, partialTicks);
+		if (state.getBlock() instanceof StargateBaseBlock) {
+			if (state.getValue(BlockTESRMember.RENDER))
+				return;
+			
+			calculateLightMap((float) partialTicks);
+			
+			int clamped = MathHelper.clamp(skyLight+blockLight, 0, 15);
+			
+			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, blockLight * 16, clamped * 16);
+			
+			renderGate(x, y, z);
+			renderRing(x, y, z, partialTicks);
+			renderChevrons(x, y, z, partialTicks);
+			
+			if (doEventHorizonRender) {
+				renderKawoosh(x, y, z, partialTicks);
+			}
 		}
 	}
 	

@@ -3,9 +3,14 @@ package mrjake.aunis.packet.gate.teleportPlayer;
 import javax.vecmath.Vector2f;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.AunisSoundEvents;
+import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.StargateBaseBlock;
+import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.tileentity.StargateBaseTile;
-import mrjake.aunis.tileentity.StargateBaseTile.TeleportPacket;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -56,13 +61,24 @@ public class MotionToServer implements IMessage {
 			if ( world.getBlockState(message.gatePos).getBlock() instanceof StargateBaseBlock ) {
 				world.addScheduledTask(() -> {
 					
+					EnumFacing sourceFacing = world.getBlockState(message.gatePos).getValue(BlockFaced.FACING);
+					
 					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.gatePos);
-					TeleportPacket packet = gateTile.scheduledTeleportMap.get(message.entityId);
 					
-					packet.motionVector = new Vector2f(message.motionX, message.motionZ);
-					gateTile.scheduledTeleportMap.put(message.entityId, packet);
+					Vector2f motionVector = new Vector2f(message.motionX, message.motionZ);
 					
-					gateTile.teleportPlayer(message.entityId);
+					if (TeleportHelper.frontSide(sourceFacing, motionVector)) {
+						gateTile.scheduledTeleportMap.put(message.entityId, gateTile.scheduledTeleportMap.get(message.entityId).setMotion(motionVector));
+						
+						world.playSound(null, message.gatePos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+						gateTile.teleportEntity(message.entityId);
+					}
+					
+					else {
+						((EntityPlayerMP)world.getEntityByID(message.entityId)).onKillCommand();
+						gateTile.removeEntityFromTeleportList(message.entityId);
+					}
+					
 				});
 			}
 			
