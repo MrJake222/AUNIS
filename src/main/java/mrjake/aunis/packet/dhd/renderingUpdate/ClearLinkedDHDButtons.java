@@ -58,7 +58,7 @@ public class ClearLinkedDHDButtons implements IMessage {
 			
 			else {
 				World world = Minecraft.getMinecraft().player.getEntityWorld();
-				DHDRenderer renderer = (DHDRenderer) ((DHDTile)world.getTileEntity(message.gatePos)).getRenderer();
+				DHDRenderer renderer = ((DHDTile)world.getTileEntity(message.gatePos)).getDHDRenderer();
 				
 				renderer.clearButtons();				
 			}

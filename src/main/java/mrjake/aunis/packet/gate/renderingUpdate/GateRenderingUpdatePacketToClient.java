@@ -89,7 +89,7 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 				
 				switch ( EnumPacket.valueOf(message.packetID) ) {
 					case DHD_RENDERER_UPDATE:
-						DHDRenderer dhdRenderer = (DHDRenderer) dhdTile.getRenderer();
+						DHDRenderer dhdRenderer = dhdTile.getDHDRenderer();
 						
 						if (message.objectID == -1) 
 							dhdRenderer.clearButtons();

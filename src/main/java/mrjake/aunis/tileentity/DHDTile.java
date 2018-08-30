@@ -36,6 +36,10 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 		return (DHDRenderer) renderer;
 	}
 	
+	public DHDRenderer getDHDRenderer() {
+		return (DHDRenderer) getRenderer();
+	}
+	
 	public DHDRendererState getDHDRendererState() {
 		return (DHDRendererState) getRendererState();
 	}

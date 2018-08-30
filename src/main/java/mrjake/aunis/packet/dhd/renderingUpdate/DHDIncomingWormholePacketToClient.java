@@ -3,7 +3,6 @@ package mrjake.aunis.packet.dhd.renderingUpdate;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
@@ -51,7 +50,7 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 				List<Integer> address = EnumSymbol.fromLong(message.dialedAddress);
 				address.add(EnumSymbol.ORIGIN.id);
 				
-				( (DHDRenderer)te.getRenderer() ).smoothlyActivateButtons(address);
+				te.getDHDRenderer().smoothlyActivateButtons(address);
 			});
 			
 			return null;

@@ -1,7 +1,5 @@
 package mrjake.aunis.renderer;
 
-import static org.lwjgl.opengl.GL11.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,14 +11,22 @@ import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockRotated;
+import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ForgeHooksClient;
 
 public class DHDRenderer implements Renderer<DHDRendererState> {
 	//private DHDTile te;
@@ -64,11 +70,6 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 		
 		initTextureList();
 	}
-	
-	/*@Override
-	public DHDRendererState getState() {
-		return new DHDRendererState(pos, getActiveButtons());
-	}*/
 	
 	@Override
 	public void setState(DHDRendererState rendererState) {
@@ -149,16 +150,51 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 		activation = 0;
 	}
 	
+	private boolean doInsertAnimation = false;
+	private boolean doRemovalAnimation = false;
+	private boolean doUpgradeRender = false;
+	private long insertionTime;
+	
+	public boolean hasUpgrade;
+	
+	public void insertUpgrade() {
+		doUpgradeRender = true;
+	}
+	
+	public void slideInUpgrade() {
+		if (doUpgradeRender && !doInsertAnimation) {
+			insertionTime = world.getTotalWorldTime();
+			doInsertAnimation = true;
+		}
+	}
+	
+	public void slideOutUpgrade() {
+		if (!doUpgradeRender && !doRemovalAnimation && hasUpgrade) {
+			insertionTime = world.getTotalWorldTime();
+			doRemovalAnimation = true;
+			doUpgradeRender = true;
+		}
+	}
+	
+	public void dropUpgrade() {
+		if (doUpgradeRender && !doRemovalAnimation) {
+			doUpgradeRender = false;
+			
+			// TODO Upgrade removed, send to server and drop item
+			hasUpgrade = false;
+		}
+	}
+	
 	@Override
 	public void render(double x, double y, double z, double partialTicks) {
 		Model dhdModel = Aunis.modelLoader.getModel(EnumModel.DHD_MODEL);
 		Model brbModel = Aunis.modelLoader.getModel(EnumModel.BRB);
 		
 		if (dhdModel != null && brbModel != null) {	
-			glPushMatrix();
+			GlStateManager.pushMatrix();
 			
-			glTranslated(x+0.5, y, z+0.5);
-			glRotatef(rotation, 0, 1, 0);
+			GlStateManager.translate(x+0.5, y, z+0.5);
+			GlStateManager.rotate(rotation, 0, 1, 0);
 						
 			ModelLoader.bindTexture( EnumModel.DHD_MODEL );
 			dhdModel.render();
@@ -176,7 +212,44 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 				}
 			}
 			
-			glPopMatrix();
+			if (doUpgradeRender) {
+				float arg = (float) ((world.getTotalWorldTime() - insertionTime + partialTicks) / 60.0);
+				float mul = 1;
+				
+				if (doInsertAnimation)
+					mul = MathHelper.cos(arg+0.31f)+0.048f;
+				else if (doRemovalAnimation)
+					mul = MathHelper.sin(arg) + 0.53f;
+				
+				GlStateManager.translate(0, 0.5, 0.5*mul);
+				GlStateManager.rotate(-90, 0, 1, 0);	
+				GlStateManager.rotate(45, 0, 0, 1);	
+					
+				ItemStack stack = new ItemStack(AunisItems.dhdControlCrystal);
+					
+				IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, world, null);
+				model = ForgeHooksClient.handleCameraTransforms(model, ItemCameraTransforms.TransformType.GROUND, false);
+			
+				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+				Minecraft.getMinecraft().getRenderItem().renderItem(stack, model);
+										
+				if (doInsertAnimation && mul < 0.53f) {
+					doUpgradeRender = false;
+					doInsertAnimation = false;
+					
+					// TODO Upgrade inserted, send to server
+					hasUpgrade = true;
+				}
+				
+				else if (doRemovalAnimation && mul > 1) {
+					doRemovalAnimation = false;
+				}
+			}
+			
+			GlStateManager.popMatrix();
+			
+			// -----------------------------------------------------------------
+			// Logic code
 			
 			if (activation != -1) {
 				int stage;
@@ -223,8 +296,6 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 						if (!clearingButtons) {
 							setActiveButtons(toActivate);
 						}
-						
-						// AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
 					}
 					
 					// When activating remotely, we need to take into account that gate will not be rendered at the time
@@ -232,8 +303,6 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 					if (brbToActivate) {
 						brbToActivate = false;
 						buttonTexture.put("b38", "dhd/brb/brb5.png");
-						
-						// AunisPacketHandler.INSTANCE.sendToServer( new StateUpdateToServer(getState()) );
 					}
 					
 					activation = -1;

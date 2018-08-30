@@ -2,7 +2,10 @@ package mrjake.aunis.block;
 
 import javax.annotation.Nullable;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
+import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.TileEntityRotated;
@@ -10,8 +13,11 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -50,9 +56,46 @@ public class DHDBlock extends TileEntityRotated<DHDTile> {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		
-
+		// Aunis.info("item: "+playerIn.getHeldItemMainhand().getItem()+", facing: "+facing+", hitY: "+hitY);
 		
+		EnumFacing dhdFacingOpposite = EnumFacing.getHorizontal(state.getValue(BlockRotated.ROTATE) / 4);
+		
+		// Check if player clicked with upgrade, on back side, on lower part of the block
+		if (facing == dhdFacingOpposite) {
+			DHDTile dhdTile = (DHDTile) worldIn.getTileEntity(pos);
+			
+			if (worldIn.isRemote) {
+				DHDRenderer renderer = dhdTile.getDHDRenderer();
+				
+				/*renderer.slideInUpgrade();
+				renderer.dropUpgrade();*/
+				
+				// TODO Send packet to server to check for upgrade
+				if (renderer.hasUpgrade) {
+					renderer.dropUpgrade();
+					renderer.slideOutUpgrade();
+				}
+				
+				else {
+					renderer.slideInUpgrade();
+					
+					if (playerIn.getHeldItemMainhand().getItem() == AunisItems.dhdControlCrystal) {
+						// TODO Reduce ItemStack
+						
+						renderer.insertUpgrade();
+					}
+				}
+			}
+						
+			return true;
+		}
+		
+		return false;
 	}
 	
 	@Override
