@@ -16,7 +16,7 @@ public class ItemBase extends Item {
 		setCreativeTab(creativeTab);
 	}
 	
-	public void registerModel() {
+	public void registerItemRenderer() {
 		Aunis.proxy.registerItemRenderer(this, 0, getRegistryName());
 	}
 }

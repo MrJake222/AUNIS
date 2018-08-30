@@ -44,7 +44,7 @@ public class StargateMemberBlock extends BlockTESRMember {
 	
 	@Override
 	public boolean isOpaqueCube(IBlockState state) {
-		return state.getValue(BlockTESRMember.RENDER);
+		return false;
 	}
 	
 	@Override
