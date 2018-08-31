@@ -2,10 +2,10 @@ package mrjake.aunis.block;
 
 import javax.annotation.Nullable;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.renderer.DHDRenderer;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.TileEntityRotated;
@@ -14,6 +14,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
@@ -22,6 +23,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class DHDBlock extends TileEntityRotated<DHDTile> {
 	
@@ -59,53 +61,46 @@ public class DHDBlock extends TileEntityRotated<DHDTile> {
 	}
 	
 	@Override
-	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		
-		// Aunis.info("item: "+playerIn.getHeldItemMainhand().getItem()+", facing: "+facing+", hitY: "+hitY);
-		
-		EnumFacing dhdFacingOpposite = EnumFacing.getHorizontal(state.getValue(BlockRotated.ROTATE) / 4);
-		
-		// Check if player clicked with upgrade, on back side, on lower part of the block
-		if (facing == dhdFacingOpposite) {
-			DHDTile dhdTile = (DHDTile) worldIn.getTileEntity(pos);
+	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {		
+		if (!worldIn.isRemote && hand == EnumHand.MAIN_HAND) {
+			EnumFacing dhdFacingOpposite = EnumFacing.getHorizontal( Math.round(state.getValue(BlockRotated.ROTATE)/4.0f) );
 			
-			if (worldIn.isRemote) {
-				DHDRenderer renderer = dhdTile.getDHDRenderer();
+			// Back side of block
+			if (facing == dhdFacingOpposite) {
+				DHDTile dhdTile = (DHDTile) worldIn.getTileEntity(pos);
+								
+				ItemStack itemStack = playerIn.getHeldItemMainhand();								
+				boolean hasUpgrade = dhdTile.hasUpgrade();
+				boolean isHoldingUpgrade = itemStack.getItem() == AunisItems.dhdControlCrystal;
 				
-				/*renderer.slideInUpgrade();
-				renderer.dropUpgrade();*/
-				
-				// TODO Send packet to server to check for upgrade
-				if (renderer.hasUpgrade) {
-					renderer.dropUpgrade();
-					renderer.slideOutUpgrade();
-				}
-				
-				else {
-					renderer.slideInUpgrade();
+				if (!dhdTile.getInsertAnimation()) {
+					// Reduce ItemStack
+					if (!hasUpgrade && isHoldingUpgrade)
+						playerIn.setHeldItem(hand, new ItemStack(itemStack.getItem(), itemStack.getCount()-1) );
 					
-					if (playerIn.getHeldItemMainhand().getItem() == AunisItems.dhdControlCrystal) {
-						// TODO Reduce ItemStack
-						
-						renderer.insertUpgrade();
-					}
+					dhdTile.setInsertAnimation(true);
 				}
+				
+				AunisPacketHandler.INSTANCE.sendToAllAround( new UpgradeSlotInteractToClient(pos, hasUpgrade, isHoldingUpgrade), new TargetPoint(worldIn.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64) );
 			}
-						
-			return true;
 		}
 		
-		return false;
+		return true;
 	}
-	
+		
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-		DHDTile dhd = (DHDTile) world.getTileEntity(pos);
+		DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
 		
-		StargateBaseTile gate = dhd.getLinkedGate(world);
-		
-		if (gate != null) {
-			gate.setLinkedDHD(null);
+		if (!world.isRemote) {
+			StargateBaseTile gateTile = dhdTile.getLinkedGate(world);
+			
+			if (gateTile != null)
+				gateTile.setLinkedDHD(null);
+			
+			if (dhdTile.hasUpgrade() || dhdTile.getInsertAnimation()) {
+				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.dhdControlCrystal));
+			}
 		}
 		
 		super.breakBlock(world, pos, state);

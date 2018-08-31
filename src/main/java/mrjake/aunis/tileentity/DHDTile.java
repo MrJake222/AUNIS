@@ -84,6 +84,8 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 		
 		compound.setLong("linkedGate", gate.toLong());
 		compound.setBoolean("isLinkedGateEngaged", isLinkedGateEngaged);
+		compound.setBoolean("hasUpgrade", hasUpgrade);
+		compound.setBoolean("insertAnimation", insertAnimation);
 		
 		getRendererState().toNBT(compound);
 		
@@ -101,6 +103,8 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 		this.rendererState = rendererState;
 		
 		linkedGate = BlockPos.fromLong( compound.getLong("linkedGate") );
+		hasUpgrade = compound.getBoolean("hasUpgrade");
+		insertAnimation = compound.getBoolean("insertAnimation");
 		
 		super.readFromNBT(compound);
 	}
@@ -120,7 +124,30 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 		}
 	}
 	
-    @Override
+	private boolean hasUpgrade = false;
+	private boolean insertAnimation = false;
+	
+	public boolean hasUpgrade() {
+		return hasUpgrade;
+	}
+	
+	public void setUpgrade(boolean hasUpgrade) {
+		this.hasUpgrade = hasUpgrade;
+		
+		markDirty();
+	}
+	
+    public boolean getInsertAnimation() {
+		return insertAnimation;
+	}
+
+	public void setInsertAnimation(boolean insertAnimation) {
+		this.insertAnimation = insertAnimation;
+		
+		markDirty();
+	}
+
+	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
 		return new AxisAlignedBB(getPos().add(-1, 0, -1), getPos().add(1, 2, 1));
 	}

@@ -12,6 +12,8 @@ import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockRotated;
 import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.upgrade.UpgradeTileUpdateToServer;
 import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
@@ -155,34 +157,44 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 	private boolean doUpgradeRender = false;
 	private long insertionTime;
 	
-	public boolean hasUpgrade;
-	
-	public void insertUpgrade() {
-		doUpgradeRender = true;
-	}
-	
-	public void slideInUpgrade() {
-		if (doUpgradeRender && !doInsertAnimation) {
-			insertionTime = world.getTotalWorldTime();
-			doInsertAnimation = true;
-		}
-	}
-	
-	public void slideOutUpgrade() {
-		if (!doUpgradeRender && !doRemovalAnimation && hasUpgrade) {
-			insertionTime = world.getTotalWorldTime();
-			doRemovalAnimation = true;
-			doUpgradeRender = true;
-		}
-	}
-	
-	public void dropUpgrade() {
-		if (doUpgradeRender && !doRemovalAnimation) {
-			doUpgradeRender = false;
+	public void upgradeInteract(boolean hasUpgrade, boolean isHoldingUpgrade) {
+		if (hasUpgrade) {
+			if (doUpgradeRender) {
+				// Removing upgrade from slot				
+				doUpgradeRender = false;
+				AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, false) );
+			}
 			
-			// TODO Upgrade removed, send to server and drop item
-			hasUpgrade = false;
+			else {
+				// Sliding out upgrade
+				if (!doRemovalAnimation) {
+					insertionTime = world.getTotalWorldTime();
+					doRemovalAnimation = true;
+					doUpgradeRender = true;
+				}
+			}
 		}
+		
+		else {
+			if (doUpgradeRender) {
+				// Inserting upgrade into DHD
+				if (!doInsertAnimation) {
+					insertionTime = world.getTotalWorldTime();
+					doInsertAnimation = true;
+				}
+			}
+			
+			else {
+				// Putting upgrade in slot
+				if (isHoldingUpgrade) {
+					doUpgradeRender = true;
+				}
+			}
+		}
+	}
+	
+	public boolean upgradeInSlot() {
+		return doUpgradeRender;
 	}
 	
 	@Override
@@ -238,7 +250,7 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 					doInsertAnimation = false;
 					
 					// TODO Upgrade inserted, send to server
-					hasUpgrade = true;
+					AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, true) );
 				}
 				
 				else if (doRemovalAnimation && mul > 1) {
