@@ -2,7 +2,8 @@ package mrjake.aunis.packet.upgrade;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.RenderedTileEntity;
+import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
@@ -44,15 +45,22 @@ public class UpgradeTileUpdateToServer implements IMessage {
 			WorldServer worldServer = player.getServerWorld();
 			
 			worldServer.addScheduledTask(() -> {
-				DHDTile dhdTile = (DHDTile) worldServer.getTileEntity(message.dhdPos);
-				dhdTile.setUpgrade(message.hasUpgrade);
-				dhdTile.setInsertAnimation(false);
+				RenderedTileEntity renderedTileEntity = (RenderedTileEntity) worldServer.getTileEntity(message.dhdPos);
+				renderedTileEntity.setUpgrade(message.hasUpgrade);
+				renderedTileEntity.setInsertAnimation(false);
+				
+				ItemStack itemStack;
+				
+				if (renderedTileEntity instanceof StargateBaseTile)
+					itemStack = new ItemStack(AunisItems.stargateAddressCrystal);
+				else
+					itemStack = new ItemStack(AunisItems.dhdControlCrystal);
 				
 				if (!message.hasUpgrade) {
 					if (player.getHeldItemMainhand().isItemEqual(ItemStack.EMPTY))
-						player.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(AunisItems.dhdControlCrystal));
+						player.setHeldItem(EnumHand.MAIN_HAND, itemStack);
 					else
-						player.inventory.addItemStackToInventory(new ItemStack(AunisItems.dhdControlCrystal));
+						player.inventory.addItemStackToInventory(itemStack);
 				}
 			});
 			

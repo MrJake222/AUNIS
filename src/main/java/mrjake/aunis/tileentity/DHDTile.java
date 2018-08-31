@@ -131,6 +131,7 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 		return hasUpgrade;
 	}
 	
+	@Override
 	public void setUpgrade(boolean hasUpgrade) {
 		this.hasUpgrade = hasUpgrade;
 		
@@ -141,6 +142,7 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 		return insertAnimation;
 	}
 
+    @Override
 	public void setInsertAnimation(boolean insertAnimation) {
 		this.insertAnimation = insertAnimation;
 		

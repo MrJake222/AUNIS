@@ -10,6 +10,7 @@ public class AunisItems {
 	public static ItemBase emptyCrystal = new ItemBase("empty_crystal", Aunis.aunisCreativeTab);
 	public static ItemBase dhdControlCrystal = new ItemBase("dhd_control_crystal", Aunis.aunisCreativeTab);
 	public static ItemBase stargateAddressCrystal = new ItemBase("stargate_address_crystal", Aunis.aunisCreativeTab);
+	public static ItemBase ancientAnalyzer = new ItemBase("ancient_analyzer", Aunis.aunisCreativeTab);
 	
 	public static Item[] items = {
 		naquadahOreShard,
@@ -17,5 +18,6 @@ public class AunisItems {
 		refinedNaquadah,
 		emptyCrystal,
 		dhdControlCrystal,
-		stargateAddressCrystal };
+		stargateAddressCrystal,
+		ancientAnalyzer };
 }

@@ -8,6 +8,8 @@ item.aunis.empty_crystal.name=Empty Crystal
 item.aunis.dhd_control_crystal.name=DHD Control Crystal
 item.aunis.stargate_address_crystal.name=Stargate Address Crystal
 
+item.aunis.ancient_analyzer.name=Ancient Tech Analyzer
+
 tile.aunis.stargatebase_block.name=Stargate Base
 tile.aunis.ring_block.name=Stargate Ring
 tile.aunis.chevron_block.name=Stargate Chevron

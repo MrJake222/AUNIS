@@ -157,6 +157,7 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 	private boolean doUpgradeRender = false;
 	private long insertionTime;
 	
+	@Override
 	public void upgradeInteract(boolean hasUpgrade, boolean isHoldingUpgrade) {
 		if (hasUpgrade) {
 			if (doUpgradeRender) {
@@ -193,9 +194,9 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 		}
 	}
 	
-	public boolean upgradeInSlot() {
+	/*public boolean upgradeInSlot() {
 		return doUpgradeRender;
-	}
+	}*/
 	
 	@Override
 	public void render(double x, double y, double z, double partialTicks) {
@@ -242,14 +243,19 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 				IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, world, null);
 				model = ForgeHooksClient.handleCameraTransforms(model, ItemCameraTransforms.TransformType.GROUND, false);
 			
+				GlStateManager.enableBlend();
+				GlStateManager.color(1, 1, 1, 0.7f);
+				
 				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 				Minecraft.getMinecraft().getRenderItem().renderItem(stack, model);
-										
+				
+				GlStateManager.disableBlend();
+				
 				if (doInsertAnimation && mul < 0.53f) {
 					doUpgradeRender = false;
 					doInsertAnimation = false;
 					
-					// TODO Upgrade inserted, send to server
+					// Upgrade inserted, send to server
 					AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, true) );
 				}
 				

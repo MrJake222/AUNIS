@@ -14,10 +14,6 @@ public abstract class RenderedTileEntity extends TileEntity {
 	public abstract RendererState getRendererState();
 	public abstract void setRendererState(RendererState rendererState);
 	
-	/*public void setRendererState(RendererState rendererState) {
-		this.rendererState = rendererState;
-		// Aunis.info("rendererState synced: "+rendererState.toString());
-		
-		markDirty();
-	}*/
+	public abstract void setUpgrade(boolean hasUpgrade);
+	public abstract void setInsertAnimation(boolean insertAnimation);
 }

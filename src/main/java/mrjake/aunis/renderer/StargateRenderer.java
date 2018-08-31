@@ -14,23 +14,31 @@ import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.StargateBaseBlock;
+import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
+import mrjake.aunis.packet.upgrade.UpgradeTileUpdateToServer;
 import mrjake.aunis.renderer.RendererInit.QuadStrip;
 import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.stargate.merge.BlockPosition;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ForgeHooksClient;
 
 public class StargateRenderer implements Renderer<StargateRendererState> {
 	// private StargateBaseTile te;
@@ -119,9 +127,11 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 			renderRing(x, y, z, partialTicks);
 			renderChevrons(x, y, z, partialTicks);
 			
-			if (doEventHorizonRender) {
+			if (doEventHorizonRender)
 				renderKawoosh(x, y, z, partialTicks);
-			}
+			
+			if (doUpgradeRender)
+				renderUpgrade(x, y, z, partialTicks);
 		}
 	}
 	
@@ -871,4 +881,93 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		GlStateManager.disableBlend();
 	}
 
+	private boolean doInsertAnimation = false;
+	private boolean doRemovalAnimation = false;
+	private boolean doUpgradeRender = false;
+	private long insertionTime;
+	
+	@Override
+	public void upgradeInteract(boolean hasUpgrade, boolean isHoldingUpgrade) {
+		if (hasUpgrade) {
+			if (doUpgradeRender) {
+				// Removing upgrade from slot				
+				doUpgradeRender = false;
+				AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, false) );
+			}
+			
+			else {
+				// Sliding out upgrade
+				if (!doRemovalAnimation) {
+					insertionTime = world.getTotalWorldTime();
+					doRemovalAnimation = true;
+					doUpgradeRender = true;
+				}
+			}
+		}
+		
+		else {
+			if (doUpgradeRender) {
+				// Inserting upgrade into DHD
+				if (!doInsertAnimation) {
+					insertionTime = world.getTotalWorldTime();
+					doInsertAnimation = true;
+				}
+			}
+			
+			else {
+				// Putting upgrade in slot
+				if (isHoldingUpgrade) {
+					doUpgradeRender = true;
+				}
+			}
+		}
+	}
+	
+	/*public boolean upgradeInSlot() {
+		return doUpgradeRender;
+	}*/
+	
+	public void renderUpgrade(double x, double y, double z, double partialTicks) {		
+		float arg = (float) ((world.getTotalWorldTime() - insertionTime + partialTicks) / 60.0);
+		float mul = 1;
+		
+		if (doInsertAnimation)
+			mul = MathHelper.cos(arg+0.31f)+0.048f;
+		else if (doRemovalAnimation)
+			mul = MathHelper.sin(arg) + 0.53f;
+		
+		GlStateManager.pushMatrix();
+		
+		// Gate diameter/2 + 0.9
+		GlStateManager.translate(x, y-4.55f+1*mul, z-0.07f);
+		// GlStateManager.rotate(-90, 0, 1, 0);	
+		GlStateManager.rotate(135, 0, 0, 1);	
+			
+		ItemStack stack = new ItemStack(AunisItems.stargateAddressCrystal);
+			
+		IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, world, null);
+		model = ForgeHooksClient.handleCameraTransforms(model, ItemCameraTransforms.TransformType.GROUND, false);
+	
+		GlStateManager.enableBlend();
+		
+		GlStateManager.color(1, 1, 1, 0.7f);
+		Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+		Minecraft.getMinecraft().getRenderItem().renderItem(stack, model);
+		
+		GlStateManager.disableBlend();
+		
+		if (doInsertAnimation && mul < 0.7f) {
+			doUpgradeRender = false;
+			doInsertAnimation = false;
+			
+			// Upgrade inserted, send to server
+			AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, true) );
+		}
+		
+		else if (doRemovalAnimation && mul > 1) {
+			doRemovalAnimation = false;
+		}
+		
+		GlStateManager.popMatrix();
+	}
 }

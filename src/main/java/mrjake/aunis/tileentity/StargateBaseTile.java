@@ -216,6 +216,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		compound.setBoolean("isEngaged", isEngaged);
 		compound.setBoolean("isInitiating", isInitiating);
+		compound.setBoolean("hasUpgrade", hasUpgrade);
+		compound.setBoolean("insertAnimation", insertAnimation);
 		
 		if (isEngaged && isInitiating) {
 			for (int i=0; i<maxChevrons-1; i++) {
@@ -249,7 +251,9 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		isEngaged = compound.getBoolean("isEngaged");
 		isInitiating = compound.getBoolean("isInitiating");
-				
+		hasUpgrade = compound.getBoolean("hasUpgrade");
+		insertAnimation = compound.getBoolean("insertAnimation");
+		
 		if (isEngaged && isInitiating) {
 			dialedAddress.clear();
 			
@@ -451,6 +455,31 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 				// Possibly TODO: Add region, so if we break the stargate and place it nearby, it keeps the address
 			}			
 		}
+	}
+	
+	private boolean hasUpgrade = false;
+	private boolean insertAnimation = false;
+	
+	public boolean hasUpgrade() {
+		return hasUpgrade;
+	}
+	
+	@Override
+	public void setUpgrade(boolean hasUpgrade) {
+		this.hasUpgrade = hasUpgrade;
+		
+		markDirty();
+	}
+	
+    public boolean getInsertAnimation() {
+		return insertAnimation;
+	}
+
+    @Override
+	public void setInsertAnimation(boolean insertAnimation) {
+		this.insertAnimation = insertAnimation;
+		
+		markDirty();
 	}
 	
 	@Override
