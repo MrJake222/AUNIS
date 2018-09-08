@@ -2,7 +2,6 @@ package mrjake.aunis.tileentity;
 
 import java.util.ArrayList;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRenderer;
@@ -57,9 +56,7 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 		this.rendererState = rendererState;
 	}
 	
-	public void setLinkedGate(BlockPos gate) {
-		Aunis.log("Linking to gate at " + gate.toString());
-		
+	public void setLinkedGate(BlockPos gate) {		
 		this.linkedGate = gate;
 		markDirty();
 	}
@@ -75,10 +72,8 @@ public class DHDTile extends RenderedTileEntity implements ITickable {
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		BlockPos gate;
 		
-		if (linkedGate == null) {
-			Aunis.log("linkedGate is null!");
+		if (linkedGate == null)
 			gate = new BlockPos(0,0,0);
-		}
 		else
 			gate = linkedGate;
 		

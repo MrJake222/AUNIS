@@ -50,6 +50,23 @@ public class RendererInit {
 			Minecraft.getMinecraft().getTextureManager().loadTexture(resource, itextureobject);
 		}
 		
+		// Load button textures
+		for (int k=0; k<2; k++) {
+			String tex;
+					
+			if (k == 0)
+				tex = "symbol";
+			else
+				tex = "brb";
+					
+			for (int i=0; i<=5; i++) {
+				ResourceLocation resource = new ResourceLocation( "aunis:textures/tesr/dhd/"+tex+"/"+tex+i+".png" );
+					
+				ITextureObject itextureobject = new SimpleTexture(resource);
+				Minecraft.getMinecraft().getTextureManager().loadTexture(resource, itextureobject);
+			}
+		}
+		
 		initEventHorizon();
 		initKawoosh();
 	}

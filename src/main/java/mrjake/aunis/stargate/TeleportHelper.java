@@ -49,22 +49,31 @@ public class TeleportHelper {
 		v.y += dest.y;
 	}
 	
-	public static void teleportServer(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, String sourceAxisName, Vector2f motionVector) {
-		setRotation(player, rotation, sourceAxisName);
-		teleport(player, sourceGatePos, targetGatePos, rotation, sourceAxisName);
-		setMotion(player, rotation, sourceAxisName, motionVector);
+	public static void teleportServer(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, int rotation, String sourceAxisName, Vector2f motionVector, int targetDimension, float dimensionMul) {
+		int sourceDimension = player.getEntityWorld().provider.getDimension();
+		
+		Vec3d lookVec = player.getLookVec();
+		Vec3d playerPos = player.getPositionVector();
+		
+		if (sourceDimension != targetDimension)
+			player.changeDimension(targetDimension);
+		
+		setRotation(player, lookVec, rotation);
+		teleport(player, playerPos, sourceGatePos, targetGatePos, rotation, sourceAxisName);
+		setMotion(player, rotation, motionVector);
 	}
 	
-	public static void setRotation(Entity player, float rotation, String sourceAxisName) {
-		Vec3d lookVec = player.getLookVec();
+	public static void setRotation(Entity player, Vec3d lookVec, float rotation) {
 		Vector2f lookVec2f = new Vector2f( (float)(lookVec.x), (float)(lookVec.z) );
 		
-		rotateAround00(lookVec2f, rotation, sourceAxisName);
+		rotateAround00(lookVec2f, rotation, null);
 		
-		player.rotationYaw = (float) Math.toDegrees(MathHelper.atan2(lookVec2f.x, lookVec2f.y));		
+		float targetYaw = (float) Math.toDegrees(MathHelper.atan2(-lookVec2f.x, lookVec2f.y));
+		
+		player.rotationYaw = targetYaw;
 	}
 	
-	public static void setMotion(Entity player, float rotation, String sourceAxisName, Vector2f motionVec2f) {		
+	public static void setMotion(Entity player, float rotation, Vector2f motionVec2f) {		
 		if (motionVec2f != null) {		
 			rotateAround00(motionVec2f, rotation, null);
 					
@@ -91,16 +100,16 @@ public class TeleportHelper {
 			return motion >= 0;
 	}
 	
-	public static void teleport(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, String sourceAxisName) {
+	public static void teleport(Entity player, Vec3d playerPos, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, String sourceAxisName) {
 		Vector2f sourceCenter = new Vector2f( sourceGatePos.getX()+0.5f, sourceGatePos.getZ()+0.5f );
 		Vector2f destCenter = new Vector2f( targetGatePos.getX()+0.5f, targetGatePos.getZ()+0.5f );
-		Vector2f playerPosition = new Vector2f( (float)(player.posX), (float)(player.posZ) );  
+		Vector2f playerPosition = new Vector2f( (float)playerPos.x, (float)playerPos.z );  
 		
 		translateTo00(sourceCenter, playerPosition);
 		rotateAround00(playerPosition, rotation, sourceAxisName);				
 		translateToDest(playerPosition, destCenter);
 		
-		float y = (float) (targetGatePos.getY() + ( player.posY - sourceGatePos.getY() ));
+		float y = (float) (targetGatePos.getY() + ( playerPos.y - sourceGatePos.getY() ));
 		player.setPositionAndUpdate(playerPosition.x, y, playerPosition.y);
 	}
 	

@@ -10,7 +10,6 @@ import org.lwjgl.util.vector.Vector3f;
 import mrjake.aunis.block.BlockRotated;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -144,11 +143,9 @@ public class DHDActivation {
 		}
 		
 		if (button != -1) {
-			//Aunis.info("Button: " + button);
 			player.swingArm(EnumHand.MAIN_HAND);
 
-			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.DHD_RENDERER_UPDATE, button, pos) );
-			//AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(EnumPacket.Chevron, button, pos) );
+			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(button, pos) );
 		}
 	}
 	

@@ -37,7 +37,7 @@ public class ClearLinkedDHDButtons implements IMessage {
 	
 	
 	public static class ClearLinkedDHDButtonsHandler implements IMessageHandler<ClearLinkedDHDButtons, IMessage> {
-
+		// TODO Cleanup
 		@Override
 		public IMessage onMessage(ClearLinkedDHDButtons message, MessageContext ctx) {
 			

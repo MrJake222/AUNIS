@@ -8,11 +8,11 @@ import java.util.Random;
 
 import javax.vecmath.Vector2f;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.Renderer;
@@ -23,6 +23,7 @@ import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
+import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.stargate.merge.MergeHelper;
 import net.minecraft.block.state.IBlockState;
@@ -35,10 +36,13 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
+import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	
-	private static final int maxChevrons = 7;
+	private static final int maxChevrons = 8;
 
 	private LimitedStargateRendererState limitedState;
 	private BlockPos linkedDHD = null;
@@ -54,11 +58,11 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	public List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
 	
-	public boolean addSymbolToAddress(EnumSymbol symbol) {		
+	public boolean addSymbolToAddress(EnumSymbol symbol, DHDTile dhdTile) {		
 		if (dialedAddress.contains(symbol)) 
 			return false;
 		
-		if (dialedAddress.size() == maxChevrons)
+		if ( dialedAddress.size() == (dhdTile.hasUpgrade() ? 8 : 7) )
 			return false;
 		
 		dialedAddress.add(symbol);
@@ -121,7 +125,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 
 	private void setRendererState() {
 		if (isEngaged)
-			rendererState = new StargateRendererState(pos, maxChevrons, true, getLimitedState().ringAngularRotation, true, EnumVortexState.STILL, true, true);
+			rendererState = new StargateRendererState(pos, dialedAddress.size(), true, getLimitedState().ringAngularRotation, true, EnumVortexState.STILL, true, true);
 		else
 			rendererState = new StargateRendererState(pos, 0, false, getLimitedState().ringAngularRotation, false, EnumVortexState.FORMING, false, false);
 	}
@@ -199,10 +203,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		BlockPos dhd;
 		
-		if (linkedDHD == null) {
-			Aunis.log(pos.toString()+":  linkedDHD is null!");
+		if (linkedDHD == null)
 			dhd = new BlockPos(0,0,0);
-		}
 		else
 			dhd = linkedDHD;
 		
@@ -220,7 +222,9 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		compound.setBoolean("insertAnimation", insertAnimation);
 		
 		if (isEngaged && isInitiating) {
-			for (int i=0; i<maxChevrons-1; i++) {
+			compound.setInteger("dialedAddressLength", dialedAddress.size());
+			
+			for (int i=0; i<dialedAddress.size(); i++) {
 				compound.setInteger("dialedSymbol"+i, dialedAddress.get(i).id);
 			}
 		}
@@ -233,8 +237,6 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		this.linkedDHD = BlockPos.fromLong( compound.getLong("linkedDHD") );
-
-		Aunis.log(pos.toString()+": Relinking to DHD at " + linkedDHD.toString());
 		
 		boolean compoundHasAddress = compound.hasKey("symbol0");
 		
@@ -245,19 +247,18 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 				int id = compound.getInteger("symbol"+i);
 				gateAddress.add( EnumSymbol.valueOf(id) );
 			}
-			
-			Aunis.log("Read address: "+gateAddress.toString());
 		}
 		
 		isEngaged = compound.getBoolean("isEngaged");
 		isInitiating = compound.getBoolean("isInitiating");
 		hasUpgrade = compound.getBoolean("hasUpgrade");
 		insertAnimation = compound.getBoolean("insertAnimation");
-		
+
 		if (isEngaged && isInitiating) {
 			dialedAddress.clear();
+			int dialedAddressLength = compound.getInteger("dialedAddressLength");
 			
-			for (int i=0; i<maxChevrons-1; i++) {
+			for (int i=0; i<dialedAddressLength; i++) {
 				dialedAddress.add( EnumSymbol.valueOf(compound.getInteger("dialedSymbol"+i)) );
 			}
 		}
@@ -287,26 +288,26 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		private BlockPos sourceGatePos;
 		private BlockPos targetGatePos;
 		
-		private float rotation;
+		private int rotation;
 		private String sourceAxisName;
 		
 		private Vector2f motionVector;
+		private WorldProvider targetWorldProvider;
 		
-		public TeleportPacket(BlockPos source, BlockPos target, float rot, EnumFacing.Axis sourceAxis) {
+		public TeleportPacket(BlockPos source, BlockPos target, int rotation, EnumFacing.Axis sourceAxis, World targetWorld) {
 			sourceGatePos = source;
 			targetGatePos = target;
 			
-			rotation = rot;
+			this.rotation = rotation;
 			sourceAxisName = sourceAxis.getName();
+			targetWorldProvider = targetWorld.provider;
 		}
 		
-		public void teleport(Entity entity) {
-			TeleportHelper.teleportServer(entity, sourceGatePos, targetGatePos, rotation, sourceAxisName, motionVector);
+		public void teleport(Entity entity, World sourceWorld) {
+			TeleportHelper.teleportServer(entity, sourceGatePos, targetGatePos, rotation, sourceAxisName, motionVector, targetWorldProvider.getDimension(), (float) (sourceWorld.provider.getMovementFactor()/targetWorldProvider.getMovementFactor()));
 			
 			if (entity instanceof EntityPlayerMP)
 				entity.getEntityWorld().playSound(null, targetGatePos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
-			
-			// AunisPacketHandler.INSTANCE.sendTo(new PlayWormholeSoundPacketToClient(targetGatePos), player);
 		}
 
 		public TeleportPacket setMotion(Vector2f motion) {
@@ -320,13 +321,24 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	
 	public void teleportEntity(int entityId) {
 		Entity entity = world.getEntityByID(entityId);
-		scheduledTeleportMap.get(entityId).teleport(entity);
+		scheduledTeleportMap.get(entityId).teleport(entity, world);
 		
 		removeEntityFromTeleportList(entityId);
 	}
 	
 	public void removeEntityFromTeleportList(int entityId) {		
 		scheduledTeleportMap.remove(entityId);
+	}
+	
+	private boolean clearingButtons;
+	private long waitForClear;
+	private int clearDelay;
+	
+	public void clearLinkedDHDButtons(boolean dialingFailed) {
+		clearDelay = dialingFailed ? 29 : 52;
+		
+		waitForClear = world.getTotalWorldTime();
+		clearingButtons = true;
 	}
 	
 	@Override
@@ -380,15 +392,19 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 				int entId = entity.getEntityId();
 				
 				if ( !scheduledTeleportMap.containsKey(entId) ) {
-					BlockPos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
+					StargatePos targetGate = StargateNetwork.get(world).getStargate( dialedAddress );
+					World targetWorld = DimensionManager.getWorld(targetGate.getDimension());
+					
+					BlockPos targetPos = targetGate.getPos();
+					// StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 					
 					EnumFacing sourceFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
-					EnumFacing targetFacing = world.getBlockState(targetPos).getValue(BlockFaced.FACING);
+					EnumFacing targetFacing = targetWorld.getBlockState(targetPos).getValue(BlockFaced.FACING);
 					
-					float rotation = targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle();
-					rotation = (float) Math.toRadians( EnumFacing.fromAngle(rotation).getOpposite().getHorizontalAngle() );
+					int rotation = (int) (sourceFacing.getHorizontalAngle() - targetFacing.getHorizontalAngle());
+					//rotation = (float) Math.toRadians( /*.getOpposite()*/.getHorizontalAngle() );
 					
-					TeleportPacket packet = new TeleportPacket(pos, targetPos, rotation, sourceFacing.getAxis());
+					TeleportPacket packet = new TeleportPacket(pos, targetPos, rotation, sourceFacing.getAxis(), targetWorld);
 					
 					if (entity instanceof EntityPlayerMP) {
 						scheduledTeleportMap.put(entId, packet);
@@ -404,6 +420,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 						}
 						
 						else {
+							// TODO Make custom message appear
 							entity.onKillCommand();
 						}
 					}
@@ -417,8 +434,16 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		}
 		
 		if (isClosing) {
-			if (world.getTotalWorldTime()-waitForClose >= 56 && isClosing) 
+			if (world.getTotalWorldTime()-waitForClose >= 56) 
 				disconnectGate();
+		}
+		
+		if (clearingButtons) {
+			if (world.getTotalWorldTime()-waitForClear >= clearDelay) { 
+				if (linkedDHD != null)
+					AunisPacketHandler.INSTANCE.sendToAllAround(new ClearLinkedDHDButtons(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64));
+				clearingButtons = false;
+			}
 		}
 	}
 	
@@ -446,11 +471,9 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 							
 				gateAddress = address;
 				markDirty();
-				
-				Aunis.log("Adding new gate, Generated address "+address.toString());
-				
+								
 				// Add Stargate to the "network" - WorldSavedData
-				StargateNetwork.get(world).addStargate(gateAddress, pos);
+				StargateNetwork.get(world).addStargate(gateAddress, world.provider.getDimension(), pos);
 				
 				// Possibly TODO: Add region, so if we break the stargate and place it nearby, it keeps the address
 			}			

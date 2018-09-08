@@ -23,7 +23,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 @EventBusSubscriber(Side.CLIENT)
-public class AunisClientEventHandler {
+public class AunisEventHandler {
 	
 	@SubscribeEvent
 	public static void onDrawHighlight(DrawBlockHighlightEvent event) {		

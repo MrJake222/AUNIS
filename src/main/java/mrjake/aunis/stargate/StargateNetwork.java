@@ -22,17 +22,21 @@ public class StargateNetwork extends WorldSavedData {
 		super(name);
 	}
 	
-	private Map<Long, BlockPos> stargateMap = new HashMap<Long, BlockPos>();
+	// Long - Base address - 6 symbols serialized
+	// StargatePos - BlockPos/int Object
+	private Map<Long, StargatePos> stargateMap = new HashMap<Long, StargatePos>();
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		compound.setInteger( "size", stargateMap.size() );
 		
 		int i = 0;
-		for ( Map.Entry<Long, BlockPos> entry : stargateMap.entrySet() ) {
+		for ( Map.Entry<Long, StargatePos> entry : stargateMap.entrySet() ) {
 			
-			compound.setLong( "key"+i, entry.getKey() );
-			compound.setLong( "value"+i, entry.getValue().toLong() );
+			compound.setLong(    "addr"+i, entry.getKey() );
+			compound.setLong(    "pos"+i, entry.getValue().getPos().toLong() );
+			compound.setInteger(    "last"+i, entry.getValue().get7thSymbol().id );
+			compound.setInteger( "dim"+i, entry.getValue().getDimension() );
 			
 			i++;
 		}
@@ -43,20 +47,23 @@ public class StargateNetwork extends WorldSavedData {
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		int size = compound.getInteger("size");
+		stargateMap.clear();
 		
 		for (int i=0; i<size; i++) {
-			long key = compound.getLong("key"+i);
-			BlockPos value = BlockPos.fromLong( compound.getLong("value"+i) );
+			long addr = compound.getLong("addr"+i);
+			BlockPos pos = BlockPos.fromLong( compound.getLong("pos"+i) );
+			EnumSymbol last = EnumSymbol.valueOf( compound.getInteger("last"+i) );
+			int dim = compound.getInteger("dim"+i);
 			
-			stargateMap.put(key, value);
+			stargateMap.put(addr, new StargatePos(pos, last, dim));
 		}
 		
-		Aunis.log("Read gates from NBT: " + stargateMap.toString());
+		// Aunis.log("Read gates from NBT: " + stargateMap.toString());
 	}
 		
-	public void addStargate(List<EnumSymbol> address, BlockPos pos) {	
+	public void addStargate(List<EnumSymbol> address, int dimension, BlockPos pos) {	
 		if ( !checkForStargate(address) ) {
-			stargateMap.put(EnumSymbol.toLong(address), pos);
+			stargateMap.put(EnumSymbol.toLong(address), new StargatePos(pos, address.get(address.size()-1), dimension));
 			
 			markDirty();
 		}
@@ -64,16 +71,10 @@ public class StargateNetwork extends WorldSavedData {
 	
 	public void removeStargate(List<EnumSymbol> address) {
 		if ( checkForStargate(address) ) {
-			stargateMap.remove( EnumSymbol.toLong(address) );
+			stargateMap.remove(EnumSymbol.toLong(address));
 			
 			markDirty();
 		}
-	}
-	
-	public void clear() {
-		stargateMap.clear();
-		
-		markDirty();
 	}
 	
 	@Override
@@ -81,7 +82,7 @@ public class StargateNetwork extends WorldSavedData {
 		return stargateMap.toString();
 	}
 	
-	public BlockPos getStargate(List<EnumSymbol> address) {
+	public StargatePos getStargate(List<EnumSymbol> address) {
 		return stargateMap.get( EnumSymbol.toLong(address) );
 	}
 	
@@ -102,7 +103,32 @@ public class StargateNetwork extends WorldSavedData {
 	}
 
 	
-
-	
-	
+	public static class StargatePos {
+		private BlockPos gatePos;
+		private int dimension;
+		private EnumSymbol lastSymbol;
+		
+		public StargatePos(BlockPos pos, EnumSymbol lastSymbol, int dimension) {
+			this.gatePos = pos;
+			this.lastSymbol = lastSymbol;
+			this.dimension = dimension;
+		}
+		
+		public BlockPos getPos() {
+			return gatePos;
+		}
+		
+		public int getDimension() {
+			return dimension;
+		}
+		
+		public EnumSymbol get7thSymbol() {
+			return lastSymbol;
+		}
+		
+		@Override
+		public String toString() {
+			return gatePos+" in dim:"+dimension+", last: "+lastSymbol;
+		}
+	}
 }

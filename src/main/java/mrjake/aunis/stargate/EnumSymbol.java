@@ -82,11 +82,21 @@ public enum EnumSymbol {
 	// Serialize address to long
 	public static long toLong(List<EnumSymbol> address) {
 		long out = 0;
-		int size = address.size();
 		
+		// This encodes only "base" address - 6 symbols
+		int size = 6;
+		
+		/*
+		int size = address.size(); 
 		if (address.get(size-1) == EnumSymbol.ORIGIN) {
 			size--;
 		}
+		
+		if (size > 6)
+			size--;*/
+		
+		
+		
 		
 		for (int i=0; i<size; i++) {
 			long id = (long)(address.get(i).id) << i*6;
@@ -101,7 +111,7 @@ public enum EnumSymbol {
 	public static List<Integer> fromLong(long address) {
 		List<Integer> out = new ArrayList<Integer>();
 				
-		// TODO: Check for length
+		// This decodes only base address - 6 symbol one
 		for (int i=0; i<6; i++) {
 			int id = (int) ((address >>> i*6) & 0x3F); // 0b00111111
 			

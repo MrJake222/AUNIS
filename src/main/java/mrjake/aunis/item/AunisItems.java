@@ -1,16 +1,16 @@
 package mrjake.aunis.item;
 
-import mrjake.aunis.Aunis;
 import net.minecraft.item.Item;
 
 public class AunisItems {
-	public static ItemBase naquadahOreShard = new ItemBase("naquadah_ore_shard", Aunis.aunisCreativeTab);
-	public static ItemBase pureNaquadahOre = new ItemBase("pure_naquadah_ore", Aunis.aunisCreativeTab);
-	public static ItemBase refinedNaquadah = new ItemBase("refined_naquadah", Aunis.aunisCreativeTab);
-	public static ItemBase emptyCrystal = new ItemBase("empty_crystal", Aunis.aunisCreativeTab);
-	public static ItemBase dhdControlCrystal = new ItemBase("dhd_control_crystal", Aunis.aunisCreativeTab);
-	public static ItemBase stargateAddressCrystal = new ItemBase("stargate_address_crystal", Aunis.aunisCreativeTab);
-	public static ItemBase ancientAnalyzer = new ItemBase("ancient_analyzer", Aunis.aunisCreativeTab);
+	public static ItemBase naquadahOreShard = new ItemBase("naquadah_ore_shard");
+	public static ItemBase pureNaquadahOre = new ItemBase("pure_naquadah_ore");
+	public static ItemBase refinedNaquadah = new ItemBase("refined_naquadah");
+	public static ItemBase emptyCrystal = new ItemBase("empty_crystal");
+	public static ItemBase dhdControlCrystal = new ItemBase("dhd_control_crystal");
+	public static ItemBase stargateAddressCrystal = new ItemBase("stargate_address_crystal");
+	public static ItemBase ancientAnalyzer = new ItemBase("ancient_analyzer");
+	public static ItemBase fastDialer = new ItemBase("fast_dialer");
 	
 	public static Item[] items = {
 		naquadahOreShard,
@@ -19,5 +19,6 @@ public class AunisItems {
 		emptyCrystal,
 		dhdControlCrystal,
 		stargateAddressCrystal,
-		ancientAnalyzer };
+		ancientAnalyzer,
+		fastDialer };
 }

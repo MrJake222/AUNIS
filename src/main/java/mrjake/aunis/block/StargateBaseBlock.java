@@ -1,22 +1,21 @@
 package mrjake.aunis.block;
 
-import javafx.stage.Stage;
-import mrjake.aunis.gui.StargateGUI;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.merge.MergeHelper;
-import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.TileEntityTESRMember;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -61,27 +60,42 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
 		ItemStack heldItem = player.getHeldItemMainhand();	
 		
-		// Client side
-		if (world.isRemote) {
+		// Server side
+		if (!world.isRemote) {
 			if (heldItem.getItem() == AunisItems.ancientAnalyzer) {
-				Minecraft.getMinecraft().displayGuiScreen( new StargateGUI(gateTile) );
+				AunisPacketHandler.INSTANCE.sendTo(new OpenStargateAddressGuiToClient(pos, gateTile.hasUpgrade() ? 7 : 6), (EntityPlayerMP) player);
 			}
-		}
-		
-		else {
-			if ( hand == EnumHand.MAIN_HAND/* && facing == EnumFacing.UP */&& !state.getValue(BlockTESRMember.RENDER) ) {												
-				boolean hasUpgrade = gateTile.hasUpgrade();
-				boolean isHoldingUpgrade = heldItem.getItem() == AunisItems.stargateAddressCrystal;
-					
-				if (!gateTile.getInsertAnimation()) {
-					// Reduce ItemStack
-					if (!hasUpgrade && isHoldingUpgrade)
-						player.setHeldItem(hand, new ItemStack(heldItem.getItem(), heldItem.getCount()-1) );
+			
+			else if (heldItem.getItem() == AunisItems.fastDialer) {				
+				NBTTagCompound compound = heldItem.getTagCompound();
+				if (compound == null) 
+					compound = new NBTTagCompound();
+				
+				byte[] symbols = new byte[gateTile.gateAddress.size()];
+				
+				for (int i=0; i<gateTile.gateAddress.size(); i++)
+					symbols[i] = (byte) gateTile.gateAddress.get(i).id;
+				
+				compound.setByteArray("address", symbols);
+				
+				heldItem.setTagCompound(compound);
+			}
+			
+			else {
+				if ( hand == EnumHand.MAIN_HAND/* && facing == EnumFacing.UP */&& !state.getValue(BlockTESRMember.RENDER) ) {												
+					boolean hasUpgrade = gateTile.hasUpgrade();
+					boolean isHoldingUpgrade = heldItem.getItem() == AunisItems.stargateAddressCrystal;
 						
-					gateTile.setInsertAnimation(true);
+					if (!gateTile.getInsertAnimation()) {
+						// Reduce ItemStack
+						if (!hasUpgrade && isHoldingUpgrade)
+							player.setHeldItem(hand, new ItemStack(heldItem.getItem(), heldItem.getCount()-1) );
+							
+						gateTile.setInsertAnimation(true);
+					}
+						
+					AunisPacketHandler.INSTANCE.sendToAllAround( new UpgradeSlotInteractToClient(pos, hasUpgrade, isHoldingUpgrade), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64) );
 				}
-					
-				AunisPacketHandler.INSTANCE.sendToAllAround( new UpgradeSlotInteractToClient(pos, hasUpgrade, isHoldingUpgrade), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64) );
 			}
 		}
 		

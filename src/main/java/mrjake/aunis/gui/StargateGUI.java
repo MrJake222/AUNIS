@@ -18,23 +18,31 @@ public class StargateGUI extends GuiScreen {
 	private StargateBaseTile gateTile;
 	private List<EnumSymbol> gateAddress;
 	
-	public StargateGUI(StargateBaseTile gateTile) {
+	public StargateGUI(StargateBaseTile gateTile, int sections) {
 		this.gateTile = gateTile;
 		this.gateAddress = gateTile.gateAddress;
 		
 		if (gateAddress == null) {
 			AunisPacketHandler.INSTANCE.sendToServer( new GateAddressRequestToServer(gateTile.getPos()) );
 		}
+		
+		this.sections = sections;
+		bgWidth = sectionSize*sections + (sections+1)*frameThickness;
+		imageWidth = bgWidth + 2*frameThickness;
 	}
 
+	private int sections;
+	
 	private final int sectionSize = 90;
 	private final int frameThickness = 8;
 	
 	// 6 symbols, 5 spaces, 2 margins
-	private final int bgWidth = sectionSize*6 + 7*frameThickness;
+	// private final int bgWidth = sectionSize*6 + 7*frameThickness;
+	private final int bgWidth;
 	private final int bgHeight = sectionSize + 2*frameThickness;
 		
-	private final int imageWidth = bgWidth + 2*frameThickness;
+	// private final int imageWidth = bgWidth + 2*frameThickness;
+	private final int imageWidth;
 	private final int imageHeight = bgHeight + 2*frameThickness;
 	
 	private final boolean drawSymbolBackground = false;
@@ -57,7 +65,7 @@ public class StargateGUI extends GuiScreen {
 		drawRect(frameThickness, frameThickness, bgWidth+frameThickness, bgHeight+frameThickness, color);
 		
 		if (gateAddress != null) {
-			for (int i=0; i<6; i++) {
+			for (int i=0; i<sections; i++) {
 				String name = gateAddress.get(i).name;
 				Minecraft.getMinecraft().getTextureManager().bindTexture( new ResourceLocation("aunis:textures/gui/symbol/" + name.toLowerCase() + ".png") );
 				

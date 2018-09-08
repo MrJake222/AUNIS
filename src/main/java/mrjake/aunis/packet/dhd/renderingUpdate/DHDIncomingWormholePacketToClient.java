@@ -16,23 +16,35 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 	public DHDIncomingWormholePacketToClient() {}
 	
 	private BlockPos dhdPos;
-	private long dialedAddress;
+	private long gateAddress;
+	private int lastSymbolId;
+	private boolean include7thSymbol;
 	
-	public DHDIncomingWormholePacketToClient(BlockPos dhdPos, List<EnumSymbol> dialedAddress) {		
+	public DHDIncomingWormholePacketToClient(BlockPos dhdPos, List<EnumSymbol> gateAddress, boolean include7thSymbol) {		
 		this.dhdPos = dhdPos;
-		this.dialedAddress = EnumSymbol.toLong(dialedAddress);
+		this.gateAddress = EnumSymbol.toLong(gateAddress);
+		this.include7thSymbol = include7thSymbol;
+		this.lastSymbolId = gateAddress.get(gateAddress.size()-1).id;
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeLong( dhdPos.toLong() );
-		buf.writeLong( dialedAddress );
+		buf.writeLong(gateAddress);
+		buf.writeBoolean(include7thSymbol);
+		
+		if (include7thSymbol)
+			buf.writeInt(lastSymbolId);
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		dhdPos = BlockPos.fromLong( buf.readLong() );
-		dialedAddress = buf.readLong();
+		gateAddress = buf.readLong();
+		include7thSymbol = buf.readBoolean();
+		
+		if (include7thSymbol)
+			lastSymbolId = buf.readInt();
 	}
 
 	public static class DHDIncomingWormholePacketToClientHandler implements IMessageHandler<DHDIncomingWormholePacketToClient, IMessage> {
@@ -40,14 +52,15 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 		@Override
 		public IMessage onMessage(DHDIncomingWormholePacketToClient message, MessageContext ctx) {
 			World world = Minecraft.getMinecraft().world;
-			
-			// Aunis.log("Received DHDIncomingWormholePacketToClient:  dhdPos: " + message.dhdPos.toString() + ",  dialedAddress: " + message.dialedAddress.toString());
-			
+						
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				DHDTile te = (DHDTile) world.getTileEntity( message.dhdPos );
 				
-				// message.dialedAddress.add( EnumSymbol.ORIGIN.id );
-				List<Integer> address = EnumSymbol.fromLong(message.dialedAddress);
+				List<Integer> address = EnumSymbol.fromLong(message.gateAddress);
+				
+				if (message.include7thSymbol)
+					address.add(message.lastSymbolId);
+				
 				address.add(EnumSymbol.ORIGIN.id);
 				
 				te.getDHDRenderer().smoothlyActivateButtons(address);

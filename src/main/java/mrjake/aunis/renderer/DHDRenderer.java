@@ -20,11 +20,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.ITextureObject;
-import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -52,23 +49,6 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 		//this.te = te;
 		this.world = te.getWorld();
 		this.pos = te.getPos();
-		
-		// Load button textures
-		for (int k=0; k<2; k++) {
-			String tex;
-			
-			if (k == 0)
-				tex = "symbol";
-			else
-				tex = "brb";
-			
-			for (int i=0; i<=5; i++) {
-				ResourceLocation resource = new ResourceLocation( "aunis:textures/tesr/dhd/"+tex+"/"+tex+i+".png" );
-					
-				ITextureObject itextureobject = new SimpleTexture(resource);
-				Minecraft.getMinecraft().getTextureManager().loadTexture(resource, itextureobject);
-			}
-		}
 		
 		initTextureList();
 	}
@@ -193,10 +173,6 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 			}
 		}
 	}
-	
-	/*public boolean upgradeInSlot() {
-		return doUpgradeRender;
-	}*/
 	
 	@Override
 	public void render(double x, double y, double z, double partialTicks) {

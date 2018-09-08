@@ -1,5 +1,6 @@
 package mrjake.aunis.packet;
 
+import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient;
 import mrjake.aunis.packet.gate.addressUpdate.GateAddressPacketToClient;
@@ -47,5 +48,7 @@ public class AunisPacketHandler {
 		
 		INSTANCE.registerMessage(UpgradeSlotInteractToClient.UpgradeSlotInteractHandler.class, UpgradeSlotInteractToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(UpgradeTileUpdateToServer.UpgradeTileUpdateHandler.class, UpgradeTileUpdateToServer.class, id, Side.SERVER); id++;
+		
+		INSTANCE.registerMessage(OpenStargateAddressGuiToClient.OpenStargateAddressGuiClientHandler.class, OpenStargateAddressGuiToClient.class, id, Side.CLIENT); id++;
 	}
 }

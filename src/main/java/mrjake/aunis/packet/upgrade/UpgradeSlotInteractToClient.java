@@ -1,9 +1,7 @@
 package mrjake.aunis.packet.upgrade;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.Renderer;
-import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.RenderedTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -43,6 +41,7 @@ public class UpgradeSlotInteractToClient implements IMessage {
 	
 	public static class UpgradeSlotInteractHandler implements IMessageHandler<UpgradeSlotInteractToClient, IMessage>{
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public IMessage onMessage(UpgradeSlotInteractToClient message, MessageContext ctx) {
 						

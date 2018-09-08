@@ -16,7 +16,6 @@ import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
 import mrjake.aunis.packet.upgrade.UpgradeTileUpdateToServer;
 import mrjake.aunis.renderer.RendererInit.QuadStrip;
@@ -463,12 +462,6 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 			int stage = (int) (((world.getTotalWorldTime() - activationStateChange) + partialTicks) * 3);
 
 			if (stage < 0) return;
-			else {
-				if (!dhdButtonsCleared && clearingChevrons) {
-					dhdButtonsCleared = true;
-					AunisPacketHandler.INSTANCE.sendToServer( new ClearLinkedDHDButtons(pos) );
-				}
-			}
 			
 			if (stage < 11) {
 				if (changingChevrons) {
@@ -506,17 +499,21 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 					// render code isn't running and gate can't perform any animation(not necessary in this case)
 					// So we need to check if chevron's states didn't change and perform correction
 					
-					for (int i=0; i<9; i++) {
-						String tex = textureTemplate;
-					
-						if (clearingChevrons)
-							tex += "0.png";
-						else
-							tex += "10.png";
+					if (clearingChevrons) {
+						String tex = textureTemplate+"0.png";
 						
-						if ( !chevronTextureList.get(i).equals(tex) ) {
+						for (int i=0; i<9; i++) {
 							chevronTextureList.set(i, tex);
 						}
+					}
+					
+					else {
+						String tex = textureTemplate+"10.png";
+						
+						for (int i=0; i<chevronsToLightUp-1; i++)
+							chevronTextureList.set(i, tex);
+						
+						chevronTextureList.set(8, tex);
 					}
 				}
 				
@@ -568,11 +565,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	
 	private long gateWaitClose = 0;
 	private boolean zeroAlphaSet;	
-	
-	private boolean dhdButtonsCleared;
-		
+			
 	public void openGate() {
-		dhdButtonsCleared = false;
 		gateWaitStart = world.getTotalWorldTime();
 		soundPlayed = false;
 		
@@ -591,7 +585,6 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		
 		AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateClose);
 		gateWaitClose = world.getTotalWorldTime();
-		// closingSoundPlayed = false;
 		
 		vortexState = EnumVortexState.CLOSING;
 	}

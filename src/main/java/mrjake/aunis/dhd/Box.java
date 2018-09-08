@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.lwjgl.util.vector.Vector2f;
 
-import mrjake.aunis.Aunis;
-
 public class Box {
 	private List<Ray> rays;
 	private int verticalIndex;
@@ -27,15 +25,10 @@ public class Box {
 		float a = 0.3f;
 		float b = p.y - (a*p.x);
 		
-		Aunis.log(String.format("(%f,%f)", p.x, p.y));	
-		Aunis.log(String.format("y=%fx+%f", a, b));
-		
 		for (int i=0; i<rays.size(); i++) {
 			Ray currentRay = rays.get(i);
 			currentRay.setVerticalOffset(verticalIndex);
-			
-			Aunis.log(currentRay.toString());
-			
+						
 			Vector2f inter = currentRay.getIntersect(a, b);
 			
 			if (inter.x > p.x) {
@@ -54,16 +47,10 @@ public class Box {
 				if ( inter.x > xMin && inter.x < xMax && inter.y > yMin && inter.y < yMax ) {
 					intersects++;
 				}
-						
-				Aunis.log(String.format("(%f,%f)", x0, y0));				
-				Aunis.log(String.format("(%f,%f)", x1, y1));				
-				Aunis.log(String.format("(%f,%f)", inter.x, inter.y));
 			}
 			
 		}
-		
-		Aunis.log( "Intersects: " + intersects );
-		
+				
 		return (intersects%2 > 0);		
 	}
 }

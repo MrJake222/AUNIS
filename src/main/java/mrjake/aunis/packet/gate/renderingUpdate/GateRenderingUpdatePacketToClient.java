@@ -25,6 +25,10 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 	private int objectID;
 	private BlockPos blockPos; 
 	
+	public GateRenderingUpdatePacketToClient(EnumPacket packet, EnumSymbol symbol, BlockPos pos) {
+		this(packet.packetID, symbol.id, pos);
+	}
+	
 	public GateRenderingUpdatePacketToClient(EnumPacket packet, int objectID, TileEntity dhdTile) {
 		this(packet.packetID, objectID, dhdTile.getPos());
 	}
@@ -66,9 +70,7 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 		public IMessage onMessage(GateRenderingUpdatePacketToClient message, MessageContext ctx) {	
 			EntityPlayer player = Minecraft.getMinecraft().player;
 			World world = player.getEntityWorld();
-			
-			//Aunis.info("Received GateRenderingUpdatePacketToClient, message.packetID = "+message.packetID);
-			
+						
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				TileEntity te = world.getTileEntity( message.blockPos );
 				StargateBaseTile gateTile = null;
@@ -130,10 +132,6 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 					renderer.openGate();
 					break;
 					
-				/*case OPEN_GATE_RECEIVING:
-					renderer.openGate(false);
-					break;*/
-					
 				case CLOSE_GATE:
 					renderer.closeGate();
 					break;
@@ -143,9 +141,12 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 					renderer.clearChevrons();
 					break;
 					
-				case LIGHT_UP_ALL_CHEVRONS:
-					// TODO: Check how many symbols dialed on initiating gate
-					renderer.lightUpChevrons( gateTile.getMaxSymbols() );
+				case LIGHT_UP_7_CHEVRONS:
+					renderer.lightUpChevrons( 7 );
+					break;
+					
+				case LIGHT_UP_8_CHEVRONS:
+					renderer.lightUpChevrons( 8 );
 					break;
 			}
 		}
