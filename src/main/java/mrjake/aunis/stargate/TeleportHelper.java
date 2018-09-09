@@ -5,12 +5,17 @@ import javax.vecmath.Vector2f;
 import org.lwjgl.util.vector.Matrix2f;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Teleporter;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 
 public class TeleportHelper {
 	
@@ -49,14 +54,29 @@ public class TeleportHelper {
 		v.y += dest.y;
 	}
 	
-	public static void teleportServer(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, int rotation, String sourceAxisName, Vector2f motionVector, int targetDimension, float dimensionMul) {
+	public static World getWorld(int dimension) {
+		World world = DimensionManager.getWorld(0);
+		
+		if (dimension == 0)
+			return world;
+		
+		return world.getMinecraftServer().getWorld(dimension);
+	}
+	
+	public static void teleportServer(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, int rotationAngle, String sourceAxisName, Vector2f motionVector, int targetDimension, float dimensionMul) {
 		int sourceDimension = player.getEntityWorld().provider.getDimension();
 		
 		Vec3d lookVec = player.getLookVec();
 		Vec3d playerPos = player.getPositionVector();
 		
-		if (sourceDimension != targetDimension)
-			player.changeDimension(targetDimension);
+		/*if (sourceDimension != targetDimension)
+			player.changeDimension(targetDimension);*/
+		
+		//player.getServer().getPlayerList().transferEntityToWorld(player, sourceDimension, (WorldServer)player.getEntityWorld(), (WorldServer)TeleportHelper.getWorld(targetDimension));
+		player.getServer().getPlayerList().transferPlayerToDimension((EntityPlayerMP) player, targetDimension, new Teleporter((WorldServer) player.getEntityWorld()));
+		/* teleporter.playerNetServerHandler.setPlayerLocation
+		 			(posX, posY, posZ, teleporter.rotationYaw, teleporter.rotationPitch);*/
+		float rotation = (float) Math.toRadians(rotationAngle);
 		
 		setRotation(player, lookVec, rotation);
 		teleport(player, playerPos, sourceGatePos, targetGatePos, rotation, sourceAxisName);

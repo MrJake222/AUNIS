@@ -54,6 +54,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	private long waitForClose;
 	private boolean unstableVortex;
 	private boolean isClosing;
+	
+	private int dialedChevrons;
 		
 	public List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
@@ -77,8 +79,13 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		dialedAddress.clear();
 	}
 	
-	public void openGate(boolean initiating) {
+	public void openGate(boolean initiating, Integer incomingChevrons) {
 		isInitiating = initiating;
+		
+		if (isInitiating)
+			dialedChevrons = dialedAddress.size();
+		else
+			dialedChevrons = incomingChevrons;
 		
 		unstableVortex = true;
 		waitForEngage = world.getTotalWorldTime();
@@ -125,7 +132,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 
 	private void setRendererState() {
 		if (isEngaged)
-			rendererState = new StargateRendererState(pos, dialedAddress.size(), true, getLimitedState().ringAngularRotation, true, EnumVortexState.STILL, true, true);
+			rendererState = new StargateRendererState(pos, dialedChevrons, true, getLimitedState().ringAngularRotation, true, EnumVortexState.STILL, true, true);
 		else
 			rendererState = new StargateRendererState(pos, 0, false, getLimitedState().ringAngularRotation, false, EnumVortexState.FORMING, false, false);
 	}
@@ -229,6 +236,15 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			}
 		}
 		
+		compound.setBoolean("unstableVortex", unstableVortex);
+		compound.setLong("waitForEngage", waitForEngage);
+		compound.setBoolean("isClosing", isClosing);
+		compound.setLong("waitForClose", waitForClose);
+		compound.setBoolean("clearingButtons", clearingButtons);
+		compound.setLong("waitForClear", waitForClear);
+		
+		compound.setInteger("dialedChevrons", dialedChevrons);
+		
 		getLimitedState().toNBT(compound);
 		
 		return super.writeToNBT(compound);
@@ -262,6 +278,15 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 				dialedAddress.add( EnumSymbol.valueOf(compound.getInteger("dialedSymbol"+i)) );
 			}
 		}
+		
+		unstableVortex = compound.getBoolean("unstableVortex");
+		waitForEngage = compound.getLong("waitForEngage");
+		isClosing = compound.getBoolean("isClosing");
+		waitForClose = compound.getLong("waitForClose");
+		clearingButtons = compound.getBoolean("clearingButtons");
+		waitForClear = compound.getLong("waitForClear");
+		
+		dialedChevrons = compound.getInteger("dialedChevrons");
 		
 		limitedState = new LimitedStargateRendererState(compound);
 		
@@ -393,7 +418,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 				
 				if ( !scheduledTeleportMap.containsKey(entId) ) {
 					StargatePos targetGate = StargateNetwork.get(world).getStargate( dialedAddress );
-					World targetWorld = DimensionManager.getWorld(targetGate.getDimension());
+					World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 					
 					BlockPos targetPos = targetGate.getPos();
 					// StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
@@ -419,10 +444,10 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 							teleportEntity(entId);
 						}
 						
-						else {
+						/*else {
 							// TODO Make custom message appear
-							entity.onKillCommand();
-						}
+							// entity.onKillCommand();
+						}*/
 					}
 				}
 			}

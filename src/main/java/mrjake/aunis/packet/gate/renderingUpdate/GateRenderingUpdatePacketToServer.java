@@ -16,17 +16,20 @@ import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
+import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -100,12 +103,12 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 							if ( gateTile.isEngaged() ) {
 								if ( gateTile.isInitiating() ) {									
 									StargatePos targetGate = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
-									World targetWorld = DimensionManager.getWorld(targetGate.getDimension());
+									World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 									BlockPos targetPos = targetGate.getPos();
 									StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 									
 									// clear connection and address, start animation 
-									TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
+									TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
 									
 									gateTile.clearLinkedDHDButtons(false);
 									targetTile.clearLinkedDHDButtons(false);
@@ -167,13 +170,8 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									
 									StargatePos targetGate = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
 									BlockPos targetPos = targetGate.getPos();
-									World targetWorld = null;
+									World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 									
-									if (gateTile.dialedAddress.size() == 8)
-										targetWorld = DimensionManager.getWorld(targetGate.getDimension());
-									else
-										targetWorld = world;
-																		
 									StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 									
 									if (targetTile != null) {										
@@ -183,10 +181,10 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											dhdTile.setLinkedGateEngagement(true);
 											dhdTile.setRendererState( new DHDRendererState(dhdTile.getPos(), EnumSymbol.toIntegerList(gateTile.dialedAddress, EnumSymbol.BRB)) );
 											
-											gateTile.openGate(true);
+											gateTile.openGate(true, null);
 											
 											DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
-											TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
+											TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
 											
 											// Open target gate
 											if (targetDhdTile != null) {
@@ -197,7 +195,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											}
 											
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, targetPos), targetPoint );
-											targetTile.openGate(false);
+											targetTile.openGate(false, gateTile.dialedAddress.size());
 										}
 										
 										else {
@@ -249,13 +247,13 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 								// Light up target gate, if exists
 								if ( symbol == EnumSymbol.ORIGIN  && gateTile.dialedAddress.size() >= 7 && network.checkForStargate(gateTile.dialedAddress) ) {			
 									StargatePos targetGate = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
-									World targetWorld = DimensionManager.getWorld(targetGate.getDimension());
+									World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 									
 									BlockPos targetPos = targetGate.getPos();
 									StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 									DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
 									
-									TargetPoint targetPoint = new TargetPoint(world.provider.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
+									TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
 									
 									boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
 									

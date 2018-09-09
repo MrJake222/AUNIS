@@ -74,10 +74,10 @@ public class MotionToServer implements IMessage {
 						gateTile.teleportEntity(message.entityId);
 					}
 					
-					else {
+					/*else {
 						((EntityPlayerMP)world.getEntityByID(message.entityId)).onKillCommand();
 						gateTile.removeEntityFromTeleportList(message.entityId);
-					}
+					}*/
 					
 				});
 			}
