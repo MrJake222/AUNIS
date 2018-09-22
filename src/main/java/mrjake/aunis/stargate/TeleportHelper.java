@@ -1,42 +1,72 @@
 package mrjake.aunis.stargate;
 
+import java.util.Iterator;
+
 import javax.vecmath.Vector2f;
 
 import org.lwjgl.util.vector.Matrix2f;
 
+import mrjake.aunis.block.BlockFaced;
+import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketEntityEffect;
+import net.minecraft.network.play.server.SPacketRespawn;
+import net.minecraft.network.play.server.SPacketSetExperience;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumFacing.AxisDirection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class TeleportHelper {
+	
+	enum EnumFlipAxis {
+		X(0x01),
+		Z(0x02);
+		
+		public int mask;
+		
+		EnumFlipAxis(int mask) {
+			this.mask = mask;
+		}
+		
+		public static boolean masked(EnumFlipAxis flipAxis, int in) {
+			return (in & flipAxis.mask) != 0;
+		}
+	}
 	
 	private static void translateTo00(Vector2f center, Vector2f v) {
 		v.x -= center.x;
 		v.y -= center.y;
 	}
 	
-	public static void rotateAround00(Vector2f v, float rotation, String flip) {
+	public static void rotateAround00(Vector2f v, float rotation, int flip) {
 		Matrix2f m = new Matrix2f();
 		Matrix2f p = new Matrix2f();
 		
 		float sin = MathHelper.sin(rotation);
 		float cos = MathHelper.cos(rotation);
 		
-		if (flip != null) {
-			if ( flip.equals("x") )
+		if ( EnumFlipAxis.masked(EnumFlipAxis.X, flip) )
+			v.x *= -1;
+		
+		if ( EnumFlipAxis.masked(EnumFlipAxis.Z, flip) )
+			v.y *= -1;
+		/*if (flip != null) {
+			if ( flip == Axis.X )
 				v.x *= -1;
 			else
 				v.y *= -1;
-		}
+		}*/
 		
 		m.m00 = cos;	m.m10 = -sin;
 		m.m01 = sin;	m.m11 =  cos;
@@ -54,6 +84,151 @@ public class TeleportHelper {
 		v.y += dest.y;
 	}
 	
+	// Kindly borrowed from SGCraft beacause I have no idea how Minecraft dimension teleportation system works
+	// and there is hardly any docs
+	private static void transferPlayerToDimension(EntityPlayerMP player, int newDimension, Vec3d position, float yaw) {
+        MinecraftServer server = player.getServer();
+        PlayerList playerList = server.getPlayerList();
+        
+        WorldServer oldWorld = player.getServerWorld();
+        WorldServer newWorld = (WorldServer) getWorld(newDimension);
+        player.dimension = newDimension;
+                
+        player.closeScreen();
+        player.connection.sendPacket( new SPacketRespawn(player.dimension,
+            player.world.getDifficulty(), newWorld.getWorldInfo().getTerrainType(),
+            player.interactionManager.getGameType()) );
+        
+        oldWorld.removeEntityDangerously(player);
+        player.isDead = false;
+        player.setLocationAndAngles(position.x, position.y, position.z, yaw, player.rotationPitch);
+        newWorld.spawnEntity(player);
+        player.setWorld(newWorld);
+        playerList.preparePlayer(player, oldWorld);
+        player.connection.setPlayerLocation(position.x, position.y, position.z, yaw, player.rotationPitch);
+        player.interactionManager.setWorld(newWorld);
+        playerList.updateTimeAndWeatherForPlayer(player, newWorld);
+        playerList.syncPlayerInventory(player);
+
+        Iterator<PotionEffect> var6 = player.getActivePotionEffects().iterator();
+        while (var6.hasNext()) {
+            PotionEffect effect = (PotionEffect)var6.next();
+            player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), effect));
+        }
+        player.connection.sendPacket(new SPacketSetExperience(player.experience, player.experienceTotal, player.experienceLevel));
+        FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, oldWorld.provider.getDimension(), newDimension);
+      
+    }
+	
+	public static void teleportEntity(Entity entity, BlockPos sourceGatePos, StargatePos targetGatePos, float rotation, Vector2f motionVector) {		
+		World world = entity.getEntityWorld();
+		int sourceDim = world.provider.getDimension();
+		
+		// Cross dimension entity teleport not supported YET, possibly TODO
+		if (sourceDim != targetGatePos.getDimension() && !(entity instanceof EntityPlayerMP))
+			return;
+		
+		EnumFacing sourceFacing = world.getBlockState(sourceGatePos).getValue(BlockFaced.FACING);
+		EnumFacing targetFacing = targetGatePos.getWorld().getBlockState(targetGatePos.getPos()).getValue(BlockFaced.FACING);
+		
+		int flipAxis = 0;
+		
+		if (sourceFacing.getAxis() == targetFacing.getAxis())
+			flipAxis |= EnumFlipAxis.X.mask;
+		else
+			flipAxis |= EnumFlipAxis.Z.mask;
+		
+		float yaw = getRotation(entity, rotation, flipAxis);
+		Vec3d pos = getPosition(entity, sourceGatePos, targetGatePos.getPos(), rotation, targetFacing.getAxis()==Axis.Z ? ~flipAxis : flipAxis);
+		
+		
+		if (sourceDim == targetGatePos.getDimension()) {
+			entity.rotationYaw = yaw;
+			entity.setPositionAndUpdate(pos.x, pos.y, pos.z);
+		}
+		
+		else {			
+			if (entity instanceof EntityPlayerMP) {
+				EntityPlayerMP player = (EntityPlayerMP) entity;
+				
+				boolean flying = player.capabilities.isFlying;
+				
+				transferPlayerToDimension(player, targetGatePos.getDimension(), pos, yaw);
+				
+				player.capabilities.isFlying = flying;
+				player.sendPlayerAbilities();
+			}
+		}
+		
+		setMotion(entity, rotation, motionVector);
+	}
+	
+	/* public static void teleportPlayer(EntityPlayerMP player, BlockPos sourceGatePos, StargatePos targetGatePos, float rotation, Vector2f motionVector) {
+		World world = player.getEntityWorld();
+		
+		EnumFacing sourceFacing = world.getBlockState(sourceGatePos).getValue(BlockFaced.FACING);
+		EnumFacing targetFacing = targetGatePos.getWorld().getBlockState(targetGatePos.getPos()).getValue(BlockFaced.FACING);
+		
+		int flipAxis = 0;
+		
+		if (sourceFacing.getAxis() == targetFacing.getAxis())
+			flipAxis |= EnumFlipAxis.X.mask;
+		else
+			flipAxis |= EnumFlipAxis.Z.mask;
+		
+		float yaw = getRotation(player, rotation, flipAxis);
+		Vec3d pos = getPosition(player, sourceGatePos, targetGatePos.getPos(), rotation, targetFacing.getAxis()==Axis.Z ? ~flipAxis : flipAxis);
+		int sourceDim = world.provider.getDimension();
+		
+		if (sourceDim == targetGatePos.getDimension()) {
+			player.rotationYaw = yaw;
+			player.setPositionAndUpdate(pos.x, pos.y, pos.z);
+		}
+		
+		else {
+			boolean flying = player.capabilities.isFlying;
+			
+			transferPlayerToDimension(player, targetGatePos.getDimension(), pos, yaw);
+			
+			player.capabilities.isFlying = flying;
+			player.sendPlayerAbilities();
+		}
+		
+		setMotion(player, rotation, motionVector);
+	} */
+	
+	public static float getRotation(Entity player, float rotation, int flipAxis) {
+		Vec3d lookVec = player.getLookVec();
+		Vector2f lookVec2f = new Vector2f( (float)(lookVec.x), (float)(lookVec.z) );
+		
+		rotateAround00(lookVec2f, rotation, flipAxis);
+		
+		return (float) Math.toDegrees(MathHelper.atan2(lookVec2f.x, lookVec2f.y));		
+	}
+	
+	public static void setMotion(Entity player, float rotation, Vector2f motionVec2f) {		
+		if (motionVec2f != null) {		
+			rotateAround00(motionVec2f, rotation, 0);
+					
+			player.motionX = motionVec2f.x;
+			player.motionZ = motionVec2f.y;
+			player.velocityChanged = true;
+		}
+	}
+	
+	public static Vec3d getPosition(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, int flipAxis) {
+		Vector2f sourceCenter = new Vector2f( sourceGatePos.getX()+0.5f, sourceGatePos.getZ()+0.5f );
+		Vector2f destCenter = new Vector2f( targetGatePos.getX()+0.5f, targetGatePos.getZ()+0.5f );
+		Vector2f playerPosition = new Vector2f( (float)(player.posX), (float)(player.posZ) );  
+		
+		translateTo00(sourceCenter, playerPosition);
+		rotateAround00(playerPosition, rotation, flipAxis);				
+		translateToDest(playerPosition, destCenter);
+		
+		float y = (float) (targetGatePos.getY() + ( player.posY - sourceGatePos.getY() ));
+		return new Vec3d(playerPosition.x, y, playerPosition.y);
+	}
+	
 	public static World getWorld(int dimension) {
 		World world = DimensionManager.getWorld(0);
 		
@@ -62,47 +237,7 @@ public class TeleportHelper {
 		
 		return world.getMinecraftServer().getWorld(dimension);
 	}
-	
-	public static void teleportServer(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, int rotationAngle, String sourceAxisName, Vector2f motionVector, int targetDimension, float dimensionMul) {
-		int sourceDimension = player.getEntityWorld().provider.getDimension();
-		
-		Vec3d lookVec = player.getLookVec();
-		Vec3d playerPos = player.getPositionVector();
-		
-		/*if (sourceDimension != targetDimension)
-			player.changeDimension(targetDimension);*/
-		
-		//player.getServer().getPlayerList().transferEntityToWorld(player, sourceDimension, (WorldServer)player.getEntityWorld(), (WorldServer)TeleportHelper.getWorld(targetDimension));
-		player.getServer().getPlayerList().transferPlayerToDimension((EntityPlayerMP) player, targetDimension, new Teleporter((WorldServer) player.getEntityWorld()));
-		/* teleporter.playerNetServerHandler.setPlayerLocation
-		 			(posX, posY, posZ, teleporter.rotationYaw, teleporter.rotationPitch);*/
-		float rotation = (float) Math.toRadians(rotationAngle);
-		
-		setRotation(player, lookVec, rotation);
-		teleport(player, playerPos, sourceGatePos, targetGatePos, rotation, sourceAxisName);
-		setMotion(player, rotation, motionVector);
-	}
-	
-	public static void setRotation(Entity player, Vec3d lookVec, float rotation) {
-		Vector2f lookVec2f = new Vector2f( (float)(lookVec.x), (float)(lookVec.z) );
-		
-		rotateAround00(lookVec2f, rotation, null);
-		
-		float targetYaw = (float) Math.toDegrees(MathHelper.atan2(-lookVec2f.x, lookVec2f.y));
-		
-		player.rotationYaw = targetYaw;
-	}
-	
-	public static void setMotion(Entity player, float rotation, Vector2f motionVec2f) {		
-		if (motionVec2f != null) {		
-			rotateAround00(motionVec2f, rotation, null);
-					
-			player.motionX = motionVec2f.x;
-			player.motionZ = motionVec2f.y;
-			player.velocityChanged = true;
-		}
-	}
-	
+
 	public static boolean frontSide(EnumFacing sourceFacing, Vector2f motionVec) {
 		Axis axis = sourceFacing.getAxis();
 		AxisDirection direction = sourceFacing.getAxisDirection();
@@ -118,19 +253,6 @@ public class TeleportHelper {
 			return motion <= 0;
 		else
 			return motion >= 0;
-	}
-	
-	public static void teleport(Entity player, Vec3d playerPos, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, String sourceAxisName) {
-		Vector2f sourceCenter = new Vector2f( sourceGatePos.getX()+0.5f, sourceGatePos.getZ()+0.5f );
-		Vector2f destCenter = new Vector2f( targetGatePos.getX()+0.5f, targetGatePos.getZ()+0.5f );
-		Vector2f playerPosition = new Vector2f( (float)playerPos.x, (float)playerPos.z );  
-		
-		translateTo00(sourceCenter, playerPosition);
-		rotateAround00(playerPosition, rotation, sourceAxisName);				
-		translateToDest(playerPosition, destCenter);
-		
-		float y = (float) (targetGatePos.getY() + ( playerPos.y - sourceGatePos.getY() ));
-		player.setPositionAndUpdate(playerPosition.x, y, playerPosition.y);
 	}
 	
 }

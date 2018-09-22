@@ -122,6 +122,10 @@ public class StargateNetwork extends WorldSavedData {
 			return dimension;
 		}
 		
+		public World getWorld() {
+			return TeleportHelper.getWorld(dimension);
+		}
+		
 		public EnumSymbol get7thSymbol() {
 			return lastSymbol;
 		}

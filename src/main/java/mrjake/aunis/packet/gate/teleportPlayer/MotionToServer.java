@@ -8,7 +8,6 @@ import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.tileentity.StargateBaseTile;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;

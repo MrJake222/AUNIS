@@ -36,8 +36,6 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class StargateBaseTile extends RenderedTileEntity implements ITickable {
@@ -311,28 +309,24 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 	public static class TeleportPacket {
 		private BlockPos sourceGatePos;
-		private BlockPos targetGatePos;
+		private StargatePos targetGatePos;
 		
-		private int rotation;
-		private String sourceAxisName;
+		private float rotation;
 		
 		private Vector2f motionVector;
-		private WorldProvider targetWorldProvider;
 		
-		public TeleportPacket(BlockPos source, BlockPos target, int rotation, EnumFacing.Axis sourceAxis, World targetWorld) {
+		public TeleportPacket(BlockPos source, StargatePos target, float rotation) {
 			sourceGatePos = source;
 			targetGatePos = target;
 			
 			this.rotation = rotation;
-			sourceAxisName = sourceAxis.getName();
-			targetWorldProvider = targetWorld.provider;
 		}
 		
 		public void teleport(Entity entity, World sourceWorld) {
-			TeleportHelper.teleportServer(entity, sourceGatePos, targetGatePos, rotation, sourceAxisName, motionVector, targetWorldProvider.getDimension(), (float) (sourceWorld.provider.getMovementFactor()/targetWorldProvider.getMovementFactor()));
+			TeleportHelper.teleportEntity(entity, sourceGatePos, targetGatePos, rotation, motionVector);
 			
 			if (entity instanceof EntityPlayerMP)
-				entity.getEntityWorld().playSound(null, targetGatePos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+				entity.getEntityWorld().playSound(null, targetGatePos.getPos(), AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
 		}
 
 		public TeleportPacket setMotion(Vector2f motion) {
@@ -418,6 +412,9 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 				
 				if ( !scheduledTeleportMap.containsKey(entId) ) {
 					StargatePos targetGate = StargateNetwork.get(world).getStargate( dialedAddress );
+					if (targetGate == null)
+						return;
+					
 					World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 					
 					BlockPos targetPos = targetGate.getPos();
@@ -426,10 +423,9 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 					EnumFacing sourceFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
 					EnumFacing targetFacing = targetWorld.getBlockState(targetPos).getValue(BlockFaced.FACING);
 					
-					int rotation = (int) (sourceFacing.getHorizontalAngle() - targetFacing.getHorizontalAngle());
-					//rotation = (float) Math.toRadians( /*.getOpposite()*/.getHorizontalAngle() );
-					
-					TeleportPacket packet = new TeleportPacket(pos, targetPos, rotation, sourceFacing.getAxis(), targetWorld);
+					float rotation = (float) Math.toRadians( EnumFacing.fromAngle(targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle()).getOpposite().getHorizontalAngle() );
+
+					TeleportPacket packet = new TeleportPacket(pos, targetGate, rotation);
 					
 					if (entity instanceof EntityPlayerMP) {
 						scheduledTeleportMap.put(entId, packet);

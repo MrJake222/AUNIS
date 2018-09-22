@@ -287,7 +287,11 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 					if (changingButtons) {
 						changingButtons = false;
 						
-						if (!clearingButtons) {
+						if (clearingButtons) {
+							setActiveButtons(new ArrayList<>());
+						}
+						
+						else {
 							setActiveButtons(toActivate);
 						}
 					}
