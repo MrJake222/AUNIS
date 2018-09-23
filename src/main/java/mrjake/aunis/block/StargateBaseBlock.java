@@ -64,6 +64,8 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 		if (!world.isRemote) {
 			if (heldItem.getItem() == AunisItems.ancientAnalyzer) {
 				AunisPacketHandler.INSTANCE.sendTo(new OpenStargateAddressGuiToClient(pos, gateTile.hasUpgrade() ? 7 : 6), (EntityPlayerMP) player);
+				
+				return true;
 			}
 			
 			else if (heldItem.getItem() == AunisItems.fastDialer) {				
@@ -79,17 +81,18 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 				compound.setByteArray("address", symbols);
 				
 				heldItem.setTagCompound(compound);
+				
+				return true;
 			}
 			
 			else {
 				if ( hand == EnumHand.MAIN_HAND/* && facing == EnumFacing.UP */&& !state.getValue(BlockTESRMember.RENDER) ) {												
 					boolean hasUpgrade = gateTile.hasUpgrade();
 					boolean isHoldingUpgrade = heldItem.getItem() == AunisItems.stargateAddressCrystal;
-						
-					if (!gateTile.getInsertAnimation()) {
+					
+					if (!gateTile.getInsertAnimation() && !hasUpgrade && isHoldingUpgrade) {
 						// Reduce ItemStack
-						if (!hasUpgrade && isHoldingUpgrade)
-							player.setHeldItem(hand, new ItemStack(heldItem.getItem(), heldItem.getCount()-1) );
+						player.setHeldItem(hand, new ItemStack(heldItem.getItem(), heldItem.getCount()-1) );
 							
 						gateTile.setInsertAnimation(true);
 					}
@@ -99,7 +102,7 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 			}
 		}
 		
-		return true;
+		return false;
 	}
 	
 	@Override

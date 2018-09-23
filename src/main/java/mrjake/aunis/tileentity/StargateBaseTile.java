@@ -13,6 +13,7 @@ import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
+import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.Renderer;
 import mrjake.aunis.renderer.StargateRenderer;
@@ -89,11 +90,18 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		waitForEngage = world.getTotalWorldTime();
 	}
 	
+	public boolean fastDialer;
+	
 	private void engageGate() {	
 		unstableVortex = false;
 		isEngaged = true;
 		
 		setRendererState();
+		
+		if (fastDialer) {
+			AunisPacketHandler.INSTANCE.sendToAllAround(new TileUpdatePacketToClient(getRendererState()), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64));
+			fastDialer = false;
+		}
 		
 		markDirty();
 	}
@@ -540,5 +548,10 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
 		return new AxisAlignedBB(getPos().add(-6, 0, -6), getPos().add(7, 12, 7));
+	}
+	
+	@Override
+	public double getMaxRenderDistanceSquared() {
+		return 32768;
 	}
 }

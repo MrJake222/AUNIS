@@ -77,8 +77,8 @@ public class RendererInit {
 		return rand.nextFloat()*2-1;
 	}
 	
-	private float getOffset(int index, float tick) {
-		return MathHelper.sin( tick/4f + offsetList.get(index) ) / 24f;
+	private float getOffset(int index, float tick, float mul) {
+		return MathHelper.sin( tick/4f + offsetList.get(index) ) / 24f * mul;
 	}
 	
 	private float toUV(float coord) {
@@ -127,11 +127,7 @@ public class RendererInit {
 			}
 		}
 		
-		public void render(float tick) {
-			render(tick, false, null);
-		}
-		
-		public void render(float tick, boolean white, Float alpha) {
+		public void render(float tick, boolean white, Float alpha, float mul) {
 			if (white) {
 				GlStateManager.disableTexture2D();
 				if (alpha > 0.5f)
@@ -153,7 +149,7 @@ public class RendererInit {
 					index = i;
 				
 				if (!white) glTexCoord2f( tx.get(index), ty.get(index) );
-				glVertex3f( x.get(index), y.get(index), getOffset(index, tick) );
+				glVertex3f( x.get(index), y.get(index), getOffset(index, tick, mul) );
 			}
 
 			glEnd();
@@ -202,7 +198,7 @@ public class RendererInit {
 					float rad = radius.get(k);
 					
 					if (tick != null) {
-						rad += getOffset(i, tick) * 2;
+						rad += getOffset(i, tick, 1) * 2;
 					}
 					
 					x.add( rad * sin.get(i) );
@@ -214,19 +210,11 @@ public class RendererInit {
 			}
 		}
 		
-		public void render(float tick) {
-			render(tick, false, null);
+		public void render(float tick, boolean white, Float alpha, float mul) {
+			render(tick, null, null, white, alpha, mul);
 		}
 		
-		public void render(float tick, boolean white, Float alpha) {
-			render(tick, null, null, white, alpha);
-		}
-		
-		public void render(float tick, Float outerZ, Float innerZ) {
-			render(tick, outerZ, innerZ, false, null);
-		}
-		
-		public void render(float tick, Float outerZ, Float innerZ, boolean white, Float alpha) {
+		public void render(float tick, Float outerZ, Float innerZ, boolean white, Float alpha, float mul) {
 			if (white) {
 				GlStateManager.disableTexture2D();
 				if (alpha > 0.5f)
@@ -248,7 +236,7 @@ public class RendererInit {
 				float z;
 				
 				if (outerZ != null) z = outerZ.floatValue();
-				else z = getOffset(index + sections*quadStripIndex, tick);
+				else z = getOffset(index + sections*quadStripIndex, tick, mul);
 				
 				if (!white) glTexCoord2f( tx.get(index), ty.get(index) );
 				glVertex3f( x.get(index), y.get(index),  z );
@@ -256,7 +244,7 @@ public class RendererInit {
 				index = index + sections;
 				
 				if (innerZ != null) z = innerZ.floatValue();
-				else z = getOffset(index + sections*quadStripIndex, tick);
+				else z = getOffset(index + sections*quadStripIndex, tick, mul);
 				
 				if (!white) glTexCoord2f( tx.get(index), ty.get(index) );
 				glVertex3f( x.get(index), y.get(index), z );

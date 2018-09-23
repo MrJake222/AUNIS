@@ -146,7 +146,9 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									
 									dialedAddress.add(EnumSymbol.ORIGIN);
 									
-									gateTile.dialedAddress = dialedAddress;					
+									gateTile.dialedAddress = dialedAddress;	
+									// gateTile.setRendererState();
+									gateTile.fastDialer = true;
 								}
 																
 								int symbolCount = gateTile.getEnteredSymbolsCount();

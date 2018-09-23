@@ -626,6 +626,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		AunisSoundHelper.playPositionedSound("wormhole", pos, true);
 	}
 	
+	float horizonInstabilityMul = 1;
+	
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 		
@@ -755,7 +757,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 								float rad = e.getValue();
 								
 								// Aunis.getRendererInit().new QuadStrip(0, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul);
-								Aunis.getRendererInit().new QuadStrip(0, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul, false, 1.0f - whiteOverlayAlpha);
+								Aunis.getRendererInit().new QuadStrip(0, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul, false, 1.0f - whiteOverlayAlpha, 1);
 								
 								prevZ = zOffset;
 								prevRad = rad;
@@ -764,25 +766,31 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 					} // not shrinking if
 					
 					else {
-						// Going outwards, closing the gate
-						long stateChange = gateWaitClose + 29;
+						// Going outwards, closing the gate 29
+						long stateChange = gateWaitClose + 35;
 						float arg2 = (float) ((world.getTotalWorldTime() - stateChange + partialTicks) / 3f) - 1.0f;
-						
+												
 						if (arg2 < Aunis.getRendererInit().eventHorizonRadius+0.1f) {
 							backStrip = Aunis.getRendererInit().new QuadStrip(0, arg2, Aunis.getRendererInit().eventHorizonRadius, tick);
 						}
 						
 						else {
-							doEventHorizonRender = false;							
-							clearChevrons(stateChange + 14);
+							whiteOverlayAlpha = null;							
+							
+							if (world.getTotalWorldTime() - stateChange - 9 > 7) {
+								doEventHorizonRender = false;							
+								clearChevrons(stateChange + 9 + 7);
+							}
+							
+							// return;
 						}
 					}
 				} // not closing if
 				
 				else {					
 					// Fading out the event horizon, closing the gate
-					if ( (world.getTotalWorldTime() - gateWaitClose) > 29 ) {
-						float arg2 = (float) ((world.getTotalWorldTime() - (gateWaitClose+29) + partialTicks) / speedFactor / 2f);
+					if ( (world.getTotalWorldTime() - gateWaitClose) > 35 ) {
+						float arg2 = (float) ((world.getTotalWorldTime() - (gateWaitClose+35) + partialTicks) / speedFactor / 2f);
 												
 						if ( arg2 <= Math.PI/6 )
 							whiteOverlayAlpha = MathHelper.sin( arg2 );
@@ -801,10 +809,10 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		if (vortexState != null) {
 			if ( vortexState.equals(EnumVortexState.STILL) || vortexState.equals(EnumVortexState.CLOSING) ) {
 				
-				if ( vortexState.equals(EnumVortexState.CLOSING) )
-					renderEventHorizon(x, y, z, partialTicks, true, whiteOverlayAlpha, false);
+				if ( vortexState.equals(EnumVortexState.CLOSING) || vortexState == EnumVortexState.SHRINKING )
+					renderEventHorizon(x, y, z, partialTicks, true, whiteOverlayAlpha, false, 1.3f);
 				else
-					renderEventHorizon(x, y, z, partialTicks, false, null, false);
+					renderEventHorizon(x, y, z, partialTicks, false, null, false, 1);
 				
 				GlStateManager.popMatrix();
 				GlStateManager.enableLighting();
@@ -816,11 +824,12 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		}
 				
 		if (whiteOverlayAlpha != null) {
+			GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 			GlStateManager.enableBlend();
 			
 			if (backStrip != null)
-				backStrip.render(tick, 0f, null, false, 1.0f - whiteOverlayAlpha);
-			renderEventHorizon(x, y, z, partialTicks, false, 0f, true);
+				backStrip.render(tick, 0f, null, false, 1.0f - whiteOverlayAlpha, 1);
+			renderEventHorizon(x, y, z, partialTicks, false, 0f, true, 1);
 			
 			GlStateManager.disableBlend();
 		}
@@ -829,8 +838,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		GlStateManager.popMatrix();
 	}
 	
-	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly) {			
-		float tick = (float) (world.getTotalWorldTime() + partialTicks);	
+	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly, float mul) {			
+		float tick = (float) (world.getTotalWorldTime() + partialTicks) * mul;	
 		
 	    GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.enableBlend();
@@ -860,15 +869,15 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 			
 			
 			if (white)
-				Aunis.getRendererInit().innerCircle.render(tick, true, alpha);
+				Aunis.getRendererInit().innerCircle.render(tick, true, alpha, mul);
 			
-			Aunis.getRendererInit().innerCircle.render(tick, false, 1.0f-alpha);
+			Aunis.getRendererInit().innerCircle.render(tick, false, 1.0f-alpha, mul);
 			
 			for ( QuadStrip strip : Aunis.getRendererInit().quadStrips ) {
 				if (white)
-					strip.render(tick, true, alpha);
+					strip.render(tick, true, alpha, mul);
 				
-				strip.render(tick, false, 1.0f-alpha);
+				strip.render(tick, false, 1.0f-alpha, mul);
 			}
 		}
 		
@@ -901,7 +910,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		
 		else {
 			if (doUpgradeRender) {
-				// Inserting upgrade into DHD
+				// Inserting upgrade
 				if (!doInsertAnimation) {
 					insertionTime = world.getTotalWorldTime();
 					doInsertAnimation = true;
