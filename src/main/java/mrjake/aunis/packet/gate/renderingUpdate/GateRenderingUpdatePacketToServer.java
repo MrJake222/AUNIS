@@ -71,7 +71,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 				Block block = world.getBlockState(pos).getBlock();
 				
 				if ( block instanceof StargateBaseBlock || block instanceof DHDBlock ) {
-					TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64);
+					TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 					
 					TileEntity te = world.getTileEntity(pos);
 					StargateBaseTile gateTile;
@@ -105,7 +105,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 									
 									// clear connection and address, start animation 
-									TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
+									TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 512);
 									
 									gateTile.clearLinkedDHDButtons(false);
 									targetTile.clearLinkedDHDButtons(false);
@@ -123,7 +123,6 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									
 									targetTile.closeGate();
 									gateTile.closeGate();
-									gateTile.clearAddress();
 								}
 								
 								else {
@@ -180,10 +179,12 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											dhdTile.setLinkedGateEngagement(true);
 											dhdTile.setRendererState( new DHDRendererState(dhdTile.getPos(), EnumSymbol.toIntegerList(gateTile.dialedAddress, EnumSymbol.BRB)) );
 											
-											gateTile.openGate(true, null);
+											gateTile.openGate(true, null, null);
 											
 											DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
-											TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
+											TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 512);
+											
+											targetTile.openGate(false, gateTile.dialedAddress.size()-1, gateTile.gateAddress);
 											
 											// Open target gate
 											if (targetDhdTile != null) {
@@ -201,7 +202,6 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											}
 											
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, targetPos), targetPoint );
-											targetTile.openGate(false, gateTile.dialedAddress.size()-1);
 										}
 										
 										else {
@@ -259,7 +259,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 									DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
 									
-									TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 64);
+									TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 512);
 									
 									boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
 									

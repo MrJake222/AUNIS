@@ -49,7 +49,7 @@ public class ClearLinkedDHDButtons implements IMessage {
 					
 					if ( gateTile.isLinked() ) {
 						BlockPos dhd = gateTile.getLinkedDHD();
-						TargetPoint point = new TargetPoint(world.provider.getDimension(), dhd.getX(), dhd.getY(), dhd.getZ(), 64);
+						TargetPoint point = new TargetPoint(world.provider.getDimension(), dhd.getX(), dhd.getY(), dhd.getZ(), 512);
 						
 						AunisPacketHandler.INSTANCE.sendToAllAround(new ClearLinkedDHDButtons(dhd), point);
 					}
@@ -58,9 +58,12 @@ public class ClearLinkedDHDButtons implements IMessage {
 			
 			else {
 				World world = Minecraft.getMinecraft().player.getEntityWorld();
-				DHDRenderer renderer = ((DHDTile)world.getTileEntity(message.gatePos)).getDHDRenderer();
+				DHDTile dhdTile = ((DHDTile)world.getTileEntity(message.gatePos));
 				
-				renderer.clearButtons();				
+				if (dhdTile != null) {
+					DHDRenderer renderer = dhdTile.getDHDRenderer();
+					renderer.clearButtons();
+				}
 			}
 						
 			return null;

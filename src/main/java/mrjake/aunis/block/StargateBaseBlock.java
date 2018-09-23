@@ -97,7 +97,7 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 						gateTile.setInsertAnimation(true);
 					}
 						
-					AunisPacketHandler.INSTANCE.sendToAllAround( new UpgradeSlotInteractToClient(pos, hasUpgrade, isHoldingUpgrade), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64) );
+					AunisPacketHandler.INSTANCE.sendToAllAround( new UpgradeSlotInteractToClient(pos, hasUpgrade, isHoldingUpgrade), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512) );
 				}
 			}
 		}

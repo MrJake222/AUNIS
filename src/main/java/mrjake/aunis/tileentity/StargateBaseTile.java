@@ -55,6 +55,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	private boolean isClosing;
 	
 	private int dialedChevrons;
+	private int playersPassed;
 		
 	public List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
@@ -78,13 +79,15 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		dialedAddress.clear();
 	}
 	
-	public void openGate(boolean initiating, Integer incomingChevrons) {
+	public void openGate(boolean initiating, Integer incomingChevrons, List<EnumSymbol> incomingAddress) {
 		isInitiating = initiating;
 		
 		if (isInitiating)
 			dialedChevrons = dialedAddress.size()-1;
-		else
+		else {
 			dialedChevrons = incomingChevrons;
+			dialedAddress.addAll(incomingAddress);
+		}
 		
 		unstableVortex = true;
 		waitForEngage = world.getTotalWorldTime();
@@ -96,10 +99,12 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		unstableVortex = false;
 		isEngaged = true;
 		
+		playersPassed = 0;
+		
 		setRendererState();
 		
 		if (fastDialer) {
-			AunisPacketHandler.INSTANCE.sendToAllAround(new TileUpdatePacketToClient(getRendererState()), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64));
+			AunisPacketHandler.INSTANCE.sendToAllAround(new TileUpdatePacketToClient(getRendererState()), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 32768));
 			fastDialer = false;
 		}
 		
@@ -111,6 +116,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		isClosing = true;
 		isEngaged = false;
+		
+		clearAddress();
 	}
 	
 	private void disconnectGate() {	
@@ -333,7 +340,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			this.rotation = rotation;
 		}
 		
-		public void teleport(Entity entity, World sourceWorld) {
+		public void teleport(Entity entity) {
 			TeleportHelper.teleportEntity(entity, sourceGatePos, targetGatePos, rotation, motionVector);
 			
 			if (entity instanceof EntityPlayerMP)
@@ -351,7 +358,10 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	
 	public void teleportEntity(int entityId) {
 		Entity entity = world.getEntityByID(entityId);
-		scheduledTeleportMap.get(entityId).teleport(entity, world);
+		scheduledTeleportMap.get(entityId).teleport(entity);
+		
+		if (entity instanceof EntityPlayerMP)
+			playersPassed++;
 		
 		removeEntityFromTeleportList(entityId);
 	}
@@ -364,8 +374,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	private long waitForClear;
 	private int clearDelay;
 	
-	public void clearLinkedDHDButtons(boolean dialingFailed) {
-		clearDelay = dialingFailed ? 29 : 52;
+	public void clearLinkedDHDButtons(boolean dialingFailed) { // 29 : 52
+		clearDelay = dialingFailed ? 29 : 65;
 		
 		waitForClear = world.getTotalWorldTime();
 		clearingButtons = true;
@@ -473,7 +483,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		if (clearingButtons) {
 			if (world.getTotalWorldTime()-waitForClear >= clearDelay) { 
 				if (linkedDHD != null)
-					AunisPacketHandler.INSTANCE.sendToAllAround(new ClearLinkedDHDButtons(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64));
+					AunisPacketHandler.INSTANCE.sendToAllAround(new ClearLinkedDHDButtons(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
 				clearingButtons = false;
 			}
 		}
@@ -530,6 +540,14 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		return insertAnimation;
 	}
 
+	public int getEntitiesPassed() {
+		return playersPassed;
+	}
+	
+	public void entityPassing() {
+		playersPassed++;
+	}
+
     @Override
 	public void setInsertAnimation(boolean insertAnimation) {
 		this.insertAnimation = insertAnimation;
@@ -552,6 +570,6 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	
 	@Override
 	public double getMaxRenderDistanceSquared() {
-		return 32768;
+		return 65536;
 	}
 }

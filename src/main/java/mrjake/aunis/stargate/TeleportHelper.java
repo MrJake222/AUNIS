@@ -8,6 +8,7 @@ import org.lwjgl.util.vector.Matrix2f;
 
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
+import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketEntityEffect;
@@ -141,7 +142,6 @@ public class TeleportHelper {
 		float yaw = getRotation(entity, rotation, flipAxis);
 		Vec3d pos = getPosition(entity, sourceGatePos, targetGatePos.getPos(), rotation, targetFacing.getAxis()==Axis.Z ? ~flipAxis : flipAxis);
 		
-		
 		if (sourceDim == targetGatePos.getDimension()) {
 			entity.rotationYaw = yaw;
 			entity.setPositionAndUpdate(pos.x, pos.y, pos.z);
@@ -161,6 +161,11 @@ public class TeleportHelper {
 		}
 		
 		setMotion(entity, rotation, motionVector);
+		
+		if (entity instanceof EntityPlayerMP) {
+			StargateBaseTile targetTile = (StargateBaseTile) getWorld(targetGatePos.getDimension()).getTileEntity(targetGatePos.getPos());
+			targetTile.entityPassing();
+		}
 	}
 	
 	/* public static void teleportPlayer(EntityPlayerMP player, BlockPos sourceGatePos, StargatePos targetGatePos, float rotation, Vector2f motionVector) {
