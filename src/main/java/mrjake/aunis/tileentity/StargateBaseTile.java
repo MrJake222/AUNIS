@@ -8,7 +8,6 @@ import java.util.Random;
 
 import javax.vecmath.Vector2f;
 
-import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -21,6 +20,7 @@ import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
 import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
+import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
@@ -191,6 +191,9 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	}
 	
 	public DHDTile getLinkedDHD(World world) {
+		if (linkedDHD == null)
+			return null;
+		
 		return (DHDTile) world.getTileEntity(linkedDHD);
 	}
 	
@@ -326,7 +329,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			TeleportHelper.teleportEntity(entity, sourceGatePos, targetGatePos, rotation, motionVector);
 			
 			if (entity instanceof EntityPlayerMP)
-				entity.getEntityWorld().playSound(null, targetGatePos.getPos(), AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+				entity.getEntityWorld().playSound(null, targetGatePos.getPos(), AunisSoundHelper.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
 		}
 
 		public TeleportPacket setMotion(Vector2f motion) {

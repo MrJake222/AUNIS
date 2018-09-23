@@ -3,9 +3,9 @@ package mrjake.aunis.packet.gate.teleportPlayer;
 import javax.vecmath.Vector2f;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.StargateBaseBlock;
+import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.util.EnumFacing;
@@ -69,7 +69,7 @@ public class MotionToServer implements IMessage {
 					if (TeleportHelper.frontSide(sourceFacing, motionVector)) {
 						gateTile.scheduledTeleportMap.put(message.entityId, gateTile.scheduledTeleportMap.get(message.entityId).setMotion(motionVector));
 						
-						world.playSound(null, message.gatePos, AunisSoundEvents.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+						world.playSound(null, message.gatePos, AunisSoundHelper.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
 						gateTile.teleportEntity(message.entityId);
 					}
 					

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
@@ -15,6 +14,7 @@ import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.upgrade.UpgradeTileUpdateToServer;
 import mrjake.aunis.renderer.state.DHDRendererState;
+import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -104,9 +104,9 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 	
 	public void activateButton(int buttonID) {
 		if ( buttonID == 38 )
-			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.dhdPressBRB);
+			AunisSoundHelper.playSound(world, pos, AunisSoundHelper.dhdPressBRB);
 		else
-			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.dhdPress);
+			AunisSoundHelper.playSound(world, pos, AunisSoundHelper.dhdPress);
 		
 		if (activation == -1) {
 			if ( buttonID == 38 )

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisSoundEvents;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
@@ -21,6 +20,7 @@ import mrjake.aunis.packet.upgrade.UpgradeTileUpdateToServer;
 import mrjake.aunis.renderer.RendererInit.QuadStrip;
 import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
+import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.merge.BlockPosition;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.state.IBlockState;
@@ -79,8 +79,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		doEventHorizonRender = state.doEventHorizonRender;
 		dialingComplete = state.dialingComplete;
 		
-		AunisSoundEvents.playPositionedSound("wormhole", pos, vortexState == EnumVortexState.STILL);
-		AunisSoundEvents.playPositionedSound("ringRoll", pos, ringSpin);
+		AunisSoundHelper.playPositionedSound("wormhole", pos, vortexState == EnumVortexState.STILL);
+		AunisSoundHelper.playPositionedSound("ringRoll", pos, ringSpin);
 	}
 	
 	private int skyLight;
@@ -174,10 +174,10 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		this.dialingComplete = dialingComplete;
 		
 		if (!dialingComplete)
-			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateDialFail);
+			AunisSoundHelper.playSound(world, pos, AunisSoundHelper.gateDialFail);
 		
 		if (spin) {
-			AunisSoundEvents.playPositionedSound("ringRoll", pos, true);
+			AunisSoundHelper.playPositionedSound("ringRoll", pos, true);
 			
 			ringSpinStart = world.getTotalWorldTime();
 			lastTick = -1;
@@ -188,7 +188,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		}
 		
 		else {
-			AunisSoundEvents.playPositionedSound("ringRoll", pos, false);
+			AunisSoundHelper.playPositionedSound("ringRoll", pos, false);
 			
 			lockSoundPlayed = false;
 			ringDecelFirst = true;
@@ -232,7 +232,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 							// Play final chevron lock sound
 							if (dialingComplete) {
 								moveFinalChevron();
-								AunisSoundEvents.playSound(world, pos, AunisSoundEvents.chevronLockDHD);
+								AunisSoundHelper.playSound(world, pos, AunisSoundHelper.chevronLockDHD);
 							}
 						}
 						
@@ -361,7 +361,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	}
 	
 	public void lightUpChevrons(int chevronsToLightUp) {
-		AunisSoundEvents.playSound(world, pos, AunisSoundEvents.chevronIncoming);
+		AunisSoundHelper.playSound(world, pos, AunisSoundHelper.chevronIncoming);
 		
 		this.chevronsToLightUp = chevronsToLightUp;
 		this.dialingComplete = true;
@@ -581,9 +581,9 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	}
 	
 	public void closeGate() {
-		AunisSoundEvents.playPositionedSound("wormhole", pos, false);
+		AunisSoundHelper.playPositionedSound("wormhole", pos, false);
 		
-		AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateClose);
+		AunisSoundHelper.playSound(world, pos, AunisSoundHelper.gateClose);
 		gateWaitClose = world.getTotalWorldTime();
 		
 		vortexState = EnumVortexState.CLOSING;
@@ -623,7 +623,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	
 	private void engageGate() {
 		vortexState = EnumVortexState.STILL;
-		AunisSoundEvents.playPositionedSound("wormhole", pos, true);
+		AunisSoundHelper.playPositionedSound("wormhole", pos, true);
 	}
 	
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
@@ -638,7 +638,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		if ( !soundPlayed && gateWait < 30 ) {
 			soundPlayed = true;
 			
-			AunisSoundEvents.playSound(world, pos, AunisSoundEvents.gateOpen);
+			AunisSoundHelper.playSound(world, pos, AunisSoundHelper.gateOpen);
 		}
 		
 		// Waiting for sound sync
