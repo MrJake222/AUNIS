@@ -832,6 +832,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	private void renderEventHorizon(double x, double y, double z, double partialTicks, boolean white, Float alpha, boolean backOnly) {			
 		float tick = (float) (world.getTotalWorldTime() + partialTicks);	
 		
+	    GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.enableBlend();
 		
 		int k;
