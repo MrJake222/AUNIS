@@ -187,12 +187,19 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 											if (targetDhdTile != null) {
 												targetDhdTile.setLinkedGateEngagement(true);
 												
-												targetDhdTile.setRendererState( new DHDRendererState(targetDhdTile.getPos(), EnumSymbol.toIntegerList(gateAddressWithOrigin, EnumSymbol.BRB)) );
+												List<Integer> targetDhdSymbols = new ArrayList<>();
+												for (int i=0; i<gateTile.dialedAddress.size()-1; i++)
+													targetDhdSymbols.add(gateTile.gateAddress.get(i).id);
+												
+												targetDhdSymbols.add(EnumSymbol.ORIGIN.id);
+												targetDhdSymbols.add(EnumSymbol.BRB.id);
+												
+												targetDhdTile.setRendererState( new DHDRendererState(targetDhdTile.getPos(), targetDhdSymbols) );
 												AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, message.objectID, targetDhdTile), targetPoint );
 											}
 											
 											AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, targetPos), targetPoint );
-											targetTile.openGate(false, gateTile.dialedAddress.size());
+											targetTile.openGate(false, gateTile.dialedAddress.size()-1);
 										}
 										
 										else {

@@ -81,7 +81,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		isInitiating = initiating;
 		
 		if (isInitiating)
-			dialedChevrons = dialedAddress.size();
+			dialedChevrons = dialedAddress.size()-1;
 		else
 			dialedChevrons = incomingChevrons;
 		

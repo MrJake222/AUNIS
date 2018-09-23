@@ -932,9 +932,12 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		GlStateManager.pushMatrix();
 		
 		// Gate diameter/2 + 0.9
-		GlStateManager.translate(x, y-4.55f+1*mul, z-0.07f);
-		// GlStateManager.rotate(-90, 0, 1, 0);	
-		GlStateManager.rotate(135, 0, 0, 1);	
+		GlStateManager.translate(x, y-4.55f+1*mul, z);
+		GlStateManager.rotate(horizontalRotation, 0, 1, 0);
+		
+		GlStateManager.translate(0.077f, 0, 0.07f);
+		GlStateManager.rotate(135, 0, 0, 1);
+		
 			
 		ItemStack stack = new ItemStack(AunisItems.stargateAddressCrystal);
 			
