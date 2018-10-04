@@ -1,0 +1,18 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"NN",
+		"NN"
+	],
+	
+	"key": {
+		"N": {
+			"item": "aunis:naquadah_ore_shard"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:pure_naquadah_ore",
+		"data": 0
+	}
+}
