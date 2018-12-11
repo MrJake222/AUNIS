@@ -1,0 +1,25 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"R R",
+		"NCN",
+		"NNN"
+	],
+	
+	"key": {
+		"R": {
+			"item": "aunis:stargate_ring_item"
+		},
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+		"C": {
+			"item": "aunis:crystal_control_stargate"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:stargatebase_block",
+		"data": 0
+	}
+}

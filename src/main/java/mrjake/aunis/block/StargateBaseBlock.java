@@ -48,7 +48,7 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 				
 		if (!world.isRemote) {
 			if (gateTile.hasUpgrade() || gateTile.getInsertAnimation()) {
-				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.stargateAddressCrystal));
+				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphStargate));
 			}
 		}
 		
@@ -62,13 +62,13 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 		
 		// Server side
 		if (!world.isRemote) {
-			if (heldItem.getItem() == AunisItems.ancientAnalyzer) {
+			if (heldItem.getItem() == AunisItems.analyzerAncient) {
 				AunisPacketHandler.INSTANCE.sendTo(new OpenStargateAddressGuiToClient(pos, gateTile.hasUpgrade() ? 7 : 6), (EntityPlayerMP) player);
 				
 				return true;
 			}
 			
-			else if (heldItem.getItem() == AunisItems.fastDialer) {				
+			else if (heldItem.getItem() == AunisItems.dialerFast) {				
 				NBTTagCompound compound = heldItem.getTagCompound();
 				if (compound == null) 
 					compound = new NBTTagCompound();
@@ -88,7 +88,7 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 			else {
 				if ( hand == EnumHand.MAIN_HAND/* && facing == EnumFacing.UP */&& !state.getValue(BlockTESRMember.RENDER) ) {												
 					boolean hasUpgrade = gateTile.hasUpgrade();
-					boolean isHoldingUpgrade = heldItem.getItem() == AunisItems.stargateAddressCrystal;
+					boolean isHoldingUpgrade = heldItem.getItem() == AunisItems.crystalGlyphStargate;
 					
 					if (!gateTile.getInsertAnimation() && !hasUpgrade && isHoldingUpgrade) {
 						// Reduce ItemStack

@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"NNN",
+		"   ",
+		"NNN"
+	],
+	
+	"key": {
+		"N": {
+			"item": "aunis:naquadah_refined"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:stargate_ring_item",
+		"count": 4,
+		"data": 0
+	}
+}

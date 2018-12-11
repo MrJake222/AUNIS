@@ -1,0 +1,26 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"INI",
+		"NRN",
+		"INI"
+	],
+	
+	"key": {
+		"N": {
+			"item": "aunis:naquadah_ore_pure"
+		},
+		"I": {
+			"item": "minecraft:iron_ingot"
+		},
+		"R": {
+			"item": "minecraft:redstone"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:naquadah_refined",
+		"count": 2,
+		"data": 0
+	}
+}

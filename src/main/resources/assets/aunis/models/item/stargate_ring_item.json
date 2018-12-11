@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "aunis:items/dhd_control_crystal"
+        "layer0": "aunis:items/stargate_ring_item"
     }
 }

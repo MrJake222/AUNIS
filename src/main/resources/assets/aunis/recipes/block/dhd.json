@@ -1,0 +1,35 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		" G ",
+		"RCR",
+		"NLN"
+	],
+	
+	"key": {
+		"R": {
+			"item": "minecraft:redstone"
+		},
+		
+		"G": {
+			"item": "minecraft:glass"
+		},
+		
+		"C": {
+			"item": "aunis:crystal_control_dhd"
+		},
+		
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+		
+		"L": {
+			"item": "minecraft:glowstone"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:dhd_block",
+		"data": 0
+	}
+}

@@ -71,7 +71,7 @@ public class DHDBlock extends TileEntityRotated<DHDTile> {
 								
 				ItemStack itemStack = playerIn.getHeldItemMainhand();								
 				boolean hasUpgrade = dhdTile.hasUpgrade();
-				boolean isHoldingUpgrade = itemStack.getItem() == AunisItems.dhdControlCrystal;
+				boolean isHoldingUpgrade = itemStack.getItem() == AunisItems.crystalGlyphDhd;
 				
 				if (!dhdTile.getInsertAnimation()) {
 					// Reduce ItemStack
@@ -99,7 +99,7 @@ public class DHDBlock extends TileEntityRotated<DHDTile> {
 				gateTile.setLinkedDHD(null);
 			
 			if (dhdTile.hasUpgrade() || dhdTile.getInsertAnimation()) {
-				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.dhdControlCrystal));
+				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphDhd));
 			}
 		}
 		

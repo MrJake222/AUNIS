@@ -14,3 +14,4 @@ usernamecache.json
 .classpath
 .project
 .settings/
+.metadata/

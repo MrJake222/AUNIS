@@ -12,7 +12,8 @@
 	},
 	
 	"result": {
-		"item": "aunis:pure_naquadah_ore",
+		"item": "aunis:naquadah_ore_pure",
+		"count": 2,
 		"data": 0
 	}
 }

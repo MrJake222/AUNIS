@@ -949,7 +949,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		GlStateManager.rotate(135, 0, 0, 1);
 		
 			
-		ItemStack stack = new ItemStack(AunisItems.stargateAddressCrystal);
+		ItemStack stack = new ItemStack(AunisItems.crystalGlyphStargate);
 			
 		IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, world, null);
 		model = ForgeHooksClient.handleCameraTransforms(model, ItemCameraTransforms.TransformType.GROUND, false);

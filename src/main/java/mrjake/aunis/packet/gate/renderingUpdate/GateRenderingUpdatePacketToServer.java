@@ -134,7 +134,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 								// Gate is closed, BRB pressed
 								
 								ItemStack stack = player.getHeldItem(EnumHand.MAIN_HAND);
-								if (stack.getItem() == AunisItems.fastDialer) {
+								if (stack.getItem() == AunisItems.dialerFast) {
 									NBTTagCompound compound = stack.getTagCompound();
 									
 									byte[] symbols = compound.getByteArray("address");

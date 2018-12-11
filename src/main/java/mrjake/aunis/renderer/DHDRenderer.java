@@ -214,7 +214,7 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 				GlStateManager.rotate(-90, 0, 1, 0);	
 				GlStateManager.rotate(45, 0, 0, 1);	
 					
-				ItemStack stack = new ItemStack(AunisItems.dhdControlCrystal);
+				ItemStack stack = new ItemStack(AunisItems.crystalGlyphDhd);
 					
 				IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, world, null);
 				model = ForgeHooksClient.handleCameraTransforms(model, ItemCameraTransforms.TransformType.GROUND, false);

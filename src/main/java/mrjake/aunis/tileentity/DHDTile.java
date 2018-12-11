@@ -21,7 +21,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
-import scala.annotation.meta.param;
 
 public class DHDTile extends RenderedTileEntity implements ITickable {
 	

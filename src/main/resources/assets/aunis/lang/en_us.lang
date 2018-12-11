@@ -1,14 +1,18 @@
 itemGroup.aunis=Aunis
 
+item.aunis.analyzer_ancient.name=Ancient Analyzer
+
+item.aunis.crystal_control_dhd.name=DHD Control Crystal
+item.aunis.crystal_control_empty.name=Empty Control Crystal
+item.aunis.crystal_control_stargate.name=Stargate Control Crystal
+
+item.aunis.crystal_glyph_dhd.name=DHD Glyph Crystal
+item.aunis.crystal_glyph_empty.name=Empty Glyph Crystal
+item.aunis.crystal_glyph_stargate.name=Stargate Glyph Crystal
+
+item.aunis.naquadah_ore_pure.name=Pure Naquadah Ore
 item.aunis.naquadah_ore_shard.name=Naquadah Ore Shard
-item.aunis.pure_naquadah_ore.name=Pure Naquadah Ore
-item.aunis.refined_naquadah.name=Refined Naquadah
-
-item.aunis.empty_crystal.name=Empty Crystal
-item.aunis.dhd_control_crystal.name=DHD Control Crystal
-item.aunis.stargate_address_crystal.name=Stargate Address Crystal
-
-item.aunis.ancient_analyzer.name=Ancient Tech Analyzer
+item.aunis.naquadah_refined.name=Refined Naquadah
 
 tile.aunis.stargatebase_block.name=Stargate Base
 tile.aunis.ring_block.name=Stargate Ring

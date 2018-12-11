@@ -1,0 +1,31 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"RGR",
+		"NCN",
+		"NLN"
+	],
+	
+	"key": {
+		"R": {
+			"item": "aunis:stargate_ring_item"
+		},
+		"G": {
+			"item": "minecraft:glass"
+		},
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+		"C": {
+			"item": "aunis:crystal_control_ring"
+		},
+		"L": {
+			"item": "minecraft:glowstone"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:chevron_block",
+		"data": 0
+	}
+}

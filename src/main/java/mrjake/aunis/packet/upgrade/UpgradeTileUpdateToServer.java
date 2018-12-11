@@ -52,9 +52,9 @@ public class UpgradeTileUpdateToServer implements IMessage {
 				ItemStack itemStack;
 				
 				if (renderedTileEntity instanceof StargateBaseTile)
-					itemStack = new ItemStack(AunisItems.stargateAddressCrystal);
+					itemStack = new ItemStack(AunisItems.crystalGlyphStargate);
 				else
-					itemStack = new ItemStack(AunisItems.dhdControlCrystal);
+					itemStack = new ItemStack(AunisItems.crystalGlyphDhd);
 				
 				if (!message.hasUpgrade) {
 					if (player.getHeldItemMainhand().isItemEqual(ItemStack.EMPTY))
