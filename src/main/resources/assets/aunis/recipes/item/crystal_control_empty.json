@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"  Q",
+		" Q ",
+		"Q  "
+	],
+	
+	"key": {
+		"Q": {
+			"item": "minecraft:quartz"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:crystal_control_empty",
+		"count": 1,
+		"data": 0
+	}
+}

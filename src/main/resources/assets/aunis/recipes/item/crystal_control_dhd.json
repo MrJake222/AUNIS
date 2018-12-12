@@ -1,0 +1,31 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"R R",
+		"GCG",
+		"RNR"
+	],
+	
+	"key": {
+		"R": {
+			"item": "minecraft:redstone"
+		},
+	
+		"C": {
+			"item": "aunis:crystal_control_empty"
+		},
+		
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+		
+		"G": {
+			"item": "minecraft:glowstone_dust"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:crystal_control_dhd",
+		"count": 1
+	}
+}

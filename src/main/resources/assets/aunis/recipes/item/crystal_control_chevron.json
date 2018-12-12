@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"  R",
+		" C ",
+		"R  "
+	],
+	
+	"key": {
+		"C": {
+			"item": "aunis:crystal_control_empty"
+		},
+		
+		"R": {
+			"item": "minecraft:redstone"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:crystal_control_chevron",
+		"count": 1,
+		"data": 0
+	}
+}

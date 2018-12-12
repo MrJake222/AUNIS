@@ -1,19 +1,23 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"NNN",
+		"NPN",
 		"   ",
-		"NNN"
+		"NPN"
 	],
 	
 	"key": {
 		"N": {
 			"item": "aunis:naquadah_refined"
+		},
+		
+		"P": {
+			"item": "aunis:naquadah_ore_pure"
 		}
 	},
 	
 	"result": {
-		"item": "aunis:stargate_ring_item",
+		"item": "aunis:stargate_ring_fragment",
 		"count": 4,
 		"data": 0
 	}

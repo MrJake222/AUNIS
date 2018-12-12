@@ -13,7 +13,7 @@ public class AunisItems {
 	 */
 	public static ItemBase crystalControlDhd = new ItemBase("crystal_control_dhd");
 	public static ItemBase crystalControlEmpty = new ItemBase("crystal_control_empty");
-	public static ItemBase crystalControlRing = new ItemBase("crystal_control_ring");
+	public static ItemBase crystalControlChevron = new ItemBase("crystal_control_chevron");
 	public static ItemBase crystalControlStargate = new ItemBase("crystal_control_stargate");
 	
 	/**
@@ -36,14 +36,14 @@ public class AunisItems {
 	public static ItemBase naquadahOreShard = new ItemBase("naquadah_ore_shard");
 	public static ItemBase naquadahRefined = new ItemBase("naquadah_refined");
 	
-	public static ItemBase stargateRingItem = new ItemBase("stargate_ring_item");
+	public static ItemBase stargateRingFragment = new ItemBase("stargate_ring_fragment");
 	
 	public static Item[] items = {
 		analyzerAncient,
 		
 		crystalControlDhd,
 		crystalControlEmpty,
-		crystalControlRing,
+		crystalControlChevron,
 		crystalControlStargate,
 		
 		crystalGlyphDhd,
@@ -56,6 +56,6 @@ public class AunisItems {
 		naquadahOreShard,
 		naquadahRefined,
 		
-		stargateRingItem
+		stargateRingFragment
 	};
 }
