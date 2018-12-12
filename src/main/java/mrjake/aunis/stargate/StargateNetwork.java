@@ -87,7 +87,37 @@ public class StargateNetwork extends WorldSavedData {
 	}
 	
 	public boolean checkForStargate(List<EnumSymbol> address) {
-		return stargateMap.containsKey( EnumSymbol.toLong(address) );
+		return stargateMap.containsKey(EnumSymbol.toLong(address));
+	}
+	
+	public boolean stargateInWorld(World currentWorld, List<EnumSymbol> address) {
+		if (address.size() < 7)
+			return false;
+		
+		StargatePos stargatePos = stargateMap.get(EnumSymbol.toLong(address));
+		
+		// Gate exists
+		// NOT checking 7th symbol or dimension
+		if (stargatePos != null) {
+			
+			// Local dial
+			if (address.size() == 7) {
+				
+				// Same dimension
+				if (currentWorld.provider.getDimension() == stargatePos.getDimension()) {
+					return true;
+				}
+			}
+			
+			// Cross dimensional dial
+			else {
+				
+				// No need to check dimension
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public static StargateNetwork get(World world) {

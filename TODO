@@ -1,5 +1,10 @@
 # Aunis Mod TODO list
-#   Add craftings
+# D Add craftings
+#   Fix DHD not going dark (unloaded, closing from dialing site)
+#   Fix autoclose on unloaded gates
+#
+#
+# -----------------------------------
 #   Add power consumption
 #     Naquadah placeholder?
 #  Test out autoclose
