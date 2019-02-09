@@ -2,7 +2,7 @@ package mrjake.aunis.packet.upgrade;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.Renderer;
-import mrjake.aunis.tileentity.RenderedTileEntity;
+import mrjake.aunis.tileentity.TileEntityRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.BlockPos;
@@ -49,8 +49,8 @@ public class UpgradeSlotInteractToClient implements IMessage {
 				EntityPlayerSP player = Minecraft.getMinecraft().player;
 				World world = player.getEntityWorld();
 				
-				RenderedTileEntity renderedTileEntity = (RenderedTileEntity) world.getTileEntity(message.dhdPos);
-				Renderer renderer = renderedTileEntity.getRenderer();
+				TileEntityRenderer TileEntityRenderer = (TileEntityRenderer) world.getTileEntity(message.dhdPos);
+				Renderer renderer = TileEntityRenderer.getRenderer();
 				
 				renderer.upgradeInteract(message.hasUpgrade, message.isHoldingUpgrade);
 			});

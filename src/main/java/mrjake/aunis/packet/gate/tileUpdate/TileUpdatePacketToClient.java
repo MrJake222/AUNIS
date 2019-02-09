@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
-import mrjake.aunis.tileentity.RenderedTileEntity;
+import mrjake.aunis.tileentity.TileEntityRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.world.World;
@@ -47,7 +47,7 @@ public class TileUpdatePacketToClient implements IMessage {
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				
-				RenderedTileEntity te = (RenderedTileEntity) world.getTileEntity(message.rendererState.pos);
+				TileEntityRenderer te = (TileEntityRenderer) world.getTileEntity(message.rendererState.pos);
 				te.getRenderer().setState(message.rendererState);
 				
 			});

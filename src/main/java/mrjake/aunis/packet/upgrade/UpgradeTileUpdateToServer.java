@@ -2,7 +2,7 @@ package mrjake.aunis.packet.upgrade;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.tileentity.RenderedTileEntity;
+import mrjake.aunis.tileentity.TileEntityRenderer;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -45,13 +45,13 @@ public class UpgradeTileUpdateToServer implements IMessage {
 			WorldServer worldServer = player.getServerWorld();
 			
 			worldServer.addScheduledTask(() -> {
-				RenderedTileEntity renderedTileEntity = (RenderedTileEntity) worldServer.getTileEntity(message.dhdPos);
-				renderedTileEntity.setUpgrade(message.hasUpgrade);
-				renderedTileEntity.setInsertAnimation(false);
+				TileEntityRenderer TileEntityRenderer = (TileEntityRenderer) worldServer.getTileEntity(message.dhdPos);
+				TileEntityRenderer.setUpgrade(message.hasUpgrade);
+				TileEntityRenderer.setInsertAnimation(false);
 				
 				ItemStack itemStack;
 				
-				if (renderedTileEntity instanceof StargateBaseTile)
+				if (TileEntityRenderer instanceof StargateBaseTile)
 					itemStack = new ItemStack(AunisItems.crystalGlyphStargate);
 				else
 					itemStack = new ItemStack(AunisItems.crystalGlyphDhd);

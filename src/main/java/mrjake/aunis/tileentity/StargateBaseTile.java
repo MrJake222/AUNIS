@@ -12,6 +12,7 @@ import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
@@ -31,18 +32,24 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
-public class StargateBaseTile extends RenderedTileEntity implements ITickable {
+public class StargateBaseTile extends TileEntity implements TileEntityRenderer, ITickable {
 	
 	private static final int maxChevrons = 8;
-
+	
+	@SuppressWarnings("rawtypes")
+	private Renderer renderer;
+	private RendererState rendererState;
+	
 	private LimitedStargateRendererState limitedState;
 	private BlockPos linkedDHD = null;
 	
@@ -90,7 +97,10 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		}
 		
 		unstableVortex = true;
+		playersPassed = 0;
 		waitForEngage = world.getTotalWorldTime();
+		
+		markDirty();
 	}
 	
 	public boolean fastDialer;
@@ -98,9 +108,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	private void engageGate() {	
 		unstableVortex = false;
 		isEngaged = true;
-		
-		playersPassed = 0;
-		
+		gateCloseTimeout = 5;
+				
 		setRendererState();
 		
 		if (fastDialer) {
@@ -116,6 +125,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		isClosing = true;
 		isEngaged = false;
+		gateCloseTimeout = 5;
 		
 		clearAddress();
 	}
@@ -241,10 +251,12 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		compound.setBoolean("isEngaged", isEngaged);
 		compound.setBoolean("isInitiating", isInitiating);
+		compound.setBoolean("unstableVortex", unstableVortex);
+
 		compound.setBoolean("hasUpgrade", hasUpgrade);
 		compound.setBoolean("insertAnimation", insertAnimation);
 		
-		if (isEngaged && isInitiating) {
+		if (isEngaged || unstableVortex) {
 			compound.setInteger("dialedAddressLength", dialedAddress.size());
 			
 			for (int i=0; i<dialedAddress.size(); i++) {
@@ -260,6 +272,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		compound.setLong("waitForClear", waitForClear);
 		
 		compound.setInteger("dialedChevrons", dialedChevrons);
+		
+		compound.setInteger("playersPassed", playersPassed);
 		
 		getLimitedState().toNBT(compound);
 		
@@ -283,10 +297,12 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		
 		isEngaged = compound.getBoolean("isEngaged");
 		isInitiating = compound.getBoolean("isInitiating");
+		unstableVortex = compound.getBoolean("unstableVortex");
+
 		hasUpgrade = compound.getBoolean("hasUpgrade");
 		insertAnimation = compound.getBoolean("insertAnimation");
-
-		if (isEngaged && isInitiating) {
+		
+		if (isEngaged || unstableVortex) {
 			dialedAddress.clear();
 			int dialedAddressLength = compound.getInteger("dialedAddressLength");
 			
@@ -295,7 +311,6 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			}
 		}
 		
-		unstableVortex = compound.getBoolean("unstableVortex");
 		waitForEngage = compound.getLong("waitForEngage");
 		isClosing = compound.getBoolean("isClosing");
 		waitForClose = compound.getLong("waitForClose");
@@ -303,6 +318,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		waitForClear = compound.getLong("waitForClear");
 		
 		dialedChevrons = compound.getInteger("dialedChevrons");
+		
+		playersPassed = compound.getInteger("playersPassed");
 		
 		limitedState = new LimitedStargateRendererState(compound);
 		
@@ -361,7 +378,7 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		scheduledTeleportMap.get(entityId).teleport(entity);
 		
 		if (entity instanceof EntityPlayerMP)
-			playersPassed++;
+			entityPassing();
 		
 		removeEntityFromTeleportList(entityId);
 	}
@@ -381,6 +398,9 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 		clearingButtons = true;
 	}
 	
+	private AxisAlignedBB scanArea;
+	private int gateCloseTimeout = 5;
+	
 	@Override
 	public void update() {
 		if (firstTick) {
@@ -395,6 +415,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			generateAddress();
 			
 			updateMergeState(MergeHelper.checkBlocks(this));
+			
+			scanArea = new AxisAlignedBB(this.pos.add(new Vec3i(-10, -2, -10)), this.pos.add(new Vec3i(10, 2, 10)));
 			
 			if (!world.isRemote) {
 				EnumFacing sourceGateFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
@@ -425,12 +447,15 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 			}
 		}
 		
+		
+		// Scan for entities passing through event horizon
 		if (!world.isRemote && horizonBoundingBox != null && isEngaged && isInitiating) {
 			List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, horizonBoundingBox);
 			
 			for (Entity entity : entities) {
 				int entId = entity.getEntityId();
 				
+				// If entity not added to scheduled teleport list
 				if ( !scheduledTeleportMap.containsKey(entId) ) {
 					StargatePos targetGate = StargateNetwork.get(world).getStargate( dialedAddress );
 					if (targetGate == null)
@@ -468,6 +493,38 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 					}
 				}
 			}
+		}
+		
+		// AutoClose (on server) (engaged) (target gate)
+		// Scan for load status of the source gate
+		// Every X ticks
+		//   Unloaded -- then no player is in the area
+		//   Loaded   -- then scan for players
+		if (!world.isRemote && isEngaged && !isInitiating) {
+			if (world.getTotalWorldTime() % 20 == 0) {
+				if (dialedAddress.size() > 0) {
+					StargatePos sourcePos = StargateNetwork.get(world).getStargate(dialedAddress);
+					
+					boolean sourceLoaded = world.isBlockLoaded(sourcePos.getPos());
+					
+					if (getEntitiesPassed() > 0) {
+						if (sourceLoaded) {
+							int entityCount = world.getEntitiesWithinAABB(EntityPlayerMP.class, scanArea).size();
+							
+							if (entityCount == 0)
+								gateCloseTimeout--;
+						}
+						
+						else {
+							gateCloseTimeout--;
+						}
+					}
+					
+					if (gateCloseTimeout == 0) {
+						AunisPacketHandler.INSTANCE.sendToServer(new GateRenderingUpdatePacketToServer(EnumSymbol.BRB.id, sourcePos.getPos()));
+					}
+				}
+			}			
 		}
 		
 		if (unstableVortex) {
@@ -546,6 +603,8 @@ public class StargateBaseTile extends RenderedTileEntity implements ITickable {
 	
 	public void entityPassing() {
 		playersPassed++;
+		
+		markDirty();
 	}
 
     @Override

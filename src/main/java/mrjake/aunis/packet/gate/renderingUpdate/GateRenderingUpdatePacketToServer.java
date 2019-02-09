@@ -116,10 +116,10 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									
 									// Open target gate
 									if (targetDhdTile != null) {
-										targetDhdTile.setLinkedGateEngagement(false);
+										targetDhdTile.setRendererState(new DHDRendererState(targetDhdTile.getPos(), new ArrayList<Integer>()));
 									}
 									
-									dhdTile.setLinkedGateEngagement(false);
+									dhdTile.setRendererState(new DHDRendererState(targetDhdTile.getPos(), new ArrayList<Integer>()));
 									
 									targetTile.closeGate();
 									gateTile.closeGate();
@@ -169,7 +169,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									
 									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, message.objectID, dhdTile), point );
 									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, gateTile), point );
-									dhdTile.setLinkedGateEngagement(true);
+//									dhdTile.setLinkedGateEngagement(true);
 									dhdTile.setRendererState( new DHDRendererState(dhdTile.getPos(), EnumSymbol.toIntegerList(gateTile.dialedAddress, EnumSymbol.BRB)) );
 									
 									gateTile.openGate(true, null, null);
@@ -181,7 +181,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									
 									// Open target gate
 									if (targetDhdTile != null) {
-										targetDhdTile.setLinkedGateEngagement(true);
+//										targetDhdTile.setLinkedGateEngagement(true);
 										
 										List<Integer> targetDhdSymbols = new ArrayList<>();
 										for (int i=0; i<gateTile.dialedAddress.size()-1; i++)

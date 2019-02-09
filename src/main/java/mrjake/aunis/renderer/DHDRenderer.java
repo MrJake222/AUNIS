@@ -64,22 +64,9 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 			
 		buttonTexture.put("b38", "dhd/brb/brb0.png");
 	}
+
 	
-	public List<Integer> getActiveButtons() {
-		List<Integer> out = new ArrayList<Integer>();
-		
-		for (int i=0; i<=38; i++) {
-			String val = buttonTexture.get("b"+i);
-			
-			if ( !val.equals("dhd/symbol/symbol0.png") && !val.equals("dhd/brb/brb0.png") )
-				out.add(i);
-			
-		}
-		
-		return out;
-	}
-	
-	public void setActiveButtons(List<Integer> list) {
+	private void setActiveButtons(List<Integer> list) {
 		initTextureList();
 		String template;
 		

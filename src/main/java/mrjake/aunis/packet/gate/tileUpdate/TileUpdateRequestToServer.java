@@ -3,7 +3,7 @@ package mrjake.aunis.packet.gate.tileUpdate;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.StargateBaseBlock;
-import mrjake.aunis.tileentity.RenderedTileEntity;
+import mrjake.aunis.tileentity.TileEntityRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -40,7 +40,7 @@ public class TileUpdateRequestToServer implements IMessage {
 			Block block = world.getBlockState(message.tilePos).getBlock();
 			
 			if ( block instanceof StargateBaseBlock || block instanceof DHDBlock ) {				
-				RenderedTileEntity te = (RenderedTileEntity) world.getTileEntity(message.tilePos);
+				TileEntityRenderer te = (TileEntityRenderer) world.getTileEntity(message.tilePos);
 				
 				if (te != null)
 					return new TileUpdatePacketToClient(te.getRendererState());

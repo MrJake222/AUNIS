@@ -6,7 +6,7 @@ import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.packet.gate.tileUpdate.EnumTile;
 import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.RendererState;
-import mrjake.aunis.tileentity.RenderedTileEntity;
+import mrjake.aunis.tileentity.TileEntityRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -53,7 +53,7 @@ public class StateUpdateToServer implements IMessage {
 			if ( block instanceof StargateBaseBlock || block instanceof DHDBlock ) {
 				world.addScheduledTask(() -> {
 					
-					RenderedTileEntity te = (RenderedTileEntity) world.getTileEntity(message.rendererState.pos);
+					TileEntityRenderer te = (TileEntityRenderer) world.getTileEntity(message.rendererState.pos);
 					te.setRendererState(message.rendererState);
 						
 				});
