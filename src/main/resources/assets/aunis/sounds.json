@@ -1,6 +1,6 @@
 {
   "dhd_press": {
-    "category": "block",
+    "category": "ambient",
     "subtitle": "aunis.subtitle.dhd_press",
     "sounds": [
       "aunis:dhd/press_1",
@@ -14,7 +14,7 @@
   },
   
   "dhd_brb": {
-    "category": "block",
+    "category": "ambient",
     "subtitle": "aunis.subtitle.dhd_press_brb",
     "sounds": [
       "aunis:dhd/press_brb"
@@ -22,7 +22,7 @@
   },
   
   "gate_open": {
-    "category": "block",
+    "category": "ambient",
     "subtitle": "aunis.subtitle.gate_open",
     "sounds": [
       "aunis:gate/open"
@@ -30,26 +30,34 @@
   },
   
   "gate_close": {
-    "category": "block",
+    "category": "ambient",
     "subtitle": "aunis.subtitle.gate_close",
     "sounds": [
       "aunis:gate/close"
     ]
   },
   
-  "ring_roll": {
-    "category": "block",
-    "subtitle": "aunis.subtitle.ring_roll",
+  "ring_roll_start": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.ring_roll_start",
     "sounds": [
       {
-      	"name": "aunis:gate/roll",
+      	"name": "aunis:gate/roll_start",
       	"stream": true
       }
     ]
   },
   
+  "ring_roll_loop": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.ring_roll_loop",
+    "sounds": [
+      "aunis:gate/roll_loop"
+    ]
+  },
+  
   "chevron_lock_dhd": {
-    "category": "block",
+    "category": "ambient",
     "subtitle": "aunis.subtitle.chevron_lock_dhd",
     "sounds": [
       "aunis:gate/chevron_lock_dhd"
@@ -57,7 +65,7 @@
   },
   
   "gate_dial_fail": {
-    "category": "block",
+    "category": "ambient",
     "subtitle": "aunis.subtitle.gate_dial_fail",
     "sounds": [
       "aunis:gate/dial_fail"
@@ -65,7 +73,7 @@
   },
   
    "chevron_incoming": {
-    "category": "block",
+    "category": "ambient",
     "subtitle": "aunis.subtitle.gate_dial_fail",
     "sounds": [
       "aunis:gate/chevron_incoming"
@@ -73,7 +81,7 @@
   },
   
   "wormhole_loop": {
-    "category": "block",
+    "category": "ambient",
     "subtitle": "aunis.subtitle.wormhole_loop",
     "sounds": [
       "aunis:gate/wormhole_loop"
@@ -81,7 +89,7 @@
   },
   
   "wormhole_go": {
-    "category": "block",
+    "category": "ambient",
     "subtitle": "aunis.subtitle.wormhole_go",
     "sounds": [
       "aunis:eh/eh_go_1",

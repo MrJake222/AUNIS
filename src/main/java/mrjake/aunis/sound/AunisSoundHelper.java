@@ -23,7 +23,8 @@ public class AunisSoundHelper {
 	public static SoundEvent chevronIncoming;
 	public static SoundEvent wormholeGo;
 	
-	public static ResourceLocation ringRoll;
+	public static ResourceLocation ringRollStart;
+	public static ResourceLocation ringRollLoop;
 	public static ResourceLocation wormholeLoop;
 	
 	private static Map<String, AunisSound> aunisSounds = new HashMap<>();
@@ -66,14 +67,16 @@ public class AunisSoundHelper {
 		chevronIncoming = new SoundEvent( new ResourceLocation("aunis", "chevron_incoming") );	
 		wormholeGo = new SoundEvent( new ResourceLocation("aunis", "wormhole_go") );
 		
-		ringRoll = new ResourceLocation("aunis", "ring_roll");
+		ringRollStart = new ResourceLocation("aunis", "ring_roll_start");
+		ringRollLoop = new ResourceLocation("aunis", "ring_roll_loop");
 		wormholeLoop = new ResourceLocation("aunis", "wormhole_loop");
 		
-		aunisSounds.put("ringRoll", new AunisSound(AunisSoundHelper.ringRoll, SoundCategory.BLOCKS, false));
+		aunisSounds.put("ringRollStart", new AunisSound(AunisSoundHelper.ringRollStart, SoundCategory.AMBIENT, false));
+		aunisSounds.put("ringRollLoop", new AunisSound(AunisSoundHelper.ringRollLoop, SoundCategory.AMBIENT, true));
 		aunisSounds.put("wormhole", new AunisSound(AunisSoundHelper.wormholeLoop, SoundCategory.AMBIENT, true));
 	}
 	
 	public static void playSound(World world, BlockPos pos, SoundEvent soundEvent) {
-		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEvent, SoundCategory.BLOCKS, 1.0f, 1.0f, false);
+		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEvent, SoundCategory.AMBIENT, 1.0f, 1.0f, false);
 	}
 }

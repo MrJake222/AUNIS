@@ -80,7 +80,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		dialingComplete = state.dialingComplete;
 		
 		AunisSoundHelper.playPositionedSound("wormhole", pos, vortexState == EnumVortexState.STILL);
-		AunisSoundHelper.playPositionedSound("ringRoll", pos, ringSpin);
+		AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
+		AunisSoundHelper.playPositionedSound("ringRollLoop", pos, ringSpin);
 	}
 	
 	private int skyLight;
@@ -161,8 +162,9 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 	
 	private float lastTick;
 	
-	private boolean ringAccelerating;
+	private boolean ringRollLoopPlayed;
 	
+	private boolean ringAccelerating;
 	private boolean ringDecelerating;
 	private boolean ringDecelFirst;
 	private float ringDecelStart;
@@ -177,7 +179,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 			AunisSoundHelper.playSound(world, pos, AunisSoundHelper.gateDialFail);
 		
 		if (spin) {
-			AunisSoundHelper.playPositionedSound("ringRoll", pos, true);
+			AunisSoundHelper.playPositionedSound("ringRollStart", pos, true);
+			ringRollLoopPlayed = false;
 			
 			ringSpinStart = world.getTotalWorldTime();
 			lastTick = -1;
@@ -188,7 +191,8 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		}
 		
 		else {
-			AunisSoundHelper.playPositionedSound("ringRoll", pos, false);
+			AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
+			AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
 			
 			lockSoundPlayed = false;
 			ringDecelFirst = true;
@@ -206,6 +210,15 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 			if (ringSpin) {
 				float tick = (float) (world.getTotalWorldTime() - ringSpinStart + partialTicks);
 				float anglePerTick = targetAnglePerTick;
+				
+				// Play looped ring sound
+				// ringRollStart duration in 4.891s
+				// 4.891 * 20 = 98 ticks
+				if (!ringRollLoopPlayed && tick > 98) {
+					ringRollLoopPlayed = true;
+										
+					AunisSoundHelper.playPositionedSound("ringRollLoop", pos, true);
+				}
 				
 				if (ringAccelerating) {
 					if ( tick < maxTick ) {
@@ -383,7 +396,7 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 			if (dialingComplete)
 				activationStateChange += 10;
 			else
-				activationStateChange += 30;
+				activationStateChange += 40;
 		}
 		
 		activation = 0;

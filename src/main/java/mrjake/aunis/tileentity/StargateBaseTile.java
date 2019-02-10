@@ -391,8 +391,8 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 	private long waitForClear;
 	private int clearDelay;
 	
-	public void clearLinkedDHDButtons(boolean dialingFailed) { // 29 : 52
-		clearDelay = dialingFailed ? 29 : 65;
+	public void clearLinkedDHDButtons(boolean dialingFailed) { // 29 : 65
+		clearDelay = dialingFailed ? 39 : 65;
 		
 		waitForClear = world.getTotalWorldTime();
 		clearingButtons = true;
