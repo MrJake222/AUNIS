@@ -6,13 +6,21 @@ import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.packet.gate.tileUpdate.EnumTile;
 import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.RendererState;
-import mrjake.aunis.tileentity.TileEntityRenderer;
+import mrjake.aunis.tileentity.ITileEntityRendered;
 import net.minecraft.block.Block;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+/**
+ * Now used only for sending ring angular position to server(not tested though)
+ * TODO: Remove this. This will not be reliable in multiplayer enviroment once
+ * 		 ring position will matter more(see you SGC computer)
+ * 
+ * @see StargateRenderer
+ * 
+ */
 public class StateUpdateToServer implements IMessage {
 	public StateUpdateToServer() {}
 	
@@ -53,7 +61,7 @@ public class StateUpdateToServer implements IMessage {
 			if ( block instanceof StargateBaseBlock || block instanceof DHDBlock ) {
 				world.addScheduledTask(() -> {
 					
-					TileEntityRenderer te = (TileEntityRenderer) world.getTileEntity(message.rendererState.pos);
+					ITileEntityRendered te = (ITileEntityRendered) world.getTileEntity(message.rendererState.pos);
 					te.setRendererState(message.rendererState);
 						
 				});

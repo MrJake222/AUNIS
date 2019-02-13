@@ -22,6 +22,7 @@ public class RegistryHandler {
 		
 		GameRegistry.registerTileEntity(AunisBlocks.stargateBaseBlock.getTileEntityClass(), AunisBlocks.stargateBaseBlock.getRegistryName().toString());
 		GameRegistry.registerTileEntity(AunisBlocks.dhdBlock.getTileEntityClass(), AunisBlocks.dhdBlock.getRegistryName().toString());
+		GameRegistry.registerTileEntity(AunisBlocks.crystalInfuserBlock.getTileEntityClass(), AunisBlocks.crystalInfuserBlock.getRegistryName().toString());
 	}
 	
 	@SubscribeEvent

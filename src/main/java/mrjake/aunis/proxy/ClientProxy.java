@@ -1,7 +1,9 @@
 package mrjake.aunis.proxy;
 
+import mrjake.aunis.tesr.CrystalInfuserTESR;
 import mrjake.aunis.tesr.DHD_TESR;
 import mrjake.aunis.tesr.StargateTESR;
+import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -42,5 +44,7 @@ public class ClientProxy implements IProxy {
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateBaseTile.class, new StargateTESR());
 		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, new DHD_TESR());
+		
+		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, new CrystalInfuserTESR());
 	}
 }

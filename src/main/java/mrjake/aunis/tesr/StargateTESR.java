@@ -14,6 +14,7 @@ public class StargateTESR extends TileEntitySpecialRenderer<StargateBaseTile> {
 		z += 0.50;
 		
 		te.getRenderer().render(x, y, z, partialTicks);
+		te.getUpgradeRenderer().render(x, y, z, partialTicks);
 	}
 }
 

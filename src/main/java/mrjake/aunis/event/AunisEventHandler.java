@@ -4,7 +4,6 @@ import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.block.StargateMemberBlock;
-import mrjake.aunis.chunk.AunisChunkLoader;
 import mrjake.aunis.dhd.DHDActivation;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -17,7 +16,6 @@ import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -41,16 +39,6 @@ public class AunisEventHandler {
 			event.setCanceled(cancelled);
 		}
     }
-	
-	@SubscribeEvent
-	public static void onWorldLoad(WorldEvent.Load event) {
-		AunisChunkLoader.genTicketForWorld( event.getWorld() );
-	}
-	
-	@SubscribeEvent
-	public static void onWorldUnload(WorldEvent.Unload event) {
-		AunisChunkLoader.removeTicketForWorld( event.getWorld() );
-	}
 	
 	@SubscribeEvent
 	public static void onRightClickBlock(RightClickBlock event) {	

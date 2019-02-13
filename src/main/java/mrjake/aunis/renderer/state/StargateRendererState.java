@@ -57,6 +57,12 @@ public class StargateRendererState extends RendererState {
 		super(compound);
 	}
 	
+	@Override
+	protected String getKeyName() {
+		return "rendererState";
+	}
+	
+	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeLong( pos.toLong() );
 		
@@ -73,6 +79,7 @@ public class StargateRendererState extends RendererState {
 		buf.writeBoolean(dialingComplete);
 	}
 	
+	@Override
 	public void fromBytes(ByteBuf buf) {
 		pos = BlockPos.fromLong( buf.readLong() );
 		

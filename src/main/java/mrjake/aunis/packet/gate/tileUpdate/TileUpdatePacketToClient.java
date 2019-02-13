@@ -4,7 +4,9 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
-import mrjake.aunis.tileentity.TileEntityRenderer;
+import mrjake.aunis.renderer.state.UpgradeRendererState;
+import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.tileentity.ITileEntityRendered;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.world.World;
@@ -17,14 +19,30 @@ public class TileUpdatePacketToClient implements IMessage {
 	
 	private RendererState rendererState;
 	
+	private boolean supportsUpgrade;
+	private UpgradeRendererState upgradeRendererState;
+	
 	public TileUpdatePacketToClient(RendererState rendererState) {
 		this.rendererState = rendererState;
+		
+		this.supportsUpgrade = false;
+	}
+	
+	public TileUpdatePacketToClient(RendererState rendererState, UpgradeRendererState upgradeRendererState) {
+		this.rendererState = rendererState;
+		
+		this.supportsUpgrade = true;
+		this.upgradeRendererState = upgradeRendererState;
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {		
 		buf.writeInt( EnumTile.fromObject(rendererState) );		
 		rendererState.toBytes(buf);	
+		
+		buf.writeBoolean(supportsUpgrade);
+		if (supportsUpgrade)
+			upgradeRendererState.toBytes(buf);
 	}
 	
 	@Override
@@ -35,6 +53,10 @@ public class TileUpdatePacketToClient implements IMessage {
 			rendererState = new StargateRendererState(buf);
 		else if (tile == EnumTile.DHD_TILE)
 			rendererState = new DHDRendererState(buf);
+		
+		supportsUpgrade = buf.readBoolean();
+		if (supportsUpgrade)
+			this.upgradeRendererState = new UpgradeRendererState(buf);
 	}
 	
 	public static class TileUpdateClientHandler implements IMessageHandler<TileUpdatePacketToClient, IMessage> {
@@ -47,8 +69,11 @@ public class TileUpdatePacketToClient implements IMessage {
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				
-				TileEntityRenderer te = (TileEntityRenderer) world.getTileEntity(message.rendererState.pos);
+				ITileEntityRendered te = (ITileEntityRendered) world.getTileEntity(message.rendererState.pos);
 				te.getRenderer().setState(message.rendererState);
+				
+				if (message.supportsUpgrade)
+					((ITileEntityUpgradeable) te).getUpgradeRenderer().setState(message.upgradeRendererState);
 				
 			});
 			

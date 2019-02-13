@@ -1,8 +1,8 @@
 package mrjake.aunis.packet.upgrade;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.renderer.Renderer;
-import mrjake.aunis.tileentity.TileEntityRenderer;
+import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.upgrade.UpgradeRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.BlockPos;
@@ -14,34 +14,29 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class UpgradeSlotInteractToClient implements IMessage {
 	public UpgradeSlotInteractToClient() {}
 	
-	private BlockPos dhdPos;
-	private boolean hasUpgrade;
-	private boolean isHoldingUpgrade;
+	private BlockPos pos;
+	private EnumUpgradeAction upgradeAction;
 	
-	public UpgradeSlotInteractToClient(BlockPos dhdPos, boolean hasUpgrade, boolean isHoldingUpgrade) {
-		this.dhdPos = dhdPos;
-		this.hasUpgrade = hasUpgrade;
-		this.isHoldingUpgrade = isHoldingUpgrade;
+	public UpgradeSlotInteractToClient(BlockPos pos, EnumUpgradeAction upgradeAction) {
+		this.pos = pos;
+		this.upgradeAction = upgradeAction;
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
-		 buf.writeLong( dhdPos.toLong() );
-		 buf.writeBoolean(hasUpgrade);
-		 buf.writeBoolean(isHoldingUpgrade);
+		 buf.writeLong( pos.toLong() );
+		 buf.writeInt(upgradeAction.id);
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		dhdPos = BlockPos.fromLong( buf.readLong() );
-		hasUpgrade = buf.readBoolean();
-		isHoldingUpgrade = buf.readBoolean();
+		pos = BlockPos.fromLong( buf.readLong() );
+		upgradeAction = EnumUpgradeAction.values()[buf.readInt()];
 	}
 	
 	
 	public static class UpgradeSlotInteractHandler implements IMessageHandler<UpgradeSlotInteractToClient, IMessage>{
 
-		@SuppressWarnings("rawtypes")
 		@Override
 		public IMessage onMessage(UpgradeSlotInteractToClient message, MessageContext ctx) {
 						
@@ -49,10 +44,29 @@ public class UpgradeSlotInteractToClient implements IMessage {
 				EntityPlayerSP player = Minecraft.getMinecraft().player;
 				World world = player.getEntityWorld();
 				
-				TileEntityRenderer TileEntityRenderer = (TileEntityRenderer) world.getTileEntity(message.dhdPos);
-				Renderer renderer = TileEntityRenderer.getRenderer();
-				
-				renderer.upgradeInteract(message.hasUpgrade, message.isHoldingUpgrade);
+				ITileEntityUpgradeable upgradeable = (ITileEntityUpgradeable) world.getTileEntity(message.pos);
+				UpgradeRenderer renderer = upgradeable.getUpgradeRenderer();
+								
+				switch (message.upgradeAction) {
+					case PUT_UPGRADE:
+						renderer.putUpgradeInSlot();
+						break;
+						
+					case INSERT_UPGRADE:
+						renderer.insertUpgrade();
+						break;
+						
+					case REMOVE_UPGRADE:
+						renderer.removeUpgrade();
+						break;
+					
+					case POP_UPGRADE:
+						renderer.popUpgrade();
+						break;
+	
+					default:
+						break;
+				}
 			});
 			
 			return null;

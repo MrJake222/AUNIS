@@ -33,6 +33,11 @@ public class LimitedStargateRendererState extends RendererState {
 		super(compound);
 	}
 	
+	@Override
+	protected String getKeyName() {
+		return "rendererState";
+	}
+	
 	public void toBytes(ByteBuf buf) {
 		buf.writeLong( pos.toLong() );
 		

@@ -10,27 +10,33 @@ import javax.vecmath.Vector2f;
 
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
+import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
-import mrjake.aunis.renderer.Renderer;
+import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
 import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
+import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.stargate.merge.MergeHelper;
+import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.upgrade.StargateUpgradeRenderer;
+import mrjake.aunis.upgrade.UpgradeRenderer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -42,13 +48,15 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
-public class StargateBaseTile extends TileEntity implements TileEntityRenderer, ITickable {
+public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable {
 	
 	private static final int maxChevrons = 8;
 	
-	@SuppressWarnings("rawtypes")
-	private Renderer renderer;
+	private ISpecialRenderer<StargateRendererState> renderer;
 	private RendererState rendererState;
+	
+	private StargateUpgradeRenderer upgradeRenderer;
+	private UpgradeRendererState upgradeRendererState;
 	
 	private LimitedStargateRendererState limitedState;
 	private BlockPos linkedDHD = null;
@@ -153,6 +161,11 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 		MergeHelper.updateChevRingMergeState(this, state, isMerged);
 	}
 
+	/**
+	 * Sets ONLY the variable.
+	 * 
+	 * It's not the interface method.
+	 */
 	private void setRendererState() {
 		if (isEngaged)
 			rendererState = new StargateRendererState(pos, dialedChevrons, true, getLimitedState().ringAngularRotation, true, EnumVortexState.STILL, true, true);
@@ -167,9 +180,8 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 		return limitedState;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public Renderer getRenderer() {
+	public ISpecialRenderer<StargateRendererState> getRenderer() {
 		if (renderer == null)
 			renderer = new StargateRenderer(this);
 		
@@ -195,6 +207,22 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 			
 			getStargateRendererState().ringAngularRotation = ringAngularRotation;
 		}
+	}
+	
+	@Override
+	public UpgradeRenderer getUpgradeRenderer() {
+		if (upgradeRenderer == null)
+			upgradeRenderer = new StargateUpgradeRenderer(this);
+		
+		return upgradeRenderer;
+	}
+	
+	@Override
+	public UpgradeRendererState getUpgradeRendererState() {
+		if (upgradeRendererState == null)
+			upgradeRendererState = new UpgradeRendererState(pos);
+		
+		return upgradeRendererState;
 	}
 	
 	public int getMaxSymbols() {
@@ -254,7 +282,7 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 		compound.setBoolean("unstableVortex", unstableVortex);
 
 		compound.setBoolean("hasUpgrade", hasUpgrade);
-		compound.setBoolean("insertAnimation", insertAnimation);
+//		compound.setBoolean("insertAnimation", insertAnimation);
 		
 		if (isEngaged || unstableVortex) {
 			compound.setInteger("dialedAddressLength", dialedAddress.size());
@@ -276,6 +304,7 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 		compound.setInteger("playersPassed", playersPassed);
 		
 		getLimitedState().toNBT(compound);
+		getUpgradeRendererState().toNBT(compound);
 		
 		return super.writeToNBT(compound);
 	}
@@ -300,7 +329,7 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 		unstableVortex = compound.getBoolean("unstableVortex");
 
 		hasUpgrade = compound.getBoolean("hasUpgrade");
-		insertAnimation = compound.getBoolean("insertAnimation");
+//		insertAnimation = compound.getBoolean("insertAnimation");
 		
 		if (isEngaged || unstableVortex) {
 			dialedAddress.clear();
@@ -322,6 +351,7 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 		playersPassed = compound.getInteger("playersPassed");
 		
 		limitedState = new LimitedStargateRendererState(compound);
+		upgradeRendererState = new UpgradeRendererState(compound);
 		
 		super.readFromNBT(compound);
 	}
@@ -405,7 +435,7 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 	public void update() {
 		if (firstTick) {
 			firstTick = false;
-			
+						
 			// Client loaded region, need to update
 			// Send rendererState to client's renderer
 			if (world.isRemote)
@@ -579,9 +609,12 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 		}
 	}
 	
-	private boolean hasUpgrade = false;
-	private boolean insertAnimation = false;
+	// -----------------------------------------------------------------
+	// Upgrade
 	
+	private boolean hasUpgrade = false;
+	
+	@Override
 	public boolean hasUpgrade() {
 		return hasUpgrade;
 	}
@@ -592,24 +625,32 @@ public class StargateBaseTile extends TileEntity implements TileEntityRenderer, 
 		
 		markDirty();
 	}
-	
-    public boolean getInsertAnimation() {
-		return insertAnimation;
-	}
 
+	@Override
+	public Item getAcceptedUpgradeItem() {
+		return AunisItems.crystalGlyphStargate;
+	}
+	
+//	@Override
+//	public void setUpgrade(boolean hasUpgrade) {
+//		this.hasUpgrade = hasUpgrade;
+//		
+//		markDirty();
+//	}
+//	
+//    @Override
+//	public void setInsertAnimation(boolean insertAnimation) {
+//		this.insertAnimation = insertAnimation;
+//		
+//		markDirty();
+//	}
+	
 	public int getEntitiesPassed() {
 		return playersPassed;
 	}
 	
 	public void entityPassing() {
 		playersPassed++;
-		
-		markDirty();
-	}
-
-    @Override
-	public void setInsertAnimation(boolean insertAnimation) {
-		this.insertAnimation = insertAnimation;
 		
 		markDirty();
 	}

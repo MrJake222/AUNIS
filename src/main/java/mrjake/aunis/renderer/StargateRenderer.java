@@ -13,10 +13,8 @@ import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.StargateBaseBlock;
-import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
-import mrjake.aunis.packet.upgrade.UpgradeTileUpdateToServer;
 import mrjake.aunis.renderer.RendererInit.QuadStrip;
 import mrjake.aunis.renderer.state.LimitedStargateRendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
@@ -24,29 +22,23 @@ import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.merge.BlockPosition;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
 
-public class StargateRenderer implements Renderer<StargateRendererState> {
+public class StargateRenderer implements ISpecialRenderer<StargateRendererState> {
 	// private StargateBaseTile te;
 	private World world;
 	private BlockPos pos;
 	
 	private static final Vec3d ringLoc = new Vec3d(0.0, -0.122333, -0.000597);
 	private int horizontalRotation;	
-	
+		
 	public StargateRenderer(StargateBaseTile te) {
 		// this.te = te;		
 		this.world = te.getWorld();
@@ -61,9 +53,13 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		else
 			horizontalRotation = (int) facing.getHorizontalAngle();
 		
-		for (int i=0; i<9; i++) {
+		for (int i=0; i<9; i++)
 			chevronTextureList.add(textureTemplate + "0.png");
-		}
+	}
+	
+	@Override
+	public float getHorizontalRotation() {
+		return horizontalRotation;
 	}
 	
 	@Override
@@ -129,9 +125,6 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 			
 			if (doEventHorizonRender)
 				renderKawoosh(x, y, z, partialTicks);
-			
-			if (doUpgradeRender)
-				renderUpgrade(x, y, z, partialTicks);
 		}
 	}
 	
@@ -895,98 +888,5 @@ public class StargateRenderer implements Renderer<StargateRendererState> {
 		}
 		
 		GlStateManager.disableBlend();
-	}
-
-	private boolean doInsertAnimation = false;
-	private boolean doRemovalAnimation = false;
-	private boolean doUpgradeRender = false;
-	private long insertionTime;
-	
-	@Override
-	public void upgradeInteract(boolean hasUpgrade, boolean isHoldingUpgrade) {
-		if (hasUpgrade) {
-			if (doUpgradeRender) {
-				// Removing upgrade from slot				
-				doUpgradeRender = false;
-				AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, false) );
-			}
-			
-			else {
-				// Sliding out upgrade
-				if (!doRemovalAnimation) {
-					insertionTime = world.getTotalWorldTime();
-					doRemovalAnimation = true;
-					doUpgradeRender = true;
-				}
-			}
-		}
-		
-		else {
-			if (doUpgradeRender) {
-				// Inserting upgrade
-				if (!doInsertAnimation) {
-					insertionTime = world.getTotalWorldTime();
-					doInsertAnimation = true;
-				}
-			}
-			
-			else {
-				// Putting upgrade in slot
-				if (isHoldingUpgrade) {
-					doUpgradeRender = true;
-				}
-			}
-		}
-	}
-	
-	/*public boolean upgradeInSlot() {
-		return doUpgradeRender;
-	}*/
-	
-	public void renderUpgrade(double x, double y, double z, double partialTicks) {		
-		float arg = (float) ((world.getTotalWorldTime() - insertionTime + partialTicks) / 60.0);
-		float mul = 1;
-		
-		if (doInsertAnimation)
-			mul = MathHelper.cos(arg+0.31f)+0.048f;
-		else if (doRemovalAnimation)
-			mul = MathHelper.sin(arg) + 0.53f;
-		
-		GlStateManager.pushMatrix();
-		
-		// Gate diameter/2 + 0.9
-		GlStateManager.translate(x, y-4.55f+1*mul, z);
-		GlStateManager.rotate(horizontalRotation, 0, 1, 0);
-		
-		GlStateManager.translate(0.077f, 0, 0.07f);
-		GlStateManager.rotate(135, 0, 0, 1);
-		
-			
-		ItemStack stack = new ItemStack(AunisItems.crystalGlyphStargate);
-			
-		IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, world, null);
-		model = ForgeHooksClient.handleCameraTransforms(model, ItemCameraTransforms.TransformType.GROUND, false);
-	
-		GlStateManager.enableBlend();
-		
-		GlStateManager.color(1, 1, 1, 0.7f);
-		Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-		Minecraft.getMinecraft().getRenderItem().renderItem(stack, model);
-		
-		GlStateManager.disableBlend();
-		
-		if (doInsertAnimation && mul < 0.7f) {
-			doUpgradeRender = false;
-			doInsertAnimation = false;
-			
-			// Upgrade inserted, send to server
-			AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, true) );
-		}
-		
-		else if (doRemovalAnimation && mul > 1) {
-			doRemovalAnimation = false;
-		}
-		
-		GlStateManager.popMatrix();
 	}
 }

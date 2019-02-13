@@ -57,7 +57,9 @@ public class ModelLoader {
 		
 		ChevronLight("ChevronLight", "stargate/chevron/chevronLight.obj", "stargate/chevron/chevmap0.png"),
 		ChevronFrame("ChevronFrame", "stargate/chevron/chevronFrame.obj", "stargate/chevron/chevmap10.png"),
-		ChevronMoving("ChevronMoving", "stargate/chevron/chevronMoving.obj", "stargate/chevron/chevmap10.png");
+		ChevronMoving("ChevronMoving", "stargate/chevron/chevronMoving.obj", "stargate/chevron/chevmap10.png"),
+		
+		CrystalInfuser("CrystalInfuser", "crystalinfuser/stand1.obj", "stargate/darkmetal2048.png");
 		
 		private String name;
 		private String modelPath;

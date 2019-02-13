@@ -10,12 +10,15 @@ public class AunisBlocks {
 	public static StargateMemberBlock chevronBlock = new StargateMemberBlock("chevron_block");
 	public static NaquadahOreBlock naquadahOreBlock = new NaquadahOreBlock();
 	
+	public static CrystalInfuserBlock crystalInfuserBlock = new CrystalInfuserBlock();
+	
 	public static Block[] blocks = {
 			stargateBaseBlock,
 			dhdBlock,
 			ringBlock,
 			chevronBlock,
-			naquadahOreBlock };
+			naquadahOreBlock,
+			crystalInfuserBlock };
 	
 	public static Item[] getItems() {
 		Item[] items = new Item[blocks.length];

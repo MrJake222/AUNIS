@@ -13,7 +13,6 @@ import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient;
-import mrjake.aunis.packet.upgrade.UpgradeTileUpdateToServer;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -47,7 +46,7 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.CLIENT); id++;
 		
 		INSTANCE.registerMessage(UpgradeSlotInteractToClient.UpgradeSlotInteractHandler.class, UpgradeSlotInteractToClient.class, id, Side.CLIENT); id++;
-		INSTANCE.registerMessage(UpgradeTileUpdateToServer.UpgradeTileUpdateHandler.class, UpgradeTileUpdateToServer.class, id, Side.SERVER); id++;
+//		INSTANCE.registerMessage(UpgradeTileUpdateToServer.UpgradeTileUpdateHandler.class, UpgradeTileUpdateToServer.class, id, Side.SERVER); id++;
 		
 		INSTANCE.registerMessage(OpenStargateAddressGuiToClient.OpenStargateAddressGuiClientHandler.class, OpenStargateAddressGuiToClient.class, id, Side.CLIENT); id++;
 	}

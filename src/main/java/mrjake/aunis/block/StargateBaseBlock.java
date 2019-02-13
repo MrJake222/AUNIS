@@ -3,16 +3,18 @@ package mrjake.aunis.block;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
-import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.merge.MergeHelper;
+import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.TileEntityTESRMember;
+import mrjake.aunis.upgrade.UpgradeHelper;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,7 +23,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 
@@ -47,8 +48,15 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 		MergeHelper.updateChevRingMergeState(gateTile, state, false);
 				
 		if (!world.isRemote) {
-			if (gateTile.hasUpgrade() || gateTile.getInsertAnimation()) {
-				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphStargate));
+//			if (gateTile.hasUpgrade() || gateTile.getInsertAnimation()) {
+//				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphStargate));
+//			}
+			
+			// Supports upgrades
+			if (gateTile instanceof ITileEntityUpgradeable) {			
+				if (gateTile.hasUpgrade() || gateTile.getUpgradeRendererState().doInsertAnimation) {
+					InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphStargate));
+				}
 			}
 		}
 		
@@ -58,7 +66,7 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
-		ItemStack heldItem = player.getHeldItemMainhand();	
+		ItemStack heldItem = player.getHeldItem(hand);
 		
 		// Server side
 		if (!world.isRemote) {
@@ -85,24 +93,20 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 				return true;
 			}
 			
-			else {
-				if ( hand == EnumHand.MAIN_HAND/* && facing == EnumFacing.UP */&& !state.getValue(BlockTESRMember.RENDER) ) {												
-					boolean hasUpgrade = gateTile.hasUpgrade();
-					boolean isHoldingUpgrade = heldItem.getItem() == AunisItems.crystalGlyphStargate;
-					
-					if (!gateTile.getInsertAnimation() && !hasUpgrade && isHoldingUpgrade) {
-						// Reduce ItemStack
-						player.setHeldItem(hand, new ItemStack(heldItem.getItem(), heldItem.getCount()-1) );
-							
-						gateTile.setInsertAnimation(true);
-					}
-						
-					AunisPacketHandler.INSTANCE.sendToAllAround( new UpgradeSlotInteractToClient(pos, hasUpgrade, isHoldingUpgrade), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512) );
-				}
+			else if (!state.getValue(BlockTESRMember.RENDER) && hand == EnumHand.MAIN_HAND) {
+				return UpgradeHelper.upgradeInteract((EntityPlayerMP) player, gateTile, heldItem);
 			}
+			
+			return false;
 		}
 		
-		return false;
+		// Client side
+		else {
+			return  heldItem.getItem() == AunisItems.analyzerAncient ||
+					heldItem.getItem() == AunisItems.dialerFast || 
+					heldItem.getItem() == AunisItems.crystalGlyphStargate || 
+					heldItem.getItem() == Items.AIR;
+		}
 	}
 	
 	@Override

@@ -1,11 +1,17 @@
 package mrjake.aunis.tileentity;
 
+import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRenderer;
-import mrjake.aunis.renderer.Renderer;
+import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.renderer.state.RendererState;
+import mrjake.aunis.renderer.state.UpgradeRendererState;
+import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.upgrade.DHDUpgradeRenderer;
+import mrjake.aunis.upgrade.UpgradeRenderer;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
@@ -13,17 +19,18 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class DHDTile extends TileEntity implements TileEntityRenderer, ITickable {
+public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable {
 	
-	@SuppressWarnings("rawtypes")
-	private Renderer renderer;
+	private ISpecialRenderer<DHDRendererState> renderer;
 	private RendererState rendererState;
+	
+	private DHDUpgradeRenderer upgradeRenderer;
+	private UpgradeRendererState upgradeRendererState;
 	
 	private BlockPos linkedGate = null;
 	
-	@SuppressWarnings("rawtypes")
 	@Override
-	public Renderer getRenderer() {
+	public ISpecialRenderer<DHDRendererState> getRenderer() {
 		if (renderer == null)
 			renderer = new DHDRenderer(this);
 		
@@ -56,6 +63,22 @@ public class DHDTile extends TileEntity implements TileEntityRenderer, ITickable
 		markDirty();
 	}
 	
+	@Override
+	public UpgradeRenderer getUpgradeRenderer() {
+		if (upgradeRenderer == null)
+			upgradeRenderer = new DHDUpgradeRenderer(this);
+		
+		return upgradeRenderer;
+	}
+	
+	@Override
+	public UpgradeRendererState getUpgradeRendererState() {
+		if (upgradeRendererState == null)
+			upgradeRendererState = new UpgradeRendererState(pos);
+		
+		return upgradeRendererState;
+	}
+	
 	public StargateBaseTile getLinkedGate(World world) {
 		if (linkedGate == null)
 			return null;
@@ -77,15 +100,16 @@ public class DHDTile extends TileEntity implements TileEntityRenderer, ITickable
 		compound.setBoolean("insertAnimation", insertAnimation);
 		
 		getRendererState().toNBT(compound);
+		getUpgradeRendererState().toNBT(compound);
 		
 		return super.writeToNBT(compound);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
-		DHDRendererState rendererState = new DHDRendererState(compound);
 		
-		this.rendererState = rendererState;
+		this.rendererState = new DHDRendererState(compound);
+		this.upgradeRendererState = new UpgradeRendererState(compound);
 		
 		linkedGate = BlockPos.fromLong( compound.getLong("linkedGate") );
 		hasUpgrade = compound.getBoolean("hasUpgrade");
@@ -111,6 +135,7 @@ public class DHDTile extends TileEntity implements TileEntityRenderer, ITickable
 	private boolean hasUpgrade = false;
 	private boolean insertAnimation = false;
 	
+	@Override
 	public boolean hasUpgrade() {
 		return hasUpgrade;
 	}
@@ -122,16 +147,31 @@ public class DHDTile extends TileEntity implements TileEntityRenderer, ITickable
 		markDirty();
 	}
 	
-    public boolean getInsertAnimation() {
-		return insertAnimation;
+	@Override
+	public Item getAcceptedUpgradeItem() {
+		return AunisItems.crystalGlyphDhd;
 	}
-
-    @Override
-	public void setInsertAnimation(boolean insertAnimation) {
-		this.insertAnimation = insertAnimation;
-		
-		markDirty();
-	}
+//	public boolean hasUpgrade() {
+//		return hasUpgrade;
+//	}
+//	
+//	@Override
+//	public void setUpgrade(boolean hasUpgrade) {
+//		this.hasUpgrade = hasUpgrade;
+//		
+//		markDirty();
+//	}
+//	
+//    public boolean getInsertAnimation() {
+//		return insertAnimation;
+//	}
+//
+//    @Override
+//	public void setInsertAnimation(boolean insertAnimation) {
+//		this.insertAnimation = insertAnimation;
+//		
+//		markDirty();
+//	}
 
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {

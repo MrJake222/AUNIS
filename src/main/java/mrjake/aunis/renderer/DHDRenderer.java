@@ -10,24 +10,14 @@ import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.BlockRotated;
-import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.upgrade.UpgradeTileUpdateToServer;
 import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.tileentity.DHDTile;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
 
-public class DHDRenderer implements Renderer<DHDRendererState> {
+public class DHDRenderer implements ISpecialRenderer<DHDRendererState> {
 	//private DHDTile te;
 	private World world;
 	private BlockPos pos;
@@ -43,7 +33,7 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 	private boolean changingButtons = false;
 	private boolean clearingButtons = false;
 	public boolean brbToActivate = false;
-	
+		
 	public DHDRenderer(DHDTile te) {
 		this.rotation = te.getWorld().getBlockState(te.getPos()).getValue(BlockRotated.ROTATE) * -22.5f;
 		//this.te = te;
@@ -51,6 +41,11 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 		this.pos = te.getPos();
 		
 		initTextureList();
+	}
+	
+	@Override
+	public float getHorizontalRotation() {
+		return rotation;
 	}
 	
 	@Override
@@ -119,47 +114,47 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 		activation = 0;
 	}
 	
-	private boolean doInsertAnimation = false;
-	private boolean doRemovalAnimation = false;
-	private boolean doUpgradeRender = false;
-	private long insertionTime;
+//	private boolean doInsertAnimation = false;
+//	private boolean doRemovalAnimation = false;
+//	private boolean doUpgradeRender = false;
+//	private long insertionTime;
 	
-	@Override
-	public void upgradeInteract(boolean hasUpgrade, boolean isHoldingUpgrade) {
-		if (hasUpgrade) {
-			if (doUpgradeRender) {
-				// Removing upgrade from slot				
-				doUpgradeRender = false;
-				AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, false) );
-			}
-			
-			else {
-				// Sliding out upgrade
-				if (!doRemovalAnimation) {
-					insertionTime = world.getTotalWorldTime();
-					doRemovalAnimation = true;
-					doUpgradeRender = true;
-				}
-			}
-		}
-		
-		else {
-			if (doUpgradeRender) {
-				// Inserting upgrade into DHD
-				if (!doInsertAnimation) {
-					insertionTime = world.getTotalWorldTime();
-					doInsertAnimation = true;
-				}
-			}
-			
-			else {
-				// Putting upgrade in slot
-				if (isHoldingUpgrade) {
-					doUpgradeRender = true;
-				}
-			}
-		}
-	}
+//	@Override
+//	public void upgradeInteract(boolean hasUpgrade, boolean isHoldingUpgrade) {
+//		if (hasUpgrade) {
+//			if (doUpgradeRender) {
+//				// Removing upgrade from slot				
+//				doUpgradeRender = false;
+//				AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, false) );
+//			}
+//			
+//			else {
+//				// Sliding out upgrade
+//				if (!doRemovalAnimation) {
+//					insertionTime = world.getTotalWorldTime();
+//					doRemovalAnimation = true;
+//					doUpgradeRender = true;
+//				}
+//			}
+//		}
+//		
+//		else {
+//			if (doUpgradeRender) {
+//				// Inserting upgrade into DHD
+//				if (!doInsertAnimation) {
+//					insertionTime = world.getTotalWorldTime();
+//					doInsertAnimation = true;
+//				}
+//			}
+//			
+//			else {
+//				// Putting upgrade in slot
+//				if (isHoldingUpgrade) {
+//					doUpgradeRender = true;
+//				}
+//			}
+//		}
+//	}
 	
 	@Override
 	public void render(double x, double y, double z, double partialTicks) {
@@ -185,45 +180,6 @@ public class DHDRenderer implements Renderer<DHDRendererState> {
 				if (b != null) {
 					ModelLoader.bindTexture( buttonTexture.get( buttons[i].getName() ) );
 					b.render();
-				}
-			}
-			
-			if (doUpgradeRender) {
-				float arg = (float) ((world.getTotalWorldTime() - insertionTime + partialTicks) / 60.0);
-				float mul = 1;
-				
-				if (doInsertAnimation)
-					mul = MathHelper.cos(arg+0.31f)+0.048f;
-				else if (doRemovalAnimation)
-					mul = MathHelper.sin(arg) + 0.53f;
-				
-				GlStateManager.translate(0, 0.5, 0.5*mul);
-				GlStateManager.rotate(-90, 0, 1, 0);	
-				GlStateManager.rotate(45, 0, 0, 1);	
-					
-				ItemStack stack = new ItemStack(AunisItems.crystalGlyphDhd);
-					
-				IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, world, null);
-				model = ForgeHooksClient.handleCameraTransforms(model, ItemCameraTransforms.TransformType.GROUND, false);
-			
-				GlStateManager.enableBlend();
-				GlStateManager.color(1, 1, 1, 0.7f);
-				
-				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-				Minecraft.getMinecraft().getRenderItem().renderItem(stack, model);
-				
-				GlStateManager.disableBlend();
-				
-				if (doInsertAnimation && mul < 0.53f) {
-					doUpgradeRender = false;
-					doInsertAnimation = false;
-					
-					// Upgrade inserted, send to server
-					AunisPacketHandler.INSTANCE.sendToServer( new UpgradeTileUpdateToServer(pos, true) );
-				}
-				
-				else if (doRemovalAnimation && mul > 1) {
-					doRemovalAnimation = false;
 				}
 			}
 			

@@ -1,10 +1,9 @@
 package mrjake.aunis.packet.gate.tileUpdate;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.block.DHDBlock;
-import mrjake.aunis.block.StargateBaseBlock;
-import mrjake.aunis.tileentity.TileEntityRenderer;
-import net.minecraft.block.Block;
+import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.tileentity.ITileEntityRendered;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -37,13 +36,16 @@ public class TileUpdateRequestToServer implements IMessage {
 		public TileUpdatePacketToClient onMessage(TileUpdateRequestToServer message, MessageContext ctx) {
 						
 			WorldServer world = ctx.getServerHandler().player.getServerWorld();
-			Block block = world.getBlockState(message.tilePos).getBlock();
 			
-			if ( block instanceof StargateBaseBlock || block instanceof DHDBlock ) {				
-				TileEntityRenderer te = (TileEntityRenderer) world.getTileEntity(message.tilePos);
+			if (world.isBlockLoaded(message.tilePos)) {
+				TileEntity te = world.getTileEntity(message.tilePos);
 				
-				if (te != null)
-					return new TileUpdatePacketToClient(te.getRendererState());
+				if (te != null) {
+					if (te instanceof ITileEntityUpgradeable)
+						return new TileUpdatePacketToClient(((ITileEntityRendered) te).getRendererState(), ((ITileEntityUpgradeable) te).getUpgradeRendererState());
+					else
+						return new TileUpdatePacketToClient(((ITileEntityRendered) te).getRendererState());
+				}
 				
 			}
 			

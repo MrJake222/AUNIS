@@ -37,6 +37,11 @@ public class DHDRendererState extends RendererState {
 		return pos+": activeButtons: " + activeButtons;
 	}
 	
+	@Override
+	protected String getKeyName() {
+		return "rendererState";
+	}
+	
 	public void toBytes(ByteBuf buf) {
 		buf.writeLong( pos.toLong() );
 		
