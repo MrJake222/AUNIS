@@ -7,7 +7,6 @@ import mrjake.aunis.packet.gate.addressUpdate.GateAddressPacketToClient;
 import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.gate.stateUpdate.StateUpdateToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.MotionToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
@@ -37,12 +36,12 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(RetrieveMotionToClient.RetrieveMotionClientHandler.class, RetrieveMotionToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(MotionToServer.MotionServerHandler.class, MotionToServer.class, id, Side.SERVER); id++;
 		
-		INSTANCE.registerMessage(StateUpdateToServer.StateUpdateServerHandler.class, StateUpdateToServer.class, id, Side.SERVER); id++;
+//		INSTANCE.registerMessage(StateUpdateToServer.StateUpdateServerHandler.class, StateUpdateToServer.class, id, Side.SERVER); id++;
 		
 		INSTANCE.registerMessage(TileUpdateRequestToServer.TileUpdateServerHandler.class, TileUpdateRequestToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(TileUpdatePacketToClient.TileUpdateClientHandler.class, TileUpdatePacketToClient.class, id, Side.CLIENT); id++;
 		
-		INSTANCE.registerMessage(ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.SERVER); id++;
+//		INSTANCE.registerMessage(ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.CLIENT); id++;
 		
 		INSTANCE.registerMessage(UpgradeSlotInteractToClient.UpgradeSlotInteractHandler.class, UpgradeSlotInteractToClient.class, id, Side.CLIENT); id++;

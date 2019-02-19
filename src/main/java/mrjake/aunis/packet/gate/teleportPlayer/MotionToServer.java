@@ -5,6 +5,7 @@ import javax.vecmath.Vector2f;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.StargateBaseBlock;
+import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.tileentity.StargateBaseTile;
@@ -16,25 +17,26 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MotionToServer implements IMessage {
+public class MotionToServer extends PositionedPacket {
 	public MotionToServer() {}
 	
 	private int entityId;
-	private BlockPos gatePos;
 	private float motionX;
 	private float motionZ;
 	
-	public MotionToServer(int entityId, BlockPos gatePos, float motionX, float motionZ) {
+	public MotionToServer(int entityId, BlockPos pos, float motionX, float motionZ) {
+		super(pos);
+		
 		this.entityId = entityId;
-		this.gatePos = gatePos;
 		this.motionX = motionX;
 		this.motionZ = motionZ;
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
+		super.toBytes(buf);
+		
 		buf.writeInt(entityId);
-		buf.writeLong( gatePos.toLong() );
 		
 		buf.writeFloat(motionX);
 		buf.writeFloat(motionZ);
@@ -43,8 +45,9 @@ public class MotionToServer implements IMessage {
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
+		super.fromBytes(buf);
+		
 		entityId = buf.readInt();
-		gatePos = BlockPos.fromLong( buf.readLong() );
 		
 		motionX = buf.readFloat();
 		motionZ = buf.readFloat();
@@ -57,19 +60,19 @@ public class MotionToServer implements IMessage {
 		public IMessage onMessage(MotionToServer message, MessageContext ctx) {
 			WorldServer world = ctx.getServerHandler().player.getServerWorld();
 			
-			if ( world.getBlockState(message.gatePos).getBlock() instanceof StargateBaseBlock ) {
+			if ( world.getBlockState(message.pos).getBlock() instanceof StargateBaseBlock ) {
 				world.addScheduledTask(() -> {
 					
-					EnumFacing sourceFacing = world.getBlockState(message.gatePos).getValue(BlockFaced.FACING);
+					EnumFacing sourceFacing = world.getBlockState(message.pos).getValue(BlockFaced.FACING);
 					
-					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.gatePos);
+					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.pos);
 					
 					Vector2f motionVector = new Vector2f(message.motionX, message.motionZ);
 					
 					if (TeleportHelper.frontSide(sourceFacing, motionVector)) {
 						gateTile.scheduledTeleportMap.put(message.entityId, gateTile.scheduledTeleportMap.get(message.entityId).setMotion(motionVector));
 						
-						world.playSound(null, message.gatePos, AunisSoundHelper.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+						world.playSound(null, message.pos, AunisSoundHelper.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
 						gateTile.teleportEntity(message.entityId);
 					}
 					

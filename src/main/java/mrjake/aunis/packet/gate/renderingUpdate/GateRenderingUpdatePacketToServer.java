@@ -9,10 +9,10 @@ import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
-import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
@@ -33,29 +33,29 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class GateRenderingUpdatePacketToServer implements IMessage {
+public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 	public GateRenderingUpdatePacketToServer() {}
 	
 	private int objectID;
-	private BlockPos blockPos; 
 	
 	public GateRenderingUpdatePacketToServer(int objectID, BlockPos pos) {
+		super(pos);
+		
 		this.objectID = objectID;
-		this.blockPos = pos;
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeInt(objectID);
+		super.toBytes(buf);
 		
-		buf.writeLong( blockPos.toLong() );
+		buf.writeInt(objectID);
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
+		super.fromBytes(buf);
+		
 		objectID = buf.readInt();
-
-		blockPos = BlockPos.fromLong( buf.readLong() );
 	}
 
 	
@@ -66,7 +66,7 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 			
 				EntityPlayerMP player = ctx.getServerHandler().player;
 				World world = player.getEntityWorld();
-				BlockPos pos = message.blockPos;
+				BlockPos pos = message.pos;
 				
 				Block block = world.getBlockState(pos).getBlock();
 				
@@ -107,22 +107,11 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									// clear connection and address, start animation 
 									TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 512);
 									
-									gateTile.clearLinkedDHDButtons(false);
-									targetTile.clearLinkedDHDButtons(false);
 									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, gateTile), point );
 									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, targetPos), targetPoint );
 									
-									DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
-									
-									// Open target gate
-									if (targetDhdTile != null) {
-										targetDhdTile.setRendererState(new DHDRendererState(targetDhdTile.getPos(), new ArrayList<Integer>()));
-									}
-									
-									dhdTile.setRendererState(new DHDRendererState(targetDhdTile.getPos(), new ArrayList<Integer>()));
-									
-									targetTile.closeGate();
-									gateTile.closeGate();
+									targetTile.closeGate(false);
+									gateTile.closeGate(false);
 								}
 								
 								else {
@@ -150,15 +139,15 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									gateTile.fastDialer = true;
 								}
 																
-								List<EnumSymbol> gateAddressWithOrigin = new ArrayList<EnumSymbol>();
+//								List<EnumSymbol> gateAddressWithOrigin = gateTile.gateAddress.subList(0, gateTile.gateAddress.size());
 								
-								for (EnumSymbol s : gateTile.gateAddress)
-									gateAddressWithOrigin.add(s);
+//								for (EnumSymbol s : gateTile.gateAddress)
+//									gateAddressWithOrigin.add(s);
 								
-								gateAddressWithOrigin.add(EnumSymbol.ORIGIN);
+//								gateAddressWithOrigin.add(EnumSymbol.ORIGIN);
 																
 								// Check if symbols entered match the range, last is ORIGIN, target gate exists, and if not dialing self
-								if (StargateNetwork.get(world).stargateInWorld(world, gateTile.dialedAddress) && !gateTile.dialedAddress.equals(gateAddressWithOrigin)) {
+								if (StargateNetwork.get(world).stargateInWorld(world, gateTile.dialedAddress) && !gateTile.dialedAddress.subList(0, 6).equals(gateTile.gateAddress)) {
 									// All check, light it up and start gate animation
 									
 									StargatePos targetGate = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
@@ -170,27 +159,28 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, message.objectID, dhdTile), point );
 									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, gateTile), point );
 //									dhdTile.setLinkedGateEngagement(true);
-									dhdTile.setRendererState( new DHDRendererState(dhdTile.getPos(), EnumSymbol.toIntegerList(gateTile.dialedAddress, EnumSymbol.BRB)) );
+//									dhdTile.getDHDRendererState().activeButtons = EnumSymbol.toIntegerList(gateTile.dialedAddress, EnumSymbol.BRB);
 									
-									gateTile.openGate(true, null, null);
+									gateTile.openGate(true, 0, null);
 									
 									DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
 									TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 512);
 									
-									targetTile.openGate(false, gateTile.dialedAddress.size()-1, gateTile.gateAddress);
+									targetTile.openGate(false, gateTile.dialedAddress.size(), gateTile.gateAddress);
 									
 									// Open target gate
 									if (targetDhdTile != null) {
 //										targetDhdTile.setLinkedGateEngagement(true);
 										
-										List<Integer> targetDhdSymbols = new ArrayList<>();
-										for (int i=0; i<gateTile.dialedAddress.size()-1; i++)
-											targetDhdSymbols.add(gateTile.gateAddress.get(i).id);
+//										List<EnumSymbol> targetDhdSymbols = new ArrayList<>();
+//										targetDhdSymbols.addAll(gateTile.gateAddress);
+//										for (int i=0; i<gateTile.dialedAddress.size()-1; i++)
+//											targetDhdSymbols.add(gateTile.gateAddress.get(i).id);
+//										
+//										targetDhdSymbols.add(EnumSymbol.ORIGIN);
+//										targetDhdSymbols.add(EnumSymbol.BRB);
 										
-										targetDhdSymbols.add(EnumSymbol.ORIGIN.id);
-										targetDhdSymbols.add(EnumSymbol.BRB.id);
-										
-										targetDhdTile.setRendererState( new DHDRendererState(targetDhdTile.getPos(), targetDhdSymbols) );
+//										targetDhdTile.getDHDRendererState().activeButtons.add(EnumSymbol.BRB.id);
 										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, message.objectID, targetDhdTile), targetPoint );
 									}
 									
@@ -200,8 +190,9 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 								else {
 									// Address malformed, dialing failed
 									// Execute GATE_DIAL_FAILED
-									gateTile.clearLinkedDHDButtons(true);
-									gateTile.clearAddress();
+//									gateTile.clearLinkedDHDButtons(true);
+									gateTile.closeGate(true);
+									
 									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.GATE_DIAL_FAILED, gateTile), point );
 								}
 							}	
@@ -230,7 +221,8 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 								StargateNetwork network = StargateNetwork.get(world);
 																
 								// Light up target gate, if exists
-								if ( symbol == EnumSymbol.ORIGIN && network.stargateInWorld(world, gateTile.dialedAddress) ) {			
+								if ( symbol == EnumSymbol.ORIGIN && network.stargateInWorld(world, gateTile.dialedAddress) ) {	
+									
 									StargatePos targetGate = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
 									World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 									
@@ -242,15 +234,22 @@ public class GateRenderingUpdatePacketToServer implements IMessage {
 									
 									boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
 									
+									targetTile.incomingWormhole(gateTile.gateAddress, gateTile.dialedAddress.size());
+									
 									// To renderer: light up chevrons and target dhd glyphs																
 									if (targetDhdTile != null) {
-										targetDhdTile.setRendererState( new DHDRendererState(targetDhdTile.getPos(), EnumSymbol.toIntegerList(gateTile.dialedAddress)) );
+//										List<EnumSymbol> incomingAddress = gateTile.gateAddress.subList(0, 6);
+//										
+//										if (eightChevronDial)
+//											incomingAddress.add(gateTile.gateAddress.get(6));
+//																				
+//										targetDhdTile.getDHDRendererState().activeButtons = EnumSymbol.toIntegerList(incomingAddress, EnumSymbol.ORIGIN);
+										
 										AunisPacketHandler.INSTANCE.sendToAllAround( new DHDIncomingWormholePacketToClient(targetDhdTile.getPos(), gateTile.gateAddress, eightChevronDial), targetPoint );	
 									}
 									
-									// Changed targetTile to gateTile									
-									targetTile.getStargateRendererState().activeChevrons = gateTile.dialedAddress.size();
-									targetTile.getStargateRendererState().isFinalActive = true;
+//									targetTile.getStargateRendererState().activeChevrons = gateTile.dialedAddress.size() - 1;
+//									targetTile.getStargateRendererState().isFinalActive = true;
 									
 									EnumGateAction gateAction;
 									if (eightChevronDial)

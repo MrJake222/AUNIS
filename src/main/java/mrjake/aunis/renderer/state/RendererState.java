@@ -3,7 +3,6 @@ package mrjake.aunis.renderer.state;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
 
 /**
  * Base class for all renderer states.
@@ -13,19 +12,15 @@ import net.minecraft.util.math.BlockPos;
  */
 public abstract class RendererState {
 	
-	public BlockPos pos;
-	
-	public RendererState(BlockPos pos) {
-		this.pos = pos;
-	}
+	public RendererState() {}
 	
 	public RendererState(ByteBuf buf) {
 		fromBytes(buf);
 	}
 	
 	/**
-	 * Should return all parameters that matter to client-side renderer(ex. vortexState in StargateRenderer)
-	 * in form of a ByteBuf.
+	 * Should write all parameters that matter to client-side renderer(ex. vortexState in StargateRenderer)
+	 * to a ByteBuf.
 	 * 
 	 * Data should be put and read in the same order!
 	 * 
@@ -40,8 +35,18 @@ public abstract class RendererState {
 	 */
 	public abstract void fromBytes(ByteBuf buf);
 	
+	/**
+	 * Key name under which the parameters will be stored in NBT as ByteBuf
+	 * 
+	 * @return key name
+	 */
 	protected abstract String getKeyName();
 	
+	/**
+	 * Writes ByteBuf with parameters to NBT with getKeyName() key
+	 * 
+	 * @param compound - NBT compound
+	 */
 	public void toNBT(NBTTagCompound compound) {
 		ByteBuf buf = Unpooled.buffer();
 		toBytes(buf);
@@ -52,6 +57,11 @@ public abstract class RendererState {
 		compound.setByteArray(getKeyName(), dst);
 	}
 	
+	/**
+	 * Constructor that reads bytes from NBT with getKeyName() key
+	 * 
+	 * @param compound - NBT compound
+	 */
 	public RendererState(NBTTagCompound compound) {
 		byte[] dst = compound.getByteArray(getKeyName());
 		

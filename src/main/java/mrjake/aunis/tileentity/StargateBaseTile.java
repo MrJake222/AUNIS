@@ -8,6 +8,7 @@ import java.util.Random;
 
 import javax.vecmath.Vector2f;
 
+import io.netty.buffer.ByteBuf;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.item.AunisItems;
@@ -20,7 +21,7 @@ import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.StargateRenderer;
 import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
-import mrjake.aunis.renderer.state.LimitedStargateRendererState;
+import mrjake.aunis.renderer.StargateRingSpinHelper;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
@@ -49,16 +50,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable {
-	
-	private static final int maxChevrons = 8;
-	
+		
 	private ISpecialRenderer<StargateRendererState> renderer;
 	private RendererState rendererState;
 	
 	private StargateUpgradeRenderer upgradeRenderer;
 	private UpgradeRendererState upgradeRendererState;
 	
-	private LimitedStargateRendererState limitedState;
 	private BlockPos linkedDHD = null;
 	
 	private boolean isEngaged;
@@ -69,38 +67,94 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	private boolean unstableVortex;
 	private boolean isClosing;
 	
-	private int dialedChevrons;
+//	private int dialedChevrons;
 	private int playersPassed;
 		
 	public List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
 	
+	private StargateRingSpinHelper serverRingSpinHelper;
+	
+	private StargateRingSpinHelper getServerRingSpinHelper() {
+		if (serverRingSpinHelper == null)
+			serverRingSpinHelper = new StargateRingSpinHelper(world, pos, null, getStargateRendererState());
+		
+		return serverRingSpinHelper;
+	}
+	
+	/**
+	 * Adds symbol to address. Called from GateRenderingUpdatePacketToServer. Handles all server-side consequences:
+	 * 	- server ring movement cache
+	 * 	- renderer's state
+	 *
+	 * 
+	 * @param symbol - Currently added symbol
+	 * @param dhdTile - Clicked DHD's Tile instance
+	 * @return true if symbol was added
+	 */
 	public boolean addSymbolToAddress(EnumSymbol symbol, DHDTile dhdTile) {		
 		if (dialedAddress.contains(symbol)) 
 			return false;
 		
-		if ( dialedAddress.size() == (dhdTile.hasUpgrade() ? 8 : 7) )
+		int maxChevrons = (dhdTile.hasUpgrade() ? 8 : 7);
+		
+		if (dialedAddress.size() == maxChevrons)
 			return false;
 		
-		dialedAddress.add(symbol);
+		// First glyph is pressed
+		// Ring starts to spin
+		if (dialedAddress.size() == 0) {
+			getServerRingSpinHelper().setSpeedUpTimeTick(25);
+			getServerRingSpinHelper().requestStart(getStargateRendererState().ringAngularRotation);
+		}
 		
-		getStargateRendererState().activeChevrons++;
-		getStargateRendererState().isFinalActive = dialedAddress.size() == maxChevrons;
+		dialedAddress.add(symbol);
+		dhdTile.getDHDRendererState().activeButtons.add(symbol.id);
+		
+		if (dialedAddress.size() == maxChevrons || symbol == EnumSymbol.ORIGIN) {
+			getStargateRendererState().isFinalActive = true;
+			
+			getServerRingSpinHelper().requestStop();
+		}
+		
+		else {
+			getStargateRendererState().activeChevrons++;
+		}
+		
+		markDirty();
 		
 		return true;
 	}
 	
-	public void clearAddress() {		
-		dialedAddress.clear();
+	/**
+	 * Called on receiving gate. Sets renderer's state
+	 * 
+	 * @param incomingAddress - Initializing gate's address
+	 * @param dialedAddressSize - How many symbols are there pressed on the DHD
+	 */
+	public void incomingWormhole(List<EnumSymbol> incomingAddress, int dialedAddressSize) {
+		getStargateRendererState().activeChevrons = dialedAddressSize - 1;
+		getStargateRendererState().isFinalActive = true;
+		
+		DHDTile dhdTile = getLinkedDHD(world);
+		
+		if (dhdTile != null) {			
+			dhdTile.getDHDRendererState().activeButtons = EnumSymbol.toIntegerList(incomingAddress.subList(0, dialedAddressSize - 1), EnumSymbol.ORIGIN);
+		}
 	}
 	
-	public void openGate(boolean initiating, Integer incomingChevrons, List<EnumSymbol> incomingAddress) {
+	/**
+	 * Called on BRB press. Initializes renderer's state
+	 * 
+	 * @param initiating - true if gate is initializing the connection
+	 * @param dialedAddressSize - Glyph count on initiating DHD
+	 * @param incomingAddress - Source gate address
+	 */
+	public void openGate(boolean initiating, int dialedAddressSize, List<EnumSymbol> incomingAddress) {
 		isInitiating = initiating;
 		
-		if (isInitiating)
-			dialedChevrons = dialedAddress.size()-1;
-		else {
-			dialedChevrons = incomingChevrons;
+		if (!isInitiating) {
+			dialedAddress.clear();
 			dialedAddress.addAll(incomingAddress);
 		}
 		
@@ -108,41 +162,84 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		playersPassed = 0;
 		waitForEngage = world.getTotalWorldTime();
 		
+		if (isInitiating)
+			getStargateRendererState().activeChevrons = dialedAddress.size() - 1;
+		else
+			getStargateRendererState().activeChevrons = dialedAddressSize - 1;
+		
+		getStargateRendererState().isFinalActive = true;
+		
+		getStargateRendererState().doEventHorizonRender = true;
+		getStargateRendererState().vortexState = EnumVortexState.STILL;
+		getStargateRendererState().openingSoundPlayed = true;
+		getStargateRendererState().dialingComplete = true;
+		
+		DHDTile dhdTile = getLinkedDHD(world);
+		if (dhdTile != null) {
+			dhdTile.getDHDRendererState().activeButtons.add(EnumSymbol.BRB.id);
+		}
+		
 		markDirty();
 	}
 	
 	public boolean fastDialer;
 	
+	/**
+	 * Called when vortex becomes stable. From now players are being teleported
+	 * 
+	 */
 	private void engageGate() {	
 		unstableVortex = false;
 		isEngaged = true;
 		gateCloseTimeout = 5;
-				
-		setRendererState();
 		
 		if (fastDialer) {
-			AunisPacketHandler.INSTANCE.sendToAllAround(new TileUpdatePacketToClient(getRendererState()), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 32768));
+			AunisPacketHandler.INSTANCE.sendToAllAround(new TileUpdatePacketToClient(pos, getRendererState()), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 32768));
 			fastDialer = false;
 		}
 		
 		markDirty();
 	}
 	
-	public void closeGate() {
-		waitForClose = world.getTotalWorldTime();
+	
+	/**
+	 * Called either on pressing BRB on open gate or by pressing BRB on malformed address
+	 * 
+	 * @param dialingFailed - True if second case above
+	 */
+	public void closeGate(boolean dialingFailed) {
+		if (!dialingFailed) {
+			waitForClose = world.getTotalWorldTime();
 		
-		isClosing = true;
-		isEngaged = false;
-		gateCloseTimeout = 5;
+			isClosing = true;
+			isEngaged = false;
+			gateCloseTimeout = 5;
+			
+			getStargateRendererState().doEventHorizonRender = false;
+			getStargateRendererState().openingSoundPlayed = false;
+			getStargateRendererState().dialingComplete = false;
+		}
 		
-		clearAddress();
+		else {
+			getServerRingSpinHelper().requestStop();
+		}
+			
+		dialedAddress.clear();
+		
+		getStargateRendererState().activeChevrons = 0;
+		getStargateRendererState().isFinalActive = false;
+		clearLinkedDHDButtons(dialingFailed);
+		
+		markDirty();
 	}
 	
+	/**
+	 * Called on event horizon fully closed
+	 * 
+	 */
 	private void disconnectGate() {	
 		isClosing = false;
-		
-		setRendererState();
-		
+				
 		markDirty();
 	}
 	
@@ -154,32 +251,18 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		return isInitiating;
 	}
 	
+	/**
+	 * Checks gate's merge state
+	 * 
+	 * @param isMerged - True if gate's multiblock structure is valid
+	 */
 	public void updateMergeState(boolean isMerged) {
 		IBlockState state = world.getBlockState(pos);
 		
 		world.setBlockState( pos, state.withProperty(BlockTESRMember.RENDER, !isMerged) );
 		MergeHelper.updateChevRingMergeState(this, state, isMerged);
 	}
-
-	/**
-	 * Sets ONLY the variable.
-	 * 
-	 * It's not the interface method.
-	 */
-	private void setRendererState() {
-		if (isEngaged)
-			rendererState = new StargateRendererState(pos, dialedChevrons, true, getLimitedState().ringAngularRotation, true, EnumVortexState.STILL, true, true);
-		else
-			rendererState = new StargateRendererState(pos, 0, false, getLimitedState().ringAngularRotation, false, EnumVortexState.FORMING, false, false);
-	}
 	
-	private LimitedStargateRendererState getLimitedState() {
-		if (limitedState == null)
-			limitedState = new LimitedStargateRendererState(pos);
-		
-		return limitedState;
-	}
-
 	@Override
 	public ISpecialRenderer<StargateRendererState> getRenderer() {
 		if (renderer == null)
@@ -195,18 +278,14 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	@Override
 	public RendererState getRendererState() {
 		if (rendererState == null)
-			setRendererState();
+			rendererState = new StargateRendererState(pos);
 				
 		return rendererState;
 	}
 	
 	@Override
-	public void setRendererState(RendererState rendererState) {
-		if (rendererState instanceof LimitedStargateRendererState) {
-			float ringAngularRotation = ((LimitedStargateRendererState) rendererState).ringAngularRotation;
-			
-			getStargateRendererState().ringAngularRotation = ringAngularRotation;
-		}
+	public RendererState createRendererState(ByteBuf buf) {
+		return new StargateRendererState(buf);
 	}
 	
 	@Override
@@ -225,23 +304,13 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		return upgradeRendererState;
 	}
 	
-	public int getMaxSymbols() {
-		return maxChevrons;
-	}
-	
 	public int getEnteredSymbolsCount() {
 		return dialedAddress.size();
 	}
 	
-	public boolean checkForPointOfOrigin() {
-		EnumSymbol last = dialedAddress.get( dialedAddress.size() - 1 );
-		
-		return last.equals( EnumSymbol.ORIGIN );
-	}
-	
-	public BlockPos getLinkedDHD() {
-		return linkedDHD;
-	}
+//	public BlockPos getLinkedDHD() {
+//		return linkedDHD;
+//	}
 	
 	public DHDTile getLinkedDHD(World world) {
 		if (linkedDHD == null)
@@ -272,7 +341,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		compound.setLong("linkedDHD", dhd.toLong());
 				
 		if (gateAddress != null) {
-			for (int i=0; i<maxChevrons-1; i++) {
+			for (int i=0; i<7; i++) {
 				compound.setInteger("symbol"+i, gateAddress.get(i).id);
 			}
 		}
@@ -282,14 +351,11 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		compound.setBoolean("unstableVortex", unstableVortex);
 
 		compound.setBoolean("hasUpgrade", hasUpgrade);
-//		compound.setBoolean("insertAnimation", insertAnimation);
 		
-		if (isEngaged || unstableVortex) {
-			compound.setInteger("dialedAddressLength", dialedAddress.size());
-			
-			for (int i=0; i<dialedAddress.size(); i++) {
-				compound.setInteger("dialedSymbol"+i, dialedAddress.get(i).id);
-			}
+		compound.setInteger("dialedAddressLength", dialedAddress.size());
+		
+		for (int i=0; i<dialedAddress.size(); i++) {
+			compound.setInteger("dialedSymbol"+i, dialedAddress.get(i).id);
 		}
 		
 		compound.setBoolean("unstableVortex", unstableVortex);
@@ -298,12 +364,10 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		compound.setLong("waitForClose", waitForClose);
 		compound.setBoolean("clearingButtons", clearingButtons);
 		compound.setLong("waitForClear", waitForClear);
-		
-		compound.setInteger("dialedChevrons", dialedChevrons);
-		
+				
 		compound.setInteger("playersPassed", playersPassed);
 		
-		getLimitedState().toNBT(compound);
+		getStargateRendererState().toNBT(compound);
 		getUpgradeRendererState().toNBT(compound);
 		
 		return super.writeToNBT(compound);
@@ -318,7 +382,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		if (compoundHasAddress) {		
 			gateAddress = new ArrayList<EnumSymbol>();
 			
-			for (int i=0; i<maxChevrons-1; i++) {
+			for (int i=0; i<7; i++) {
 				int id = compound.getInteger("symbol"+i);
 				gateAddress.add( EnumSymbol.valueOf(id) );
 			}
@@ -329,15 +393,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		unstableVortex = compound.getBoolean("unstableVortex");
 
 		hasUpgrade = compound.getBoolean("hasUpgrade");
-//		insertAnimation = compound.getBoolean("insertAnimation");
 		
-		if (isEngaged || unstableVortex) {
-			dialedAddress.clear();
-			int dialedAddressLength = compound.getInteger("dialedAddressLength");
-			
-			for (int i=0; i<dialedAddressLength; i++) {
-				dialedAddress.add( EnumSymbol.valueOf(compound.getInteger("dialedSymbol"+i)) );
-			}
+		dialedAddress.clear();
+		int dialedAddressLength = compound.getInteger("dialedAddressLength");
+		
+		for (int i=0; i<dialedAddressLength; i++) {
+			dialedAddress.add( EnumSymbol.valueOf(compound.getInteger("dialedSymbol"+i)) );
 		}
 		
 		waitForEngage = compound.getLong("waitForEngage");
@@ -345,12 +406,10 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		waitForClose = compound.getLong("waitForClose");
 		clearingButtons = compound.getBoolean("clearingButtons");
 		waitForClear = compound.getLong("waitForClear");
-		
-		dialedChevrons = compound.getInteger("dialedChevrons");
-		
+				
 		playersPassed = compound.getInteger("playersPassed");
 		
-		limitedState = new LimitedStargateRendererState(compound);
+		rendererState = new StargateRendererState(compound);
 		upgradeRendererState = new UpgradeRendererState(compound);
 		
 		super.readFromNBT(compound);
@@ -421,11 +480,17 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	private long waitForClear;
 	private int clearDelay;
 	
-	public void clearLinkedDHDButtons(boolean dialingFailed) { // 29 : 65
-		clearDelay = dialingFailed ? 39 : 65;
+	private void clearLinkedDHDButtons(boolean dialingFailed) { // 29 : 65
+		DHDTile dhdTile = getLinkedDHD(world);
 		
-		waitForClear = world.getTotalWorldTime();
-		clearingButtons = true;
+		if (dhdTile != null) {
+			dhdTile.clearRendererButtons();
+		
+			clearDelay = dialingFailed ? 39 : 65;
+			
+			waitForClear = world.getTotalWorldTime();
+			clearingButtons = true;
+		}		
 	}
 	
 	private AxisAlignedBB scanArea;
@@ -574,6 +639,14 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				clearingButtons = false;
 			}
 		}
+		
+		// Set ring rotation
+		// This will be synced to clients
+		if (!world.isRemote && getStargateRendererState().isSpinning) {
+			getStargateRendererState().ringAngularRotation = getServerRingSpinHelper().spin(0) % 360;
+			
+			markDirty();
+		}
 	}
 	
 	public void generateAddress() {
@@ -585,7 +658,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				List<EnumSymbol> address = new ArrayList<EnumSymbol>(); 
 					
 				while (true) {
-					while (address.size() < maxChevrons-1) {
+					while (address.size() < 7) {
 						EnumSymbol symbol = EnumSymbol.valueOf( rand.nextInt(38) );
 							
 						if ( !address.contains(symbol) && symbol != EnumSymbol.ORIGIN ) {
@@ -630,20 +703,6 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	public Item getAcceptedUpgradeItem() {
 		return AunisItems.crystalGlyphStargate;
 	}
-	
-//	@Override
-//	public void setUpgrade(boolean hasUpgrade) {
-//		this.hasUpgrade = hasUpgrade;
-//		
-//		markDirty();
-//	}
-//	
-//    @Override
-//	public void setInsertAnimation(boolean insertAnimation) {
-//		this.insertAnimation = insertAnimation;
-//		
-//		markDirty();
-//	}
 	
 	public int getEntitiesPassed() {
 		return playersPassed;

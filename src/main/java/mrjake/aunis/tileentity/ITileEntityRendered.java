@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity;
 
+import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.state.RendererState;
 
@@ -23,6 +24,7 @@ public interface ITileEntityRendered {
 	@SuppressWarnings("rawtypes")
 	public abstract ISpecialRenderer getRenderer();
 	
+	
 	/**
 	 * Should return an RendererState instance with all parameters that matter to client-side renderer.
 	 * 
@@ -30,10 +32,13 @@ public interface ITileEntityRendered {
 	 */
 	public abstract RendererState getRendererState();
 	
+	
 	/**
+	 * Should create specific instance of the RendererState(ex. StargateRendererState for StargateBaseTile)
+	 * from the given ByteBuf. 
 	 * 
-	 * 
-	 * @param rendererState
+	 * @param buf - Message's ByteBuf
+	 * @return RendererState's instance
 	 */
-	public abstract void setRendererState(RendererState rendererState);
+	public abstract RendererState createRendererState(ByteBuf buf);
 }

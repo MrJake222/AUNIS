@@ -69,7 +69,7 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 		ItemStack heldItem = player.getHeldItem(hand);
 		
 		// Server side
-		if (!world.isRemote) {
+		if (!world.isRemote) {			
 			if (heldItem.getItem() == AunisItems.analyzerAncient) {
 				AunisPacketHandler.INSTANCE.sendTo(new OpenStargateAddressGuiToClient(pos, gateTile.hasUpgrade() ? 7 : 6), (EntityPlayerMP) player);
 				
@@ -102,6 +102,8 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 		
 		// Client side
 		else {
+			// Aunis.info("horizontalRotation: " + gateTile.getRenderer().getHorizontalRotation());
+			
 			return  heldItem.getItem() == AunisItems.analyzerAncient ||
 					heldItem.getItem() == AunisItems.dialerFast || 
 					heldItem.getItem() == AunisItems.crystalGlyphStargate || 

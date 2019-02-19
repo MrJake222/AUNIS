@@ -5,22 +5,17 @@ import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
 
 public class DHDRendererState extends RendererState {
 	
 	// Buttons
 	public List<Integer> activeButtons;
 	
-	public DHDRendererState(BlockPos pos) {
-		super(pos);
-		
+	public DHDRendererState() {
 		this.activeButtons = new ArrayList<Integer>();
 	}
 	
-	public DHDRendererState(BlockPos pos, List<Integer> activeButtons) {
-		super(pos);
-		
+	public DHDRendererState(List<Integer> activeButtons) {
 		this.activeButtons = activeButtons;
 	}
 	
@@ -34,7 +29,7 @@ public class DHDRendererState extends RendererState {
 
 	@Override
 	public String toString() {
-		return pos+": activeButtons: " + activeButtons;
+		return "activeButtons: " + activeButtons;
 	}
 	
 	@Override
@@ -42,9 +37,7 @@ public class DHDRendererState extends RendererState {
 		return "rendererState";
 	}
 	
-	public void toBytes(ByteBuf buf) {
-		buf.writeLong( pos.toLong() );
-		
+	public void toBytes(ByteBuf buf) {		
 		int size = activeButtons.size();
 		buf.writeInt(size);
 		
@@ -53,9 +46,7 @@ public class DHDRendererState extends RendererState {
 		
 	}
 	
-	public void fromBytes(ByteBuf buf) {
-		this.pos = BlockPos.fromLong( buf.readLong() );
-		
+	public void fromBytes(ByteBuf buf) {		
 		this.activeButtons = new ArrayList<Integer>();
 		int size = buf.readInt();
 		

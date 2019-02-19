@@ -1,6 +1,7 @@
 package mrjake.aunis.packet.gate.renderingUpdate;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.renderer.DHDRenderer;
@@ -18,12 +19,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 // Send from server to clients nearby
-public class GateRenderingUpdatePacketToClient implements IMessage {
+public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 	public GateRenderingUpdatePacketToClient() {}
 	
 	private int packetID;
 	private int objectID;
-	private BlockPos blockPos; 
 	
 	public GateRenderingUpdatePacketToClient(EnumPacket packet, EnumSymbol symbol, BlockPos pos) {
 		this(packet.packetID, symbol.id, pos);
@@ -42,25 +42,26 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 	}
 	
 	public GateRenderingUpdatePacketToClient(int packetID, int objectID, BlockPos pos) {
+		super(pos);
+		
 		this.packetID = packetID;
 		this.objectID = objectID;
-		this.blockPos = pos;
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
+		super.toBytes(buf);
+		
 		buf.writeInt(packetID);
 		buf.writeInt(objectID);
-		
-		buf.writeLong( blockPos.toLong() );
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
+		super.fromBytes(buf);
+		
 		packetID = buf.readInt();
 		objectID = buf.readInt();
-		
-		blockPos = BlockPos.fromLong( buf.readLong() );
 	}
 
 	
@@ -72,7 +73,7 @@ public class GateRenderingUpdatePacketToClient implements IMessage {
 			World world = player.getEntityWorld();
 						
 			Minecraft.getMinecraft().addScheduledTask(() -> {
-				TileEntity te = world.getTileEntity( message.blockPos );
+				TileEntity te = world.getTileEntity( message.pos );
 				StargateBaseTile gateTile = null;
 				DHDTile dhdTile = null;
 				

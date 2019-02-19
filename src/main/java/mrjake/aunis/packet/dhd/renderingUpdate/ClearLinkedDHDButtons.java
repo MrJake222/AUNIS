@@ -1,51 +1,32 @@
 package mrjake.aunis.packet.dhd.renderingUpdate;
 
-import io.netty.buffer.ByteBuf;
-import mrjake.aunis.block.StargateBaseBlock;
-import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
 
-public class ClearLinkedDHDButtons implements IMessage {
+public class ClearLinkedDHDButtons extends PositionedPacket {
 	public ClearLinkedDHDButtons() {}
-	
-	private BlockPos gatePos;
-	
+		
 	public ClearLinkedDHDButtons(BlockPos pos) {
-		this.gatePos = pos;
-	}
-	
-	@Override
-	public void toBytes(ByteBuf buf) {
-		buf.writeLong(gatePos.toLong());
-	}
-	
-	@Override
-	public void fromBytes(ByteBuf buf) {
-		gatePos = BlockPos.fromLong(buf.readLong());
-	}
-	
+		super(pos);
+	}	
 	
 	public static class ClearLinkedDHDButtonsHandler implements IMessageHandler<ClearLinkedDHDButtons, IMessage> {
 		// TODO Cleanup
 		@Override
 		public IMessage onMessage(ClearLinkedDHDButtons message, MessageContext ctx) {
 			
-			if (ctx.side == Side.SERVER) {
+			/*if (ctx.side == Side.SERVER) {
 				WorldServer world = ctx.getServerHandler().player.getServerWorld();
 				
-				if ( world.getBlockState(message.gatePos).getBlock() instanceof StargateBaseBlock ) {
-					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.gatePos);
+				if ( world.getBlockState(message.pos).getBlock() instanceof StargateBaseBlock ) {
+					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.pos);
 					
 					if ( gateTile.isLinked() ) {
 						BlockPos dhd = gateTile.getLinkedDHD();
@@ -56,14 +37,13 @@ public class ClearLinkedDHDButtons implements IMessage {
 				}
 			}
 			
-			else {
-				World world = Minecraft.getMinecraft().player.getEntityWorld();
-				DHDTile dhdTile = ((DHDTile)world.getTileEntity(message.gatePos));
-				
-				if (dhdTile != null) {
-					DHDRenderer renderer = dhdTile.getDHDRenderer();
-					renderer.clearButtons();
-				}
+			else {*/
+			World world = Minecraft.getMinecraft().player.getEntityWorld();
+			DHDTile dhdTile = ((DHDTile)world.getTileEntity(message.pos));
+			
+			if (dhdTile != null) {
+				DHDRenderer renderer = dhdTile.getDHDRenderer();
+				renderer.clearButtons();
 			}
 						
 			return null;

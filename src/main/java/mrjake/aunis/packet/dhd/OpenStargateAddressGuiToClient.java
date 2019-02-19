@@ -2,6 +2,7 @@ package mrjake.aunis.packet.dhd;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.gui.StargateGUI;
+import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
@@ -10,26 +11,28 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class OpenStargateAddressGuiToClient implements IMessage {
+public class OpenStargateAddressGuiToClient extends PositionedPacket {
 	public OpenStargateAddressGuiToClient() {}
 	
-	private BlockPos gatePos;
 	private int symbolsCount;
 	
-	public OpenStargateAddressGuiToClient(BlockPos gatePos, int symbolsCount) {
-		this.gatePos = gatePos;
+	public OpenStargateAddressGuiToClient(BlockPos pos, int symbolsCount) {
+		super(pos);
+		
 		this.symbolsCount = symbolsCount;
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeLong( gatePos.toLong() );
+		super.toBytes(buf);
+		
 		buf.writeInt(symbolsCount);
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		gatePos = BlockPos.fromLong( buf.readLong() );
+		super.fromBytes(buf);
+		
 		symbolsCount = buf.readInt();
 	}
 
@@ -39,7 +42,7 @@ public class OpenStargateAddressGuiToClient implements IMessage {
 		@Override
 		public IMessage onMessage(OpenStargateAddressGuiToClient message, MessageContext ctx) {
 			World world = Minecraft.getMinecraft().player.world;
-			StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.gatePos);
+			StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.pos);
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				Minecraft.getMinecraft().displayGuiScreen( new StargateGUI(gateTile, message.symbolsCount) );

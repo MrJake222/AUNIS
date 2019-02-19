@@ -11,7 +11,7 @@ public class UpgradeRendererState extends RendererState {
 	public long insertionTime;
 	
 	public UpgradeRendererState(BlockPos pos) {
-		this(pos, false, false, false, 0);
+		this(false, false, false, 0);
 	}
 	
 	/**
@@ -23,9 +23,7 @@ public class UpgradeRendererState extends RendererState {
 	 * @param doUpgradeRender - Do the upgrade's render code need to run?
 	 * @param insertionTime - World's time of the animation start
 	 */
-	public UpgradeRendererState(BlockPos pos, boolean doInsertAnimation, boolean doRemovalAnimation, boolean doUpgradeRender, long insertionTime) {
-		super(pos);
-		
+	public UpgradeRendererState(boolean doInsertAnimation, boolean doRemovalAnimation, boolean doUpgradeRender, long insertionTime) {
 		this.doInsertAnimation = doInsertAnimation;
 		this.doRemovalAnimation = doRemovalAnimation;
 		this.doUpgradeRender = doUpgradeRender;

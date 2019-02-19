@@ -11,41 +11,88 @@ public class StargateRendererState extends RendererState {
 	public int activeChevrons;
 	public boolean isFinalActive;
 
-	// Ring
-	public float ringAngularRotation;
-	/*public boolean ringSpin;
-	public long ringSpinStart;*/
+	// Ring		
+	public double ringAngularRotation;
+
+	/**
+	 * Stores world's time when rotation started.
+	 */
+	public long tickStart;
+	
+	/**
+	 * Stores starting ring pos to correctly shift the next rotation
+	 * 
+	 * Set by requestStart()
+	 */
+	public double ringStartingRotation;
+
+	/**
+	 * Defines when ring is spinning ie. no stop animation was performed.
+	 */
+	public boolean isSpinning;
+	
+	/**
+	 * Set by requestStop(). Set when ring needs to be stopped.
+	 */
+	public boolean stopRequested;
+	
+	/**
+	 * Time when requestStop() was called
+	 */
+	public long tickStopRequested;
 
 	// Gate
 	public boolean doEventHorizonRender;
 	public EnumVortexState vortexState;
-	public boolean soundPlayed;
+	public boolean openingSoundPlayed;
 	public boolean dialingComplete;
 	
-	@Override
-	public String toString() {
-		return String.format(pos+": activeChevrons: %d, isFinalActive: %b, doEventHorizonRender: %b, vortexState: %s, soundPlayed: %b", activeChevrons, isFinalActive,
-				doEventHorizonRender, vortexState.toString(), soundPlayed);
-	}
+//	@Override
+//	public String toString() {
+//		return String.format(pos+": activeChevrons: %d, isFinalActive: %b, doEventHorizonRender: %b, vortexState: %s, openingSoundPlayed: %b", activeChevrons, isFinalActive,
+//				doEventHorizonRender, vortexState.toString(), openingSoundPlayed);
+//	}
 	
 	// Default state
 	public StargateRendererState(BlockPos pos) {
-		this(pos, 0, false, 0, false, EnumVortexState.FORMING, false, false);
+		this(pos, 0, false, 0, 0, 0, false, false, 0, false, EnumVortexState.FORMING, false, false);
 	}
 	
-	public StargateRendererState(BlockPos pos, int activeChevrons, boolean isFinalActive, float ringAngularRotation, /*boolean ringSpin, long ringSpinStart, */boolean doEventHorizonRender, EnumVortexState vortexState, boolean soundPlayed, boolean dialingComplete) {
-		super(pos);
-		
+	public StargateRendererState(
+			BlockPos pos,
+			
+			int activeChevrons,
+			boolean isFinalActive,
+			
+			float ringAngularRotation,
+			double ringStartingRotation,
+			long tickStart,
+			boolean isSpinning,
+			boolean stopRequested,
+			long tickStopRequested,
+			
+			boolean doEventHorizonRender,
+			EnumVortexState vortexState,
+			boolean openingSoundPlayed,
+			boolean dialingComplete) {
+				
+		// Chevrons
 		this.activeChevrons = activeChevrons;
 		this.isFinalActive = isFinalActive;
 		
+		// Ring
 		this.ringAngularRotation = ringAngularRotation;
-		/*this.ringSpin = ringSpin;
-		this.ringSpinStart = ringSpinStart;*/
+		this.ringStartingRotation = ringStartingRotation;
+
+		this.tickStart = tickStart;
+		this.isSpinning = isSpinning;
+		this.stopRequested = stopRequested;
+		this.tickStopRequested = tickStopRequested;
 		
+		// Gate
 		this.doEventHorizonRender = doEventHorizonRender;
 		this.vortexState = vortexState;
-		this.soundPlayed = soundPlayed;
+		this.openingSoundPlayed = openingSoundPlayed;
 		this.dialingComplete = dialingComplete;
 	}
 	
@@ -64,35 +111,37 @@ public class StargateRendererState extends RendererState {
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeLong( pos.toLong() );
-		
 		buf.writeInt(activeChevrons);
 		buf.writeBoolean(isFinalActive);
 		
-		buf.writeFloat(ringAngularRotation);
-		/*buf.writeBoolean(ringSpin);
-		buf.writeLong(ringSpinStart);*/
+		buf.writeDouble(ringAngularRotation);
+		buf.writeDouble(ringStartingRotation);
+		buf.writeLong(tickStart);
+		buf.writeBoolean(isSpinning);
+		buf.writeBoolean(stopRequested);
+		buf.writeLong(tickStopRequested);
 		
 		buf.writeBoolean(doEventHorizonRender);
 		buf.writeInt(vortexState.index);
-		buf.writeBoolean(soundPlayed);
+		buf.writeBoolean(openingSoundPlayed);
 		buf.writeBoolean(dialingComplete);
 	}
 	
 	@Override
-	public void fromBytes(ByteBuf buf) {
-		pos = BlockPos.fromLong( buf.readLong() );
-		
+	public void fromBytes(ByteBuf buf) {		
 		activeChevrons = buf.readInt();
 		isFinalActive = buf.readBoolean();
 		
-		ringAngularRotation = buf.readFloat();
-		/*ringSpin = buf.readBoolean();
-		ringSpinStart = buf.readLong();*/
+		ringAngularRotation = buf.readDouble();
+		ringStartingRotation = buf.readDouble();
+		tickStart = buf.readLong();
+		isSpinning = buf.readBoolean();
+		stopRequested = buf.readBoolean();
+		tickStopRequested = buf.readLong();
 		
 		doEventHorizonRender = buf.readBoolean();
 		vortexState = EnumVortexState.valueOf( buf.readInt() );
-		soundPlayed = buf.readBoolean();
+		openingSoundPlayed = buf.readBoolean();
 		dialingComplete = buf.readBoolean();
 	}
 }

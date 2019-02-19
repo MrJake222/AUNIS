@@ -1,13 +1,20 @@
 package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class CrystalInfuserRendererState extends RendererState {
-
-	public CrystalInfuserRendererState(BlockPos pos) {
-		super(pos);
-		// TODO Auto-generated constructor stub
+	
+	public CrystalInfuserRendererState() {
+		
+	}
+	
+	public CrystalInfuserRendererState(ByteBuf buf) {
+		super(buf);
+	}
+	
+	public CrystalInfuserRendererState(NBTTagCompound compound) {
+		super(compound);
 	}
 
 	@Override

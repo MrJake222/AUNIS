@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity;
 
+import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.CrystalInfuserRenderer;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.state.CrystalInfuserRendererState;
@@ -9,6 +10,7 @@ import net.minecraft.tileentity.TileEntity;
 public class CrystalInfuserTile extends TileEntity implements ITileEntityRendered {
 
 	CrystalInfuserRenderer renderer;
+	CrystalInfuserRendererState rendererState;
 	
 	@Override
 	public ISpecialRenderer<CrystalInfuserRendererState> getRenderer() {
@@ -19,14 +21,14 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 	}
 
 	@Override
-	public RendererState getRendererState() {
-		return new CrystalInfuserRendererState(pos);
-	}
-
-	@Override
-	public void setRendererState(RendererState rendererState) {
-		// TODO Auto-generated method stub
-		
+	public RendererState getRendererState() {	
+		if (rendererState == null)
+			rendererState = new CrystalInfuserRendererState();
+				
+		return rendererState;
 	}
 	
+	public RendererState createRendererState(ByteBuf buf) {
+		return new CrystalInfuserRendererState(buf);
+	}
 }

@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity;
 
+import io.netty.buffer.ByteBuf;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
@@ -48,14 +49,20 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	@Override
 	public RendererState getRendererState() {	
 		if (rendererState == null)
-			rendererState = new DHDRendererState(pos);
+			rendererState = new DHDRendererState();
 				
 		return rendererState;
 	}
 	
 	@Override
-	public void setRendererState(RendererState rendererState) {		
-		this.rendererState = rendererState;		
+	public RendererState createRendererState(ByteBuf buf) {
+		return new DHDRendererState(buf);
+	}
+	
+	public void clearRendererButtons() {
+		getDHDRendererState().activeButtons.clear();
+		
+		markDirty();
 	}
 	
 	public void setLinkedGate(BlockPos gate) {		
@@ -151,27 +158,6 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	public Item getAcceptedUpgradeItem() {
 		return AunisItems.crystalGlyphDhd;
 	}
-//	public boolean hasUpgrade() {
-//		return hasUpgrade;
-//	}
-//	
-//	@Override
-//	public void setUpgrade(boolean hasUpgrade) {
-//		this.hasUpgrade = hasUpgrade;
-//		
-//		markDirty();
-//	}
-//	
-//    public boolean getInsertAnimation() {
-//		return insertAnimation;
-//	}
-//
-//    @Override
-//	public void setInsertAnimation(boolean insertAnimation) {
-//		this.insertAnimation = insertAnimation;
-//		
-//		markDirty();
-//	}
 
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {

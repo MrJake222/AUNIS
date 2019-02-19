@@ -3,6 +3,7 @@ package mrjake.aunis.packet.dhd.renderingUpdate;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
@@ -12,16 +13,16 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class DHDIncomingWormholePacketToClient implements IMessage {
+public class DHDIncomingWormholePacketToClient extends PositionedPacket {
 	public DHDIncomingWormholePacketToClient() {}
 	
-	private BlockPos dhdPos;
 	private long gateAddress;
 	private int lastSymbolId;
 	private boolean include7thSymbol;
 	
-	public DHDIncomingWormholePacketToClient(BlockPos dhdPos, List<EnumSymbol> gateAddress, boolean include7thSymbol) {		
-		this.dhdPos = dhdPos;
+	public DHDIncomingWormholePacketToClient(BlockPos pos, List<EnumSymbol> gateAddress, boolean include7thSymbol) {	
+		super(pos);
+		
 		this.gateAddress = EnumSymbol.toLong(gateAddress);
 		this.include7thSymbol = include7thSymbol;
 		this.lastSymbolId = gateAddress.get(gateAddress.size()-1).id;
@@ -29,7 +30,8 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeLong( dhdPos.toLong() );
+		super.toBytes(buf);
+		
 		buf.writeLong(gateAddress);
 		buf.writeBoolean(include7thSymbol);
 		
@@ -39,7 +41,8 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		dhdPos = BlockPos.fromLong( buf.readLong() );
+		super.fromBytes(buf);
+
 		gateAddress = buf.readLong();
 		include7thSymbol = buf.readBoolean();
 		
@@ -54,7 +57,7 @@ public class DHDIncomingWormholePacketToClient implements IMessage {
 			World world = Minecraft.getMinecraft().world;
 						
 			Minecraft.getMinecraft().addScheduledTask(() -> {
-				DHDTile te = (DHDTile) world.getTileEntity( message.dhdPos );
+				DHDTile te = (DHDTile) world.getTileEntity( message.pos );
 				
 				List<Integer> address = EnumSymbol.fromLong(message.gateAddress);
 				

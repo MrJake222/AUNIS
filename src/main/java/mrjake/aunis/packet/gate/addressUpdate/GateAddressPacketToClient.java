@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.Minecraft;
@@ -13,20 +14,21 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class GateAddressPacketToClient implements IMessage {
+public class GateAddressPacketToClient extends PositionedPacket {
 	public GateAddressPacketToClient() {}
 	
-	public GateAddressPacketToClient(BlockPos gatePos, List<EnumSymbol> gateAddress) {
-		this.gatePos = gatePos;
+	public GateAddressPacketToClient(BlockPos pos, List<EnumSymbol> gateAddress) {
+		super(pos);
+		
 		this.gateAddress = gateAddress;
 	}
 	
-	private BlockPos gatePos;
 	private List<EnumSymbol> gateAddress;
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeLong( gatePos.toLong() );
+		super.toBytes(buf);
+		
 		buf.writeInt(gateAddress.size());
 		
 		for (EnumSymbol symbol : gateAddress) {
@@ -36,7 +38,7 @@ public class GateAddressPacketToClient implements IMessage {
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		gatePos = BlockPos.fromLong( buf.readLong() );
+		super.fromBytes(buf);
 		
 		int len = buf.readInt();
 		gateAddress = new ArrayList<EnumSymbol>();
@@ -53,7 +55,7 @@ public class GateAddressPacketToClient implements IMessage {
 			World world = Minecraft.getMinecraft().world;
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
-				StargateBaseTile te = (StargateBaseTile) world.getTileEntity( message.gatePos );
+				StargateBaseTile te = (StargateBaseTile) world.getTileEntity( message.pos );
 				
 				te.gateAddress = message.gateAddress;
 			});
