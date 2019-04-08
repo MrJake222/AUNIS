@@ -1,6 +1,7 @@
 package mrjake.aunis.tileentity;
 
 import io.netty.buffer.ByteBuf;
+
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
@@ -13,12 +14,19 @@ import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.DHDUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.EnergyStorage;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
 public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable {
 	
@@ -109,6 +117,8 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 		getRendererState().toNBT(compound);
 		getUpgradeRendererState().toNBT(compound);
 		
+		compound.setTag("inventory", inventory.serializeNBT());
+		
 		return super.writeToNBT(compound);
 	}
 	
@@ -122,6 +132,8 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 		hasUpgrade = compound.getBoolean("hasUpgrade");
 		insertAnimation = compound.getBoolean("insertAnimation");
 		
+		inventory.deserializeNBT(compound.getCompoundTag("inventory"));
+
 		super.readFromNBT(compound);
 	}
 		
@@ -136,6 +148,32 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 			
 			if (world.isRemote)
 				AunisPacketHandler.INSTANCE.sendToServer( new TileUpdateRequestToServer(pos) );
+		}
+		
+		// Server
+		if (!world.isRemote) {
+			/*
+			 * Lets transfer some power to the gate, if possible
+			 */
+			
+			StargateBaseTile gateTile = getLinkedGate(world);
+			
+			if (gateTile != null) {			
+				ItemStack energyItemStack = inventory.getStackInSlot(0);
+				
+				if (!energyItemStack.isEmpty()) {
+					EnergyStorage dhdEnergyStorage = (EnergyStorage) energyItemStack.getCapability(CapabilityEnergy.ENERGY, null);
+					EnergyStorage stargateEnergyStorage = (EnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
+					
+					int toTransmit = stargateEnergyStorage.getMaxEnergyStored() - stargateEnergyStorage.getEnergyStored();
+					
+					toTransmit = Math.min(toTransmit, dhdEnergyStorage.getEnergyStored());
+					
+					if (toTransmit > 0) {						
+						stargateEnergyStorage.receiveEnergy(dhdEnergyStorage.extractEnergy(toTransmit, false), false);
+					}
+				}
+			}
 		}
 	}
 	
@@ -167,5 +205,27 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	@Override
 	public double getMaxRenderDistanceSquared() {
 		return 65536;
+	}
+	
+	// -----------------------------------------------------------------------------
+	
+	private ItemStackHandler inventory = new ItemStackHandler(1) {
+		
+		protected void onContentsChanged(int slot) {
+			super.onContentsChanged(slot);
+			
+			markDirty();
+		};
+	};
+	
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T)inventory : super.getCapability(capability, facing);	
 	}
 }

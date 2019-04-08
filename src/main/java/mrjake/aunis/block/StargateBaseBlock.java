@@ -1,5 +1,6 @@
 package mrjake.aunis.block;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
@@ -7,7 +8,6 @@ import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.merge.MergeHelper;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.StargateBaseTile;
-import mrjake.aunis.tileentity.TileEntityTESRMember;
 import mrjake.aunis.upgrade.UpgradeHelper;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -23,21 +23,13 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.EnergyStorage;
 
-public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
+public class StargateBaseBlock extends BlockTESRMember {
 
 	public StargateBaseBlock() {
 		super(Material.IRON, SoundType.METAL, "stargatebase_block");
-	}
-	
-	@Override
-	public Class<StargateBaseTile> getTileEntityClass() {
-		return StargateBaseTile.class;
-	}
-
-	@Override
-	public StargateBaseTile createTileEntity(World world, IBlockState state) {
-		return new StargateBaseTile();
 	}
 	
 	@Override
@@ -72,6 +64,11 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 		if (!world.isRemote) {			
 			if (heldItem.getItem() == AunisItems.analyzerAncient) {
 				AunisPacketHandler.INSTANCE.sendTo(new OpenStargateAddressGuiToClient(pos, gateTile.hasUpgrade() ? 7 : 6), (EntityPlayerMP) player);
+				
+				EnergyStorage energyStorage = (EnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
+
+				// TODO: Move this to GUI
+				Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored());
 				
 				return true;
 			}
@@ -109,6 +106,16 @@ public class StargateBaseBlock extends TileEntityTESRMember<StargateBaseTile> {
 					heldItem.getItem() == AunisItems.crystalGlyphStargate || 
 					heldItem.getItem() == Items.AIR;
 		}
+	}
+	
+	@Override
+	public boolean hasTileEntity(IBlockState state) {
+		return true;
+	}
+	
+	@Override
+	public StargateBaseTile createTileEntity(World world, IBlockState state) {
+		return new StargateBaseTile();
 	}
 	
 	@Override

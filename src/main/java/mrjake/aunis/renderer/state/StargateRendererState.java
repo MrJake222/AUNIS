@@ -47,6 +47,13 @@ public class StargateRendererState extends RendererState {
 	public boolean openingSoundPlayed;
 	public boolean dialingComplete;
 	
+	/**
+	 * When power is low, this becomes true. Flashing begins.
+	 *  
+	 * Individual flashes are handled client-side
+	 */
+	public boolean horizonUnstable;
+	
 //	@Override
 //	public String toString() {
 //		return String.format(pos+": activeChevrons: %d, isFinalActive: %b, doEventHorizonRender: %b, vortexState: %s, openingSoundPlayed: %b", activeChevrons, isFinalActive,
@@ -55,7 +62,7 @@ public class StargateRendererState extends RendererState {
 	
 	// Default state
 	public StargateRendererState(BlockPos pos) {
-		this(pos, 0, false, 0, 0, 0, false, false, 0, false, EnumVortexState.FORMING, false, false);
+		this(pos, 0, false, 0, 0, 0, false, false, 0, false, EnumVortexState.FORMING, false, false, false);
 	}
 	
 	public StargateRendererState(
@@ -74,7 +81,8 @@ public class StargateRendererState extends RendererState {
 			boolean doEventHorizonRender,
 			EnumVortexState vortexState,
 			boolean openingSoundPlayed,
-			boolean dialingComplete) {
+			boolean dialingComplete,
+			boolean horizonInstable) {
 				
 		// Chevrons
 		this.activeChevrons = activeChevrons;
@@ -94,6 +102,7 @@ public class StargateRendererState extends RendererState {
 		this.vortexState = vortexState;
 		this.openingSoundPlayed = openingSoundPlayed;
 		this.dialingComplete = dialingComplete;
+		this.horizonUnstable = horizonInstable;
 	}
 	
 	public StargateRendererState(ByteBuf buf) {
@@ -125,6 +134,7 @@ public class StargateRendererState extends RendererState {
 		buf.writeInt(vortexState.index);
 		buf.writeBoolean(openingSoundPlayed);
 		buf.writeBoolean(dialingComplete);
+		buf.writeBoolean(horizonUnstable);
 	}
 	
 	@Override
@@ -143,5 +153,6 @@ public class StargateRendererState extends RendererState {
 		vortexState = EnumVortexState.valueOf( buf.readInt() );
 		openingSoundPlayed = buf.readBoolean();
 		dialingComplete = buf.readBoolean();
+		horizonUnstable = buf.readBoolean();
 	}
 }

@@ -52,7 +52,12 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		
 		for (int i=0; i<9; i++)
 			chevronTextureList.add(textureTemplate + "0.png");
-	}
+		
+		// Load chevron textures
+		for (int i=0; i<=10; i++)
+			ModelLoader.getTexture("stargate/chevron/chevron" + i + ".png");
+		
+		}
 	
 	@Override
 	public float getHorizontalRotation() {
@@ -71,7 +76,6 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		
 		ringSpinHelper = new StargateRingSpinHelper(world, pos, this, state);
 		
-//		Mouse.setGrabbed(false);
 		
 		AunisSoundHelper.playPositionedSound("wormhole", pos, state.doEventHorizonRender);
 		
@@ -127,8 +131,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		}
 	}
 	
-	private void renderGate(double x, double y, double z) {
-		Model gateModel = Aunis.modelLoader.getModel( EnumModel.GATE_MODEL );
+	private void renderGate(double x, double y, double z) {		
+		Model gateModel = ModelLoader.getModel( EnumModel.GATE_MODEL );
 		
 		if ( gateModel != null ) {
 			GlStateManager.pushMatrix();
@@ -136,7 +140,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			GlStateManager.translate(x, y, z);
 			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
 			
-			ModelLoader.bindTexture( EnumModel.GATE_MODEL );
+			EnumModel.GATE_MODEL.bindTexture();
+			
 			gateModel.render();
 			
 			GlStateManager.popMatrix();
@@ -201,7 +206,9 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	}
 	
 	private void renderRing(double x, double y, double z, double partialTicks) {
-		Model ringModel = Aunis.modelLoader.getModel(EnumModel.RING_MODEL);
+//		ModelLoader.loadModel(EnumModel.RING_MODEL);
+		
+		Model ringModel = ModelLoader.getModel(EnumModel.RING_MODEL);
 		
 		if (ringModel != null) {
 			
@@ -243,7 +250,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
 			
 			
-			ModelLoader.bindTexture( EnumModel.RING_MODEL );
+			EnumModel.RING_MODEL.bindTexture();
 			ringModel.render();
 			
 			GlStateManager.popMatrix();
@@ -364,11 +371,14 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	}
 	
 	private void renderChevron(double x, double y, double z, int index, double partialTicks) {
-		Model ChevronLight = Aunis.modelLoader.getModel( EnumModel.ChevronLight );
-		Model ChevronFrame = Aunis.modelLoader.getModel( EnumModel.ChevronFrame );
-		Model ChevronMoving = Aunis.modelLoader.getModel( EnumModel.ChevronMoving );
+//		ModelLoader.loadModel(EnumModel.ChevronLight);
 		
-		if ( ChevronLight != null && ChevronFrame != null && ChevronMoving != null ) {
+		Model ChevronLight = ModelLoader.getModel( EnumModel.ChevronLight );
+		Model ChevronFrame = ModelLoader.getModel( EnumModel.ChevronFrame );
+		Model ChevronMoving = ModelLoader.getModel( EnumModel.ChevronMoving );
+		Model ChevronBack = ModelLoader.getModel( EnumModel.ChevronBack );
+		
+		if ( ChevronLight != null && ChevronFrame != null && ChevronMoving != null && ChevronBack != null ) {
 			GlStateManager.pushMatrix();
 			
 			GlStateManager.translate(x, y, z);
@@ -401,21 +411,28 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 					finalChevronOffset = 0;
 					finalChevronMove = false;
 				}
-											
-				ChevronFrame.render();
+								
+				GlStateManager.pushMatrix();
 				
 				GlStateManager.translate(0, finalChevronOffset, 0);
 				ChevronLight.render();
 			
 				GlStateManager.translate(0, -2*finalChevronOffset, 0);
 				ChevronMoving.render();
+				
+				GlStateManager.popMatrix();
 			}
 			
 			else {
 				ChevronLight.render();	
-				ChevronFrame.render();
 				ChevronMoving.render();
 			}
+			
+			EnumModel.ChevronFrame.bindTexture();
+			ChevronFrame.render();
+			
+			EnumModel.ChevronBack.bindTexture();
+			ChevronBack.render();
 			
 			GlStateManager.popMatrix();
 		}
@@ -431,6 +448,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			int stage = (int) (((world.getTotalWorldTime() - activationStateChange) + partialTicks) * 3);
 
 			if (stage < 0) return;
+			
+//			Aunis.info("Stage: " + stage);
 			
 			if (stage < 11) {
 				if (changingChevrons) {
@@ -484,6 +503,10 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 						
 						chevronTextureList.set(8, tex);
 					}
+				}
+				
+				else {
+					chevronTextureList.set(activation, textureTemplate+"10.png");
 				}
 				
 				activation = -1;
@@ -595,8 +618,10 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		AunisSoundHelper.playPositionedSound("wormhole", pos, true);
 	}
 	
-	float horizonInstabilityMul = 1;
-	
+	public void unstableHorizon(boolean unstable) {
+		state.horizonUnstable = unstable;
+	}
+		
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 		
@@ -626,8 +651,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		GlStateManager.rotate(horizontalRotation, 0, 1, 0);
 		GlStateManager.translate(0, 0, 0.1);
 		
-		ModelLoader.bindTexture( "stargate/event_horizon_by_mclatchyt_2.jpg" );
-			
+		ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2.jpg"));
+		
 		float tick = (float) (world.getTotalWorldTime() - kawooshStart + partialTicks);
 		float mul = 1;
 		
@@ -647,14 +672,14 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		
 		// Going center
 		if (inner >= Aunis.getRendererInit().kawooshRadius) {
-			backStrip = Aunis.getRendererInit().new QuadStrip(0, inner - 0.2f, Aunis.getRendererInit().eventHorizonRadius, tick);
+			backStrip = Aunis.getRendererInit().new QuadStrip(8, inner - 0.2f, Aunis.getRendererInit().eventHorizonRadius, tick);
 		}
 		
 		else {
 			if (backStripClamp) {
 				// Clamping to the desired size
 				backStripClamp = false;
-				backStrip = Aunis.getRendererInit().new QuadStrip(0, Aunis.getRendererInit().kawooshRadius - 0.2f, Aunis.getRendererInit().eventHorizonRadius, null);
+				backStrip = Aunis.getRendererInit().new QuadStrip(8, Aunis.getRendererInit().kawooshRadius - 0.2f, Aunis.getRendererInit().eventHorizonRadius, null);
 				
 				vortexStart = 5.275f;
 				
@@ -725,8 +750,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 								float zOffset = e.getKey();
 								float rad = e.getValue();
 								
-								// Aunis.getRendererInit().new QuadStrip(0, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul);
-								Aunis.getRendererInit().new QuadStrip(0, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul, false, 1.0f - whiteOverlayAlpha, 1);
+								// Aunis.getRendererInit().new QuadStrip(8, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul);
+								Aunis.getRendererInit().new QuadStrip(8, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul, false, 1.0f - whiteOverlayAlpha, 1);
 								
 								prevZ = zOffset;
 								prevRad = rad;
@@ -740,7 +765,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 						float arg2 = (float) ((world.getTotalWorldTime() - stateChange + partialTicks) / 3f) - 1.0f;
 												
 						if (arg2 < Aunis.getRendererInit().eventHorizonRadius+0.1f) {
-							backStrip = Aunis.getRendererInit().new QuadStrip(0, arg2, Aunis.getRendererInit().eventHorizonRadius, tick);
+							backStrip = Aunis.getRendererInit().new QuadStrip(8, arg2, Aunis.getRendererInit().eventHorizonRadius, tick);
 						}
 						
 						else {
@@ -765,7 +790,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 							whiteOverlayAlpha = MathHelper.sin( arg2 );
 						else {
 							if (backStrip == null)
-								backStrip = Aunis.getRendererInit().new QuadStrip(0, arg2, Aunis.getRendererInit().eventHorizonRadius, tick);
+								backStrip = Aunis.getRendererInit().new QuadStrip(8, arg2, Aunis.getRendererInit().eventHorizonRadius, tick);
 							
 							state.vortexState = EnumVortexState.SHRINKING;
 						}
@@ -773,20 +798,35 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				}
 			} // not still if
 		}
-				
+						
 		// Rendering proper event horizon or the <backStrip> for vortex
 		if (state.vortexState != null) {
 			if ( state.vortexState.equals(EnumVortexState.STILL) || state.vortexState.equals(EnumVortexState.CLOSING) ) {
 				
-				if ( state.vortexState.equals(EnumVortexState.CLOSING) || state.vortexState == EnumVortexState.SHRINKING )
-					renderEventHorizon(x, y, z, partialTicks, true, whiteOverlayAlpha, false, 1.3f);
-				else
-					renderEventHorizon(x, y, z, partialTicks, false, null, false, 1);
+				boolean horizonUnstable;
 				
+				
+				if (state.horizonUnstable)
+					horizonUnstable = getHorizonFlashing(partialTicks);
+				else
+					horizonUnstable = false;
+				
+				
+				if (horizonUnstable)
+					ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2_unstable.jpg"));
+
+//				if ( state.vortexState.equals(EnumVortexState.CLOSING) || state.vortexState == EnumVortexState.SHRINKING )
+//					renderEventHorizon(x, y, z, partialTicks, true, whiteOverlayAlpha, true, 1);
+//				else				
+//					renderEventHorizon(x, y, z, partialTicks, false, 0.0f, false, horizonUnstable ? 2f : 1);
+				
+				if ( state.vortexState.equals(EnumVortexState.CLOSING) )
+					renderEventHorizon(x, y, z, partialTicks, true, whiteOverlayAlpha, false, 1.7f);
+				else
+					renderEventHorizon(x, y, z, partialTicks, false, null, false, horizonUnstable ? 1.5f : 1);
+					
 				GlStateManager.popMatrix();
 				GlStateManager.enableLighting();
-				
-				
 				
 				return;
 			}
@@ -798,7 +838,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			
 			if (backStrip != null)
 				backStrip.render(tick, 0f, null, false, 1.0f - whiteOverlayAlpha, 1);
-			renderEventHorizon(x, y, z, partialTicks, false, 0f, true, 1);
+			
+			renderEventHorizon(x, y, z, partialTicks, false, 0.0f, true, 1.0f);
 			
 			GlStateManager.disableBlend();
 		}
@@ -813,14 +854,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	    GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.enableBlend();
 		
-		int k;
-		
-		if (backOnly)
-			k = 1;
-		else
-			k = 0;
-		
-		for (; k<2; k++) {
+		for (int k=(backOnly ? 1 : 0); k<2; k++) {
 			if (k == 1) {
 				GlStateManager.popMatrix();
 				
@@ -835,12 +869,13 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			
 			if (k == 1)
 				alpha += 0.3f;
-			
+				
 			
 			if (white)
 				Aunis.getRendererInit().innerCircle.render(tick, true, alpha, mul);
 			
 			Aunis.getRendererInit().innerCircle.render(tick, false, 1.0f-alpha, mul);
+			
 			
 			for ( QuadStrip strip : Aunis.getRendererInit().quadStrips ) {
 				if (white)
@@ -851,5 +886,62 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		}
 		
 		GlStateManager.disableBlend();
+	}
+	
+	private long lastFlashEnded = 0;
+	private long nextFlashIn = 0;
+	private long flashDuration1 = 0;
+	private long flashDuration2 = 0;
+	
+	private boolean soundPlayed = false;
+		
+	private boolean getHorizonFlashing(double partialTicks) {
+		float tick = (float) (world.getTotalWorldTime() + partialTicks);
+		
+		tick -= lastFlashEnded;
+		
+		if (tick > 100) {
+			resetFlashing();
+			
+			Aunis.info("setka!");
+
+			return false;
+		}
+		
+		tick -= nextFlashIn;
+		
+//		Aunis.info("tick: " + tick + "\t\tflashDuration2*4:  " + (flashDuration2 * 4));
+		
+		if (tick > 0) {
+			if (!soundPlayed) {
+				soundPlayed = true;
+				
+				Aunis.info("sound");
+				AunisSoundHelper.playSound(world, pos.up(), AunisSoundHelper.wormholeFlicker);
+			}
+			
+			if (tick < flashDuration1) return true;
+			if (tick < flashDuration1 * 2) return false;
+			if (tick < flashDuration2 * 3) return true;
+			if (tick < flashDuration2 * 4) return true;
+			else {
+				resetFlashing();
+				
+				Aunis.info("nextFlashIn: " + nextFlashIn + ", flashDuration1: " + flashDuration1 + ", flashDuration2: " + flashDuration2);
+				
+				return false;
+			}
+		}
+		
+		return false;
+	}
+	
+	private void resetFlashing() {
+		lastFlashEnded = world.getTotalWorldTime();
+		nextFlashIn = (long)(Math.random() * 40) + 5;
+		flashDuration1 = (long)(Math.random() * 4) + 1;
+		flashDuration2 = (long)(Math.random() * 4) + 1;
+		
+		soundPlayed = false;
 	}
 }

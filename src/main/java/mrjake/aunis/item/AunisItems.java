@@ -11,7 +11,7 @@ public class AunisItems {
 	/**
 	 * Crafting of the Stargate
 	 */
-	public static ItemBase crystalControlDhd = new ItemBase("crystal_control_dhd");
+	public static CrystalControlDHDItem crystalControlDhd = new CrystalControlDHDItem();
 	public static ItemBase crystalControlEmpty = new ItemBase("crystal_control_empty");
 	public static ItemBase crystalControlChevron = new ItemBase("crystal_control_chevron");
 	public static ItemBase crystalControlStargate = new ItemBase("crystal_control_stargate");

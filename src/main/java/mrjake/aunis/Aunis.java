@@ -2,7 +2,6 @@ package mrjake.aunis;
 
 import org.apache.logging.log4j.Logger;
 
-import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
 import mrjake.aunis.renderer.RendererInit;
@@ -27,7 +26,6 @@ public class Aunis {
     public static final String SERVER = "mrjake.aunis.proxy.ServerProxy";
     
     public static final AunisCreativeTab aunisCreativeTab = new AunisCreativeTab();
-    public static ModelLoader modelLoader = new ModelLoader();
     
     @Instance(ModID)
 	public static Aunis instance;

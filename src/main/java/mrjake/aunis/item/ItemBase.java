@@ -9,7 +9,7 @@ public class ItemBase extends Item {
 	public ItemBase(String registryName) {
 		this.name = registryName;
 		
-		setRegistryName(name);
+		setRegistryName(Aunis.ModID + ":" + name);
 		setUnlocalizedName(Aunis.ModID + "." + name);
 		
 		setCreativeTab(Aunis.aunisCreativeTab);

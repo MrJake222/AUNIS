@@ -1,12 +1,19 @@
 package mrjake.aunis.OBJLoader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import mrjake.aunis.Aunis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.util.ResourceLocation;
 
 public class ModelLoader {
+	
+	private static Map<String, ResourceLocation> textureNameMap = new HashMap<>();
+	private static List<String> failedToLoadTextures = new ArrayList<>();
 	
 	public enum EnumModel {
 		B0("b0", "dhd/0.obj", null),
@@ -52,23 +59,31 @@ public class ModelLoader {
 		
 		DHD_MODEL("DHDModel", "dhd/DHD.obj", "dhd/dhd.png"),
 		
-		GATE_MODEL("GateModel", "stargate/gate.obj", "stargate/darkmetal2048.png"),
-		RING_MODEL("RingModel", "stargate/ring.obj", "stargate/texturering.png"),
+		GATE_MODEL("GateModel", "stargate/gate.obj", "stargate/gatering7.png"),
+		RING_MODEL("RingModel", "stargate/ring.obj", "stargate/gatering7.png"),
+				
+		ChevronLight("ChevronLight", "stargate/chevron/chevronLight.obj", "stargate/chevron/chevron0.png"),
+		ChevronFrame("ChevronFrame", "stargate/chevron/chevronFrame.obj", "stargate/gatering7.png"),
+		ChevronMoving("ChevronMoving", "stargate/chevron/chevronMoving.obj", "stargate/chevron/chevron0.png"),
+		ChevronBack("ChevronBack", "stargate/chevron/chevronBack.obj", "stargate/gatering7.png"),
 		
-		ChevronLight("ChevronLight", "stargate/chevron/chevronLight.obj", "stargate/chevron/chevmap0.png"),
-		ChevronFrame("ChevronFrame", "stargate/chevron/chevronFrame.obj", "stargate/chevron/chevmap10.png"),
-		ChevronMoving("ChevronMoving", "stargate/chevron/chevronMoving.obj", "stargate/chevron/chevmap10.png"),
-		
-		CrystalInfuser("CrystalInfuser", "crystalinfuser/stand1.obj", "stargate/darkmetal2048.png");
+		CrystalInfuser("CrystalInfuser", "crystalinfuser/projector.obj", "stargate/darkmetal2048.png");
 		
 		private String name;
 		private String modelPath;
 		private String texturePath;
 		
+		private ResourceLocation textureResource;
+		
 		private EnumModel(String name, String path, String texturePath) {
 			this.name = name;
 			this.modelPath = "assets/aunis/models/" + path;
-			this.texturePath = texturePath;
+			
+			if (texturePath != null) {
+				this.texturePath = texturePath;
+			
+				this.textureResource = getTexture(this.texturePath);
+			}
 		}
 		
 		public String getName() {
@@ -79,23 +94,41 @@ public class ModelLoader {
 			return modelPath;
 		}
 		
-		public String getTexturePath() {
-			return texturePath;
+//		public String getTexturePath() {
+//			return texturePath;
+//		}
+		
+		public ResourceLocation getTextureResource() {
+			return textureResource;
+		}
+		
+		public void bindTexture() {
+			if (this.textureResource != null) {
+				Minecraft.getMinecraft().getTextureManager().bindTexture(textureResource);
+			}
+		}
+	}
+		
+//	public static void bindTexture(EnumModel model) {
+//		Minecraft.getMinecraft().getTextureManager().bindTexture(model.getTextureResource());
+//	}
+	
+	public static void bindTexture(String texture) {
+		ResourceLocation resource = getTexture(texture);
+		
+		if (resource != null) {
+			bindTexture(resource);
 		}
 	}
 	
-	public static void bindTexture(EnumModel model) {
-		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation( "aunis:textures/tesr/" + model.getTexturePath() ));
+	public static void bindTexture(ResourceLocation resource) {
+		Minecraft.getMinecraft().getTextureManager().bindTexture(resource);
 	}
 	
-	public static void bindTexture(String texture) {
-		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation( "aunis:textures/tesr/" + texture ));
-	}
-	
-	private Map<String, Boolean> loadAttempted = new HashMap<>();
-	private Map<String, ModelLoaderThread> threads = new HashMap<>();
+	private static Map<String, Boolean> loadAttempted = new HashMap<>();
+	private static Map<String, ModelLoaderThread> threads = new HashMap<>();
 		
-	public Model getModel(EnumModel model) {
+	public static Model getModel(EnumModel model) {
 		String name = model.getName();
 
 		try {
@@ -115,7 +148,7 @@ public class ModelLoader {
 		}
 	}
 	
-	public void loadModel(EnumModel model) {
+	private static void loadModel(EnumModel model) {
 		String name = model.getName();
 		
 		threads.put(name, new ModelLoaderThread( model.getPath() ));
@@ -123,4 +156,38 @@ public class ModelLoader {
 		threads.get(name).setPriority(Thread.MIN_PRIORITY);
 		threads.get(name).start();
 	}
+	
+	/**
+	 * Gets specific ResourceLocation from the map
+	 * If no-existent, loads it.
+	 * 
+	 * @param texturePath - Path to the texture
+	 * @return texture ResourceLocation
+	 */
+	public static ResourceLocation getTexture(String texturePath) {	
+		if (failedToLoadTextures.contains(texturePath))
+			return null;
+		
+		ResourceLocation resource = textureNameMap.get(texturePath);
+		
+		if (resource == null) {
+			resource = new ResourceLocation("aunis:textures/tesr/" + texturePath);
+			
+			Aunis.info("Loading " + texturePath + "...");
+			
+			// Failed to load
+			if (!Minecraft.getMinecraft().getTextureManager().loadTexture(resource, new SimpleTexture(resource))) {
+				failedToLoadTextures.add(texturePath);
+				
+				Aunis.info("Failed to load: " + texturePath);
+				
+				return null;
+			}
+			
+			textureNameMap.put(texturePath, resource);
+		}
+		
+		return resource;
+	}
+
 }

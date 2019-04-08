@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
@@ -39,6 +38,16 @@ public class DHDRenderer implements ISpecialRenderer<DHDRendererState> {
 		//this.te = te;
 		this.world = te.getWorld();
 		this.pos = te.getPos();
+		
+		// Load DHD textures
+		for (int k=0; k<2; k++) {
+			
+			String tex = (k == 0 ? "symbol" : "brb");
+			
+			for (int i=0; i<=5; i++) {
+				ModelLoader.getTexture("dhd/" + tex + "/" + tex+i + ".png");
+			}
+		}
 		
 		initTextureList();
 	}
@@ -158,8 +167,8 @@ public class DHDRenderer implements ISpecialRenderer<DHDRendererState> {
 	
 	@Override
 	public void render(double x, double y, double z, double partialTicks) {
-		Model dhdModel = Aunis.modelLoader.getModel(EnumModel.DHD_MODEL);
-		Model brbModel = Aunis.modelLoader.getModel(EnumModel.BRB);
+		Model dhdModel = ModelLoader.getModel(EnumModel.DHD_MODEL);
+		Model brbModel = ModelLoader.getModel(EnumModel.BRB);
 		
 		if (dhdModel != null && brbModel != null) {	
 			GlStateManager.pushMatrix();
@@ -167,7 +176,7 @@ public class DHDRenderer implements ISpecialRenderer<DHDRendererState> {
 			GlStateManager.translate(x+0.5, y, z+0.5);
 			GlStateManager.rotate(rotation, 0, 1, 0);
 						
-			ModelLoader.bindTexture( EnumModel.DHD_MODEL );
+			EnumModel.DHD_MODEL.bindTexture();
 			dhdModel.render();
 			
 			ModelLoader.bindTexture( buttonTexture.get( EnumModel.BRB.getName() ) );
@@ -175,7 +184,7 @@ public class DHDRenderer implements ISpecialRenderer<DHDRendererState> {
 			
 			EnumModel[] buttons = EnumModel.values();	
 			for (int i=0; i<38; i++) {
-				Model b = Aunis.modelLoader.getModel(buttons[i]);
+				Model b = ModelLoader.getModel(buttons[i]);
 				
 				if (b != null) {
 					ModelLoader.bindTexture( buttonTexture.get( buttons[i].getName() ) );

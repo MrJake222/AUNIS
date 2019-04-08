@@ -1,5 +1,6 @@
 package mrjake.aunis.event;
 
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.StargateBaseBlock;
@@ -17,6 +18,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -54,14 +56,22 @@ public class AunisEventHandler {
 		EntityPlayer player = event.getEntityPlayer();
 		World world = player.getEntityWorld();
 		
-		if ( world.isRemote && event.getHand() == EnumHand.MAIN_HAND) {
-			BlockPos pos = player.getPosition();
-						
-			Iterable<BlockPos> blocks = BlockPos.getAllInBox(pos.add(-1,-1,-1), pos.add(1,1,1));
-			
-			for (BlockPos activatedBlock : blocks) {
-				if (world.getBlockState(activatedBlock).getBlock() instanceof DHDBlock) {
-					DHDActivation.onActivated(world, activatedBlock, player);
+		if (player.isSneaking()) {
+			if (event instanceof RightClickBlock && world.getBlockState(event.getPos()).getBlock() == AunisBlocks.dhdBlock) {
+				((RightClickBlock) event).setUseBlock(Result.ALLOW);
+			}
+		}
+		
+		else {
+			if (world.isRemote && event.getHand() == EnumHand.MAIN_HAND) {
+				BlockPos pos = player.getPosition();
+							
+				Iterable<BlockPos> blocks = BlockPos.getAllInBox(pos.add(-1,-1,-1), pos.add(1,1,1));
+				
+				for (BlockPos activatedBlock : blocks) {
+					if (world.getBlockState(activatedBlock).getBlock() instanceof DHDBlock) {
+						DHDActivation.onActivated(world, activatedBlock, player);
+					}
 				}
 			}
 		}

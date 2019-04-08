@@ -24,7 +24,7 @@ public class AunisBlocks {
 		Item[] items = new Item[blocks.length];
 		
 		for (int i=0; i<blocks.length; i++)
-			items[i] = ((BlockBase) blocks[i]).getItemBlock();
+			items[i] = ((IBlockBase) blocks[i]).getItemBlock();
 		
 		return items;
 	}

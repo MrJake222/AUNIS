@@ -9,11 +9,17 @@ import java.util.Random;
 import javax.vecmath.Vector2f;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisConfig;
 import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.block.BlockTESRMember;
+import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
@@ -47,10 +53,13 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
-public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable {
-		
+
+public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider {		
 	private ISpecialRenderer<StargateRendererState> renderer;
 	private RendererState rendererState;
 	
@@ -179,16 +188,52 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			dhdTile.getDHDRendererState().activeButtons.add(EnumSymbol.BRB.id);
 		}
 		
+		if (isInitiating) {
+			Aunis.info("Opening gate, drawing " + openCost);
+			energyStorage.extractEnergy(openCost, false);
+		}
+		
 		markDirty();
 	}
 	
 	public boolean fastDialer;
 	
 	/**
+	 * Set on engageGate(). Indicates when the gate has been opened.
+	 * 
+	 * Used to calculate energy use while not loaded 
+	 */
+	public long gateOpenTime;
+	
+	/**
+	 * How much energy gate already consumed to keep the connection alive
+	 * 
+	 * Subtracted from calculated energy use at the closeGate()
+	 */
+	public int energyConsumed;
+	
+	public void updateEnergyStatus() {
+		long ticks = world.getTotalWorldTime() - gateOpenTime;
+		
+		int energy = (int) (ticks * keepAliveCostPerTick);
+					
+		Aunis.info("Consumed: " + energyConsumed + ", should be: " + energy);
+		
+		energy -= energyConsumed;
+
+		Aunis.info("Consuming " + energy);
+		
+		energyStorage.extractEnergy(energy, false);
+	}
+	
+	/**
 	 * Called when vortex becomes stable. From now players are being teleported
 	 * 
 	 */
 	private void engageGate() {	
+		gateOpenTime = world.getTotalWorldTime();
+		energyConsumed = 0;
+		
 		unstableVortex = false;
 		isEngaged = true;
 		gateCloseTimeout = 5;
@@ -230,6 +275,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		getStargateRendererState().isFinalActive = false;
 		clearLinkedDHDButtons(dialingFailed);
 		
+//		Aunis.info("Closing isInitiating:" + isInitiating);
+//		if (isInitiating && !dialingFailed) {
+//			
+//			
+//		}
+//		
 		markDirty();
 	}
 	
@@ -249,6 +300,14 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	
 	public boolean isInitiating() {
 		return isInitiating;
+	}
+	
+	public boolean isOpening() {
+		return unstableVortex;
+	}
+	
+	public boolean isClosing() {
+		return isClosing;
 	}
 	
 	/**
@@ -370,6 +429,13 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		getStargateRendererState().toNBT(compound);
 		getUpgradeRendererState().toNBT(compound);
 		
+		compound.setTag("energyStorage", energyStorage.serializeNBT());
+		compound.setInteger("openCost", openCost);
+		compound.setInteger("keepAliveCostPerTick", keepAliveCostPerTick);
+		
+		compound.setLong("gateOpenTime", gateOpenTime);
+		compound.setInteger("energyConsumed", energyConsumed);
+		
 		return super.writeToNBT(compound);
 	}
 	
@@ -411,6 +477,14 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		rendererState = new StargateRendererState(compound);
 		upgradeRendererState = new UpgradeRendererState(compound);
+		
+		energyStorage.deserializeNBT((NBTTagCompound) compound.getTag("energyStorage"));
+		
+		this.openCost = compound.getInteger("openCost");
+		this.keepAliveCostPerTick = compound.getInteger("keepAliveCostPerTick");
+		
+		this.gateOpenTime = compound.getLong("gateOpenTime");
+		this.energyConsumed = compound.getInteger("energyConsumed");
 		
 		super.readFromNBT(compound);
 	}
@@ -482,7 +556,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	
 	private void clearLinkedDHDButtons(boolean dialingFailed) { // 29 : 65
 		DHDTile dhdTile = getLinkedDHD(world);
-		
+				
 		if (dhdTile != null) {
 			dhdTile.clearRendererButtons();
 		
@@ -546,45 +620,44 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		// Scan for entities passing through event horizon
 		if (!world.isRemote && horizonBoundingBox != null && isEngaged && isInitiating) {
 			List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, horizonBoundingBox);
-			
+			StargateNetwork.get(world).getStargate(dialedAddress);
 			for (Entity entity : entities) {
 				int entId = entity.getEntityId();
 				
 				// If entity not added to scheduled teleport list
 				if ( !scheduledTeleportMap.containsKey(entId) ) {
 					StargatePos targetGate = StargateNetwork.get(world).getStargate( dialedAddress );
-					if (targetGate == null)
-						return;
-					
-					World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
-					
-					BlockPos targetPos = targetGate.getPos();
-					// StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
-					
-					EnumFacing sourceFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
-					EnumFacing targetFacing = targetWorld.getBlockState(targetPos).getValue(BlockFaced.FACING);
-					
-					float rotation = (float) Math.toRadians( EnumFacing.fromAngle(targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle()).getOpposite().getHorizontalAngle() );
-
-					TeleportPacket packet = new TeleportPacket(pos, targetGate, rotation);
-					
-					if (entity instanceof EntityPlayerMP) {
-						scheduledTeleportMap.put(entId, packet);
-						AunisPacketHandler.INSTANCE.sendTo(new RetrieveMotionToClient(pos), (EntityPlayerMP) entity);
-					}
-					
-					else {
-						Vector2f motion = new Vector2f( (float)entity.motionX, (float)entity.motionZ );
+					if (targetGate != null) {					
+						World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 						
-						if (TeleportHelper.frontSide(sourceFacing, motion)) {
-							scheduledTeleportMap.put(entId, packet.setMotion(motion) );
-							teleportEntity(entId);
+						BlockPos targetPos = targetGate.getPos();
+						// StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
+						
+						EnumFacing sourceFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
+						EnumFacing targetFacing = targetWorld.getBlockState(targetPos).getValue(BlockFaced.FACING);
+						
+						float rotation = (float) Math.toRadians( EnumFacing.fromAngle(targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle()).getOpposite().getHorizontalAngle() );
+	
+						TeleportPacket packet = new TeleportPacket(pos, targetGate, rotation);
+						
+						if (entity instanceof EntityPlayerMP) {
+							scheduledTeleportMap.put(entId, packet);
+							AunisPacketHandler.INSTANCE.sendTo(new RetrieveMotionToClient(pos), (EntityPlayerMP) entity);
 						}
 						
-						/*else {
-							// TODO Make custom message appear
-							// entity.onKillCommand();
-						}*/
+						else {
+							Vector2f motion = new Vector2f( (float)entity.motionX, (float)entity.motionZ );
+							
+							if (TeleportHelper.frontSide(sourceFacing, motion)) {
+								scheduledTeleportMap.put(entId, packet.setMotion(motion) );
+								teleportEntity(entId);
+							}
+							
+							/*else {
+								// TODO Make custom message appear
+								// entity.onKillCommand();
+							}*/
+						}
 					}
 				}
 			}
@@ -622,6 +695,39 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			}			
 		}
 		
+		/*
+		 * Draw power (engaged)
+		 * 
+		 * If initiating
+		 * 	True: Extract energy each tick
+		 * 	False: Update the source gate about consumed energy each second
+		 */
+		if (isEngaged) {
+			if (isInitiating) {
+				/*
+				 * If not enough energy(minimum DHD operable + some buffer), close
+				 */
+				if (energyStorage.getEnergyStored() < 20000)
+					AunisPacketHandler.INSTANCE.sendToServer(new GateRenderingUpdatePacketToServer(EnumSymbol.BRB.id, pos));
+				
+				else 
+					energyConsumed += energyStorage.extractEnergy(keepAliveCostPerTick, false);		
+			}
+			
+			else {
+				if (world.getTotalWorldTime() % 20 == 0 && dialedAddress.size() > 0) {
+					StargatePos sourcePos = StargateNetwork.get(world).getStargate(dialedAddress);
+					
+					// Only if not loaded
+					if (!sourcePos.getWorld().isBlockLoaded(sourcePos.getPos())) {					
+						StargateBaseTile sourceTile = (StargateBaseTile) sourcePos.getWorld().getTileEntity(sourcePos.getPos());
+						
+						sourceTile.updateEnergyStatus();
+					}
+				}
+			}
+		}
+		
 		if (unstableVortex) {
 			if (world.getTotalWorldTime()-waitForEngage >= 86 && !isClosing)
 				engageGate();
@@ -633,9 +739,10 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		}
 		
 		if (clearingButtons) {
-			if (world.getTotalWorldTime()-waitForClear >= clearDelay) { 
+			if (world.getTotalWorldTime()-waitForClear >= clearDelay) { 				
 				if (linkedDHD != null)
 					AunisPacketHandler.INSTANCE.sendToAllAround(new ClearLinkedDHDButtons(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+				
 				clearingButtons = false;
 			}
 		}
@@ -682,6 +789,93 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		}
 	}
 	
+	
+	// -----------------------------------------------------------------
+	// Power system
+	
+	private int openCost = 0;
+	private int keepAliveCostPerTick = 0;
+	
+	private EnergyStorageSerializable energyStorage = new EnergyStorageSerializable(AunisConfig.stargateEnergyStorage, AunisConfig.stargateMaxEnergyTransfer, AunisConfig.stargateEnergyStorage) {
+		protected void onEnergyChanged() {
+			Aunis.info("Stargate energy: " + this.getEnergyStored() + " / " + this.getMaxEnergyStored() + "\t\tAlive for: " + (float)(getEnergyStored())/keepAliveCostPerTick/20);
+			
+			int sec = keepAliveCostPerTick*20;
+
+			/*
+			 * If energy can sustain connection for less than 10 seconds
+			 * Start flickering
+			 */
+			if (getEnergyStored() < sec*10 && !getStargateRendererState().horizonUnstable || getEnergyStored() > sec*10 && getStargateRendererState().horizonUnstable) {
+				// Toggle horizon status
+				getStargateRendererState().horizonUnstable ^= true;
+				
+				EnumGateAction action = getStargateRendererState().horizonUnstable ? EnumGateAction.UNSTABLE_HORIZON : EnumGateAction.STABLE_HORIZON;
+				
+				TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
+				AunisPacketHandler.INSTANCE.sendToAllAround(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, pos), point);
+				
+				if (isEngaged) {
+					StargatePos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
+					BlockPos tPos = targetPos.getPos();
+
+					TargetPoint targetPoint = new TargetPoint(targetPos.getDimension(), tPos.getX(), tPos.getY(), tPos.getZ(), 512);
+					AunisPacketHandler.INSTANCE.sendToAllAround(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, tPos), targetPoint);
+				}
+			}
+			
+			markDirty();
+		};
+	};
+	
+
+	/*
+	 * Checks is gate has sufficient power to dial across specified distance and dimension
+	 * It also sets energy draw for (possibly) outgoing wormhole
+	 */
+	public boolean hasEnergyToDial(int distance, World targetWorld) {		
+		double mul;
+		
+		switch (targetWorld.provider.getDimensionType()) {
+			case NETHER: mul = AunisConfig.netherMultiplier; break;
+			case THE_END: mul = AunisConfig.theEndMultiplier; break;
+		
+			// No multiplier
+			default: mul = 1; break;
+		}
+		
+		int energy = (int) (distance * AunisConfig.openingBlockToEnergyRatio * mul);
+		int keepAlive = (int) Math.ceil(distance * AunisConfig.keepAliveBlockToEnergyRatioPerTick * mul);
+
+		
+		Aunis.info("Energy required to dial [distance="+distance+", dim="+targetWorld.provider.getDimension()+"] = " + energy + " / keepAlive: "+(keepAlive*20)+"/s, stored: " + energyStorage.getEnergyStored());
+		
+		if (energyStorage.getEnergyStored() >= energy) {
+			this.openCost = energy;
+			this.keepAliveCostPerTick = keepAlive;
+		
+			markDirty();
+			return true;
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+		return (capability == CapabilityEnergy.ENERGY) || super.hasCapability(capability, facing);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		if (capability == CapabilityEnergy.ENERGY) {
+			return (T)energyStorage;
+		}
+		
+		return super.getCapability(capability, facing);
+	}
+	
 	// -----------------------------------------------------------------
 	// Upgrade
 	
@@ -724,9 +918,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
-		return new AxisAlignedBB(getPos().add(-6, 0, -6), getPos().add(7, 12, 7));
+		return new AxisAlignedBB(getPos().add(-7, 0, -7), getPos().add(7, 12, 7));
+//		Aunis.info("getRenderBoundingBox");
+		
+//		return INFINITE_EXTENT_AABB;
 	}
-	
+		
 	@Override
 	public double getMaxRenderDistanceSquared() {
 		return 65536;

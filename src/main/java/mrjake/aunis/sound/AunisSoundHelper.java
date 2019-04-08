@@ -23,10 +23,12 @@ public class AunisSoundHelper {
 	public static SoundEvent chevronIncoming;
 	public static SoundEvent wormholeGo;
 	
+	public static SoundEvent wormholeFlicker;
+	
 	public static ResourceLocation ringRollStart;
 	public static ResourceLocation ringRollLoop;
 	public static ResourceLocation wormholeLoop;
-	
+		
 	private static Map<String, AunisSound> aunisSounds = new HashMap<>();
 	private static List<AunisPositionedSound> aunisPositionedSounds = new ArrayList<>();
 	
@@ -66,6 +68,8 @@ public class AunisSoundHelper {
 		chevronLockDHD = new SoundEvent( new ResourceLocation("aunis", "chevron_lock_dhd") );	
 		chevronIncoming = new SoundEvent( new ResourceLocation("aunis", "chevron_incoming") );	
 		wormholeGo = new SoundEvent( new ResourceLocation("aunis", "wormhole_go") );
+		
+		wormholeFlicker = new SoundEvent( new ResourceLocation("aunis", "wormhole_flicker") );
 		
 		ringRollStart = new ResourceLocation("aunis", "ring_roll_start");
 		ringRollLoop = new ResourceLocation("aunis", "ring_roll_loop");

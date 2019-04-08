@@ -101,6 +101,14 @@
       "aunis:eh/eh_go_7",
       "aunis:eh/eh_go_8"
     ]
+  },
+  
+  "wormhole_flicker": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.wormhole_flicker",
+    "sounds": [
+      "aunis:eh/gate_flicker"
+    ]
   }
 }
 

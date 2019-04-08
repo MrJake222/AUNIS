@@ -21,3 +21,7 @@ tile.aunis.dhd_block.name=Dial Home Device (DHD)
 
 tile.aunis.dhd_block.incoming_wormhole_warn=Unable to close the gate on this end
 tile.aunis.dhd_block.not_linked_warn=DHD is not linked to the gate
+tile.aunis.dhd_block.no_crystal_warn=DHD has no control crystal
+tile.aunis.dhd_block.no_enough_power=DHD requires at least 10,000uI to operate properly
+
+tile.aunis.stargatebase_block.not_enough_power=Insufficient power

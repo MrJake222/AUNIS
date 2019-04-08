@@ -14,11 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.texture.ITextureObject;
-import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 public class RendererInit {
@@ -41,32 +37,7 @@ public class RendererInit {
 	InnerCircle innerCircle;
 	List<QuadStrip> quadStrips = new ArrayList<QuadStrip>();
 	
-	public RendererInit() {
-		// Load chevron textures
-		for (int i=0; i<=10; i++) {
-			ResourceLocation resource = new ResourceLocation( "aunis:textures/tesr/stargate/chevron/chevron"+i+".png" );
-					
-			ITextureObject itextureobject = new SimpleTexture(resource);
-			Minecraft.getMinecraft().getTextureManager().loadTexture(resource, itextureobject);
-		}
-		
-		// Load button textures
-		for (int k=0; k<2; k++) {
-			String tex;
-					
-			if (k == 0)
-				tex = "symbol";
-			else
-				tex = "brb";
-					
-			for (int i=0; i<=5; i++) {
-				ResourceLocation resource = new ResourceLocation( "aunis:textures/tesr/dhd/"+tex+"/"+tex+i+".png" );
-					
-				ITextureObject itextureobject = new SimpleTexture(resource);
-				Minecraft.getMinecraft().getTextureManager().loadTexture(resource, itextureobject);
-			}
-		}
-		
+	public RendererInit() {		
 		initEventHorizon();
 		initKawoosh();
 	}
@@ -77,8 +48,8 @@ public class RendererInit {
 		return rand.nextFloat()*2-1;
 	}
 	
-	private float getOffset(int index, float tick, float mul) {
-		return MathHelper.sin( tick/4f + offsetList.get(index) ) / 24f * mul;
+	private float getOffset(int index, float tick, float mul, int quadStripIndex) {
+		return (float) (Math.sin(tick/4f + offsetList.get(index)) * mul * (quadStripIndex/4f) * (quadStripIndex - quadStrips.size()) / 400f);
 	}
 	
 	private float toUV(float coord) {
@@ -149,7 +120,7 @@ public class RendererInit {
 					index = i;
 				
 				if (!white) glTexCoord2f( tx.get(index), ty.get(index) );
-				glVertex3f( x.get(index), y.get(index), getOffset(index, tick, mul) );
+				glVertex3f( x.get(index), y.get(index), getOffset(index, tick, mul, 0) );
 			}
 
 			glEnd();
@@ -198,7 +169,7 @@ public class RendererInit {
 					float rad = radius.get(k);
 					
 					if (tick != null) {
-						rad += getOffset(i, tick, 1) * 2;
+						rad += getOffset(i, tick, 1, quadStripIndex) * 2;
 					}
 					
 					x.add( rad * sin.get(i) );
@@ -236,15 +207,17 @@ public class RendererInit {
 				float z;
 				
 				if (outerZ != null) z = outerZ.floatValue();
-				else z = getOffset(index + sections*quadStripIndex, tick, mul);
-				
+				else z = getOffset(index + sections*quadStripIndex, tick, mul, quadStripIndex);
+								
 				if (!white) glTexCoord2f( tx.get(index), ty.get(index) );
 				glVertex3f( x.get(index), y.get(index),  z );
+				
+//				Aunis.info("z: " + z);
 				
 				index = index + sections;
 				
 				if (innerZ != null) z = innerZ.floatValue();
-				else z = getOffset(index + sections*quadStripIndex, tick, mul);
+				else z = getOffset(index + sections*quadStripIndex, tick, mul, quadStripIndex+1);
 				
 				if (!white) glTexCoord2f( tx.get(index), ty.get(index) );
 				glVertex3f( x.get(index), y.get(index), z );

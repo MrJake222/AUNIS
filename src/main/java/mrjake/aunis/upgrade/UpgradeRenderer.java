@@ -2,16 +2,11 @@ package mrjake.aunis.upgrade;
 
 import mrjake.aunis.item.ItemBase;
 import mrjake.aunis.renderer.ISpecialRenderer;
+import mrjake.aunis.renderer.ItemRenderer;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
 
 public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendererState> {
 	private World world;
@@ -25,6 +20,8 @@ public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendere
 	
 	protected float mul;
 	
+	private ItemRenderer itemRenderer;
+	
 	/**
 	 * Creates UpgradeRenderer instance.
 	 * 
@@ -34,6 +31,8 @@ public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendere
 		this.world = te.getWorld();
 		
 		this.horizontalRotation = horizontalRotation;
+		
+		this.itemRenderer = new ItemRenderer(getUpgradeItem(), world);
 	}
 	
 	/**
@@ -146,19 +145,16 @@ public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendere
 		float arg = (float) ((world.getTotalWorldTime() - insertionTime + partialTicks) / 60.0);
 		
 		GlStateManager.pushMatrix();
-		
 		translateUpgradeModel(x, y, z, arg);		
-			
-		ItemStack stack = new ItemStack(getUpgradeItem());
-			
-		IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, world, null);
-		model = ForgeHooksClient.handleCameraTransforms(model, ItemCameraTransforms.TransformType.GROUND, false);
-	
+		
 		GlStateManager.enableBlend();
 		
 		GlStateManager.color(1, 1, 1, 0.7f);
-		Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-		Minecraft.getMinecraft().getRenderItem().renderItem(stack, model);
+		
+		GlStateManager.scale(0.7, 0.7, 0.7);
+		GlStateManager.translate(-0.15, 0, 0);
+		
+		itemRenderer.render();
 		
 		GlStateManager.disableBlend();
 		
