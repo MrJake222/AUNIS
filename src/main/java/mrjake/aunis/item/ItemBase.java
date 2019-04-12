@@ -1,7 +1,9 @@
 package mrjake.aunis.item;
 
 import mrjake.aunis.Aunis;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
+import net.minecraftforge.client.model.ModelLoader;
 
 public class ItemBase extends Item {
 	protected String name;
@@ -16,6 +18,7 @@ public class ItemBase extends Item {
 	}
 	
 	public void registerItemRenderer() {
-		Aunis.proxy.registerItemRenderer(this, 0, getRegistryName());
+		ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
+
 	}
 }

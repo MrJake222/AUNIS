@@ -1,9 +1,8 @@
 package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
+import mrjake.aunis.renderer.stargate.StargateRenderer.EnumVortexState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
 
 public class StargateRendererState extends RendererState {
 	
@@ -13,34 +12,8 @@ public class StargateRendererState extends RendererState {
 
 	// Ring		
 	public double ringAngularRotation;
-
-	/**
-	 * Stores world's time when rotation started.
-	 */
-	public long tickStart;
+	public SpinState spinState;
 	
-	/**
-	 * Stores starting ring pos to correctly shift the next rotation
-	 * 
-	 * Set by requestStart()
-	 */
-	public double ringStartingRotation;
-
-	/**
-	 * Defines when ring is spinning ie. no stop animation was performed.
-	 */
-	public boolean isSpinning;
-	
-	/**
-	 * Set by requestStop(). Set when ring needs to be stopped.
-	 */
-	public boolean stopRequested;
-	
-	/**
-	 * Time when requestStop() was called
-	 */
-	public long tickStopRequested;
-
 	// Gate
 	public boolean doEventHorizonRender;
 	public EnumVortexState vortexState;
@@ -61,22 +34,16 @@ public class StargateRendererState extends RendererState {
 //	}
 	
 	// Default state
-	public StargateRendererState(BlockPos pos) {
-		this(pos, 0, false, 0, 0, 0, false, false, 0, false, EnumVortexState.FORMING, false, false, false);
+	public StargateRendererState() {
+		this(0, false, 0, new SpinState(), false, EnumVortexState.FORMING, false, false, false);
 	}
 	
-	public StargateRendererState(
-			BlockPos pos,
-			
+	public StargateRendererState(			
 			int activeChevrons,
 			boolean isFinalActive,
 			
 			float ringAngularRotation,
-			double ringStartingRotation,
-			long tickStart,
-			boolean isSpinning,
-			boolean stopRequested,
-			long tickStopRequested,
+			SpinState spinState,
 			
 			boolean doEventHorizonRender,
 			EnumVortexState vortexState,
@@ -88,14 +55,9 @@ public class StargateRendererState extends RendererState {
 		this.activeChevrons = activeChevrons;
 		this.isFinalActive = isFinalActive;
 		
-		// Ring
+		// Ring		
 		this.ringAngularRotation = ringAngularRotation;
-		this.ringStartingRotation = ringStartingRotation;
-
-		this.tickStart = tickStart;
-		this.isSpinning = isSpinning;
-		this.stopRequested = stopRequested;
-		this.tickStopRequested = tickStopRequested;
+		this.spinState = spinState;
 		
 		// Gate
 		this.doEventHorizonRender = doEventHorizonRender;
@@ -124,11 +86,7 @@ public class StargateRendererState extends RendererState {
 		buf.writeBoolean(isFinalActive);
 		
 		buf.writeDouble(ringAngularRotation);
-		buf.writeDouble(ringStartingRotation);
-		buf.writeLong(tickStart);
-		buf.writeBoolean(isSpinning);
-		buf.writeBoolean(stopRequested);
-		buf.writeLong(tickStopRequested);
+		spinState.toBytes(buf);
 		
 		buf.writeBoolean(doEventHorizonRender);
 		buf.writeInt(vortexState.index);
@@ -141,13 +99,13 @@ public class StargateRendererState extends RendererState {
 	public void fromBytes(ByteBuf buf) {		
 		activeChevrons = buf.readInt();
 		isFinalActive = buf.readBoolean();
-		
+				
 		ringAngularRotation = buf.readDouble();
-		ringStartingRotation = buf.readDouble();
-		tickStart = buf.readLong();
-		isSpinning = buf.readBoolean();
-		stopRequested = buf.readBoolean();
-		tickStopRequested = buf.readLong();
+		
+		if (spinState == null)
+			spinState = new SpinState();
+		
+		spinState.fromBytes(buf);
 		
 		doEventHorizonRender = buf.readBoolean();
 		vortexState = EnumVortexState.valueOf( buf.readInt() );

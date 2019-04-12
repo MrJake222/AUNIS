@@ -4,8 +4,10 @@ import mrjake.aunis.Aunis;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraftforge.client.model.ModelLoader;
 
 public class BlockBase extends Block implements IBlockBase {
 	public BlockBase(Material material, SoundType sound, String name) {
@@ -25,6 +27,8 @@ public class BlockBase extends Block implements IBlockBase {
 	
 	@Override
 	public void registerItemRenderer() {
-		Aunis.proxy.registerItemRenderer(Item.getItemFromBlock(this), 0, getRegistryName());
+//		Aunis.proxy.registerItemRenderer(Item.getItemFromBlock(this), 0, getRegistryName());
+		
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
 	}
 }

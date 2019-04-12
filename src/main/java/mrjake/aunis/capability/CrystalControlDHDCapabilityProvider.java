@@ -11,8 +11,8 @@ public class CrystalControlDHDCapabilityProvider implements ICapabilitySerializa
 
 	private EnergyStorageSerializable energyStorage;
 	
-	public CrystalControlDHDCapabilityProvider() {
-		energyStorage = new EnergyStorageSerializable(AunisConfig.dhdCrystalEnergyStorage, AunisConfig.dhdCrystalMaxEnergyTransfer);
+	public CrystalControlDHDCapabilityProvider() {		
+		energyStorage = new EnergyStorageSerializable(AunisConfig.dhdCrystalEnergyStorage, AunisConfig.dhdCrystalMaxEnergyTransfer * 10);
 	}
 
 	@Override
@@ -28,7 +28,9 @@ public class CrystalControlDHDCapabilityProvider implements ICapabilitySerializa
 	
 	@Override
 	public NBTTagCompound serializeNBT() {
-		return energyStorage.serializeNBT();
+		NBTTagCompound compound = energyStorage.serializeNBT();
+				
+		return compound;
 	}
 
 	@Override

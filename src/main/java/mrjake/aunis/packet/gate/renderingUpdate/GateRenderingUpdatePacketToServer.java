@@ -29,8 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.EnergyStorage;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -63,6 +62,32 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 		objectID = buf.readInt();
 	}
 
+	/**
+	 * Closes gate server side
+	 * Handles animation packets both sides(initiating and receiving)
+	 * Calls closeGate()
+	 * 
+	 * @param sourceTile - Source StargateBaseTile instance
+	 */
+	public static void closeGatePacket(StargateBaseTile sourceTile, boolean targetOnly) {
+		StargatePos targetGate = StargateNetwork.get(sourceTile.getWorld()).getStargate( sourceTile.dialedAddress );
+		World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
+		BlockPos targetPos = targetGate.getPos();
+		StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
+		
+		if (!targetOnly) {
+			BlockPos sourcePos = sourceTile.getPos();
+			TargetPoint point = new TargetPoint(sourceTile.getWorld().provider.getDimension(), sourcePos.getX(), sourcePos.getY(), sourcePos.getZ(), 512);
+			
+			AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, sourceTile), point );
+			sourceTile.closeGate(false);
+		}
+
+		TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 512);
+		AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, targetPos), targetPoint );
+		targetTile.closeGate(false);
+	}
+	
 	
 	public static class GateRenderingUpdatePacketToServerHandler implements IMessageHandler<GateRenderingUpdatePacketToServer, IMessage> {		
 		@Override
@@ -118,42 +143,26 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 						}
 						
 						else {
-							EnergyStorage energyStorage = (EnergyStorage) powerCrystal.getCapability(CapabilityEnergy.ENERGY, null);
-							EnergyStorage stargateEnergyStorage = (EnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
+//							EnergyStorage energyStorage = (EnergyStorage) powerCrystal.getCapability(CapabilityEnergy.ENERGY, null);
+//							EnergyStorage stargateEnergyStorage = (EnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
+//							
+////							Aunis.info("Crystal: " + energyStorage.getEnergyStored() + "uI / " + energyStorage.getMaxEnergyStored() + "uI");
+//							
+//							int energy = Math.max(energyStorage.getEnergyStored(), stargateEnergyStorage.getEnergyStored());
 							
-//							Aunis.info("Crystal: " + energyStorage.getEnergyStored() + "uI / " + energyStorage.getMaxEnergyStored() + "uI");
+							IEnergyStorage energyStorage = gateTile.getEnergyStorage(10000);
 							
-							int energy = Math.max(energyStorage.getEnergyStored(), stargateEnergyStorage.getEnergyStored());
-							
-							if (energy < 10000) {
+							if (energyStorage == null) {
 								player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.no_enough_power")), true);
 								
 								return;
 							}
-							
-							/*
-							 * From now, energy management is passed to the gate itself
-							 */
 						}
 						
 						if ( symbol == EnumSymbol.BRB ) {						
 							if ( gateTile.isEngaged() ) {
-								if ( gateTile.isInitiating() ) {
-//									Aunis.info("isClosing: " + gateTile.isClosing());
-									
-									StargatePos targetGate = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
-									World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
-									BlockPos targetPos = targetGate.getPos();
-									StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
-									
-									// clear connection and address, start animation 
-									TargetPoint targetPoint = new TargetPoint(targetGate.getDimension(), targetPos.getX(), targetPos.getY(), targetPos.getZ(), 512);
-									
-									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, gateTile), point );
-									AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.CLOSE_GATE, targetPos), targetPoint );
-									
-									targetTile.closeGate(false);
-									gateTile.closeGate(false);
+								if ( gateTile.isInitiating() ) {									
+									closeGatePacket(gateTile, false);
 								}
 								
 								else {
@@ -191,14 +200,31 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 									BlockPos targetPos = targetGate.getPos();
 									World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 									
-									boolean nether = targetWorld.provider.getDimensionType() == DimensionType.NETHER;
-									int x = targetPos.getX() * (nether ? 8 : 1);
-									int y = targetPos.getY() * (nether ? 8 : 1);
-									int z = targetPos.getZ() * (nether ? 8 : 1);
+//									BlockPos sourceTranslated
 									
-									int distance = (int) gateTile.getPos().getDistance(x, y, z);
+									int distance = (int) pos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ());
+									int multiplier = 1;
+									
+									// It the dimensions are the same, no multiplier
+									if (targetWorld.provider.getDimensionType() != world.provider.getDimensionType()) { 
+										if (targetWorld.provider.getDimensionType() == DimensionType.NETHER || world.provider.getDimensionType() == DimensionType.NETHER) {
+											distance /= 8;
+										}
+										
+										multiplier = 2;
+									}
+//									boolean nether = targetWorld.provider.getDimensionType() == DimensionType.NETHER;
+//									int x = targetPos.getX() * (nether ? 8 : 1);
+//									int y = targetPos.getY() * (nether ? 8 : 1);
+//									int z = targetPos.getZ() * (nether ? 8 : 1);
+//									}
+									
+//									Aunis.info("source: " + gateTile.getPos().toString());
+//									Aunis.info("target: " + targetPos.toString());
+//									
+//									int distance = (int) gateTile.getPos().getDistance(x, y, z);
 
-									if (gateTile.hasEnergyToDial(distance, targetWorld)) {
+									if (gateTile.hasEnergyToDial(distance, multiplier)) {
 										StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 										
 										AunisPacketHandler.INSTANCE.sendToAllAround( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, message.objectID, dhdTile), point );

@@ -3,7 +3,6 @@ package mrjake.aunis.event;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.DHDBlock;
-import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.block.StargateMemberBlock;
 import mrjake.aunis.dhd.DHDActivation;
 import net.minecraft.block.Block;
@@ -35,8 +34,9 @@ public class AunisEventHandler {
 			
 			boolean cancelled = false;
 			
-			cancelled |= block instanceof DHDBlock;
-			cancelled |= (block instanceof StargateMemberBlock || block instanceof StargateBaseBlock) && !blockState.getValue(BlockTESRMember.RENDER);
+			cancelled |= block == AunisBlocks.dhdBlock;
+			cancelled |= (block instanceof StargateMemberBlock || block == AunisBlocks.stargateBaseBlock) && !blockState.getValue(BlockTESRMember.RENDER);
+//			cancelled |= block instanceof CrystalInfuserBlock;
 			
 			event.setCanceled(cancelled);
 		}
@@ -75,5 +75,5 @@ public class AunisEventHandler {
 				}
 			}
 		}
-    }
+    }	
 }

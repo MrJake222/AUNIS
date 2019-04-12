@@ -90,7 +90,7 @@ public class MergeHelper {
 	}
 	
 	public static boolean checkBlocks(StargateBaseTile gateTile) {
-		/*World world = gateTile.getWorld();
+		World world = gateTile.getWorld();
 		BlockPos pos = gateTile.getPos();
 		
 		EnumFacing facing = world.getBlockState(pos).getValue(BlockFaced.FACING);
@@ -107,7 +107,7 @@ public class MergeHelper {
 					return false;
 				}
 			}
-		}*/
+		}
 		
 		return true;
 	}

@@ -32,7 +32,7 @@ public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendere
 		
 		this.horizontalRotation = horizontalRotation;
 		
-		this.itemRenderer = new ItemRenderer(getUpgradeItem(), world);
+		this.itemRenderer = new ItemRenderer(getUpgradeItem());
 	}
 	
 	/**

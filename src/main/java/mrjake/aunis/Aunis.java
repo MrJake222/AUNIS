@@ -4,8 +4,6 @@ import org.apache.logging.log4j.Logger;
 
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
-import mrjake.aunis.renderer.RendererInit;
-import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -33,33 +31,24 @@ public class Aunis {
     @SidedProxy(clientSide = Aunis.CLIENT, serverSide = Aunis.SERVER)
     public static IProxy proxy;
     public static Logger logger;
-    
-	private static RendererInit rendererInit;
-	
-	public static RendererInit getRendererInit() {
-		if (rendererInit == null)
-			rendererInit = new RendererInit();
-		
-		return rendererInit;
-	}
 	
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         
-        proxy.registerRenderers();
         AunisPacketHandler.registerPackets();
-		ForgeChunkManager.setForcedChunkLoadingCallback(Aunis.instance, null);
+        
+        proxy.preInit(event);
     }
  
     @EventHandler
     public void init(FMLInitializationEvent event) {
-
+    	proxy.init(event);
     }
  
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-
+    	proxy.postInit(event);
     }
 
     

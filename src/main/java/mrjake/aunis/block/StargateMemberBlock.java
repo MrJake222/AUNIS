@@ -1,11 +1,14 @@
 package mrjake.aunis.block;
 
+import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.merge.MergeHelper;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class StargateMemberBlock extends BlockTESRMember {	
@@ -49,11 +52,21 @@ public class StargateMemberBlock extends BlockTESRMember {
 	
 	@Override
 	public boolean isFullCube(IBlockState state) {
-		return state.getValue(BlockTESRMember.RENDER);
+		return false;
 	}
 	
 	@Override
 	public boolean isFullBlock(IBlockState state) {
-		return state.getValue(BlockTESRMember.RENDER);
+		return false;
+	}
+	
+	@Override
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+		return BoundingHelper.getStargateBlockBoundingBox(state);
+	}
+	
+	@Override
+	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+		return BoundingHelper.getStargateBlockBoundingBox(state);
 	}
 }

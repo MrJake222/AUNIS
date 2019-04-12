@@ -67,7 +67,8 @@ public class ModelLoader {
 		ChevronMoving("ChevronMoving", "stargate/chevron/chevronMoving.obj", "stargate/chevron/chevron0.png"),
 		ChevronBack("ChevronBack", "stargate/chevron/chevronBack.obj", "stargate/gatering7.png"),
 		
-		CrystalInfuser("CrystalInfuser", "crystalinfuser/projector.obj", "stargate/darkmetal2048.png");
+		CrystalInfuserPylon("CrystalInfuserPylon", "crystalinfuser/CrystalInfuserPylon.obj", "stargate/gatering7.png"),
+		CrystalInfuserBase("CrystalInfuserBase", "crystalinfuser/CrystalInfuserBase.obj", "stargate/gatering7.png");
 		
 		private String name;
 		private String modelPath;
@@ -148,7 +149,7 @@ public class ModelLoader {
 		}
 	}
 	
-	private static void loadModel(EnumModel model) {
+	public static void loadModel(EnumModel model) {
 		String name = model.getName();
 		
 		threads.put(name, new ModelLoaderThread( model.getPath() ));

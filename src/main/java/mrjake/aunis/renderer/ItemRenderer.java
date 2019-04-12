@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 
 /**
@@ -20,16 +19,19 @@ public class ItemRenderer {
 	/**
 	 * Create needed parameters
 	 * 
-	 * @param item - Item instance to be rendered
-	 * @param world - world object
+	 * @param stack - ItemStack instance to be rendered
 	 */
-	public ItemRenderer(Item item, World world) {
-		stack = new ItemStack(item);
+	public ItemRenderer(ItemStack stack) {		
+		this.stack = stack;
 		
 		model = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, null, null);
 		model = ForgeHooksClient.handleCameraTransforms(model, ItemCameraTransforms.TransformType.GROUND, false);
 	}
 	
+	public ItemRenderer(Item item) {
+		this(new ItemStack(item));
+	}
+
 	/**
 	 * Render item
 	 */

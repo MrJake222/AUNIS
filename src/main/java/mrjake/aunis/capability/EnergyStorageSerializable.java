@@ -52,5 +52,11 @@ public class EnergyStorageSerializable extends EnergyStorage implements INBTSeri
 		return tx;
 	}
 	
+	public void setEnergyStored(int energyStored) {
+		this.energy = energyStored;
+		
+		onEnergyChanged();
+	}
+	
 	protected void onEnergyChanged() {}
 }

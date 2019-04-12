@@ -2,7 +2,6 @@ package mrjake.aunis.item;
 
 import java.util.List;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.capability.CrystalControlDHDCapabilityProvider;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import net.minecraft.client.util.ITooltipFlag;
@@ -33,10 +32,8 @@ public class CrystalControlDHDItem extends ItemBase {
 		
 		if (!world.isRemote) {
 			IEnergyStorage energyStorage = itemStack.getCapability(CapabilityEnergy.ENERGY, null);
-			
-			Aunis.info("Stored energy : " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored());
-			
-			energyStorage.receiveEnergy(140000, false);
+						
+			energyStorage.receiveEnergy(1400000, false);
 		}
 		
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemStack);
@@ -65,18 +62,8 @@ public class CrystalControlDHDItem extends ItemBase {
 	
 	@Override
 	public double getDurabilityForDisplay(ItemStack stack) {
-		IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
+		EnergyStorageSerializable energyStorage = (EnergyStorageSerializable) stack.getCapability(CapabilityEnergy.ENERGY, null);
 		
 		return 1 - (double)energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored();
-	}
-	
-	@Override
-	public boolean getShareTag() {
-		return true;
-	}
-	
-	@Override
-	public NBTTagCompound getNBTShareTag(ItemStack stack) {
-		return ((EnergyStorageSerializable) stack.getCapability(CapabilityEnergy.ENERGY, null)).serializeNBT();
 	}
 }

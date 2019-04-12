@@ -2,8 +2,8 @@ package mrjake.aunis.block;
 
 import javax.annotation.Nullable;
 
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
@@ -41,29 +41,14 @@ public class DHDBlock extends BlockRotated {
 		
 		// Server side
 		if ( !world.isRemote ) {
+			DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
 			
-			// Find Stargate and create link
-			
-			BlockPos range = AunisConfig.dhdRange;
-			DHDTile dhd = (DHDTile) world.getTileEntity(pos);
-			
-			for ( BlockPos sg : BlockPos.getAllInBox(pos.subtract(range), pos.add(range)) ) {
-				IBlockState gateState = world.getBlockState(sg);
-				
-				if ( gateState.getBlock() instanceof StargateBaseBlock) {		
-					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(sg);					
-					if ( !gateTile.isLinked() && !gateState.getValue(BlockTESRMember.RENDER) ) {
-						dhd.setLinkedGate(sg);
-						gateTile.setLinkedDHD(pos);
-						break;
-					}
-				}
-			}
+			DHDLinkHelper.findAndLinkGate(dhdTile);
 		}
 	}
 	
 	/*
-	 * Late-future TODO:
+	 * Maybe not-so-late-future TODO:
 	 * Rewrite upgrade system using GUIs not some stupid lazy-ass sides ;)
 	 */
 	@Override
@@ -142,6 +127,12 @@ public class DHDBlock extends BlockRotated {
 				if (dhdTile.hasUpgrade() || dhdTile.getUpgradeRendererState().doInsertAnimation) {
 					InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphDhd));
 				}
+			}
+			
+			ItemStack crystalItemStack = dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).extractItem(0, 1, false);
+			
+			if (!crystalItemStack.isEmpty()) {				
+				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), crystalItemStack);
 			}
 		}
 		

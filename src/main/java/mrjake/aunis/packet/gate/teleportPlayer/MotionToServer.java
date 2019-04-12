@@ -76,10 +76,10 @@ public class MotionToServer extends PositionedPacket {
 						gateTile.teleportEntity(message.entityId);
 					}
 					
-					/*else {
-						((EntityPlayerMP)world.getEntityByID(message.entityId)).onKillCommand();
+					else {
+//						((EntityPlayerMP)world.getEntityByID(message.entityId)).onKillCommand();
 						gateTile.removeEntityFromTeleportList(message.entityId);
-					}*/
+					}
 					
 				});
 			}

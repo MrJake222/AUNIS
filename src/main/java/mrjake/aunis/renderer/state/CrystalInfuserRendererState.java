@@ -5,8 +5,16 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class CrystalInfuserRendererState extends RendererState {
 	
+	public int energyStored;
+	public boolean renderWaves;
+
 	public CrystalInfuserRendererState() {
-		
+		this(-1, false);
+	}
+	
+	public CrystalInfuserRendererState(int energyStored, boolean renderWaves) {
+		this.energyStored = energyStored;
+		this.renderWaves = renderWaves;
 	}
 	
 	public CrystalInfuserRendererState(ByteBuf buf) {
@@ -19,19 +27,18 @@ public class CrystalInfuserRendererState extends RendererState {
 
 	@Override
 	public void toBytes(ByteBuf buf) {
-		// TODO Auto-generated method stub
-		
+		buf.writeInt(energyStored);
+		buf.writeBoolean(renderWaves);
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		// TODO Auto-generated method stub
-		
+		this.energyStored = buf.readInt();
+		this.renderWaves = buf.readBoolean();
 	}
 
 	@Override
 	protected String getKeyName() {
 		return "rendererState";
 	}
-
 }

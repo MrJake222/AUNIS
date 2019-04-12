@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
 
 import io.netty.buffer.ByteBuf;
@@ -25,13 +26,14 @@ import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.renderer.ISpecialRenderer;
-import mrjake.aunis.renderer.StargateRenderer;
-import mrjake.aunis.renderer.StargateRenderer.EnumVortexState;
-import mrjake.aunis.renderer.StargateRingSpinHelper;
+import mrjake.aunis.renderer.stargate.StargateRenderer;
+import mrjake.aunis.renderer.stargate.StargateRingSpinHelper;
+import mrjake.aunis.renderer.stargate.StargateRenderer.EnumVortexState;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
@@ -44,6 +46,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -56,7 +59,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
 
 public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider {		
@@ -86,7 +92,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	
 	private StargateRingSpinHelper getServerRingSpinHelper() {
 		if (serverRingSpinHelper == null)
-			serverRingSpinHelper = new StargateRingSpinHelper(world, pos, null, getStargateRendererState());
+			serverRingSpinHelper = new StargateRingSpinHelper(world, pos, null, getStargateRendererState().spinState);
 		
 		return serverRingSpinHelper;
 	}
@@ -113,7 +119,6 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		// First glyph is pressed
 		// Ring starts to spin
 		if (dialedAddress.size() == 0) {
-			getServerRingSpinHelper().setSpeedUpTimeTick(25);
 			getServerRingSpinHelper().requestStart(getStargateRendererState().ringAngularRotation);
 		}
 		
@@ -189,8 +194,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		}
 		
 		if (isInitiating) {
-			Aunis.info("Opening gate, drawing " + openCost);
-			energyStorage.extractEnergy(openCost, false);
+//			Aunis.info("Opening gate, drawing " + openCost);
+			getEnergyStorage(openCost).extractEnergy(openCost, false);
 		}
 		
 		markDirty();
@@ -214,16 +219,45 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	
 	public void updateEnergyStatus() {
 		long ticks = world.getTotalWorldTime() - gateOpenTime;
-		
 		int energy = (int) (ticks * keepAliveCostPerTick);
 					
-		Aunis.info("Consumed: " + energyConsumed + ", should be: " + energy);
+//		Aunis.info("Consumed: " + energyConsumed + ", should be: " + energy);
 		
 		energy -= energyConsumed;
 
-		Aunis.info("Consuming " + energy);
+//		Aunis.info("Consuming " + energy);
 		
 		energyStorage.extractEnergy(energy, false);
+	}
+	
+	/**
+	 * Unifies energy consumption methods
+	 * The order is as follows:
+	 *   - Gate internal buffer
+	 *   - DHD Crystal
+	 *   
+	 * @param minEnergy - minimal energy 
+	 * @return First IEnergyStorage that has enough energy, CAN BE NULL if no source can provide such energy
+	 */
+	@Nullable
+	public IEnergyStorage getEnergyStorage(int minEnergy) {
+		if (energyStorage.getEnergyStored() >= minEnergy)
+			return energyStorage;
+		
+		DHDTile dhdTile = getLinkedDHD(world);
+		if (dhdTile != null) {
+			ItemStackHandler dhdItemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+			ItemStack crystalItemStack = dhdItemStackHandler.getStackInSlot(0);
+					
+			if (!crystalItemStack.isEmpty()) {
+				IEnergyStorage crystalEnergyStorage = crystalItemStack.getCapability(CapabilityEnergy.ENERGY, null);
+			
+				if (crystalEnergyStorage.getEnergyStored() >= minEnergy)
+					return crystalEnergyStorage;
+			}
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -316,6 +350,17 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 * @param isMerged - True if gate's multiblock structure is valid
 	 */
 	public void updateMergeState(boolean isMerged) {
+		if (!isMerged) {
+			if (isLinked()) {
+				getLinkedDHD(world).setLinkedGate(null);			
+				linkedDHD = null;
+			}
+		}
+		
+		else {
+			DHDLinkHelper.findAndLinkDHD(this);
+		}
+		
 		IBlockState state = world.getBlockState(pos);
 		
 		world.setBlockState( pos, state.withProperty(BlockTESRMember.RENDER, !isMerged) );
@@ -337,7 +382,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	@Override
 	public RendererState getRendererState() {
 		if (rendererState == null)
-			rendererState = new StargateRendererState(pos);
+			rendererState = new StargateRendererState();
 				
 		return rendererState;
 	}
@@ -371,6 +416,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 //		return linkedDHD;
 //	}
 	
+	@Nullable
 	public DHDTile getLinkedDHD(World world) {
 		if (linkedDHD == null)
 			return null;
@@ -389,15 +435,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	}
 	
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-		BlockPos dhd;
-		
-		if (linkedDHD == null)
-			dhd = new BlockPos(0,0,0);
-		else
-			dhd = linkedDHD;
-		
-		compound.setLong("linkedDHD", dhd.toLong());
+	public NBTTagCompound writeToNBT(NBTTagCompound compound) {		
+		if (isLinked())
+			compound.setLong("linkedDHD", linkedDHD.toLong());
 				
 		if (gateAddress != null) {
 			for (int i=0; i<7; i++) {
@@ -441,7 +481,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
-		this.linkedDHD = BlockPos.fromLong( compound.getLong("linkedDHD") );
+		if (compound.hasKey("linkedDHD"))
+			this.linkedDHD = BlockPos.fromLong( compound.getLong("linkedDHD") );
 		
 		boolean compoundHasAddress = compound.hasKey("symbol0");
 		
@@ -620,7 +661,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		// Scan for entities passing through event horizon
 		if (!world.isRemote && horizonBoundingBox != null && isEngaged && isInitiating) {
 			List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, horizonBoundingBox);
-			StargateNetwork.get(world).getStargate(dialedAddress);
+//			StargateNetwork.get(world).getStargate(dialedAddress);
 			for (Entity entity : entities) {
 				int entId = entity.getEntityId();
 				
@@ -689,7 +730,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 					}
 					
 					if (gateCloseTimeout == 0) {
-						AunisPacketHandler.INSTANCE.sendToServer(new GateRenderingUpdatePacketToServer(EnumSymbol.BRB.id, sourcePos.getPos()));
+						GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 					}
 				}
 			}			
@@ -704,14 +745,48 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		 */
 		if (isEngaged) {
 			if (isInitiating) {
-				/*
-				 * If not enough energy(minimum DHD operable + some buffer), close
-				 */
-				if (energyStorage.getEnergyStored() < 20000)
-					AunisPacketHandler.INSTANCE.sendToServer(new GateRenderingUpdatePacketToServer(EnumSymbol.BRB.id, pos));
+
+				// If we have enough energy(minimal DHD operable)
+				if (getEnergyStorage(20000) != null) {
+					IEnergyStorage energyStorage = getEnergyStorage(keepAliveCostPerTick);
+					
+					if (energyStorage != null) {
+						int sec = keepAliveCostPerTick*20;
+
+						/*
+						 * If energy can sustain connection for less than 10 seconds
+						 * Start flickering
+						 */
+						if (energyStorage.getEnergyStored() < sec*10 && !getStargateRendererState().horizonUnstable || energyStorage.getEnergyStored() > sec*10 && getStargateRendererState().horizonUnstable) {
+							// Toggle horizon status
+							getStargateRendererState().horizonUnstable ^= true;
+							
+							EnumGateAction action = getStargateRendererState().horizonUnstable ? EnumGateAction.UNSTABLE_HORIZON : EnumGateAction.STABLE_HORIZON;
+							
+							TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
+							AunisPacketHandler.INSTANCE.sendToAllAround(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, pos), point);
+							
+//							if (isEngaged) {
+								StargatePos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
+								BlockPos tPos = targetPos.getPos();
+
+								TargetPoint targetPoint = new TargetPoint(targetPos.getDimension(), tPos.getX(), tPos.getY(), tPos.getZ(), 512);
+								AunisPacketHandler.INSTANCE.sendToAllAround(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, tPos), targetPoint);
+//							}
+						}
+						
+						energyConsumed += energyStorage.extractEnergy(keepAliveCostPerTick, false);
+						
+						Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
+					}
+					
+					else
+						GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+				}
 				
-				else 
-					energyConsumed += energyStorage.extractEnergy(keepAliveCostPerTick, false);		
+				else {
+					GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+				}
 			}
 			
 			else {
@@ -749,7 +824,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		// Set ring rotation
 		// This will be synced to clients
-		if (!world.isRemote && getStargateRendererState().isSpinning) {
+		if (!world.isRemote && getStargateRendererState().spinState.isSpinning) {
 			getStargateRendererState().ringAngularRotation = getServerRingSpinHelper().spin(0) % 360;
 			
 			markDirty();
@@ -798,43 +873,26 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	
 	private EnergyStorageSerializable energyStorage = new EnergyStorageSerializable(AunisConfig.stargateEnergyStorage, AunisConfig.stargateMaxEnergyTransfer, AunisConfig.stargateEnergyStorage) {
 		protected void onEnergyChanged() {
-			Aunis.info("Stargate energy: " + this.getEnergyStored() + " / " + this.getMaxEnergyStored() + "\t\tAlive for: " + (float)(getEnergyStored())/keepAliveCostPerTick/20);
+//			IEnergyStorage energyStorage = getEnergyStorage(1);
 			
-			int sec = keepAliveCostPerTick*20;
-
-			/*
-			 * If energy can sustain connection for less than 10 seconds
-			 * Start flickering
-			 */
-			if (getEnergyStored() < sec*10 && !getStargateRendererState().horizonUnstable || getEnergyStored() > sec*10 && getStargateRendererState().horizonUnstable) {
-				// Toggle horizon status
-				getStargateRendererState().horizonUnstable ^= true;
-				
-				EnumGateAction action = getStargateRendererState().horizonUnstable ? EnumGateAction.UNSTABLE_HORIZON : EnumGateAction.STABLE_HORIZON;
-				
-				TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-				AunisPacketHandler.INSTANCE.sendToAllAround(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, pos), point);
-				
-				if (isEngaged) {
-					StargatePos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
-					BlockPos tPos = targetPos.getPos();
-
-					TargetPoint targetPoint = new TargetPoint(targetPos.getDimension(), tPos.getX(), tPos.getY(), tPos.getZ(), 512);
-					AunisPacketHandler.INSTANCE.sendToAllAround(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, tPos), targetPoint);
-				}
-			}
+//			Aunis.info("Stargate energy: " + this.getEnergyStored() + " / " + this.getMaxEnergyStored() + "\t\tAlive for: " + (float)(getEnergyStored())/keepAliveCostPerTick/20);
+			
+			
 			
 			markDirty();
 		};
 	};
 	
 
-	/*
+	/**
 	 * Checks is gate has sufficient power to dial across specified distance and dimension
 	 * It also sets energy draw for (possibly) outgoing wormhole
+	 * 
+	 * @param distance - distance in blocks to target gate
+	 * @param targetWorld - target world, used for multiplier
 	 */
-	public boolean hasEnergyToDial(int distance, World targetWorld) {		
-		double mul;
+	public boolean hasEnergyToDial(int distance, int mul) {		
+		/* double mul;
 		
 		switch (targetWorld.provider.getDimensionType()) {
 			case NETHER: mul = AunisConfig.netherMultiplier; break;
@@ -842,15 +900,14 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 			// No multiplier
 			default: mul = 1; break;
-		}
+		}*/
 		
 		int energy = (int) (distance * AunisConfig.openingBlockToEnergyRatio * mul);
 		int keepAlive = (int) Math.ceil(distance * AunisConfig.keepAliveBlockToEnergyRatioPerTick * mul);
-
 		
-		Aunis.info("Energy required to dial [distance="+distance+", dim="+targetWorld.provider.getDimension()+"] = " + energy + " / keepAlive: "+(keepAlive*20)+"/s, stored: " + energyStorage.getEnergyStored());
-		
-		if (energyStorage.getEnergyStored() >= energy) {
+		Aunis.info("Energy required to dial [distance="+distance+", mul="+mul+"] = " + energy + " / keepAlive: "+(keepAlive*20)+"/s, stored: " + (getEnergyStorage(1) != null ? getEnergyStorage(1).getEnergyStored() : 0));
+				
+		if (getEnergyStorage(energy) != null) {
 			this.openCost = energy;
 			this.keepAliveCostPerTick = keepAlive;
 		

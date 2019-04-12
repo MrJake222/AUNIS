@@ -1,17 +1,33 @@
 package mrjake.aunis.packet;
 
 import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
+import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient.OpenStargateAddressGuiClientHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
+import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient;
+import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient.DHDIncomingWormholePacketToClientHandler;
 import mrjake.aunis.packet.gate.addressUpdate.GateAddressPacketToClient;
+import mrjake.aunis.packet.gate.addressUpdate.GateAddressPacketToClient.GateAddressPacketToClientHandler;
 import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
+import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer.GateAddressRequestToServerHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient.GateRenderingUpdatePacketToClientHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer.GateRenderingUpdatePacketToServerHandler;
 import mrjake.aunis.packet.gate.teleportPlayer.MotionToServer;
+import mrjake.aunis.packet.gate.teleportPlayer.MotionToServer.MotionServerHandler;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
+import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient.RetrieveMotionClientHandler;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
+import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient.TileUpdateClientHandler;
 import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
+import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer.TileUpdateServerHandler;
+import mrjake.aunis.packet.infuser.EnergyStoredToClient;
+import mrjake.aunis.packet.infuser.EnergyStoredToClient.EnergyStorageToClientHandler;
+import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient;
+import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient.ShouldRenderWavesToClientHandler;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient;
+import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient.UpgradeSlotInteractHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -22,31 +38,35 @@ public class AunisPacketHandler {
 	public static void registerPackets() {
 		int id = 0;
 		
-		INSTANCE.registerMessage(GateRenderingUpdatePacketToServer.GateRenderingUpdatePacketToServerHandler.class, GateRenderingUpdatePacketToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(GateRenderingUpdatePacketToClient.GateRenderingUpdatePacketToClientHandler.class, GateRenderingUpdatePacketToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(GateRenderingUpdatePacketToServerHandler.class, GateRenderingUpdatePacketToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(GateRenderingUpdatePacketToClientHandler.class, GateRenderingUpdatePacketToClient.class, id, Side.CLIENT); id++;
 		
 		/*INSTANCE.registerMessage(OnLoadUpdateRequest.onLoadUpdateRequestToClientHandler.class, OnLoadUpdateRequest.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(OnLoadUpdateRequest.onLoadUpdateRequestToClientHandler.class, OnLoadUpdateRequest.class, id, Side.SERVER); id++;*/
 		
-		INSTANCE.registerMessage(GateAddressRequestToServer.GateAddressRequestToServerHandler.class, GateAddressRequestToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(GateAddressPacketToClient.GateAddressPacketToClientHandler.class, GateAddressPacketToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(GateAddressRequestToServerHandler.class, GateAddressRequestToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(GateAddressPacketToClientHandler.class, GateAddressPacketToClient.class, id, Side.CLIENT); id++;
 		
-		INSTANCE.registerMessage(DHDIncomingWormholePacketToClient.DHDIncomingWormholePacketToClientHandler.class, DHDIncomingWormholePacketToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(DHDIncomingWormholePacketToClientHandler.class, DHDIncomingWormholePacketToClient.class, id, Side.CLIENT); id++;
 		
-		INSTANCE.registerMessage(RetrieveMotionToClient.RetrieveMotionClientHandler.class, RetrieveMotionToClient.class, id, Side.CLIENT); id++;
-		INSTANCE.registerMessage(MotionToServer.MotionServerHandler.class, MotionToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, RetrieveMotionToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(MotionServerHandler.class, MotionToServer.class, id, Side.SERVER); id++;
 		
 //		INSTANCE.registerMessage(StateUpdateToServer.StateUpdateServerHandler.class, StateUpdateToServer.class, id, Side.SERVER); id++;
 		
-		INSTANCE.registerMessage(TileUpdateRequestToServer.TileUpdateServerHandler.class, TileUpdateRequestToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(TileUpdatePacketToClient.TileUpdateClientHandler.class, TileUpdatePacketToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(TileUpdateServerHandler.class, TileUpdateRequestToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(TileUpdateClientHandler.class, TileUpdatePacketToClient.class, id, Side.CLIENT); id++;
 		
 //		INSTANCE.registerMessage(ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.CLIENT); id++;
 		
-		INSTANCE.registerMessage(UpgradeSlotInteractToClient.UpgradeSlotInteractHandler.class, UpgradeSlotInteractToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(UpgradeSlotInteractHandler.class, UpgradeSlotInteractToClient.class, id, Side.CLIENT); id++;
 //		INSTANCE.registerMessage(UpgradeTileUpdateToServer.UpgradeTileUpdateHandler.class, UpgradeTileUpdateToServer.class, id, Side.SERVER); id++;
 		
-		INSTANCE.registerMessage(OpenStargateAddressGuiToClient.OpenStargateAddressGuiClientHandler.class, OpenStargateAddressGuiToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(OpenStargateAddressGuiClientHandler.class, OpenStargateAddressGuiToClient.class, id, Side.CLIENT); id++;
+		
+		INSTANCE.registerMessage(EnergyStorageToClientHandler.class, EnergyStoredToClient.class, id, Side.CLIENT); id++;
+		
+		INSTANCE.registerMessage(ShouldRenderWavesToClientHandler.class, ShouldRenderWavesToClient.class, id, Side.CLIENT); id++;
 	}
 }

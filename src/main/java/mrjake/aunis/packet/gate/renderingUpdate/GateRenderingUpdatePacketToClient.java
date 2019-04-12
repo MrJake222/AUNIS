@@ -5,7 +5,7 @@ import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.renderer.DHDRenderer;
-import mrjake.aunis.renderer.StargateRenderer;
+import mrjake.aunis.renderer.stargate.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;

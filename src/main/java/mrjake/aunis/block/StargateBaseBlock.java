@@ -4,14 +4,20 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
+import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.stargate.BoundingHelper;
+import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.merge.MergeHelper;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.upgrade.UpgradeHelper;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
@@ -21,7 +27,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
@@ -33,16 +41,41 @@ public class StargateBaseBlock extends BlockTESRMember {
 	}
 	
 	@Override
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+		super.onBlockPlacedBy(world, pos, state, placer, stack);
+				
+		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+		
+		MergeHelper.updateChevRingMergeState(gateTile, state, false);
+		
+		if (!world.isRemote) {
+			state = world.getBlockState(pos);
+			
+			if (!state.getValue(BlockTESRMember.RENDER)) {
+				DHDLinkHelper.findAndLinkDHD(gateTile);
+			}
+		}
+	}
+	
+	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {		
 		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
 		
-		StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
 		MergeHelper.updateChevRingMergeState(gateTile, state, false);
 				
 		if (!world.isRemote) {
-//			if (gateTile.hasUpgrade() || gateTile.getInsertAnimation()) {
-//				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphStargate));
-//			}
+			DHDTile linkedDhdTile = gateTile.getLinkedDHD(world);
+			if (linkedDhdTile != null)
+				linkedDhdTile.setLinkedGate(null);
+			
+			if (gateTile.isEngaged()) {
+				GateRenderingUpdatePacketToServer.closeGatePacket(gateTile, true);
+				AunisSoundHelper.playPositionedSound("wormhole", pos, false);
+				AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
+				AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
+			}
+			
+			StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
 			
 			// Supports upgrades
 			if (gateTile instanceof ITileEntityUpgradeable) {			
@@ -135,11 +168,21 @@ public class StargateBaseBlock extends BlockTESRMember {
 	
 	@Override
 	public boolean isFullCube(IBlockState state) {
-		return state.getValue(BlockTESRMember.RENDER);
+		return false;
 	}
 	
 	@Override
 	public boolean isFullBlock(IBlockState state) {
-		return state.getValue(BlockTESRMember.RENDER);
+		return false;
+	}
+	
+	@Override
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+		return BoundingHelper.getStargateBlockBoundingBox(state);
+	}
+	
+	@Override
+	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
+		return BoundingHelper.getStargateBlockBoundingBox(state);
 	}
 }

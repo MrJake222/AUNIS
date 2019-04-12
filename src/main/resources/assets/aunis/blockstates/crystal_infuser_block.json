@@ -1,11 +1,12 @@
 {
 	"forge_marker": 1,
 	"defaults": {
+		"model": "aunis:crystal_infuser_block"
 	},
 	"variants": {
 		"normal": [{}],
-		"inventory": [{}],
-		
+		"inventory": [{
+		}],
 		"facing": {
 			"south": { "y": 180 },
 			"west": { "y": 270 },
@@ -13,6 +14,11 @@
 			"east": { "y": 90 },
 			"up": {},
 			"down": {}
+		},
+		
+		"render": {
+			"true": {},
+			"false": {}
 		}
 	}
 }
