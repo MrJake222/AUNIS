@@ -1,10 +1,10 @@
 package mrjake.aunis.upgrade;
 
-import mrjake.aunis.item.ItemBase;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.ItemRenderer;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
@@ -61,7 +61,7 @@ public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendere
 	 * 
 	 * @return upgrade's ItemBase.
 	 */
-	protected abstract ItemBase getUpgradeItem();
+	protected abstract Item getUpgradeItem();
 	
 	/**
 	 * Applies given state to this Renderer 

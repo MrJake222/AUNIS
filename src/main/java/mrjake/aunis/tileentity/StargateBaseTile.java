@@ -12,8 +12,7 @@ import javax.vecmath.Vector2f;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
-import mrjake.aunis.block.BlockFaced;
-import mrjake.aunis.block.BlockTESRMember;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -363,7 +362,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		IBlockState state = world.getBlockState(pos);
 		
-		world.setBlockState( pos, state.withProperty(BlockTESRMember.RENDER, !isMerged) );
+		world.setBlockState( pos, state.withProperty(AunisProps.RENDER_BLOCK, !isMerged) );
 		MergeHelper.updateChevRingMergeState(this, state, isMerged);
 	}
 	
@@ -629,7 +628,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			scanArea = new AxisAlignedBB(this.pos.add(new Vec3i(-10, -2, -10)), this.pos.add(new Vec3i(10, 2, 10)));
 			
 			if (!world.isRemote) {
-				EnumFacing sourceGateFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
+				EnumFacing sourceGateFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 				
 				int x = pos.getX();
 				int y = pos.getY();
@@ -674,8 +673,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 						BlockPos targetPos = targetGate.getPos();
 						// StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 						
-						EnumFacing sourceFacing = world.getBlockState(pos).getValue(BlockFaced.FACING);
-						EnumFacing targetFacing = targetWorld.getBlockState(targetPos).getValue(BlockFaced.FACING);
+						EnumFacing sourceFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
+						EnumFacing targetFacing = targetWorld.getBlockState(targetPos).getValue(AunisProps.FACING_HORIZONTAL);
 						
 						float rotation = (float) Math.toRadians( EnumFacing.fromAngle(targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle()).getOpposite().getHorizontalAngle() );
 	
@@ -968,7 +967,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	@Override
 	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
 		if (oldState.getBlock() == newSate.getBlock())
-			return oldState.withProperty(BlockTESRMember.RENDER, false) != newSate.withProperty(BlockTESRMember.RENDER, false);
+			return oldState.withProperty(AunisProps.RENDER_BLOCK, false) != newSate.withProperty(AunisProps.RENDER_BLOCK, false);
 		
 		return true;
 	}

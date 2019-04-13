@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
-import mrjake.aunis.block.BlockRotated;
 import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.tileentity.DHDTile;
@@ -34,7 +34,7 @@ public class DHDRenderer implements ISpecialRenderer<DHDRendererState> {
 	public boolean brbToActivate = false;
 		
 	public DHDRenderer(DHDTile te) {
-		this.rotation = te.getWorld().getBlockState(te.getPos()).getValue(BlockRotated.ROTATE) * -22.5f;
+		this.rotation = te.getWorld().getBlockState(te.getPos()).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
 		//this.te = te;
 		this.world = te.getWorld();
 		this.pos = te.getPos();

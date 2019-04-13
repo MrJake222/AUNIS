@@ -2,10 +2,12 @@ package mrjake.aunis.item;
 
 import java.util.List;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.capability.CrystalControlDHDCapabilityProvider;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
@@ -16,10 +18,15 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public class CrystalControlDHDItem extends ItemBase {
+public class CrystalControlDHDItem extends Item {
 	
-	public CrystalControlDHDItem() {
-		super("crystal_control_dhd");
+	public static final String itemName = "crystal_control_dhd";
+	
+	public CrystalControlDHDItem() {		
+		setRegistryName(Aunis.ModID + ":" + itemName);
+		setUnlocalizedName(Aunis.ModID + "." + itemName);
+		
+		setCreativeTab(Aunis.aunisCreativeTab);
 		
 		setMaxStackSize(1);
 		setNoRepair();

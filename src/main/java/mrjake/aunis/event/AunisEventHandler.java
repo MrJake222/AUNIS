@@ -1,7 +1,7 @@
 package mrjake.aunis.event;
 
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.StargateMemberBlock;
 import mrjake.aunis.dhd.DHDActivation;
@@ -35,7 +35,7 @@ public class AunisEventHandler {
 			boolean cancelled = false;
 			
 			cancelled |= block == AunisBlocks.dhdBlock;
-			cancelled |= (block instanceof StargateMemberBlock || block == AunisBlocks.stargateBaseBlock) && !blockState.getValue(BlockTESRMember.RENDER);
+			cancelled |= (block instanceof StargateMemberBlock || block == AunisBlocks.stargateBaseBlock) && !blockState.getValue(AunisProps.RENDER_BLOCK);
 //			cancelled |= block instanceof CrystalInfuserBlock;
 			
 			event.setCanceled(cancelled);

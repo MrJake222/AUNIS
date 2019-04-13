@@ -1,7 +1,6 @@
 package mrjake.aunis.stargate;
 
-import mrjake.aunis.block.BlockFaced;
-import mrjake.aunis.block.BlockTESRMember;
+import mrjake.aunis.AunisProps;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 
@@ -17,8 +16,8 @@ public class BoundingHelper {
 	@SuppressWarnings("incomplete-switch")
 	public static AxisAlignedBB getStargateBlockBoundingBox(IBlockState state) {
 				
-		if (!state.getValue(BlockTESRMember.RENDER)) {
-			switch(state.getValue(BlockFaced.FACING).getAxis()) {
+		if (!state.getValue(AunisProps.RENDER_BLOCK)) {
+			switch(state.getValue(AunisProps.FACING_HORIZONTAL).getAxis()) {
 				case X:
 					return new AxisAlignedBB(0.2, 0, 0, 0.8, 1, 1);
 					

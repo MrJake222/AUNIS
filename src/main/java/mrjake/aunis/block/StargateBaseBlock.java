@@ -1,6 +1,7 @@
 package mrjake.aunis.block;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
@@ -14,8 +15,10 @@ import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.upgrade.UpgradeHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,24 +37,61 @@ import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 
-public class StargateBaseBlock extends BlockTESRMember {
+public class StargateBaseBlock extends Block {
 
-	public StargateBaseBlock() {
-		super(Material.IRON, SoundType.METAL, "stargatebase_block");
+	private static final String blockName = "stargatebase_block";
+	
+//	private static final PropertyDirection AunisProps.FACING_HORIZONTAL = PropertyDirection.create("facing");
+//	public static final PropertyBool AunisProps.RENDER_BLOCK = PropertyBool.create("render_block");
+	
+	public StargateBaseBlock() {		
+		super(Material.IRON);
+		
+		setRegistryName(Aunis.ModID + ":" + blockName);
+		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		
+		setSoundType(SoundType.METAL); 
+		setCreativeTab(Aunis.aunisCreativeTab);
+		
+		setDefaultState(blockState.getBaseState()
+				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.NORTH)
+				.withProperty(AunisProps.RENDER_BLOCK, true));
+	}
+	
+	// ------------------------------------------------------------------------
+	@Override
+	protected BlockStateContainer createBlockState() {
+		return new BlockStateContainer(this, AunisProps.FACING_HORIZONTAL, AunisProps.RENDER_BLOCK);
 	}
 	
 	@Override
+	public int getMetaFromState(IBlockState state) {		
+		return (state.getValue(AunisProps.RENDER_BLOCK) ? 0x04 : 0) |
+				state.getValue(AunisProps.FACING_HORIZONTAL).getHorizontalIndex();
+	}
+	
+	@Override
+	public IBlockState getStateFromMeta(int meta) {		
+		return getDefaultState()
+				.withProperty(AunisProps.RENDER_BLOCK, (meta & 0x04) != 0)
+				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.getHorizontal(meta & 0x03));
+	}
+	
+	// ------------------------------------------------------------------------
+	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-		super.onBlockPlacedBy(world, pos, state, placer, stack);
-				
-		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
-		
-		MergeHelper.updateChevRingMergeState(gateTile, state, false);
-		
 		if (!world.isRemote) {
+			world.setBlockState(pos, state
+					.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite())
+					.withProperty(AunisProps.RENDER_BLOCK, true), 2); // 2 - send update to clients
+		
+			StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+			MergeHelper.updateChevRingMergeState(gateTile, state, false);
+		
+			// ------------------------------------------------------------------------
 			state = world.getBlockState(pos);
 			
-			if (!state.getValue(BlockTESRMember.RENDER)) {
+			if (!state.getValue(AunisProps.RENDER_BLOCK)) {
 				DHDLinkHelper.findAndLinkDHD(gateTile);
 			}
 		}
@@ -123,7 +163,7 @@ public class StargateBaseBlock extends BlockTESRMember {
 				return true;
 			}
 			
-			else if (!state.getValue(BlockTESRMember.RENDER) && hand == EnumHand.MAIN_HAND) {
+			else if (!state.getValue(AunisProps.RENDER_BLOCK) && hand == EnumHand.MAIN_HAND) {
 				return UpgradeHelper.upgradeInteract((EntityPlayerMP) player, gateTile, heldItem);
 			}
 			
@@ -141,6 +181,7 @@ public class StargateBaseBlock extends BlockTESRMember {
 		}
 	}
 	
+	// ------------------------------------------------------------------------
 	@Override
 	public boolean hasTileEntity(IBlockState state) {
 		return true;
@@ -155,7 +196,7 @@ public class StargateBaseBlock extends BlockTESRMember {
 	public EnumBlockRenderType getRenderType(IBlockState state) {
 		// Client side
 		
-		if ( state.getValue(BlockTESRMember.RENDER) )
+		if ( state.getValue(AunisProps.RENDER_BLOCK) )
 			return EnumBlockRenderType.MODEL;
 		else
 			return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;

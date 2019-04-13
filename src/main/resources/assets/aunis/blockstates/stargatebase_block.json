@@ -11,12 +11,10 @@
 			"south": { "y": 180 },
 			"west": { "y": 270 },
 			"north": {},
-			"east": { "y": 90 },
-			"up": {},
-			"down": {}
+			"east": { "y": 90 }
 		},
 		
-		"render": {
+		"render_block": {
 			"true": {},
 			"false": {}
 		}

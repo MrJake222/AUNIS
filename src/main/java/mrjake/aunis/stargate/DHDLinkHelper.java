@@ -1,8 +1,8 @@
 package mrjake.aunis.stargate;
 
 import mrjake.aunis.AunisConfig;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
@@ -21,7 +21,7 @@ public class DHDLinkHelper {
 			
 			if ( gateState.getBlock() instanceof StargateBaseBlock) {		
 				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(sg);					
-				if ( !gateTile.isLinked() && !gateState.getValue(BlockTESRMember.RENDER) ) {
+				if ( !gateTile.isLinked() && !gateState.getValue(AunisProps.RENDER_BLOCK) ) {
 					dhdTile.setLinkedGate(sg);
 					gateTile.setLinkedDHD(pos);
 					break;

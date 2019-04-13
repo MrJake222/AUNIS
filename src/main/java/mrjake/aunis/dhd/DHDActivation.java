@@ -7,7 +7,7 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import mrjake.aunis.block.BlockRotated;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import net.minecraft.entity.player.EntityPlayer;
@@ -78,7 +78,7 @@ public class DHDActivation {
 	);
 	
 	public static void onActivated(World world, BlockPos pos, EntityPlayer player) {
-		float rotation = world.getBlockState(pos).getValue(BlockRotated.ROTATE) * -22.5f;
+		float rotation = world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
 		
 		// Last common function, x=a, y=b
 		Ray lastRay = null;

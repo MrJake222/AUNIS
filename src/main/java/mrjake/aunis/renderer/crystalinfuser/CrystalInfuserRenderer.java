@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
-import mrjake.aunis.block.BlockFaced;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.renderer.ISpecialRenderer;
@@ -217,7 +217,7 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 			energyStorage.setEnergyStored(state.energyStored);
 						
 			if (!doCrystalRender) {
-				crystalRotation = world.getBlockState(pos).getValue(BlockFaced.FACING).getHorizontalAngle();
+				crystalRotation = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL).getHorizontalAngle();
 				
 				doCrystalRender = true;
 			}

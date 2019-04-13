@@ -1,9 +1,9 @@
 package mrjake.aunis.upgrade;
 
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.item.ItemBase;
 import mrjake.aunis.tileentity.ITileEntityRendered;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.MathHelper;
 
@@ -42,7 +42,7 @@ public class StargateUpgradeRenderer extends UpgradeRenderer{
 	}
 	
 	@Override
-	public ItemBase getUpgradeItem() {
+	public Item getUpgradeItem() {
 		return AunisItems.crystalGlyphStargate;
 	}
 }

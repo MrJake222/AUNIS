@@ -2,14 +2,18 @@ package mrjake.aunis.block;
 
 import javax.annotation.Nullable;
 
+import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.upgrade.UpgradeHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,26 +27,56 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class DHDBlock extends BlockRotated {
+public class DHDBlock extends Block {
 	
-	public DHDBlock() {
-		super(Material.IRON, SoundType.METAL, "dhd_block");
+	private static final String blockName = "dhd_block";
+	
+	public DHDBlock() {		
+		super(Material.IRON);
+		
+		setRegistryName(Aunis.ModID + ":" + blockName);
+		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		
+		setSoundType(SoundType.METAL); 
+		setCreativeTab(Aunis.aunisCreativeTab);
+		
+		setDefaultState(blockState.getBaseState()
+				.withProperty(AunisProps.ROTATION_HORIZONTAL, 0));
+	}
+	
+	// ------------------------------------------------------------------------
+	@Override
+	protected BlockStateContainer createBlockState() {
+		return new BlockStateContainer(this, AunisProps.ROTATION_HORIZONTAL);
 	}
 	
 	@Override
-	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-		
-		super.onBlockPlacedBy(world, pos, state, placer, stack);		
-		
+	public int getMetaFromState(IBlockState state) {
+		return state
+				.getValue(AunisProps.ROTATION_HORIZONTAL);
+	}
+	
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState()
+				.withProperty(AunisProps.ROTATION_HORIZONTAL, meta);
+	}
+	
+	// ------------------------------------------------------------------------
+	@Override
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {		
 		// Server side
 		if ( !world.isRemote ) {
-			DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
+			int facing = MathHelper.floor( (double)((placer.rotationYaw) * 16.0F / 360.0F) + 0.5D ) & 0x0F;
+			world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, facing), 2);
 			
+			DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
 			DHDLinkHelper.findAndLinkGate(dhdTile);
 		}
 	}
@@ -57,7 +91,7 @@ public class DHDBlock extends BlockRotated {
 		
 		if (!worldIn.isRemote) {
 			if (hand == EnumHand.MAIN_HAND) {
-				EnumFacing dhdFacingOpposite = EnumFacing.getHorizontal( Math.round(state.getValue(BlockRotated.ROTATE)/4.0f) );
+				EnumFacing dhdFacingOpposite = EnumFacing.getHorizontal( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
 								
 				// Back side of block
 				if (facing == dhdFacingOpposite) {
@@ -77,10 +111,8 @@ public class DHDBlock extends BlockRotated {
 				
 				ItemStack slotItemStack = itemStackHandler.getStackInSlot(0);
 				ItemStack heldItemStack = playerIn.getHeldItem(hand);
-				
-				float rotation = state.getValue(BlockRotated.ROTATE) * 360 / 16f;
-				
-				if (facing == EnumFacing.fromAngle(rotation).getOpposite()) {
+								
+				if (facing == dhdFacingOpposite.getOpposite()) {
 					if (slotItemStack.isEmpty()) {
 						if (heldItemStack.getItem() == AunisItems.crystalControlDhd) {
 							// Insert the crystal
@@ -139,7 +171,7 @@ public class DHDBlock extends BlockRotated {
 		super.breakBlock(world, pos, state);
 	}
 
-
+	// ------------------------------------------------------------------------
 	@Override
 	public boolean hasTileEntity(IBlockState state) {
 		return true;

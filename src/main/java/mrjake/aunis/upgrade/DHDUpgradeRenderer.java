@@ -1,9 +1,9 @@
 package mrjake.aunis.upgrade;
 
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.item.ItemBase;
 import mrjake.aunis.tileentity.ITileEntityRendered;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.MathHelper;
 
@@ -41,7 +41,7 @@ public class DHDUpgradeRenderer extends UpgradeRenderer {
 	}
 	
 	@Override
-	protected ItemBase getUpgradeItem() {
+	protected Item getUpgradeItem() {
 		return AunisItems.crystalGlyphDhd;
 	}
 }

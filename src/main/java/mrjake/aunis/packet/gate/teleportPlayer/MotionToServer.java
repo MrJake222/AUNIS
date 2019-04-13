@@ -3,7 +3,7 @@ package mrjake.aunis.packet.gate.teleportPlayer;
 import javax.vecmath.Vector2f;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.block.BlockFaced;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.sound.AunisSoundHelper;
@@ -63,7 +63,7 @@ public class MotionToServer extends PositionedPacket {
 			if ( world.getBlockState(message.pos).getBlock() instanceof StargateBaseBlock ) {
 				world.addScheduledTask(() -> {
 					
-					EnumFacing sourceFacing = world.getBlockState(message.pos).getValue(BlockFaced.FACING);
+					EnumFacing sourceFacing = world.getBlockState(message.pos).getValue(AunisProps.FACING_HORIZONTAL);
 					
 					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.pos);
 					

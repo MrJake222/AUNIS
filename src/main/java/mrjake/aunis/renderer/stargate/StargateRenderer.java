@@ -7,11 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
-import mrjake.aunis.block.BlockFaced;
-import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
@@ -44,7 +43,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		
 //		this.state.ringAngularRotation = 0;
 		
-		EnumFacing facing = world.getBlockState(pos).getValue(BlockTESRMember.FACING);
+		EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 		
 		if ( facing.getAxis().getName() == "x" )
 			horizontalRotation = (int) facing.getOpposite().getHorizontalAngle();
@@ -97,7 +96,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		blockLight = 0;
 		
 		for (int i=0; i<chevronBlocks.size(); i++) {
-			BlockPos blockPos = chevronBlocks.get(i).rotateAndGlobal((int) world.getBlockState(pos).getValue(BlockFaced.FACING).getHorizontalAngle(), pos);
+			BlockPos blockPos = chevronBlocks.get(i).rotateAndGlobal((int) world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL).getHorizontalAngle(), pos);
 			
 			skyLight += world.getLightFor(EnumSkyBlock.SKY, blockPos) - subt;
 			blockLight += world.getLightFor(EnumSkyBlock.BLOCK, blockPos);
@@ -112,7 +111,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		IBlockState state = world.getBlockState(pos);
 		
 		if (state.getBlock() instanceof StargateBaseBlock) {
-			if (state.getValue(BlockTESRMember.RENDER))
+			if (state.getValue(AunisProps.RENDER_BLOCK))
 				return;
 			
 			calculateLightMap((float) partialTicks);

@@ -6,7 +6,7 @@ import javax.vecmath.Vector2f;
 
 import org.lwjgl.util.vector.Matrix2f;
 
-import mrjake.aunis.block.BlockFaced;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.entity.Entity;
@@ -129,8 +129,8 @@ public class TeleportHelper {
 		if (sourceDim != targetGatePos.getDimension() && !(entity instanceof EntityPlayerMP))
 			return;
 		
-		EnumFacing sourceFacing = world.getBlockState(sourceGatePos).getValue(BlockFaced.FACING);
-		EnumFacing targetFacing = targetGatePos.getWorld().getBlockState(targetGatePos.getPos()).getValue(BlockFaced.FACING);
+		EnumFacing sourceFacing = world.getBlockState(sourceGatePos).getValue(AunisProps.FACING_HORIZONTAL);
+		EnumFacing targetFacing = targetGatePos.getWorld().getBlockState(targetGatePos.getPos()).getValue(AunisProps.FACING_HORIZONTAL);
 		
 		int flipAxis = 0;
 		

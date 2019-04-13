@@ -5,9 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.BlockFaced;
-import mrjake.aunis.block.BlockTESRMember;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.Block;
@@ -93,7 +92,7 @@ public class MergeHelper {
 		World world = gateTile.getWorld();
 		BlockPos pos = gateTile.getPos();
 		
-		EnumFacing facing = world.getBlockState(pos).getValue(BlockFaced.FACING);
+		EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 		
 		for ( Map.Entry<Block, List<BlockPosition>> entry : getBlockListMap().entrySet() ) {			
 			for (BlockPosition blockPosition : entry.getValue()) {				
@@ -103,7 +102,7 @@ public class MergeHelper {
 					return false;
 				}
 				
-				if ( facing != state.getValue(BlockFaced.FACING) ) {
+				if ( facing != state.getValue(AunisProps.FACING_HORIZONTAL) ) {
 					return false;
 				}
 			}
@@ -116,7 +115,7 @@ public class MergeHelper {
 		World world = gateTile.getWorld();
 		BlockPos pos = gateTile.getPos();
 		
-		EnumFacing facing = state.getValue(BlockFaced.FACING);
+		EnumFacing facing = state.getValue(AunisProps.FACING_HORIZONTAL);
 		
 		for ( Map.Entry<Block, List<BlockPosition>> entry : getBlockListMap().entrySet() ) {
 			for (BlockPosition blockPosition : entry.getValue()) {
@@ -125,7 +124,7 @@ public class MergeHelper {
 				IBlockState blockState = world.getBlockState(blockPos);
 				
 				if ( blockState.getBlock() == entry.getKey() )
-					world.setBlockState(blockPos, blockState.withProperty(BlockTESRMember.RENDER, !isMerged));
+					world.setBlockState(blockPos, blockState.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 2);
 			}
 		}
 	}

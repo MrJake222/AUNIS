@@ -2,11 +2,16 @@ package mrjake.aunis.block;
 
 import javax.annotation.Nullable;
 
+import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
+import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
@@ -20,13 +25,41 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class CrystalInfuserBlock extends BlockFaced {
+public class CrystalInfuserBlock extends Block {
 
-	public CrystalInfuserBlock() {
-		super(Material.ROCK, SoundType.STONE, "crystal_infuser_block");
+	private static final String blockName = "crystal_infuser_block";
+	
+	public CrystalInfuserBlock() {	
+		super(Material.ROCK);
+		
+		setRegistryName(Aunis.ModID + ":" + blockName);
+		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		
+		setSoundType(SoundType.STONE); 
+		setCreativeTab(Aunis.aunisCreativeTab);
+		
+		setDefaultState(blockState.getBaseState()
+				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.NORTH));
 	}
 
+	// ------------------------------------------------------------------------
+	@Override
+	protected BlockStateContainer createBlockState() {
+		return new BlockStateContainer(this, AunisProps.FACING_HORIZONTAL);
+	}
 	
+	@Override
+	public int getMetaFromState(IBlockState state) {		
+		return state.getValue(AunisProps.FACING_HORIZONTAL).getHorizontalIndex();
+	}
+	
+	@Override
+	public IBlockState getStateFromMeta(int meta) {		
+		return getDefaultState()
+				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.getHorizontal(meta & 0x03));
+	}
+	
+	// ------------------------------------------------------------------------
 	@Override
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		if (!worldIn.isRemote) {
@@ -61,6 +94,11 @@ public class CrystalInfuserBlock extends BlockFaced {
 	}
 	
 	@Override
+	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+		worldIn.setBlockState(pos, state.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite()), 2); // 2 - send update to clients
+	}
+	
+	@Override
 	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
 		CrystalInfuserTile infuserTile = (CrystalInfuserTile) worldIn.getTileEntity(pos);
 		
@@ -75,7 +113,7 @@ public class CrystalInfuserBlock extends BlockFaced {
 		super.breakBlock(worldIn, pos, state);
 	}
 	
-	
+	// ------------------------------------------------------------------------
 	@Override
 	public EnumBlockRenderType getRenderType(IBlockState state) {
 		return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
