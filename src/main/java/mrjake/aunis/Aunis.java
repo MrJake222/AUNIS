@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Logger;
 
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
+import mrjake.aunis.worldgen.AunisWorldGen;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -11,6 +12,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion )
 public class Aunis {	
@@ -43,6 +45,8 @@ public class Aunis {
  
     @EventHandler
     public void init(FMLInitializationEvent event) {
+    	GameRegistry.registerWorldGenerator(new AunisWorldGen(), 0);
+    	
     	proxy.init(event);
     }
  

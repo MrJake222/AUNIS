@@ -41,9 +41,6 @@ public class StargateBaseBlock extends Block {
 
 	private static final String blockName = "stargatebase_block";
 	
-//	private static final PropertyDirection AunisProps.FACING_HORIZONTAL = PropertyDirection.create("facing");
-//	public static final PropertyBool AunisProps.RENDER_BLOCK = PropertyBool.create("render_block");
-	
 	public StargateBaseBlock() {		
 		super(Material.IRON);
 		
