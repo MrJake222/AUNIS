@@ -19,8 +19,8 @@ public class AunisBlocks {
 	public static NaquadahOreBlock naquadahOreBlock = new NaquadahOreBlock();
 	
 	public static StargateBaseBlock stargateBaseBlock = new StargateBaseBlock();
-	public static StargateMemberBlock ringBlock = new StargateMemberBlock("ring_block");
-	public static StargateMemberBlock chevronBlock = new StargateMemberBlock("chevron_block");
+	public static StargateMemberBlock ringBlock = new StargateMemberBlock("stargate_ring_block");
+	public static StargateMemberBlock chevronBlock = new StargateMemberBlock("stargate_chevron_block");
 	
 	public static DHDBlock dhdBlock = new DHDBlock();
 	public static CrystalInfuserBlock crystalInfuserBlock = new CrystalInfuserBlock();

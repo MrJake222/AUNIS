@@ -1,27 +1,23 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"SRS",
-		"RWR",
-		"SRS"
+		" F ",
+		"FRF",
+		" F "
 	],
 	
 	"key": {
-		"R": {
-			"item": "aunis:crystal_red"
-		},
-
-		"W": {
-			"item": "aunis:crystal_blank"
+		"F": {
+			"item": "aunis:crystal_fragment"
 		},
 		
-		"S": {
+		"R": {
 			"item": "minecraft:redstone"
 		}
 	},
 	
 	"result": {
-		"item": "aunis:crystal_control_dhd",
+		"item": "aunis:crystal_red",
 		"count": 1,
 		"data": 0
 	}

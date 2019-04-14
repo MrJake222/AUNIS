@@ -9,6 +9,7 @@ options.txt
 saves/
 usercache.json
 usernamecache.json
+screenshots/
 
 .classpath
 .project

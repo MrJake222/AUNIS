@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"NNN",
+		"RRR",
+		"NNN"
+	],
+	
+	"key": {
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+		
+		"R": {
+			"item": "aunis:stargate_ring_fragment"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:stargate_ring_block",
+		"count": 1,
+		"data": 0
+	}
+}

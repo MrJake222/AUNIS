@@ -1,0 +1,32 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		" RB",
+		" CL",
+		"B  "
+	],
+	
+	"key": {
+		"C": {
+			"item": "aunis:crystal_glyph_empty"
+		},
+
+		"L": {
+			"item": "aunis:crystal_blue"
+		},
+
+		"B": {
+			"item": "aunis:crystal_blank"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:analyzer_ancient",
+		"count": 1,
+		"data": 0
+	}
+}

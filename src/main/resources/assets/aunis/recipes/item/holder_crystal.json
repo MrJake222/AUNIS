@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"   ",
+		"N N",
+		"RNB"
+	],
+	
+	"key": {
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+
+		"B": {
+			"item": "aunis:crystal_blue"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:holder_crystal",
+		"count": 1,
+		"data": 0
+	}
+}

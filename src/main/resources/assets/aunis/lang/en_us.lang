@@ -1,15 +1,13 @@
 itemGroup.aunis=Aunis
 
 item.aunis.analyzer_ancient.name=Ancient Analyzer
-
 item.aunis.crystal_control_dhd.name=DHD Control Crystal
-item.aunis.crystal_control_empty.name=Empty Control Crystal
-item.aunis.crystal_control_stargate.name=Stargate Control Crystal
 
 item.aunis.crystal_glyph_dhd.name=DHD Glyph Crystal
 item.aunis.crystal_glyph_empty.name=Empty Glyph Crystal
 item.aunis.crystal_glyph_stargate.name=Stargate Glyph Crystal
 
+tile.aunis.naquadah_ore.name=Naquadah Ore
 item.aunis.naquadah_ore_pure.name=Pure Naquadah Ore
 item.aunis.naquadah_ore_shard.name=Naquadah Ore Shard
 item.aunis.naquadah_refined.name=Refined Naquadah
@@ -18,6 +16,18 @@ tile.aunis.stargatebase_block.name=Stargate Base
 tile.aunis.ring_block.name=Stargate Ring
 tile.aunis.chevron_block.name=Stargate Chevron
 tile.aunis.dhd_block.name=Dial Home Device (DHD)
+
+tile.aunis.crystal_infuser_block.name=Crystal Infuser
+
+item.aunis.crystal_fragment.name=Crystal Fragment
+item.aunis.crystal_blank.name=Blank Crystal
+item.aunis.crystal_blue.name=Blue Crystal
+item.aunis.crystal_red.name=Red Crystal
+item.aunis.crystal_array.name=Crystal Array
+item.aunis.dhd_brb.name=Bright Red Button (BRB)
+
+item.aunis.stargate_ring_fragment.name=Stargate Ring Fragment
+item.aunis.holder_crystal.name=Crystal Holder
 
 tile.aunis.dhd_block.incoming_wormhole_warn=Unable to close the gate on this end
 tile.aunis.dhd_block.not_linked_warn=DHD is not linked to the gate

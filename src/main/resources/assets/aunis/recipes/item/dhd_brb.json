@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"GGG",
+		"NRN",
+		" N "
+	],
+	
+	"key": {
+		"G": {
+			"item": "minecraft:glass"
+		},
+
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:dhd_brb",
+		"count": 1,
+		"data": 0
+	}
+}

@@ -1,0 +1,36 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"BGB",
+		"NHN",
+		"NCN"
+	],
+	
+	"key": {
+		"C": {
+			"item": "aunis:crystal_array"
+		},
+
+		"B": {
+			"item": "minecraft:stone_button"
+		},
+
+		"G": {
+			"item": "aunis:dhd_brb"
+		},
+
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+		
+		"H": {
+			"item": "aunis:holder_crystal"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:dhd_block",
+		"count": 1,
+		"data": 0
+	}
+}

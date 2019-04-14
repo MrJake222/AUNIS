@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"   ",
+		"NHN",
+		"NCN"
+	],
+	
+	"key": {
+		"C": {
+			"item": "aunis:crystal_array"
+		},
+
+		"H": {
+			"item": "aunis:holder_crystal"
+		},
+		
+		"N": {
+			"item": "aunis:naquadah_refined"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:crystal_infuser_block",
+		"count": 1,
+		"data": 0
+	}
+}

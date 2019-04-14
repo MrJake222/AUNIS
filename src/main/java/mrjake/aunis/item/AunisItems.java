@@ -16,12 +16,9 @@ public class AunisItems {
 	public static Item analyzerAncient = ItemHelper.createGenericItem("analyzer_ancient");
 	
 	/**
-	 * Crafting of the Stargate
+	 * DHD power/control crystal
 	 */
 	public static CrystalControlDHDItem crystalControlDhd = new CrystalControlDHDItem();
-	public static Item crystalControlEmpty = ItemHelper.createGenericItem("crystal_control_empty");
-	public static Item crystalControlChevron = ItemHelper.createGenericItem("crystal_control_chevron");
-	public static Item crystalControlStargate = ItemHelper.createGenericItem("crystal_control_stargate");
 	
 	/**
 	 * These allow for dialing 8th glyph(cross dimension travel)
@@ -43,15 +40,24 @@ public class AunisItems {
 	public static Item naquadahOreShard = ItemHelper.createGenericItem("naquadah_ore_shard");
 	public static Item naquadahRefined = ItemHelper.createGenericItem("naquadah_refined");
 	
+	/**
+	 * Crafting items
+	 */
+	public static Item crystalFragment = ItemHelper.createGenericItem("crystal_fragment");
+	public static Item crystalBlank = ItemHelper.createGenericItem("crystal_blank");
+	public static Item crystalBlue = ItemHelper.createGenericItem("crystal_blue");
+	public static Item crystalRed = ItemHelper.createGenericItem("crystal_red");
+	public static Item crystalArray = ItemHelper.createGenericItem("crystal_array");
+		
 	public static Item stargateRingFragment = ItemHelper.createGenericItem("stargate_ring_fragment");
+	public static Item holderCrystal = ItemHelper.createGenericItem("holder_crystal");
+	
+	public static Item dhdBrb = ItemHelper.createGenericItem("dhd_brb");
 	
 	private static Item[] items = {
 		analyzerAncient,
 		
 		crystalControlDhd,
-		crystalControlEmpty,
-		crystalControlChevron,
-		crystalControlStargate,
 		
 		crystalGlyphDhd,
 		crystalGlyphEmpty,
@@ -63,7 +69,16 @@ public class AunisItems {
 		naquadahOreShard,
 		naquadahRefined,
 		
-		stargateRingFragment
+		crystalFragment,
+		crystalBlank,
+		crystalBlue,
+		crystalRed,
+		crystalArray,
+		
+		stargateRingFragment,
+		holderCrystal,
+		
+		dhdBrb
 	};
 	
 	@SubscribeEvent

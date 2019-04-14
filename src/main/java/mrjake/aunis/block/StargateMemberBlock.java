@@ -3,12 +3,16 @@ package mrjake.aunis.block;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.BoundingHelper;
+import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.stargate.merge.MergeHelper;
+import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -51,14 +55,16 @@ public class StargateMemberBlock extends Block {
 				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.getHorizontal(meta & 0x03));
 	}
 
-	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------	
 	@Override
-	public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-		if (!worldIn.isRemote) {
-			MergeHelper.updateBaseMergeState(worldIn, pos);
-		}		
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+		if (!world.isRemote) {
+			world.setBlockState(pos, state
+					.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite())
+					.withProperty(AunisProps.RENDER_BLOCK, true), 2); // 2 - send update to clients
 		
-		super.onBlockAdded(worldIn, pos, state);
+			MergeHelper.updateBaseMergeState(world, pos);
+		}
 	}
 	
 	@Override

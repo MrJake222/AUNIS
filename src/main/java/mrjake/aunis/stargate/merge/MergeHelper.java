@@ -89,24 +89,24 @@ public class MergeHelper {
 	}
 	
 	public static boolean checkBlocks(StargateBaseTile gateTile) {
-		World world = gateTile.getWorld();
-		BlockPos pos = gateTile.getPos();
-		
-		EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
-		
-		for ( Map.Entry<Block, List<BlockPosition>> entry : getBlockListMap().entrySet() ) {			
-			for (BlockPosition blockPosition : entry.getValue()) {				
-				IBlockState state = world.getBlockState(blockPosition.rotateAndGlobal((int) facing.getHorizontalAngle(), pos));
-				
-				if ( state.getBlock() != entry.getKey() ) {
-					return false;
-				}
-				
-				if ( facing != state.getValue(AunisProps.FACING_HORIZONTAL) ) {
-					return false;
-				}
-			}
-		}
+//		World world = gateTile.getWorld();
+//		BlockPos pos = gateTile.getPos();
+//		
+//		EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
+//		
+//		for ( Map.Entry<Block, List<BlockPosition>> entry : getBlockListMap().entrySet() ) {			
+//			for (BlockPosition blockPosition : entry.getValue()) {				
+//				IBlockState state = world.getBlockState(blockPosition.rotateAndGlobal((int) facing.getHorizontalAngle(), pos));
+//				
+//				if ( state.getBlock() != entry.getKey() ) {
+//					return false;
+//				}
+//				
+//				if ( facing != state.getValue(AunisProps.FACING_HORIZONTAL) ) {
+//					return false;
+//				}
+//			}
+//		}
 		
 		return true;
 	}

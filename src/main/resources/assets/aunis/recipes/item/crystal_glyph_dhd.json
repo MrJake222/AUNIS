@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"   ",
+		"RCR",
+		"   "
+	],
+	
+	"key": {
+		"C": {
+			"item": "aunis:crystal_glyph_empty"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:crystal_glyph_dhd",
+		"count": 1,
+		"data": 0
+	}
+}

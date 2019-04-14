@@ -29,7 +29,7 @@ public class NaquadahOreBlock extends Block {
 	
 	@Override
 	public int quantityDropped(Random random) {
-		return 3 + random.nextInt(2);
+		return 5 + random.nextInt(4);
 	}
 	
 	@Override

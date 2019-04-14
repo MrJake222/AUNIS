@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"   ",
+		"BCB",
+		"   "
+	],
+	
+	"key": {
+		"C": {
+			"item": "aunis:crystal_glyph_empty"
+		},
+		
+		"B": {
+			"item": "aunis:crystal_blue"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:crystal_glyph_stargate",
+		"count": 1,
+		"data": 0
+	}
+}

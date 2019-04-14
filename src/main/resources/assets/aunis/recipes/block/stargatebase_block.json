@@ -1,0 +1,40 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"FNF",
+		"BCR",
+		"NWN"
+	],
+	
+	"key": {
+		"F": {
+			"item": "aunis:stargate_ring_fragment"
+		},
+
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+		
+		"B": {
+			"item": "aunis:crystal_blue"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		},
+		
+		"W": {
+			"item": "aunis:crystal_blank"
+		},
+		
+		"C": {
+			"item": "aunis:crystal_array"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:stargatebase_block",
+		"count": 1,
+		"data": 0
+	}
+}
