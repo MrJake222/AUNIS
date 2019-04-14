@@ -88,37 +88,52 @@ public class TeleportHelper {
 	// Kindly borrowed from SGCraft beacause I have no idea how Minecraft dimension teleportation system works
 	// and there is hardly any docs
 	private static void transferPlayerToDimension(EntityPlayerMP player, int newDimension, Vec3d position, float yaw) {
-        MinecraftServer server = player.getServer();
-        PlayerList playerList = server.getPlayerList();
+		MinecraftServer server = player.getServer();
+		PlayerList playerList = server.getPlayerList();
+		
+		WorldServer oldWorld = player.getServerWorld();
+		WorldServer newWorld = (WorldServer) getWorld(newDimension);
+		player.dimension = newDimension;
+		
+		player.closeScreen();
+		player.connection.sendPacket( new SPacketRespawn(player.dimension,
+				player.world.getDifficulty(), newWorld.getWorldInfo().getTerrainType(),
+				player.interactionManager.getGameType()) );
+		
+		oldWorld.removeEntityDangerously(player);
+		player.isDead = false;
+		player.setLocationAndAngles(position.x, position.y, position.z, yaw, player.rotationPitch);
+		newWorld.spawnEntity(player);
+		player.setWorld(newWorld);
+		playerList.preparePlayer(player, oldWorld);
+		player.connection.setPlayerLocation(position.x, position.y, position.z, yaw, player.rotationPitch);
+		player.interactionManager.setWorld(newWorld);
+		playerList.updateTimeAndWeatherForPlayer(player, newWorld);
+		playerList.syncPlayerInventory(player);
+		
+		Iterator<PotionEffect> var6 = player.getActivePotionEffects().iterator();
+		while (var6.hasNext()) {
+			PotionEffect effect = (PotionEffect)var6.next();
+			player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), effect));
+		}
+		player.connection.sendPacket(new SPacketSetExperience(player.experience, player.experienceTotal, player.experienceLevel));
+		FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, oldWorld.provider.getDimension(), newDimension);
+		
+	}
+	
+	private static void transferEntityToDimension(Entity entity, int oldDimension, int newDimension, Vec3d position, float yaw) {
+//        MinecraftServer server = entity.getServer();
+//        PlayerList playerList = server.getPlayerList();
         
-        WorldServer oldWorld = player.getServerWorld();
+        WorldServer oldWorld = (WorldServer) getWorld(oldDimension);
         WorldServer newWorld = (WorldServer) getWorld(newDimension);
-        player.dimension = newDimension;
-                
-        player.closeScreen();
-        player.connection.sendPacket( new SPacketRespawn(player.dimension,
-            player.world.getDifficulty(), newWorld.getWorldInfo().getTerrainType(),
-            player.interactionManager.getGameType()) );
+        entity.dimension = newDimension;
         
-        oldWorld.removeEntityDangerously(player);
-        player.isDead = false;
-        player.setLocationAndAngles(position.x, position.y, position.z, yaw, player.rotationPitch);
-        newWorld.spawnEntity(player);
-        player.setWorld(newWorld);
-        playerList.preparePlayer(player, oldWorld);
-        player.connection.setPlayerLocation(position.x, position.y, position.z, yaw, player.rotationPitch);
-        player.interactionManager.setWorld(newWorld);
-        playerList.updateTimeAndWeatherForPlayer(player, newWorld);
-        playerList.syncPlayerInventory(player);
-
-        Iterator<PotionEffect> var6 = player.getActivePotionEffects().iterator();
-        while (var6.hasNext()) {
-            PotionEffect effect = (PotionEffect)var6.next();
-            player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), effect));
-        }
-        player.connection.sendPacket(new SPacketSetExperience(player.experience, player.experienceTotal, player.experienceLevel));
-        FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, oldWorld.provider.getDimension(), newDimension);
-      
+        oldWorld.removeEntityDangerously(entity);
+        entity.isDead = false;
+        entity.setLocationAndAngles(position.x, position.y, position.z, yaw, entity.rotationPitch);
+        newWorld.spawnEntity(entity);
+        entity.setWorld(newWorld);
     }
 	
 	public static void teleportEntity(Entity entity, BlockPos sourceGatePos, StargatePos targetGatePos, float rotation, Vector2f motionVector) {		
@@ -126,8 +141,8 @@ public class TeleportHelper {
 		int sourceDim = world.provider.getDimension();
 		
 		// Cross dimension entity teleport not supported YET, possibly TODO
-		if (sourceDim != targetGatePos.getDimension() && !(entity instanceof EntityPlayerMP))
-			return;
+//		if (sourceDim != targetGatePos.getDimension() && !(entity instanceof EntityPlayerMP))
+//			return;
 		
 		EnumFacing sourceFacing = world.getBlockState(sourceGatePos).getValue(AunisProps.FACING_HORIZONTAL);
 		EnumFacing targetFacing = targetGatePos.getWorld().getBlockState(targetGatePos.getPos()).getValue(AunisProps.FACING_HORIZONTAL);
@@ -157,6 +172,10 @@ public class TeleportHelper {
 				
 				player.capabilities.isFlying = flying;
 				player.sendPlayerAbilities();
+			}
+			
+			else {
+				transferEntityToDimension(entity, sourceDim, targetGatePos.getDimension(), pos, yaw);
 			}
 		}
 		

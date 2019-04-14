@@ -607,7 +607,6 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		}		
 	}
 	
-	private AxisAlignedBB scanArea;
 	private int gateCloseTimeout = 5;
 	
 	@Override
@@ -624,9 +623,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			generateAddress();
 			
 			updateMergeState(MergeHelper.checkBlocks(this));
-			
-			scanArea = new AxisAlignedBB(this.pos.add(new Vec3i(-10, -2, -10)), this.pos.add(new Vec3i(10, 2, 10)));
-			
+						
 			if (!world.isRemote) {
 				EnumFacing sourceGateFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 				
@@ -711,23 +708,30 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		if (!world.isRemote && isEngaged && !isInitiating) {
 			if (world.getTotalWorldTime() % 20 == 0) {
 				if (dialedAddress.size() > 0) {
-					StargatePos sourcePos = StargateNetwork.get(world).getStargate(dialedAddress);
+					StargatePos sourceStargatePos = StargateNetwork.get(world).getStargate(dialedAddress);
 					
-					boolean sourceLoaded = world.isBlockLoaded(sourcePos.getPos());
+					World sourceWorld = sourceStargatePos.getWorld();
+					BlockPos sourcePos = sourceStargatePos.getPos();
+					
+					boolean sourceLoaded = sourceWorld.isBlockLoaded(sourcePos);
 					
 					if (getEntitiesPassed() > 0) {
 						if (sourceLoaded) {
-							int entityCount = world.getEntitiesWithinAABB(EntityPlayerMP.class, scanArea).size();
+							
+							AxisAlignedBB scanBox = new AxisAlignedBB(sourcePos.add(new Vec3i(-10, -5, -10)), sourcePos.add(new Vec3i(10, 5, 10)));
+							int entityCount = sourceWorld.getEntitiesWithinAABB(EntityPlayerMP.class, scanBox, player -> !player.isDead).size();
 							
 							if (entityCount == 0)
 								gateCloseTimeout--;
+							else
+								gateCloseTimeout = 5;
 						}
 						
 						else {
 							gateCloseTimeout--;
 						}
 					}
-					
+										
 					if (gateCloseTimeout == 0) {
 						GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 					}
@@ -776,7 +780,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 						
 						energyConsumed += energyStorage.extractEnergy(keepAliveCostPerTick, false);
 						
-						Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
+//						Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
 					}
 					
 					else
