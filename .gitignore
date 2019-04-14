@@ -1,5 +1,9 @@
 *.log
 
+.directory
+.gradle/
+build/
+
 assets/
 bin/
 config/

@@ -112,7 +112,7 @@ public class DHDBlock extends Block {
 				ItemStack slotItemStack = itemStackHandler.getStackInSlot(0);
 				ItemStack heldItemStack = playerIn.getHeldItem(hand);
 								
-				if (facing == dhdFacingOpposite.getOpposite()) {
+				if (facing == dhdFacingOpposite.getOpposite().rotateYCCW()) {
 					if (slotItemStack.isEmpty()) {
 						if (heldItemStack.getItem() == AunisItems.crystalControlDhd) {
 							// Insert the crystal

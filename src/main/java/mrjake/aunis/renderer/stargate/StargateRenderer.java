@@ -222,7 +222,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				
 				state.ringAngularRotation = getRingSpinHelper().spin(partialTicks) % 360;
 				
-				Aunis.info("state.ringAngularRotation: " + state.ringAngularRotation);
+//				Aunis.info("state.ringAngularRotation: " + state.ringAngularRotation);
 			}
 			
 			GlStateManager.pushMatrix();

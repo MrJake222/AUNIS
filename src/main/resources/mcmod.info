@@ -1,0 +1,19 @@
+[
+  {
+    "modid": "aunis",
+    "name": "The AUNIS Mod",
+    "description": "Stargate mod",
+    "version": "1.0 Beta",
+    "mcversion": "1.12.2",
+    "url": "https://github.com/MrJake222/AUNIS",
+    "updateUrl": "",
+    "authorList": [ "MrJake222", "MarcelMPL" ],
+    "credits": "By MrJake, with the help of MarcelMPL(graphics and modeling)",
+    "logoFile": "",
+    "screenshots": [
+    ],
+    "parent":"",
+    "dependencies": [
+    ]
+  }
+]

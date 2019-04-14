@@ -121,7 +121,7 @@ public class SpinHelper {
 		effectiveTick += getStopTickShift();
 		
 		// Stop point
-		double c = state.tickStopRequested + speedUpTimeTick;		
+		double c = state.tickStopRequested + speedUpTimeTick + getStopTickShift();		
 		double first = (effectiveTick - c) / b;
 		
 		return (first*first * -1) + (((2*a*c)/b) - (2*a2));// + 180;
