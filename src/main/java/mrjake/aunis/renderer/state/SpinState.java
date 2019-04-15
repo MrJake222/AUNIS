@@ -62,13 +62,15 @@ public class SpinState extends RendererState {
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buf) {
+	public RendererState fromBytes(ByteBuf buf) {
 		startingRotation = buf.readDouble();
 		
 		tickStart = buf.readLong();
 		isSpinning = buf.readBoolean();
 		stopRequested = buf.readBoolean();
 		tickStopRequested = buf.readLong();
+		
+		return this;
 	}
 
 	@Override

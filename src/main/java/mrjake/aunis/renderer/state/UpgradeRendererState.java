@@ -1,8 +1,6 @@
 package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
 
 public class UpgradeRendererState extends RendererState {
 	public boolean doInsertAnimation;
@@ -10,7 +8,7 @@ public class UpgradeRendererState extends RendererState {
 	public boolean doUpgradeRender;
 	public long insertionTime;
 	
-	public UpgradeRendererState(BlockPos pos) {
+	public UpgradeRendererState() {
 		this(false, false, false, 0);
 	}
 	
@@ -29,24 +27,6 @@ public class UpgradeRendererState extends RendererState {
 		this.doUpgradeRender = doUpgradeRender;
 		this.insertionTime = insertionTime;
 	}
-	
-	/**
-	 * Generate state from buffer
-	 * 
-	 * @param buf
-	 */
-	public UpgradeRendererState(ByteBuf buf) {
-		super(buf);
-	}
-	
-	/**
-	 * Generate state from NBT Compound
-	 * 
-	 * @param buf
-	 */
-	public UpgradeRendererState(NBTTagCompound compound) {
-		super(compound);
-	}
 
 	@Override
 	protected String getKeyName() {
@@ -62,10 +42,12 @@ public class UpgradeRendererState extends RendererState {
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buf) {
+	public RendererState fromBytes(ByteBuf buf) {
 		this.doInsertAnimation = buf.readBoolean();		
 		this.doRemovalAnimation = buf.readBoolean();		
 		this.doUpgradeRender = buf.readBoolean();		
-		this.insertionTime = buf.readLong();		
+		this.insertionTime = buf.readLong();
+		
+		return this;		
 	}
 }

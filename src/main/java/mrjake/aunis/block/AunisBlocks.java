@@ -3,6 +3,7 @@ package mrjake.aunis.block;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -25,6 +26,8 @@ public class AunisBlocks {
 	public static DHDBlock dhdBlock = new DHDBlock();
 	public static CrystalInfuserBlock crystalInfuserBlock = new CrystalInfuserBlock();
 	
+	public static TransportRingsBlock transportRingsBlock = new TransportRingsBlock();
+	
 	private static Block[] blocks = {
 		naquadahOreBlock,
 		
@@ -33,7 +36,9 @@ public class AunisBlocks {
 		chevronBlock,
 		
 		dhdBlock,
-		crystalInfuserBlock
+		crystalInfuserBlock,
+		
+		transportRingsBlock
 	};
 	
 	@SubscribeEvent
@@ -43,6 +48,7 @@ public class AunisBlocks {
 		GameRegistry.registerTileEntity(StargateBaseTile.class, AunisBlocks.stargateBaseBlock.getRegistryName());
 		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.dhdBlock.getRegistryName());
 		GameRegistry.registerTileEntity(CrystalInfuserTile.class, AunisBlocks.crystalInfuserBlock.getRegistryName());
+		GameRegistry.registerTileEntity(TransportRingsTile.class, AunisBlocks.transportRingsBlock.getRegistryName());
 	}
 	
 	@SubscribeEvent

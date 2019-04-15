@@ -26,6 +26,8 @@ import mrjake.aunis.packet.infuser.EnergyStoredToClient;
 import mrjake.aunis.packet.infuser.EnergyStoredToClient.EnergyStorageToClientHandler;
 import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient;
 import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient.ShouldRenderWavesToClientHandler;
+import mrjake.aunis.packet.transportrings.StartRingsAnimationToClient;
+import mrjake.aunis.packet.transportrings.StartRingsAnimationToClient.StartRingsAnimationToClientHandler;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient.UpgradeSlotInteractHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -66,7 +68,8 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(OpenStargateAddressGuiClientHandler.class, OpenStargateAddressGuiToClient.class, id, Side.CLIENT); id++;
 		
 		INSTANCE.registerMessage(EnergyStorageToClientHandler.class, EnergyStoredToClient.class, id, Side.CLIENT); id++;
-		
 		INSTANCE.registerMessage(ShouldRenderWavesToClientHandler.class, ShouldRenderWavesToClient.class, id, Side.CLIENT); id++;
+		
+		INSTANCE.registerMessage(StartRingsAnimationToClientHandler.class, StartRingsAnimationToClient.class, id, Side.CLIENT); id++;
 	}
 }

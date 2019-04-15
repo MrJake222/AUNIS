@@ -109,6 +109,14 @@
     "sounds": [
       "aunis:eh/gate_flicker"
     ]
+  },
+  
+  "rings_transport": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.rings_transport",
+    "sounds": [
+      "aunis:transportrings/rings_transport"
+    ]
   }
 }
 

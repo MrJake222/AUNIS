@@ -388,7 +388,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	
 	@Override
 	public RendererState createRendererState(ByteBuf buf) {
-		return new StargateRendererState(buf);
+		return new StargateRendererState().fromBytes(buf);
 	}
 	
 	@Override
@@ -402,7 +402,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	@Override
 	public UpgradeRendererState getUpgradeRendererState() {
 		if (upgradeRendererState == null)
-			upgradeRendererState = new UpgradeRendererState(pos);
+			upgradeRendererState = new UpgradeRendererState();
 		
 		return upgradeRendererState;
 	}
@@ -515,8 +515,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				
 		playersPassed = compound.getInteger("playersPassed");
 		
-		rendererState = new StargateRendererState(compound);
-		upgradeRendererState = new UpgradeRendererState(compound);
+		getRendererState().fromNBT(compound);
+		getUpgradeRendererState().fromNBT(compound);
 		
 		energyStorage.deserializeNBT((NBTTagCompound) compound.getTag("energyStorage"));
 		

@@ -14,9 +14,9 @@ public abstract class RendererState {
 	
 	public RendererState() {}
 	
-	public RendererState(ByteBuf buf) {
-		fromBytes(buf);
-	}
+//	public RendererState(ByteBuf buf) {
+//		fromBytes(buf);
+//	}
 	
 	/**
 	 * Should write all parameters that matter to client-side renderer(ex. vortexState in StargateRenderer)
@@ -33,14 +33,16 @@ public abstract class RendererState {
 	 * 
 	 * @param buf - Buffer object you read from.
 	 */
-	public abstract void fromBytes(ByteBuf buf);
+	public abstract RendererState fromBytes(ByteBuf buf);
 	
 	/**
 	 * Key name under which the parameters will be stored in NBT as ByteBuf
 	 * 
 	 * @return key name
 	 */
-	protected abstract String getKeyName();
+	protected String getKeyName() {
+		return "rendererState";
+	}
 	
 	/**
 	 * Writes ByteBuf with parameters to NBT with getKeyName() key
@@ -62,7 +64,7 @@ public abstract class RendererState {
 	 * 
 	 * @param compound - NBT compound
 	 */
-	public RendererState(NBTTagCompound compound) {
+	public void fromNBT(NBTTagCompound compound) {
 		byte[] dst = compound.getByteArray(getKeyName());
 		
 		if (dst != null && dst.length > 0) {

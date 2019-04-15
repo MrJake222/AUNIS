@@ -19,6 +19,7 @@ import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.merge.BlockPosition;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.EnumFacing;
@@ -168,7 +169,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		if (!state.dialingComplete && (world.getTotalWorldTime() - lastFailSoundPlayed) > 54) {
 			lastFailSoundPlayed = world.getTotalWorldTime();
 			
-			AunisSoundHelper.playSound(world, pos, AunisSoundHelper.gateDialFail);
+			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.gateDialFail);
 		}
 		
 		if (spin) {
@@ -337,7 +338,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	}
 	
 	public void lightUpChevrons(int chevronsToLightUp) {
-		AunisSoundHelper.playSound(world, pos, AunisSoundHelper.chevronIncoming);
+		AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronIncoming);
 		
 		this.chevronsToLightUp = chevronsToLightUp;
 		this.state.dialingComplete = true;
@@ -575,7 +576,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	public void closeGate() {
 		AunisSoundHelper.playPositionedSound("wormhole", pos, false);
 		
-		AunisSoundHelper.playSound(world, pos, AunisSoundHelper.gateClose);
+		AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.gateClose);
 		gateWaitClose = world.getTotalWorldTime();
 		
 		state.vortexState = EnumVortexState.CLOSING;
@@ -634,7 +635,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		if ( !state.openingSoundPlayed && gateWait < 30 ) {
 			state.openingSoundPlayed = true;
 			
-			AunisSoundHelper.playSound(world, pos, AunisSoundHelper.gateOpen);
+			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.gateOpen);
 		}
 		
 		// Waiting for sound sync
@@ -917,7 +918,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				soundPlayed = true;
 				
 				Aunis.info("sound");
-				AunisSoundHelper.playSound(world, pos.up(), AunisSoundHelper.wormholeFlicker);
+				AunisSoundHelper.playSound((WorldClient) world, pos.up(), AunisSoundHelper.wormholeFlicker);
 			}
 			
 			if (tick < flashDuration1) return true;

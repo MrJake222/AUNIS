@@ -68,7 +68,9 @@ public class ModelLoader {
 		ChevronBack("ChevronBack", "stargate/chevron/chevronBack.obj", "stargate/gatering7.png"),
 		
 		CrystalInfuserPylon("CrystalInfuserPylon", "crystalinfuser/CrystalInfuserPylon.obj", "stargate/gatering7.png"),
-		CrystalInfuserBase("CrystalInfuserBase", "crystalinfuser/CrystalInfuserBase.obj", "stargate/gatering7.png");
+		CrystalInfuserBase("CrystalInfuserBase", "crystalinfuser/CrystalInfuserBase.obj", "stargate/gatering7.png"),
+		
+		RingsBlack("RingsBlack", "transportrings/rings_black.obj", "transportrings/rings_black.png");
 		
 		private String name;
 		private String modelPath;

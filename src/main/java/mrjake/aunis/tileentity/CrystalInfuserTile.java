@@ -104,7 +104,7 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		
-		rendererState = new CrystalInfuserRendererState(compound);
+		getRendererState().fromNBT(compound);
 		
 		if (compound.hasKey("energy"))
 			energyStorage.deserializeNBT((NBTTagCompound) compound.getTag("energy"));
@@ -196,6 +196,6 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 	}
 	
 	public RendererState createRendererState(ByteBuf buf) {
-		return new CrystalInfuserRendererState(buf);
+		return new CrystalInfuserRendererState().fromBytes(buf);
 	}
 }

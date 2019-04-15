@@ -3,6 +3,7 @@ package mrjake.aunis.renderer.stargate;
 import mrjake.aunis.renderer.SpinHelper;
 import mrjake.aunis.renderer.state.SpinState;
 import mrjake.aunis.sound.AunisSoundHelper;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -54,7 +55,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 			// Play final chevron lock sound
 			if (renderer.state.dialingComplete) {
 				renderer.moveFinalChevron();
-				AunisSoundHelper.playSound(world, pos, AunisSoundHelper.chevronLockDHD);
+				AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronLockDHD);
 			}
 		}
 	}

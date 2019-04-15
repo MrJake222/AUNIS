@@ -56,7 +56,7 @@ public class TileUpdatePacketToClient extends PositionedPacket {
 		
 		supportsUpgrade = buf.readBoolean();
 		if (supportsUpgrade)
-			this.upgradeRendererState = new UpgradeRendererState(buf);
+			this.upgradeRendererState = (UpgradeRendererState) new UpgradeRendererState().fromBytes(buf);
 	}
 	
 	public static class TileUpdateClientHandler implements IMessageHandler<TileUpdatePacketToClient, IMessage> {

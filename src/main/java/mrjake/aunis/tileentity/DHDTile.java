@@ -60,7 +60,7 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	
 	@Override
 	public RendererState createRendererState(ByteBuf buf) {
-		return new DHDRendererState(buf);
+		return new DHDRendererState().fromBytes(buf);
 	}
 	
 	public void clearRendererButtons() {
@@ -89,7 +89,7 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	@Override
 	public UpgradeRendererState getUpgradeRendererState() {
 		if (upgradeRendererState == null)
-			upgradeRendererState = new UpgradeRendererState(pos);
+			upgradeRendererState = new UpgradeRendererState();
 		
 		return upgradeRendererState;
 	}
@@ -125,8 +125,8 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		
-		this.rendererState = new DHDRendererState(compound);
-		this.upgradeRendererState = new UpgradeRendererState(compound);
+		getRendererState().fromNBT(compound);
+		getUpgradeRendererState().fromNBT(compound);
 		
 		linkedGate = BlockPos.fromLong( compound.getLong("linkedGate") );
 		hasUpgrade = compound.getBoolean("hasUpgrade");

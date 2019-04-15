@@ -1,7 +1,6 @@
 package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class CrystalInfuserRendererState extends RendererState {
 	
@@ -16,14 +15,6 @@ public class CrystalInfuserRendererState extends RendererState {
 		this.energyStored = energyStored;
 		this.renderWaves = renderWaves;
 	}
-	
-	public CrystalInfuserRendererState(ByteBuf buf) {
-		super(buf);
-	}
-	
-	public CrystalInfuserRendererState(NBTTagCompound compound) {
-		super(compound);
-	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
@@ -32,13 +23,10 @@ public class CrystalInfuserRendererState extends RendererState {
 	}
 
 	@Override
-	public void fromBytes(ByteBuf buf) {
+	public RendererState fromBytes(ByteBuf buf) {
 		this.energyStored = buf.readInt();
 		this.renderWaves = buf.readBoolean();
-	}
-
-	@Override
-	protected String getKeyName() {
-		return "rendererState";
+		
+		return this;
 	}
 }

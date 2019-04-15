@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class AunisSoundHelper {
 	public static SoundEvent dhdPress;
@@ -24,6 +24,7 @@ public class AunisSoundHelper {
 	public static SoundEvent wormholeGo;
 	
 	public static SoundEvent wormholeFlicker;
+	public static SoundEvent ringsTransport;
 	
 	public static ResourceLocation ringRollStart;
 	public static ResourceLocation ringRollLoop;
@@ -70,6 +71,7 @@ public class AunisSoundHelper {
 		wormholeGo = new SoundEvent( new ResourceLocation("aunis", "wormhole_go") );
 		
 		wormholeFlicker = new SoundEvent( new ResourceLocation("aunis", "wormhole_flicker") );
+		ringsTransport = new SoundEvent( new ResourceLocation("aunis", "rings_transport") );
 		
 		ringRollStart = new ResourceLocation("aunis", "ring_roll_start");
 		ringRollLoop = new ResourceLocation("aunis", "ring_roll_loop");
@@ -80,7 +82,7 @@ public class AunisSoundHelper {
 		aunisSounds.put("wormhole", new AunisSound(AunisSoundHelper.wormholeLoop, SoundCategory.AMBIENT, true));
 	}
 	
-	public static void playSound(World world, BlockPos pos, SoundEvent soundEvent) {
+	public static void playSound(WorldClient world, BlockPos pos, SoundEvent soundEvent) {
 		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEvent, SoundCategory.AMBIENT, 1.0f, 1.0f, false);
 	}
 }

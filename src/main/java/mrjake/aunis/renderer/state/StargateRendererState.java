@@ -2,7 +2,6 @@ package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.stargate.StargateRenderer.EnumVortexState;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class StargateRendererState extends RendererState {
 	
@@ -67,19 +66,6 @@ public class StargateRendererState extends RendererState {
 		this.horizonUnstable = horizonInstable;
 	}
 	
-	public StargateRendererState(ByteBuf buf) {
-		super(buf);
-	}
-	
-	public StargateRendererState(NBTTagCompound compound) {
-		super(compound);
-	}
-	
-	@Override
-	protected String getKeyName() {
-		return "rendererState";
-	}
-	
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(activeChevrons);
@@ -96,7 +82,7 @@ public class StargateRendererState extends RendererState {
 	}
 	
 	@Override
-	public void fromBytes(ByteBuf buf) {		
+	public RendererState fromBytes(ByteBuf buf) {		
 		activeChevrons = buf.readInt();
 		isFinalActive = buf.readBoolean();
 				
@@ -112,5 +98,7 @@ public class StargateRendererState extends RendererState {
 		openingSoundPlayed = buf.readBoolean();
 		dialingComplete = buf.readBoolean();
 		horizonUnstable = buf.readBoolean();
+		
+		return this;
 	}
 }

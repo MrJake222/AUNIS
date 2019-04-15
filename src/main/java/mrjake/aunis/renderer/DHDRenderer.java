@@ -12,6 +12,7 @@ import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.renderer.state.DHDRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.tileentity.DHDTile;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -95,9 +96,9 @@ public class DHDRenderer implements ISpecialRenderer<DHDRendererState> {
 	
 	public void activateButton(int buttonID) {
 		if ( buttonID == 38 )
-			AunisSoundHelper.playSound(world, pos, AunisSoundHelper.dhdPressBRB);
+			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPressBRB);
 		else
-			AunisSoundHelper.playSound(world, pos, AunisSoundHelper.dhdPress);
+			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPress);
 		
 		if (activation == -1) {
 			if ( buttonID == 38 )

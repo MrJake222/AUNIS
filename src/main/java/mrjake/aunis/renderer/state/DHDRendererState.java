@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class DHDRendererState extends RendererState {
 	
@@ -18,23 +17,10 @@ public class DHDRendererState extends RendererState {
 	public DHDRendererState(List<Integer> activeButtons) {
 		this.activeButtons = activeButtons;
 	}
-	
-	public DHDRendererState(ByteBuf buf) {
-		super(buf);
-	}
-	
-	public DHDRendererState(NBTTagCompound compound) {
-		super(compound);
-	}
 
 	@Override
 	public String toString() {
 		return "activeButtons: " + activeButtons;
-	}
-	
-	@Override
-	protected String getKeyName() {
-		return "rendererState";
 	}
 	
 	public void toBytes(ByteBuf buf) {		
@@ -46,11 +32,13 @@ public class DHDRendererState extends RendererState {
 		
 	}
 	
-	public void fromBytes(ByteBuf buf) {		
+	public RendererState fromBytes(ByteBuf buf) {		
 		this.activeButtons = new ArrayList<Integer>();
 		int size = buf.readInt();
 		
 		for (int i=0; i<size; i++)
 			this.activeButtons.add( buf.readInt() );
+		
+		return this;
 	}
 }
