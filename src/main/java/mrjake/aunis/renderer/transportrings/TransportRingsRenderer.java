@@ -3,6 +3,7 @@ package mrjake.aunis.renderer.transportrings;
 import java.util.ArrayList;
 import java.util.List;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.state.TransportRingsRendererState;
 import mrjake.aunis.tileentity.TransportRingsTile;
@@ -14,7 +15,9 @@ public class TransportRingsRenderer implements ISpecialRenderer<TransportRingsRe
 
 	public static final int ringCount = 5; 
 	public static final int uprisingInterval = 5; 
-	public static final int fallingInterval = 5; 
+	public static final int fallingInterval = 5;
+	
+	public static final double animationDiv = 2.7; 
 	
 	private World world;
 	private List<Ring> rings;
@@ -64,7 +67,7 @@ public class TransportRingsRenderer implements ISpecialRenderer<TransportRingsRe
 					if (tick % uprisingInterval == 0 && tick != lastTick) {	
 						currentRing = (int)(tick/uprisingInterval) - 1;
 						
-//						Aunis.info("[uprising][currentRing="+currentRing+"]: lastRingAnimated: "+lastRingAnimated);
+//						Aunis.info("[uprising][currentRing="+currentRing+"]: tick: "+tick);
 						
 						// Handles correction when rings were not rendered
 						for (int ring=lastRingAnimated+1; ring<Math.min(currentRing, ringCount); ring++) {

@@ -27,6 +27,7 @@ public class AunisBlocks {
 	public static CrystalInfuserBlock crystalInfuserBlock = new CrystalInfuserBlock();
 	
 	public static TransportRingsBlock transportRingsBlock = new TransportRingsBlock();
+	public static InvisibleBlock invisibleBlock = new InvisibleBlock();
 	
 	private static Block[] blocks = {
 		naquadahOreBlock,
@@ -38,7 +39,8 @@ public class AunisBlocks {
 		dhdBlock,
 		crystalInfuserBlock,
 		
-		transportRingsBlock
+		transportRingsBlock,
+		invisibleBlock
 	};
 	
 	@SubscribeEvent

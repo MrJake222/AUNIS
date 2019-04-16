@@ -37,4 +37,7 @@ public class AunisProps {
 	 * Indicates Stargate's merge state
 	 */
 	public static final PropertyBool RENDER_BLOCK = PropertyBool.create("render_block");
+	
+	
+	public static final PropertyInteger LIGHT_LEVEL = PropertyInteger.create("light", 0, 15);
 }

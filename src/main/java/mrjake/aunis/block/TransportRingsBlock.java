@@ -34,7 +34,14 @@ private static final String blockName = "transport_rings_block";
 		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {			
-			ringsTile.animationStart();
+//			ringsTile.animationStart();
+//			ringsTile.listAllRings();
+			TransportRingsTile closestTile = ringsTile.getClosest();
+			
+			if (closestTile != null) {
+				ringsTile.startAnimationAndTeleport();
+				closestTile.startAnimationAndTeleport();
+			}
 			
 			return true;
 		}
@@ -43,13 +50,33 @@ private static final String blockName = "transport_rings_block";
 	}
 	
 	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		
+		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
+		
+		if (!world.isRemote) {
+			int x = pos.getX();
+			int z = pos.getZ();
+			
+			for (BlockPos newRings : BlockPos.getAllInBoxMutable(new BlockPos(x-25, 0, z-25), new BlockPos(x+25, 255, z+25))) {
+				if (world.getBlockState(newRings).getBlock() == AunisBlocks.transportRingsBlock && !pos.equals(newRings)) {
+					TransportRingsTile newRingsTile = (TransportRingsTile) world.getTileEntity(newRings);
+					int address = newRingsTile.getAddress();
+					
+					ringsTile.addRings(newRingsTile);
+					newRingsTile.addRings(ringsTile);
+					
+					Aunis.info(newRings + ": Found rings[address="+address+"]");
+				}
+			}
+		}
 	}
 	
 	@Override
-	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-		
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {
+		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
+
+		ringsTile.unlinkAllRings();
 	}
 	
 	// ------------------------------------------------------------------------

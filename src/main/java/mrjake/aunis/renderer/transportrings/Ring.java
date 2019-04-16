@@ -1,5 +1,6 @@
 package mrjake.aunis.renderer.transportrings;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
@@ -14,6 +15,7 @@ import net.minecraft.world.World;
 public class Ring {
 	
 	private World world;
+	private int index;
 	
 	private boolean shouldRender;
 	private boolean shouldAnimate;
@@ -25,6 +27,7 @@ public class Ring {
 	
 	public Ring(World world, int index) {
 		this.world = world;
+		this.index = index;
 		
 		this.shouldRender = false;
 		
@@ -52,14 +55,13 @@ public class Ring {
 		if (shouldAnimate) {
 			double effTick = world.getTotalWorldTime() - animationStart + partialTicks;
 			
-			effTick /= 1.8;
-			effTick /= 1.5;
+			effTick /= TransportRingsRenderer.animationDiv; // 2.7 = 1.8 * 1.5
+//			effTick /= 1.8;
+//			effTick /= 1.5;
 			
 			if (effTick > Math.PI) {
 				effTick = Math.PI;
 				shouldAnimate = false;
-				
-				
 			}
 			
 			float cos = MathHelper.cos((float) effTick);
