@@ -16,7 +16,7 @@ import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.stargate.merge.BlockPosition;
+import mrjake.aunis.stargate.merge.MergeHelper;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -35,6 +35,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	private BlockPos pos;
 	
 	private static final Vec3d ringLoc = new Vec3d(0.0, -0.122333, -0.000597);
+	private EnumFacing facing;	
 	private int horizontalRotation;	
 		
 	public StargateRenderer(StargateBaseTile te) {
@@ -44,7 +45,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		
 //		this.state.ringAngularRotation = 0;
 		
-		EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
+		facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 		
 		if ( facing.getAxis().getName() == "x" )
 			horizontalRotation = (int) facing.getOpposite().getHorizontalAngle();
@@ -71,7 +72,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	public void setState(StargateRendererState state) {
 		this.state = state;
 		
-		setActiveChevrons(state.activeChevrons, state.isFinalActive);
+		setActiveChevrons(state.getActiveChevrons(), state.isFinalActive());
 		
 		this.ringRollLoopPlayed = state.spinState.isSpinning;
 		ringSpinHelper = new StargateRingSpinHelper(world, pos, this, state.spinState);
@@ -85,21 +86,21 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	private int skyLight;
 	private int blockLight;
 	
-	public static List<BlockPosition> chevronBlocks = Arrays.asList(
-			new BlockPosition(-4, 2, 0), 
-			new BlockPosition(-5, 5, 0), 
-			new BlockPosition(5, 5, 0), 
-			new BlockPosition(4, 2, 0) ); 
+	public static List<BlockPos> chevronBlocks = Arrays.asList(
+			new BlockPos(-4, 2, 0), 
+			new BlockPos(-5, 5, 0), 
+			new BlockPos(5, 5, 0), 
+			new BlockPos(4, 2, 0) ); 
 	
 	private void calculateLightMap(float partialTicks) {
-		int subt = world.calculateSkylightSubtracted(partialTicks);
+//		int subt = world.calculateSkylightSubtracted(partialTicks);
 		skyLight = 0;
 		blockLight = 0;
 		
 		for (int i=0; i<chevronBlocks.size(); i++) {
-			BlockPos blockPos = chevronBlocks.get(i).rotateAndGlobal((int) world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL).getHorizontalAngle(), pos);
+			BlockPos blockPos = MergeHelper.rotateAndGlobal(chevronBlocks.get(i), world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL), pos); //((int) world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL).getHorizontalAngle(), pos);
 			
-			skyLight += world.getLightFor(EnumSkyBlock.SKY, blockPos) - subt;
+			skyLight += world.getLightFor(EnumSkyBlock.SKY, blockPos);// - subt;
 			blockLight += world.getLightFor(EnumSkyBlock.BLOCK, blockPos);
 		}
 		
@@ -118,6 +119,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			calculateLightMap((float) partialTicks);
 			
 			int clamped = MathHelper.clamp(skyLight+blockLight, 0, 15);
+			
+//			int clamped = (skyLight+blockLight) / 2;
 			
 			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, blockLight * 16, clamped * 16);
 			
@@ -490,8 +493,13 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 					
 					if (clearingChevrons) {
 						String tex = textureTemplate+"0.png";
-						
+
 						for (int i=0; i<9; i++) {
+//							BlockPos chevPos = MergeHelper.rotateAndGlobal(MergeHelper.chevronBlocks.get(0), facing, pos);
+//							StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(chevPos);
+//							
+//							memberTile.setLitUpClient(false);
+							
 							chevronTextureList.set(i, tex);
 						}
 					}

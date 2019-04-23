@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.packet.infuser.EnergyStoredToClient;
 import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient;
+import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.crystalinfuser.CrystalInfuserRenderer;
 import mrjake.aunis.renderer.state.CrystalInfuserRendererState;
@@ -38,7 +38,7 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 			if (world.isRemote) {
 				Aunis.info("TileUpdateRequestToServer " + pos.toString());
 				
-				AunisPacketHandler.INSTANCE.sendToServer(new TileUpdateRequestToServer(pos));
+				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos));
 			}
 		}
 		

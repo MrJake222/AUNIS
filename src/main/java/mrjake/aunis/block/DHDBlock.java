@@ -48,6 +48,11 @@ public class DHDBlock extends Block {
 		
 		setDefaultState(blockState.getBaseState()
 				.withProperty(AunisProps.ROTATION_HORIZONTAL, 0));
+		
+		setLightOpacity(0);
+		
+		setHardness(3.0f);
+		setHarvestLevel("pickaxe", 3);
 	}
 	
 	// ------------------------------------------------------------------------
@@ -95,30 +100,24 @@ public class DHDBlock extends Block {
 								
 				// Back side of block
 				if (facing == dhdFacingOpposite) {
-					ITileEntityUpgradeable upgradeable = (ITileEntityUpgradeable) worldIn.getTileEntity(pos);
-	
-					return UpgradeHelper.upgradeInteract((EntityPlayerMP) playerIn, upgradeable, itemStack);				
-				}
-				
-				/*
-				 * Check if player is clicking front of the DHD
-				 * If so, check if control/energy crystal is in slot
-				 * 	True: eject the crystal into player's inventory
-				 * 	False: Check if holding the crystal, if true then insert it
-				 */
-				DHDTile dhdTile = (DHDTile) worldIn.getTileEntity(pos);
-				ItemStackHandler itemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-				
-				ItemStack slotItemStack = itemStackHandler.getStackInSlot(0);
-				ItemStack heldItemStack = playerIn.getHeldItem(hand);
-								
-				if (facing == dhdFacingOpposite.getOpposite().rotateYCCW()) {
+					DHDTile dhdTile = (DHDTile) worldIn.getTileEntity(pos);
+					ItemStackHandler itemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+					
+					ItemStack slotItemStack = itemStackHandler.getStackInSlot(0);
+					ItemStack heldItemStack = playerIn.getHeldItem(hand);
+					
 					if (slotItemStack.isEmpty()) {
 						if (heldItemStack.getItem() == AunisItems.crystalControlDhd) {
 							// Insert the crystal
 							
 							ItemStack remainder = itemStackHandler.insertItem(0, heldItemStack, false);
 							playerIn.setHeldItem(hand, remainder);
+						}
+						
+						else {
+							ITileEntityUpgradeable upgradeable = (ITileEntityUpgradeable) worldIn.getTileEntity(pos);
+							
+							return UpgradeHelper.upgradeInteract((EntityPlayerMP) playerIn, upgradeable, itemStack);
 						}
 					}
 					

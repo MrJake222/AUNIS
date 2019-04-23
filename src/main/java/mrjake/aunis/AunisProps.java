@@ -2,6 +2,9 @@ package mrjake.aunis;
 
 import java.util.Arrays;
 
+import mrjake.aunis.block.StargateMemberBlock;
+import mrjake.aunis.property.PropertyMemberVariant;
+import mrjake.aunis.property.PropertyUnlistedCamoBlockState;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
@@ -38,6 +41,14 @@ public class AunisProps {
 	 */
 	public static final PropertyBool RENDER_BLOCK = PropertyBool.create("render_block");
 	
+	/**
+	 * Defines {@link StargateMemberBlock}'s variant.
+	 */
+	public static final PropertyMemberVariant MEMBER_VARIANT = PropertyMemberVariant.create("member_variant");
 	
-	public static final PropertyInteger LIGHT_LEVEL = PropertyInteger.create("light", 0, 15);
+	
+	/**
+	 * Contains camouflage blockstate. Used later in rendering.
+	 */
+	public static final PropertyUnlistedCamoBlockState CAMO_BLOCKSTATE = new PropertyUnlistedCamoBlockState();
 }

@@ -1,4 +1,4 @@
-package mrjake.aunis.packet.gate.tileUpdate;
+package mrjake.aunis.packet.update.renderer;
 
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
@@ -9,18 +9,18 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class TileUpdateRequestToServer extends PositionedPacket {
-	public TileUpdateRequestToServer() {}	
+public class RendererUpdateRequestToServer extends PositionedPacket {
+	public RendererUpdateRequestToServer() {}	
 	
 	
-	public TileUpdateRequestToServer(BlockPos pos) {
+	public RendererUpdateRequestToServer(BlockPos pos) {
 		super(pos);
 	}
 	
-	public static class TileUpdateServerHandler implements IMessageHandler<TileUpdateRequestToServer, TileUpdatePacketToClient> {
+	public static class TileUpdateServerHandler implements IMessageHandler<RendererUpdateRequestToServer, RendererUpdatePacketToClient> {
 
 		@Override
-		public TileUpdatePacketToClient onMessage(TileUpdateRequestToServer message, MessageContext ctx) {
+		public RendererUpdatePacketToClient onMessage(RendererUpdateRequestToServer message, MessageContext ctx) {
 						
 			WorldServer world = ctx.getServerHandler().player.getServerWorld();
 			
@@ -29,9 +29,9 @@ public class TileUpdateRequestToServer extends PositionedPacket {
 				
 				if (te != null) {
 					if (te instanceof ITileEntityUpgradeable)
-						return new TileUpdatePacketToClient(message.pos, ((ITileEntityRendered) te).getRendererState(), ((ITileEntityUpgradeable) te).getUpgradeRendererState());
+						return new RendererUpdatePacketToClient(message.pos, ((ITileEntityRendered) te).getRendererState(), ((ITileEntityUpgradeable) te).getUpgradeRendererState());
 					else
-						return new TileUpdatePacketToClient(message.pos, ((ITileEntityRendered) te).getRendererState());
+						return new RendererUpdatePacketToClient(message.pos, ((ITileEntityRendered) te).getRendererState());
 				}
 				
 			}

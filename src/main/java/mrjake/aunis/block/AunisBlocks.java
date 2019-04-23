@@ -1,8 +1,11 @@
 package mrjake.aunis.block;
 
+import mrjake.aunis.item.StargateMemberItemBlock;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.tileentity.StargateMemberTile;
+import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -14,57 +17,72 @@ import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
 
 @EventBusSubscriber
 public class AunisBlocks {
 	public static NaquadahOreBlock naquadahOreBlock = new NaquadahOreBlock();
 	
-	public static StargateBaseBlock stargateBaseBlock = new StargateBaseBlock();
-	public static StargateMemberBlock ringBlock = new StargateMemberBlock("stargate_ring_block");
-	public static StargateMemberBlock chevronBlock = new StargateMemberBlock("stargate_chevron_block");
-	
+	public static StargateBaseBlock stargateBaseBlock = new StargateBaseBlock();	
 	public static DHDBlock dhdBlock = new DHDBlock();
 	public static CrystalInfuserBlock crystalInfuserBlock = new CrystalInfuserBlock();
 	
 	public static TransportRingsBlock transportRingsBlock = new TransportRingsBlock();
-	public static InvisibleBlock invisibleBlock = new InvisibleBlock();
+	public static TRControllerBlock trControllerBlock = new TRControllerBlock();
+	public static InvisibleBlock invisibleBlock = new InvisibleBlock();	
+	
+	
+	// -----------------------------------------------------------------------------
+	public static StargateMemberBlock stargateMemberBlock = new StargateMemberBlock();
+	
 	
 	private static Block[] blocks = {
 		naquadahOreBlock,
 		
 		stargateBaseBlock,
-		ringBlock,
-		chevronBlock,
 		
 		dhdBlock,
 		crystalInfuserBlock,
 		
 		transportRingsBlock,
+		trControllerBlock,
 		invisibleBlock
 	};
 	
 	@SubscribeEvent
 	public static void onRegisterBlocks(Register<Block> event) {
-		event.getRegistry().registerAll(blocks);
+		IForgeRegistry<Block> registry = event.getRegistry();
+		
+		registry.registerAll(blocks);
+		registry.register(stargateMemberBlock);
 		
 		GameRegistry.registerTileEntity(StargateBaseTile.class, AunisBlocks.stargateBaseBlock.getRegistryName());
+		GameRegistry.registerTileEntity(StargateMemberTile.class, AunisBlocks.stargateMemberBlock.getRegistryName());
 		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.dhdBlock.getRegistryName());
 		GameRegistry.registerTileEntity(CrystalInfuserTile.class, AunisBlocks.crystalInfuserBlock.getRegistryName());
 		GameRegistry.registerTileEntity(TransportRingsTile.class, AunisBlocks.transportRingsBlock.getRegistryName());
+		GameRegistry.registerTileEntity(TRControllerTile.class, AunisBlocks.trControllerBlock.getRegistryName());
 	}
 	
 	@SubscribeEvent
 	public static void onRegisterItems(Register<Item> event) {	
-		for (Block block : blocks) {
-			event.getRegistry().register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
-		}
+		IForgeRegistry<Item> registry = event.getRegistry();
+		
+		for (Block block : blocks)
+			registry.register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
+		
+		registry.register(new StargateMemberItemBlock(stargateMemberBlock));		
 	}
 	
 	@SubscribeEvent
 	public static void onModelRegistry(ModelRegistryEvent event) {
-		for (Block block : blocks) {
+		for (Block block : blocks) {			
 			ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(block), 0, new ModelResourceLocation(block.getRegistryName(), "inventory"));
 		}
+		
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMemberBlock), 0, new ModelResourceLocation("aunis:stargate_member_block_ring"));
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMemberBlock), 8, new ModelResourceLocation("aunis:stargate_member_block_chevron"));
+//		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMemberBlock), 8, new ModelResourceLocation(stargateMemberBlock.getRegistryName(), "inventory,member_variant=chevron"));
 	}
 }
 

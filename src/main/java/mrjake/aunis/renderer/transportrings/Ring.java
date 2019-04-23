@@ -1,6 +1,5 @@
 package mrjake.aunis.renderer.transportrings;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
@@ -15,7 +14,7 @@ import net.minecraft.world.World;
 public class Ring {
 	
 	private World world;
-	private int index;
+//	private int index;
 	
 	private boolean shouldRender;
 	private boolean shouldAnimate;
@@ -27,7 +26,7 @@ public class Ring {
 	
 	public Ring(World world, int index) {
 		this.world = world;
-		this.index = index;
+//		this.index = index;
 		
 		this.shouldRender = false;
 		

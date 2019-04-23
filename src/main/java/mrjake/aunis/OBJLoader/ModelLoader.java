@@ -70,7 +70,9 @@ public class ModelLoader {
 		CrystalInfuserPylon("CrystalInfuserPylon", "crystalinfuser/CrystalInfuserPylon.obj", "stargate/gatering7.png"),
 		CrystalInfuserBase("CrystalInfuserBase", "crystalinfuser/CrystalInfuserBase.obj", "stargate/gatering7.png"),
 		
-		RingsBlack("RingsBlack", "transportrings/rings_black.obj", "transportrings/rings_black.png");
+		RingsBlack("RingsBlack", "transportrings/rings_black.obj", "transportrings/rings_black.png"),
+		RingsController_goauld("RingsController_goauld", "transportrings/plate_goauld.obj", "transportrings/goauld_panel.png"),
+		RingsController_goauld_buttons("RingsController_goauld_buttons", "transportrings/buttons_goauld.obj", "transportrings/goauld_buttons.png");
 		
 		private String name;
 		private String modelPath;

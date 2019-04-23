@@ -1,7 +1,6 @@
 package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.renderer.state.RendererState;
 
 /**
  * Rings state.

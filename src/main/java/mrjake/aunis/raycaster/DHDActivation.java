@@ -1,6 +1,5 @@
-package mrjake.aunis.dhd;
+package mrjake.aunis.raycaster;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,14 +9,18 @@ import org.lwjgl.util.vector.Vector3f;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.raycaster.util.Box;
+import mrjake.aunis.raycaster.util.Ray;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class DHDActivation {
-	private static List<Vector3f> dhdVertices = Arrays.asList(
+public class DHDActivation extends Activation {
+	public static final DHDActivation INSTANCE = new DHDActivation();
+	
+	private static final List<Vector3f> dhdVertices = Arrays.asList(
 			new Vector3f( 0.194732f, 0.41862f, 0.734536f ),
 			new Vector3f( 0.131432f, 0.314995f, 0.884427f ),
 			new Vector3f( 0.071232f, 0.21041f, 1.02261f ),
@@ -77,64 +80,43 @@ public class DHDActivation {
 			new Vector3f( 0.013022f, 0.221544f, 1.016017f )
 	);
 	
-	public static void onActivated(World world, BlockPos pos, EntityPlayer player) {
+	@Override
+	protected List<Vector3f> getVertices() {
+		return dhdVertices;
+	}
+	
+	@Override
+	protected int getRayGroupCount() {
+		return 3;
+	}
+
+	
+	private int button;
+	
+	public void onActivated(World world, BlockPos pos, EntityPlayer player) {
 		float rotation = world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
+		button = -1;
 		
-		// Last common function, x=a, y=b
-		Ray lastRay = null;
-		Ray firstRay = null;
-		List<Ray> brbRayList = new ArrayList<Ray>();
-		Vec3d lookVec = player.getLookVec();
-		
-		int button = -1;
-		boolean breakLoop = false;
-		
-		for (int x=1; x<=dhdVertices.size()/3; x++) {
-		//for (int x=1; x<=1; x++) {
-			Ray currentRay;
-			
-			// Last run, current ray should be the first one
-			if (x == dhdVertices.size()/3)
-				currentRay = firstRay;
-			else 
-				currentRay = new Ray( getTransposedRay(x, rotation, pos, player) );
-			
-			// First run, we need to calculate the first right limiter function
-			if (lastRay == null) {
-				lastRay = firstRay = new Ray( getTransposedRay(0, rotation, pos, player) );	
-				//brbRayList.add(firstRay);
-			}
-			
-			List<Ray> transverseRays = new ArrayList<Ray>();
-			
-			for (int i=0; i<3; i++) {
-				Ray r = new Ray( currentRay.getVert(i), lastRay.getVert(i) );
-				transverseRays.add( r );
-				
-				if ( i == 2 ) {
-					brbRayList.add( r );
-				}
-			}	
-			
-			for (int i=0; i<2; i++) {					
-				Box box = new Box(currentRay, lastRay, transverseRays.get(i), transverseRays.get(i+1), i);
-				
-				if (box.checkForPointInBox( new Vector2f( (float)lookVec.x, (float)lookVec.z ) )) {
-					button = x-1;
-					if (i>0)
-						button += 19;
-					
-					breakLoop = true;
-					break;
-				}
-			}
-			
-			if (breakLoop)
-				break;
-			
-			lastRay = currentRay;
-		}
-		
+		super.onActivated(world, pos, player, rotation);
+	}
+	
+	private static final Vector3f TRANSLATION = new Vector3f(0.5f, 0, 0.5f); 
+	
+	@Override
+	protected Vector3f getTranslation(World world, BlockPos pos) {
+		return TRANSLATION;
+	}
+	
+	@Override
+	protected void check(World world, BlockPos pos, EntityPlayer player, int x, int i) {
+		button = x-1;
+	
+		if (i>0)
+			button += 19;
+	}
+	
+	@Override
+	protected void brbCheck(List<Ray> brbRayList, Vec3d lookVec, EntityPlayer player, BlockPos pos) {
 		if (button == -1) {				
 			Box box = new Box( brbRayList );
 			if (box.checkForPointInBox( new Vector2f( (float)lookVec.x, (float)lookVec.z ) )) {
@@ -147,22 +129,5 @@ public class DHDActivation {
 
 			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(button, pos) );
 		}
-	}
-	
-	private static Vector2f getTransposed(Vector3f v, float rotation, BlockPos pos, EntityPlayer player) {
-		DHDVertex current = new DHDVertex(v.x, v.y, v.z);
-
-		return current.rotate( rotation ).localToGlobal(pos).calculateDiffrence(player).getViewport( player.getLookVec() );
-	}
-	
-	// Ray = set of 3 vertices
-	private static List<Vector2f> getTransposedRay(int rayIndex, float rotation, BlockPos pos, EntityPlayer player) {
-		List<Vector2f> out = new ArrayList<Vector2f>();
-		
-		for (int i=0; i<3; i++) {
-			out.add( getTransposed( dhdVertices.get(rayIndex*3 + i), rotation, pos, player) );
-		}
-		
-		return out;
 	}
 }

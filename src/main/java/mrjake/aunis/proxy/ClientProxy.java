@@ -1,14 +1,18 @@
 package mrjake.aunis.proxy;
 
+import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.block.color.GrassBlockColor;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.color.CrystalControlDHDItemColor;
 import mrjake.aunis.tesr.CrystalInfuserTESR;
 import mrjake.aunis.tesr.DHD_TESR;
 import mrjake.aunis.tesr.StargateTESR;
+import mrjake.aunis.tesr.TRControllerTESR;
 import mrjake.aunis.tesr.TransportRingsTESR;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -24,7 +28,8 @@ public class ClientProxy implements IProxy {
 	}
  
     public void init(FMLInitializationEvent event) {
-		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new CrystalControlDHDItemColor(), AunisItems.crystalControlDhd);
+    	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new CrystalControlDHDItemColor(), AunisItems.crystalControlDhd);
+		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.stargateMemberBlock);
     }
  
     public void postInit(FMLPostInitializationEvent event) {
@@ -43,5 +48,6 @@ public class ClientProxy implements IProxy {
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, new CrystalInfuserTESR());
 		ClientRegistry.bindTileEntitySpecialRenderer(TransportRingsTile.class, new TransportRingsTESR());
+		ClientRegistry.bindTileEntitySpecialRenderer(TRControllerTile.class, new TRControllerTESR());
 	}
 }

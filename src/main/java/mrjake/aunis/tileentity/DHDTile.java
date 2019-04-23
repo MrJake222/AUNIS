@@ -3,7 +3,7 @@ package mrjake.aunis.tileentity;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
+import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.state.DHDRendererState;
@@ -148,7 +148,7 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 			firstTick = false;
 			
 			if (world.isRemote)
-				AunisPacketHandler.INSTANCE.sendToServer( new TileUpdateRequestToServer(pos) );
+				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos) );
 		}
 		
 		// Server

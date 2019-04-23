@@ -1,4 +1,4 @@
-package mrjake.aunis.packet.gate.tileUpdate;
+package mrjake.aunis.packet.update.renderer;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.PositionedPacket;
@@ -14,22 +14,22 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class TileUpdatePacketToClient extends PositionedPacket {
-	public TileUpdatePacketToClient() {}
+public class RendererUpdatePacketToClient extends PositionedPacket {
+	public RendererUpdatePacketToClient() {}
 	
 	private RendererState rendererState;
 	
 	private boolean supportsUpgrade;
 	private UpgradeRendererState upgradeRendererState;
 	
-	public TileUpdatePacketToClient(BlockPos pos, RendererState rendererState) {
+	public RendererUpdatePacketToClient(BlockPos pos, RendererState rendererState) {
 		super(pos);
 		
 		this.rendererState = rendererState;
 		this.supportsUpgrade = false;
 	}
 	
-	public TileUpdatePacketToClient(BlockPos pos, RendererState rendererState, UpgradeRendererState upgradeRendererState) {
+	public RendererUpdatePacketToClient(BlockPos pos, RendererState rendererState, UpgradeRendererState upgradeRendererState) {
 		this(pos, rendererState);
 		
 		this.supportsUpgrade = true;
@@ -59,11 +59,11 @@ public class TileUpdatePacketToClient extends PositionedPacket {
 			this.upgradeRendererState = (UpgradeRendererState) new UpgradeRendererState().fromBytes(buf);
 	}
 	
-	public static class TileUpdateClientHandler implements IMessageHandler<TileUpdatePacketToClient, IMessage> {
+	public static class TileUpdateClientHandler implements IMessageHandler<RendererUpdatePacketToClient, IMessage> {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public IMessage onMessage(TileUpdatePacketToClient message, MessageContext ctx) {			
+		public IMessage onMessage(RendererUpdatePacketToClient message, MessageContext ctx) {			
 			EntityPlayerSP player = Minecraft.getMinecraft().player;
 			World world = player.getEntityWorld();
 			

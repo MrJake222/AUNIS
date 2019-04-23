@@ -6,20 +6,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.input.Mouse;
+
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.gui.RingsGUI;
+import mrjake.aunis.gui.state.RingsGuiState;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient;
 import mrjake.aunis.packet.transportrings.StartRingsAnimationToClient;
+import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.TransportRingsRendererState;
-import mrjake.aunis.renderer.transportrings.PlayerFadeOutRenderEvent;
 import mrjake.aunis.renderer.transportrings.TransportRingsRenderer;
-import net.minecraft.block.state.IBlockState;
+import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.state.ITileEntityStateProvider;
+import mrjake.aunis.state.State;
+import mrjake.aunis.transportrings.TransportRings;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -28,16 +34,24 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
-public class TransportRingsTile extends TileEntity implements ITileEntityRendered, ITickable {
+public class TransportRingsTile extends TileEntity implements ITileEntityRendered, ITickable, ITileEntityStateProvider {
 
+//	public TransportRingsTile() {
+////		stateMap.put(EnumStateType.GUI_STATE, new RingsGuiState());
+//	}
+	
 	// ---------------------------------------------------------------------------------
 	// Ticking
 	private boolean firstTick = true;
+	private boolean waitForStart = false;
 	private boolean waitForFadeOut = false;
 	private boolean waitForTeleport = false;
 	private boolean waitForClearout = false;
+	
+	private long buttonPressed;
 	
 //	private boolean doLightUpdate = false;
 	
@@ -49,21 +63,32 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	
 //	private long tickStartFog;
 	
+	private List<Entity> teleportList;
+	
 	@Override
 	public void update() {
 		if (firstTick) {
 			firstTick = false;
 			
 			if (world.isRemote) {
-				AunisPacketHandler.INSTANCE.sendToServer(new TileUpdateRequestToServer(pos));
+				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos));
 			}
 		}
 		
 		if (!world.isRemote) {
-			long effTick = world.getTotalWorldTime() - getTransportRingsRendererState().animationStart;
+			long effTick = world.getTotalWorldTime();
 			
-			// 30 - offset
-			if (waitForFadeOut && effTick >= fadeOutTimeout) {
+			effTick -= waitForStart ? buttonPressed : getTransportRingsRendererState().animationStart;
+			
+			if (waitForStart && effTick >= 20) {
+				waitForStart = false;
+				waitForFadeOut = true;
+				
+				animationStart();
+				setBarrierBlocks(true);		
+			}
+			
+			else if (waitForFadeOut && effTick >= fadeOutTimeout) {
 				waitForFadeOut = false;
 				waitForTeleport = true;
 				
@@ -71,7 +96,7 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 				
 //				tickStartFog = world.getTotalWorldTime();
 				
-				
+				teleportList = world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.add(-2, 2, -2), pos.add(3, 6, 3)));
 				
 				for (Entity entity : teleportList) {
 					if (entity instanceof EntityPlayerMP) {
@@ -85,13 +110,14 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 				waitForTeleport = false;
 				waitForClearout = true;
 				
-				BlockPos target = ringsMap.get(closestAddress);
-				BlockPos teleportVector = target.subtract(pos);
+				BlockPos teleportVector = targetRingsPos.subtract(pos);
 				
 				for (Entity entity : teleportList) {
-					BlockPos ePos = entity.getPosition().add(teleportVector);
-										
-					entity.setPositionAndUpdate(ePos.getX(), ePos.getY(), ePos.getZ());
+					if (!excludedEntities.contains(entity)) {
+						BlockPos ePos = entity.getPosition().add(teleportVector);		
+						
+						entity.setPositionAndUpdate(ePos.getX(), ePos.getY(), ePos.getZ());
+					}
 				}
 			}
 				
@@ -102,7 +128,7 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 			}
 			
 			
-			// Setting light to blocks
+//			// Setting light to blocks
 //			if (doLightUpdate) {
 //				int light = (int) (PlayerFadeOutRenderEvent.calcFog(world, tickStartFog, 0) * 15.0f);
 //				
@@ -132,91 +158,53 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	
 	
 	// ---------------------------------------------------------------------------------
-	// Rings network
-	private int address = -1;
-	private Map<Integer, BlockPos> ringsMap = new HashMap<>();
-	
-	private double closestDistance;
-	private int closestAddress = -1;
-	
-	private List<Entity> teleportList;
-	
-	public int getAddress() {
-		if (address == -1) {
-			address = (int)Math.round(Math.random() * 100);
-		}
-		
-		return address;
-	}
-	
-	public TransportRingsTile getClosest() {
-		BlockPos ringsPos = ringsMap.get(closestAddress);
-		
-		return ringsPos == null ? null : (TransportRingsTile) world.getTileEntity(ringsPos);
-	}
-	
-	public void addRings(TransportRingsTile ringsTile) {
-		ringsMap.put(ringsTile.getAddress(), ringsTile.getPos());
-		
-		checkClosest(ringsTile.getPos(), ringsTile.getAddress());
-	}
-	
-	public void removeRings(int address) {
-		ringsMap.remove(address);
-		
-		if (address == closestAddress) {
-			Aunis.info("resetting closest of " + getAddress());
-			
-			resetClosest();
-		}
-	}
-	
-	public void resetClosest() {
-		closestAddress = -1;
-		
-		for (int address : ringsMap.keySet()) {
-			checkClosest(ringsMap.get(address), address);
-		}
-	}
-	
-	/**
-	 * Iterates over ringsMap and calls removeRings() on all of them
-	 */
-	public void unlinkAllRings() {
-		for (BlockPos rings : ringsMap.values()) {
-			TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(rings);
-			
-			ringsTile.removeRings(getAddress());
-		}
-	}
-	
-	public void listAllRings() {
-		Aunis.info(pos + " rings list: ");
-		
-		for (Integer address : ringsMap.keySet()) {
-			Aunis.info("\t"+address+": "+ringsMap.get(address) + (address == closestAddress ? " CLOSEST" : ""));
-		}
-	}
-	
-	private void checkClosest(BlockPos targetPos, int address) {
-		double distance = targetPos.getDistance(pos.getX(), pos.getY(), pos.getZ());
-		
-		if (distance < closestDistance || closestAddress == -1) {
-			closestDistance = distance;
-			closestAddress = address;
-		}
-	}
-	
-	// ---------------------------------------------------------------------------------
 	// Teleportation
+	private BlockPos targetRingsPos;
+	private List<Entity> excludedEntities;
 	
-	public void startAnimationAndTeleport() {
-		animationStart();
+	public List<Entity> startAnimationAndTeleport(BlockPos targetRingsPos, List<Entity> excludedEntities) {
+		this.targetRingsPos = targetRingsPos;
+		this.excludedEntities = excludedEntities;
 		
-		setBarrierBlocks(true);		
-		teleportList = world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.add(-2, 2, -2), pos.add(3, 6, 3)));
+		waitForStart = true;
+		buttonPressed = world.getTotalWorldTime();
 		
-		waitForFadeOut = true;
+		return world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.add(-2, 2, -2), pos.add(3, 6, 3)));
+	}
+	
+	public void animationStart() {
+		getTransportRingsRendererState().animationStart = world.getTotalWorldTime();
+		getTransportRingsRendererState().ringsUprising = true;
+		getTransportRingsRendererState().isAnimationActive = true;
+				
+		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
+		AunisPacketHandler.INSTANCE.sendToAllAround(new StartRingsAnimationToClient(pos, getTransportRingsRendererState().animationStart), point);
+	}
+
+	/**
+	 * Checks if Rings are linked to Rings at given address.
+	 * If yes, it starts teleportation.
+	 * 
+	 * @param address Target rings address
+	 */
+	public void attemptTransportTo(int address) {
+		TransportRings rings = ringsMap.get(address);
+				
+		// Binding exists
+		if (rings != null) {
+			BlockPos targetRingsPos = rings.getPos();
+			
+			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.add(-2, 2, -2), pos.add(3, 6, 3)));
+			
+			TransportRingsTile targetRingsTile = (TransportRingsTile) world.getTileEntity(targetRingsPos);
+			
+			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite);
+			startAnimationAndTeleport(targetRingsPos, excludedEntities);
+		}
+		
+		else {
+			Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.non_existing_address")), true);
+		}
 	}
 	
 	
@@ -239,9 +227,9 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 						
 						BlockPos newPos = new BlockPos(this.pos).add(invPos.rotate(rotation)).add(0, y, 0);
 												
-						world.setBlockState(newPos, AunisBlocks.invisibleBlock.getDefaultState());
+						world.setBlockState(newPos, AunisBlocks.invisibleBlock.getDefaultState(), 3);
 						
-//						if (y == 1)
+//							if (y == 1)
 						invisibleBlocks.add(newPos);
 					}
 				}
@@ -250,11 +238,107 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 		
 		else {
 			for (BlockPos invPos : invisibleBlocks) {
+//					world.setBlockState(invPos, Blocks.DIAMOND_BLOCK.getDefaultState(), 3);
 				world.setBlockToAir(invPos);
 			}
 		}
-//		if (set)world.setBlockState(pos.add(0,2,0), Blocks.GLASS.getDefaultState());
+//			if (set)world.setBlockState(pos.add(0,2,0), Blocks.GLASS.getDefaultState());
 	}
+	
+	
+	// ---------------------------------------------------------------------------------
+	// Controller
+	private boolean isLinked = false;
+	
+	public void setLinked(boolean linked) {
+		isLinked = linked;
+		
+		markDirty();
+	}
+	
+	public boolean isLinked() {
+		return isLinked;
+	}
+	
+	
+	// ---------------------------------------------------------------------------------
+	// Rings network
+	private TransportRings rings;
+	private TransportRings getRings() {
+		if (rings == null)
+			rings = new TransportRings(pos);
+		
+		return rings;
+	}
+	
+	/**
+	 * Gets clone of {@link TransportRingsTile#rings} object. Sets the distance from
+	 * callerPos to this tile. Called from {@link TransportRingsTile#addRings(TransportRingsTile)}.
+	 * 
+	 * @param callerPos - calling tile position
+	 * @return - clone of this rings info
+	 */
+	public TransportRings getClonedRings(BlockPos callerPos) {
+		return getRings().cloneWithNewDistance(callerPos);
+	}
+	
+	/**
+	 * Contains neighborhooding rings(clones of {@link TransportRingsTile#rings}) with distance set to this tile
+	 */
+	public Map<Integer, TransportRings> ringsMap = new HashMap<>();
+	
+	/**
+	 * Adds rings to {@link TransportRingsTile#ringsMap}, by cloning caller's {@link TransportRingsTile#rings} and
+	 * setting distance
+	 * 
+	 * @param caller - Caller rings tile
+	 */
+	public void addRings(TransportRingsTile caller) {
+		TransportRings clonedRings = caller.getClonedRings(this.pos);
+		
+		if (clonedRings.isInGrid()) {
+			ringsMap.put(clonedRings.getAddress(), clonedRings);
+			
+			markDirty();
+		}
+	}
+	
+	public void removeRings(int address) {	
+		if (ringsMap.remove(address) != null)
+			markDirty();
+	}
+	
+	public void removeAllRings() {
+		for (TransportRings rings : ringsMap.values()) {
+			
+			TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(rings.getPos());
+			ringsTile.removeRings(getRings().getAddress());
+		}
+	}
+	
+	public void setRingsParams(int address, String name) {
+		removeAllRings();
+		
+		getRings().setAddress(address);
+		getRings().setName(name);
+		
+		int x = pos.getX();
+		int z = pos.getZ();
+		
+		for (BlockPos newRings : BlockPos.getAllInBoxMutable(new BlockPos(x-25, 0, z-25), new BlockPos(x+25, 255, z+25))) {
+			
+			if (world.getBlockState(newRings).getBlock() == AunisBlocks.transportRingsBlock && !pos.equals(newRings)) {
+				
+				TransportRingsTile newRingsTile = (TransportRingsTile) world.getTileEntity(newRings);		
+				
+				this.addRings(newRingsTile);
+				newRingsTile.addRings(this);
+			}
+		}
+		
+		markDirty();
+	}
+	
 	
 	// ---------------------------------------------------------------------------------
 	// NBT data
@@ -263,19 +347,22 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		getRendererState().toNBT(compound);
 		
-		compound.setInteger("address", address);
+		compound.setTag("ringsData", getRings().serializeNBT());
+		compound.setBoolean("isLinked", isLinked);
+		
 		compound.setInteger("ringsMapLength", ringsMap.size());
 		
 		int i = 0;
-		for (int address : ringsMap.keySet()) {
-			compound.setInteger("ringsAddress" + i, address);
-			compound.setLong("ringsPos" + i, ringsMap.get(address).toLong());
+		for (TransportRings rings : ringsMap.values()) {
+			compound.setTag("ringsMap" + i, rings.serializeNBT());
 			
 			i++;
 		}
 		
-		compound.setDouble("closestDistance", closestDistance);
-		compound.setInteger("closestAddress", closestAddress);
+		
+//		for (EnumStateType stateType : stateMap.keySet()) {
+//			compound.setTag(stateType.getKey(), stateMap.get(stateType).serializeNBT());
+//		}
 		
 		return super.writeToNBT(compound);
 	}
@@ -284,7 +371,10 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	public void readFromNBT(NBTTagCompound compound) {
 		getRendererState().fromNBT(compound);
 		
-		address = compound.hasKey("address") ? compound.getInteger("address") : getAddress();
+		if (compound.hasKey("ringsData"))
+			getRings().deserializeNBT((NBTTagCompound) compound.getTag("ringsData"));
+		
+		isLinked = compound.getBoolean("isLinked");
 		
 		if (compound.hasKey("ringsMapLength")) {
 			int len = compound.getInteger("ringsMapLength");
@@ -292,34 +382,78 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 			ringsMap.clear();
 			
 			for (int i=0; i<len; i++) {
-				int addr = compound.getInteger("ringsAddress" + i);
-				BlockPos pos = BlockPos.fromLong(compound.getLong("ringsPos" + i));
+				TransportRings rings = new TransportRings(null).deserializeNBT((NBTTagCompound) compound.getTag("ringsMap" + i));
 				
-				ringsMap.put(addr, pos);
+				ringsMap.put(rings.getAddress(), rings);
 			}
 		}
 		
-		closestDistance = compound.getDouble("closestDistance");
-		closestAddress = compound.getInteger("closestAddress");
+//		for (EnumStateType stateType : stateMap.keySet()) {
+//			State state = stateMap.get(stateType);
+//			
+//			state.deserializeNBT((NBTTagCompound) compound.getTag(stateType.getKey()));
+//			
+//			stateMap.put(stateType, state);
+//		}
 		
 		super.readFromNBT(compound);
 	}
 	
 	
-	public void animationStart() {
-		getTransportRingsRendererState().animationStart = world.getTotalWorldTime();
-		getTransportRingsRendererState().ringsUprising = true;
-		getTransportRingsRendererState().isAnimationActive = true;
-		
-		Aunis.info("animationStart: " + getTransportRingsRendererState().animationStart);
-		
-		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-		AunisPacketHandler.INSTANCE.sendToAllAround(new StartRingsAnimationToClient(pos, getTransportRingsRendererState().animationStart), point);
+	// ---------------------------------------------------------------------------------	
+	// States
+//	private Map<EnumStateType, State> stateMap = new HashMap<>();
+
+	@Override
+	public State getState(EnumStateType stateType) {
+		switch (stateType) {
+			case GUI_STATE:
+				return new RingsGuiState(getRings(), ringsMap.values());
+				
+			default:
+				return null;
+		}
 	}
 	
+	@Override
+	public State createState(EnumStateType stateType) {
+		switch (stateType) {
+			case GUI_STATE:
+				return new RingsGuiState();
+				
+			default:
+				return null;
+		}
+	}
+	
+	private RingsGUI openGui;
+	
+	@Override
+	public void setState(EnumStateType stateType, State state) {
+		Mouse.setGrabbed(false);
+		
+		switch (stateType) {
+			case GUI_STATE:
+				
+				if (openGui == null || !openGui.isOpen) {
+					openGui = new RingsGUI(pos, (RingsGuiState) state);
+					Minecraft.getMinecraft().displayGuiScreen(openGui);
+				}
+				
+				else {
+					openGui.state = (RingsGuiState) state;
+				}
+				
+				break;
+				
+			default:
+				break;
+		}
+	}
 	
 	// ---------------------------------------------------------------------------------
 	// Renders
+	// TODO: To be removed and replaced by States
 	TransportRingsRenderer renderer;
 	TransportRingsRendererState rendererState;
 	

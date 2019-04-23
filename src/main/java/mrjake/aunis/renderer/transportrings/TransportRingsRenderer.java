@@ -3,7 +3,6 @@ package mrjake.aunis.renderer.transportrings;
 import java.util.ArrayList;
 import java.util.List;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.state.TransportRingsRendererState;
 import mrjake.aunis.tileentity.TransportRingsTile;
@@ -37,13 +36,15 @@ public class TransportRingsRenderer implements ISpecialRenderer<TransportRingsRe
 	private int lastRingAnimated;	
 	private long lastTick;	
 	
+	public int which = 0;
+	
 	@Override
 	public void render(double x, double y, double z, double partialTicks) {
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 		
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y+1.1, z);
-		GlStateManager.scale(0.8, 0.8, 0.8);
+//		GlStateManager.translate(x+0.50, y+2.2, z);
 
 		for (Ring ring : rings)
 			ring.render(partialTicks);

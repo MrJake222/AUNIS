@@ -5,14 +5,11 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.merge.MergeHelper;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
-import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.upgrade.UpgradeHelper;
 import net.minecraft.block.Block;
@@ -53,6 +50,11 @@ public class StargateBaseBlock extends Block {
 		setDefaultState(blockState.getBaseState()
 				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.NORTH)
 				.withProperty(AunisProps.RENDER_BLOCK, true));
+		
+		setLightOpacity(0);
+		
+		setHardness(3.0f);
+		setHarvestLevel("pickaxe", 3);
 	}
 	
 	// ------------------------------------------------------------------------
@@ -78,12 +80,14 @@ public class StargateBaseBlock extends Block {
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		if (!world.isRemote) {
-			world.setBlockState(pos, state
-					.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite())
-					.withProperty(AunisProps.RENDER_BLOCK, true), 2); // 2 - send update to clients
+			state = state.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite())
+					.withProperty(AunisProps.RENDER_BLOCK, true); // 2 - send update to clients
 		
+			world.setBlockState(pos, state);
+					
 			StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
-			MergeHelper.updateChevRingMergeState(gateTile, state, false);
+//			MergeHelper.updateChevRingMergeState(world, pos, false);
+			gateTile.updateMergeState(MergeHelper.checkBlocks(world, pos), state);
 		
 			// ------------------------------------------------------------------------
 			state = world.getBlockState(pos);
@@ -97,20 +101,13 @@ public class StargateBaseBlock extends Block {
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {		
 		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
-		
-		MergeHelper.updateChevRingMergeState(gateTile, state, false);
-				
+						
 		if (!world.isRemote) {
-			DHDTile linkedDhdTile = gateTile.getLinkedDHD(world);
-			if (linkedDhdTile != null)
-				linkedDhdTile.setLinkedGate(null);
+			gateTile.updateMergeState(false, state);
 			
-			if (gateTile.isEngaged()) {
-				GateRenderingUpdatePacketToServer.closeGatePacket(gateTile, true);
-				AunisSoundHelper.playPositionedSound("wormhole", pos, false);
-				AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
-				AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
-			}
+//			DHDTile linkedDhdTile = gateTile.getLinkedDHD(world);
+//			if (linkedDhdTile != null)
+//				linkedDhdTile.setLinkedGate(null);
 			
 			StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
 			

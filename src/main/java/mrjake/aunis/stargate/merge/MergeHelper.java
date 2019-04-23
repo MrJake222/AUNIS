@@ -7,124 +7,182 @@ import java.util.Map;
 
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.StargateBaseBlock;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.state.StateUpdatePacketToClient;
+import mrjake.aunis.stargate.EnumMemberVariant;
+import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.StargateBaseTile;
-import net.minecraft.block.Block;
+import mrjake.aunis.tileentity.StargateMemberTile;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockPos.MutableBlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 public class MergeHelper {
 	
-	public static StargateBaseTile findBaseTile(World world, BlockPos currentPos) {
-		// 6x10x6
+	public static BlockPos findBasePos(IBlockAccess blockAccess, BlockPos currentPos, IBlockState state) {
+		// 5x9x5
 		
 		int x = currentPos.getX();
 		int y = currentPos.getY();
 		int z = currentPos.getZ();
+		
+		EnumFacing facing = state.getValue(AunisProps.FACING_HORIZONTAL);
+		
+		Iterable<MutableBlockPos> blocks = null;
+		
+		switch (facing.getAxis()) {
+			case X:
+				blocks = BlockPos.getAllInBoxMutable(x, y-10, z-5, x, y, z+5);
+				break;
 				
-		for (BlockPos gatePos : BlockPos.getAllInBox(x-6, y-10, z-6, x+6, y, z+6) ) {
-			if (world.getBlockState(gatePos).getBlock() instanceof StargateBaseBlock) {
-				return (StargateBaseTile) world.getTileEntity(gatePos);
+			case Z:
+				blocks = BlockPos.getAllInBoxMutable(x-5, y-10, z, x+5, y, z);
+				break;
+				
+			default:
+				break;
+		}
+		
+		for (BlockPos gatePos : blocks) {
+			if (blockAccess.getBlockState(gatePos).getBlock() == AunisBlocks.stargateBaseBlock) {
+				return gatePos;
 			}
 		}
 		
 		return null;
 	}
 	
-	public static void updateBaseMergeState(World world, BlockPos currentPos) {
-		StargateBaseTile gateTile = findBaseTile(world, currentPos);
+	public static StargateBaseTile findBaseTile(IBlockAccess blockAccess, BlockPos currentPos, IBlockState state) {
+		BlockPos gatePos = findBasePos(blockAccess, currentPos, state);
 		
-		if (gateTile != null)		
-			gateTile.updateMergeState(checkBlocks(gateTile));
+		if (gatePos != null)
+			return (StargateBaseTile) blockAccess.getTileEntity(gatePos);
+		
+		else
+			return null;
 	}
 	
-	public static void unmergeBase(World world, BlockPos currentPos) {
-		StargateBaseTile gateTile = findBaseTile(world, currentPos);
-		
-		if (gateTile != null)		
-			gateTile.updateMergeState(false);
+	private static List<BlockPos> ringBlocks = Arrays.asList(
+			new BlockPos(-1, 0, 0), 
+			new BlockPos(-3, 1, 0),
+			new BlockPos(-4, 3, 0), 
+			new BlockPos(-5, 4, 0), 
+			new BlockPos(-4, 6, 0), 
+			new BlockPos(-4, 7, 0), 
+			new BlockPos(-2, 9, 0), 
+			new BlockPos(-1, 9, 0), 
+			new BlockPos(1, 9, 0), 
+			new BlockPos(2, 9, 0), 
+			new BlockPos(4, 7, 0), 
+			new BlockPos(4, 6, 0), 
+			new BlockPos(5, 4, 0), 
+			new BlockPos(4, 3, 0), 
+			new BlockPos(3, 1, 0), 
+			new BlockPos(1, 0, 0));
+	
+	// Light up order
+	public static List<BlockPos> chevronBlocks = Arrays.asList(
+			new BlockPos(3, 8, 0), 
+			new BlockPos(5, 5, 0), 
+			new BlockPos(4, 2, 0), 
+			new BlockPos(-4, 2, 0), 
+			new BlockPos(-5, 5, 0), 
+			new BlockPos(-3, 8, 0), 
+			new BlockPos(2, 0, 0),
+			new BlockPos(-2, 0, 0), 
+			new BlockPos(0, 9, 0));
+	
+	public static List<BlockPos> getWithoutLastChevronBlock() {
+		return chevronBlocks.subList(0, chevronBlocks.size() - 2);
 	}
 	
-	private static List<BlockPosition> ringBlocks = Arrays.asList(
-			new BlockPosition(-1, 0, 0), 
-			new BlockPosition(-3, 1, 0), 
-			new BlockPosition(-4, 3, 0), 
-			new BlockPosition(-5, 4, 0), 
-			new BlockPosition(-4, 6, 0), 
-			new BlockPosition(-4, 7, 0), 
-			new BlockPosition(-2, 9, 0), 
-			new BlockPosition(-1, 9, 0), 
-			new BlockPosition(1, 9, 0), 
-			new BlockPosition(2, 9, 0), 
-			new BlockPosition(4, 7, 0), 
-			new BlockPosition(4, 6, 0), 
-			new BlockPosition(5, 4, 0), 
-			new BlockPosition(4, 3, 0), 
-			new BlockPosition(3, 1, 0), 
-			new BlockPosition(1, 0, 0) );
+	public static BlockPos getLastChevronBlock() {
+		return chevronBlocks.get(chevronBlocks.size() - 1);
+	}
 	
-	public static List<BlockPosition> chevronBlocks = Arrays.asList(
-			new BlockPosition(-2, 0, 0), 
-			new BlockPosition(-4, 2, 0), 
-			new BlockPosition(-5, 5, 0), 
-			new BlockPosition(-3, 8, 0), 
-			new BlockPosition(0, 9, 0), 
-			new BlockPosition(3, 8, 0), 
-			new BlockPosition(5, 5, 0), 
-			new BlockPosition(4, 2, 0), 
-			new BlockPosition(2, 0, 0) );
+	private static Map<EnumMemberVariant, List<BlockPos>> blockMap = new HashMap<EnumMemberVariant, List<BlockPos>>();
 	
-	private static Map<Block, List<BlockPosition>> blockListMap;
+	static {
+		blockMap.put(EnumMemberVariant.RING, ringBlocks);
+		blockMap.put(EnumMemberVariant.CHEVRON, chevronBlocks);
+	}
 	
-	private static Map<Block, List<BlockPosition>> getBlockListMap() {
-		if (blockListMap == null) {
-			blockListMap = new HashMap<Block, List<BlockPosition>>();
-			blockListMap.put(AunisBlocks.ringBlock, ringBlocks);
-			blockListMap.put(AunisBlocks.chevronBlock, chevronBlocks);
+	public static BlockPos rotateAndGlobal(BlockPos checkPos, EnumFacing facing, BlockPos basePos) {
+		int x = 0;
+		int z = 0;
+		
+		switch ((int) facing.getHorizontalAngle()) {
+			case 0:
+				x = checkPos.getX();
+				z = checkPos.getZ();
+				break;
+				
+			case 90:
+				x = -checkPos.getZ();
+				z = checkPos.getX();
+				break;
+				
+			case 180:
+				x = -checkPos.getX();
+				z = -checkPos.getZ();
+				break;
+				
+			case 270:
+				x = checkPos.getZ();
+				z = -checkPos.getX();
+				break;				
 		}
 		
-		return blockListMap;
+		return basePos.add(x, checkPos.getY(), z);
 	}
 	
-	public static boolean checkBlocks(StargateBaseTile gateTile) {
-//		World world = gateTile.getWorld();
-//		BlockPos pos = gateTile.getPos();
-//		
-//		EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
-//		
-//		for ( Map.Entry<Block, List<BlockPosition>> entry : getBlockListMap().entrySet() ) {			
-//			for (BlockPosition blockPosition : entry.getValue()) {				
-//				IBlockState state = world.getBlockState(blockPosition.rotateAndGlobal((int) facing.getHorizontalAngle(), pos));
-//				
-//				if ( state.getBlock() != entry.getKey() ) {
-//					return false;
-//				}
-//				
-//				if ( facing != state.getValue(AunisProps.FACING_HORIZONTAL) ) {
-//					return false;
-//				}
-//			}
-//		}
+	public static boolean checkBlocks(World world, BlockPos basePos) {	
+		EnumFacing facing = world.getBlockState(basePos).getValue(AunisProps.FACING_HORIZONTAL);
 		
+		for ( EnumMemberVariant variant : blockMap.keySet() ) {			
+			for (BlockPos checkPos : blockMap.get(variant)) {	
+				IBlockState state = world.getBlockState(rotateAndGlobal(checkPos, facing, basePos));
+				
+				if (state.getBlock() != AunisBlocks.stargateMemberBlock || state.getValue(AunisProps.MEMBER_VARIANT) != variant) {					
+					return false;
+				}
+			}
+		}
+				
 		return true;
 	}
-
-	public static void updateChevRingMergeState(StargateBaseTile gateTile, IBlockState state, boolean isMerged) {
-		World world = gateTile.getWorld();
-		BlockPos pos = gateTile.getPos();
-		
+	
+	public static void updateChevRingMergeState(World world, BlockPos basePos, IBlockState state, boolean isMerged) {
 		EnumFacing facing = state.getValue(AunisProps.FACING_HORIZONTAL);
 		
-		for ( Map.Entry<Block, List<BlockPosition>> entry : getBlockListMap().entrySet() ) {
-			for (BlockPosition blockPosition : entry.getValue()) {
+		for ( EnumMemberVariant variant : blockMap.keySet() ) {			
+			for (BlockPos checkPos : blockMap.get(variant)) {	
 				
-				BlockPos blockPos = blockPosition.rotateAndGlobal((int) facing.getHorizontalAngle(), pos);
-				IBlockState blockState = world.getBlockState(blockPos);
+				checkPos = rotateAndGlobal(checkPos, facing, basePos);
 				
-				if ( blockState.getBlock() == entry.getKey() )
-					world.setBlockState(blockPos, blockState.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 2);
+				IBlockState blockState = world.getBlockState(checkPos);
+				
+				if (blockState.getBlock() == AunisBlocks.stargateMemberBlock) {		
+					StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(checkPos);
+					
+					ItemStack camoStack = memberTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).extractItem(0, 1, false);
+					if (!camoStack.isEmpty()) {
+						InventoryHelper.spawnItemStack(world, checkPos.getX(), checkPos.getY(), checkPos.getZ(), camoStack);
+						
+						TargetPoint point = new TargetPoint(world.provider.getDimension(), checkPos.getX(), checkPos.getY(), checkPos.getZ(), 512);
+						AunisPacketHandler.INSTANCE.sendToAllAround(new StateUpdatePacketToClient(checkPos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
+					}
+					
+					world.setBlockState(checkPos, blockState
+						.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 3);
+				}
 			}
 		}
 	}

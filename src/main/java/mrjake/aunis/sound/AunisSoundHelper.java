@@ -25,6 +25,7 @@ public class AunisSoundHelper {
 	
 	public static SoundEvent wormholeFlicker;
 	public static SoundEvent ringsTransport;
+	public static SoundEvent ringsControllerButton;
 	
 	public static ResourceLocation ringRollStart;
 	public static ResourceLocation ringRollLoop;
@@ -72,6 +73,7 @@ public class AunisSoundHelper {
 		
 		wormholeFlicker = new SoundEvent( new ResourceLocation("aunis", "wormhole_flicker") );
 		ringsTransport = new SoundEvent( new ResourceLocation("aunis", "rings_transport") );
+		ringsControllerButton = new SoundEvent( new ResourceLocation("aunis", "rings_controller_button") );
 		
 		ringRollStart = new ResourceLocation("aunis", "ring_roll_start");
 		ringRollLoop = new ResourceLocation("aunis", "ring_roll_loop");

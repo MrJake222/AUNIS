@@ -1,7 +1,8 @@
-package mrjake.aunis.dhd;
+package mrjake.aunis.raycaster.util;
 
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
@@ -65,11 +66,11 @@ public class DHDVertex {
 		return this;
 	}
 	
-	public DHDVertex localToGlobal(BlockPos pos) {
+	public DHDVertex localToGlobal(BlockPos pos, Vector3f translation) {
 		if ( !pos.equals(oldGlobal) ) {
-			xGlobal = xRotated + pos.getX() + 0.5f;
-			yGlobal = zRotated + pos.getY();
-			zGlobal = pos.getZ() + 0.5f - yRotated; // Blender coords are xzy	
+			xGlobal = xRotated + pos.getX() + translation.x;
+			yGlobal = zRotated + pos.getY() + translation.y;
+			zGlobal = pos.getZ() - yRotated + translation.z; // Blender coords are xzy	
 			
 			oldGlobal = pos;
 		}

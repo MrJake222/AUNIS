@@ -2,12 +2,13 @@ package mrjake.aunis.event;
 
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.DHDBlock;
-import mrjake.aunis.block.StargateMemberBlock;
-import mrjake.aunis.dhd.DHDActivation;
+import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.raycaster.ControllerActivation;
+import mrjake.aunis.raycaster.DHDActivation;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -35,7 +36,7 @@ public class AunisEventHandler {
 			boolean cancelled = false;
 			
 			cancelled |= block == AunisBlocks.dhdBlock;
-			cancelled |= (block instanceof StargateMemberBlock || block == AunisBlocks.stargateBaseBlock) && !blockState.getValue(AunisProps.RENDER_BLOCK);
+			cancelled |= (block == AunisBlocks.stargateMemberBlock || block == AunisBlocks.stargateBaseBlock) && !blockState.getValue(AunisProps.RENDER_BLOCK);
 //			cancelled |= block instanceof CrystalInfuserBlock;
 			
 			event.setCanceled(cancelled);
@@ -63,14 +64,23 @@ public class AunisEventHandler {
 		}
 		
 		else {
-			if (world.isRemote && event.getHand() == EnumHand.MAIN_HAND) {
+			EnumHand hand = event.getHand();
+			ItemStack heldItemStack = player.getHeldItem(hand);
+			
+			if (world.isRemote && hand == EnumHand.MAIN_HAND && heldItemStack.getItem() != AunisItems.analyzerAncient) {
 				BlockPos pos = player.getPosition();
 							
 				Iterable<BlockPos> blocks = BlockPos.getAllInBox(pos.add(-1,-1,-1), pos.add(1,1,1));
 				
 				for (BlockPos activatedBlock : blocks) {
-					if (world.getBlockState(activatedBlock).getBlock() instanceof DHDBlock) {
-						DHDActivation.onActivated(world, activatedBlock, player);
+					Block block = world.getBlockState(activatedBlock).getBlock();
+
+					if (block == AunisBlocks.dhdBlock) {
+						DHDActivation.INSTANCE.onActivated(world, activatedBlock, player);
+					}
+					
+					else if (block == AunisBlocks.trControllerBlock) {
+						ControllerActivation.INSTANCE.onActivated(world, activatedBlock, player);
 					}
 				}
 			}

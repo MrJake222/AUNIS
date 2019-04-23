@@ -13,6 +13,7 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -22,12 +23,12 @@ import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPa
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
-import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
-import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
+import mrjake.aunis.packet.update.renderer.RendererUpdatePacketToClient;
+import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
 import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateRenderer;
-import mrjake.aunis.renderer.stargate.StargateRingSpinHelper;
 import mrjake.aunis.renderer.stargate.StargateRenderer.EnumVortexState;
+import mrjake.aunis.renderer.stargate.StargateRingSpinHelper;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
@@ -125,13 +126,13 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		dhdTile.getDHDRendererState().activeButtons.add(symbol.id);
 		
 		if (dialedAddress.size() == maxChevrons || symbol == EnumSymbol.ORIGIN) {
-			getStargateRendererState().isFinalActive = true;
+			getStargateRendererState().setFinalActive(world, pos, true);
 			
 			getServerRingSpinHelper().requestStop();
 		}
 		
 		else {
-			getStargateRendererState().activeChevrons++;
+			getStargateRendererState().setActiveChevrons(world, pos, getStargateRendererState().getActiveChevrons() + 1);
 		}
 		
 		markDirty();
@@ -146,8 +147,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 * @param dialedAddressSize - How many symbols are there pressed on the DHD
 	 */
 	public void incomingWormhole(List<EnumSymbol> incomingAddress, int dialedAddressSize) {
-		getStargateRendererState().activeChevrons = dialedAddressSize - 1;
-		getStargateRendererState().isFinalActive = true;
+		getStargateRendererState().setActiveChevrons(world, pos, dialedAddressSize - 1);
+		getStargateRendererState().setFinalActive(world, pos, true);
 		
 		DHDTile dhdTile = getLinkedDHD(world);
 		
@@ -176,11 +177,11 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		waitForEngage = world.getTotalWorldTime();
 		
 		if (isInitiating)
-			getStargateRendererState().activeChevrons = dialedAddress.size() - 1;
+			getStargateRendererState().setActiveChevrons(world, pos, dialedAddress.size() - 1);
 		else
-			getStargateRendererState().activeChevrons = dialedAddressSize - 1;
+			getStargateRendererState().setActiveChevrons(world, pos, dialedAddressSize - 1);
 		
-		getStargateRendererState().isFinalActive = true;
+		getStargateRendererState().setFinalActive(world, pos, true);
 		
 		getStargateRendererState().doEventHorizonRender = true;
 		getStargateRendererState().vortexState = EnumVortexState.STILL;
@@ -272,7 +273,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		gateCloseTimeout = 5;
 		
 		if (fastDialer) {
-			AunisPacketHandler.INSTANCE.sendToAllAround(new TileUpdatePacketToClient(pos, getRendererState()), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 32768));
+			AunisPacketHandler.INSTANCE.sendToAllAround(new RendererUpdatePacketToClient(pos, getRendererState()), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 32768));
 			fastDialer = false;
 		}
 		
@@ -304,8 +305,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			
 		dialedAddress.clear();
 		
-		getStargateRendererState().activeChevrons = 0;
-		getStargateRendererState().isFinalActive = false;
+		getStargateRendererState().setActiveChevrons(world, pos, 0);
+		getStargateRendererState().setFinalActive(world, pos, false);
 		clearLinkedDHDButtons(dialingFailed);
 		
 //		Aunis.info("Closing isInitiating:" + isInitiating);
@@ -343,16 +344,32 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		return isClosing;
 	}
 	
+	private boolean isMerged;
+	
+	public boolean isMerged() {
+		return isMerged;
+	}
+	
 	/**
 	 * Checks gate's merge state
 	 * 
 	 * @param isMerged - True if gate's multiblock structure is valid
+	 * @param state State of base block(when destroyed we can't get it from world). If null, get it from the world
 	 */
-	public void updateMergeState(boolean isMerged) {
+	public void updateMergeState(boolean isMerged, @Nullable IBlockState state) {		
+		this.isMerged = isMerged;
+		
 		if (!isMerged) {
 			if (isLinked()) {
 				getLinkedDHD(world).setLinkedGate(null);			
 				linkedDHD = null;
+			}
+			
+			if (isEngaged()) {
+				GateRenderingUpdatePacketToServer.closeGatePacket(this, true);
+				AunisSoundHelper.playPositionedSound("wormhole", pos, false);
+				AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
+				AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
 			}
 		}
 		
@@ -360,10 +377,13 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			DHDLinkHelper.findAndLinkDHD(this);
 		}
 		
-		IBlockState state = world.getBlockState(pos);
+		IBlockState actualState = world.getBlockState(pos);
 		
-		world.setBlockState( pos, state.withProperty(AunisProps.RENDER_BLOCK, !isMerged) );
-		MergeHelper.updateChevRingMergeState(this, state, isMerged);
+		// When the block is destroyed, there will be air in this place and we cannot set it's block state
+		if (actualState.getBlock() == AunisBlocks.stargateBaseBlock)
+			world.setBlockState(pos, actualState.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 2);
+		
+		MergeHelper.updateChevRingMergeState(world, pos, (state != null) ? state : actualState, isMerged);
 	}
 	
 	@Override
@@ -444,6 +464,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			}
 		}
 		
+		compound.setBoolean("isMerged", isMerged);
 		compound.setBoolean("isEngaged", isEngaged);
 		compound.setBoolean("isInitiating", isInitiating);
 		compound.setBoolean("unstableVortex", unstableVortex);
@@ -494,6 +515,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			}
 		}
 		
+		isMerged = compound.getBoolean("isMerged");
 		isEngaged = compound.getBoolean("isEngaged");
 		isInitiating = compound.getBoolean("isInitiating");
 		unstableVortex = compound.getBoolean("unstableVortex");
@@ -617,12 +639,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			// Client loaded region, need to update
 			// Send rendererState to client's renderer
 			if (world.isRemote)
-				AunisPacketHandler.INSTANCE.sendToServer( new TileUpdateRequestToServer(pos) );
+				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos) );
 			
 			// Can't do this in onLoad(), because in that method, world isn't fully loaded
 			generateAddress();
 			
-			updateMergeState(MergeHelper.checkBlocks(this));
+//			updateMergeState(MergeHelper.checkBlocks(this));
 						
 			if (!world.isRemote) {
 				EnumFacing sourceGateFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);

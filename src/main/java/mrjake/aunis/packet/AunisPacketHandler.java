@@ -18,18 +18,26 @@ import mrjake.aunis.packet.gate.teleportPlayer.MotionToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.MotionToServer.MotionServerHandler;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient.RetrieveMotionClientHandler;
-import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient;
-import mrjake.aunis.packet.gate.tileUpdate.TileUpdatePacketToClient.TileUpdateClientHandler;
-import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer;
-import mrjake.aunis.packet.gate.tileUpdate.TileUpdateRequestToServer.TileUpdateServerHandler;
 import mrjake.aunis.packet.infuser.EnergyStoredToClient;
 import mrjake.aunis.packet.infuser.EnergyStoredToClient.EnergyStorageToClientHandler;
 import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient;
 import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient.ShouldRenderWavesToClientHandler;
+import mrjake.aunis.packet.state.StateUpdatePacketToClient;
+import mrjake.aunis.packet.state.StateUpdatePacketToClient.StateUpdateClientHandler;
+import mrjake.aunis.packet.state.StateUpdateRequestToServer;
+import mrjake.aunis.packet.state.StateUpdateRequestToServer.StateUpdateServerHandler;
+import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient.StartPlayerFadeOutToClientHandler;
 import mrjake.aunis.packet.transportrings.StartRingsAnimationToClient;
+import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer.SaveRingsParametersServerHandler;
 import mrjake.aunis.packet.transportrings.StartRingsAnimationToClient.StartRingsAnimationToClientHandler;
+import mrjake.aunis.packet.transportrings.TRControllerActivatedToServer;
+import mrjake.aunis.packet.transportrings.TRControllerActivatedToServer.TRControllerActivatedServerHandler;
+import mrjake.aunis.packet.update.renderer.RendererUpdatePacketToClient;
+import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
+import mrjake.aunis.packet.update.renderer.RendererUpdatePacketToClient.TileUpdateClientHandler;
+import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer.TileUpdateServerHandler;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient.UpgradeSlotInteractHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -58,8 +66,8 @@ public class AunisPacketHandler {
 		
 //		INSTANCE.registerMessage(StateUpdateToServer.StateUpdateServerHandler.class, StateUpdateToServer.class, id, Side.SERVER); id++;
 		
-		INSTANCE.registerMessage(TileUpdateServerHandler.class, TileUpdateRequestToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(TileUpdateClientHandler.class, TileUpdatePacketToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(TileUpdateServerHandler.class, RendererUpdateRequestToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(TileUpdateClientHandler.class, RendererUpdatePacketToClient.class, id, Side.CLIENT); id++;
 		
 //		INSTANCE.registerMessage(ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.CLIENT); id++;
@@ -74,5 +82,11 @@ public class AunisPacketHandler {
 		
 		INSTANCE.registerMessage(StartRingsAnimationToClientHandler.class, StartRingsAnimationToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(StartPlayerFadeOutToClientHandler.class, StartPlayerFadeOutToClient.class, id, Side.CLIENT); id++;
+		
+		INSTANCE.registerMessage(StateUpdateServerHandler.class, StateUpdateRequestToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(StateUpdateClientHandler.class, StateUpdatePacketToClient.class, id, Side.CLIENT); id++;
+		
+		INSTANCE.registerMessage(SaveRingsParametersServerHandler.class, SaveRingsParametersToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(TRControllerActivatedServerHandler.class, TRControllerActivatedToServer.class, id, Side.SERVER); id++;
 	}
 }

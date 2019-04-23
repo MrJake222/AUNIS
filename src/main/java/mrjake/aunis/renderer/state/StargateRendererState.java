@@ -1,13 +1,53 @@
 package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.renderer.stargate.StargateRenderer.EnumVortexState;
+import mrjake.aunis.stargate.merge.MergeHelper;
+import mrjake.aunis.tileentity.StargateMemberTile;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class StargateRendererState extends RendererState {
 	
 	// Chevrons
-	public int activeChevrons;
-	public boolean isFinalActive;
+	private int activeChevrons;
+	private boolean isFinalActive;
+	
+	public void setActiveChevrons(World world, BlockPos gatePos, int activeChevrons) {
+		this.activeChevrons = activeChevrons;
+				
+		int index = 0;
+		IBlockState state = world.getBlockState(gatePos);
+		
+		for (BlockPos chevPos : MergeHelper.getWithoutLastChevronBlock()) {
+			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
+			
+			memberTile.setLitUp(activeChevrons > index);
+			
+			index++;
+		}			
+	}
+	
+	public int getActiveChevrons() {
+		return activeChevrons;
+	}
+	
+	public void setFinalActive(World world, BlockPos gatePos, boolean isFinalActive) {
+		this.isFinalActive = isFinalActive;
+
+		IBlockState state = world.getBlockState(gatePos);
+		
+		BlockPos chevPos = MergeHelper.getLastChevronBlock();
+		StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
+			
+		memberTile.setLitUp(isFinalActive);
+	}
+	
+	public boolean isFinalActive() {
+		return isFinalActive;
+	}
 
 	// Ring		
 	public double ringAngularRotation;

@@ -49,6 +49,8 @@ public class StargateGUI extends GuiScreen {
 	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+//		drawDefaultBackground();
+		
 		GlStateManager.pushMatrix();
 				
 		if (width < imageWidth) {
@@ -83,8 +85,9 @@ public class StargateGUI extends GuiScreen {
 				
 				drawModalRectWithCustomSizedTexture(x, firstPos, 0, 0, sectionSize, sectionSize, sectionSize, sectionSize);
 				
-				setColor(78, 86, 102, 255);
-				fontRenderer.drawString(name, x + (sectionSize - fontRenderer.getStringWidth(name))/2, firstPos + sectionSize - frameThickness, color);		
+//				setColor(78, 86, 102, 255);
+				setColor(88, 97, 115, 255);
+				fontRenderer.drawStringWithShadow(name, x + (sectionSize - fontRenderer.getStringWidth(name))/2, firstPos + sectionSize - frameThickness, color);		
 				
 				GlStateManager.disableBlend();
 			}

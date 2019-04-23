@@ -40,6 +40,9 @@ public class CrystalInfuserBlock extends Block {
 		
 		setDefaultState(blockState.getBaseState()
 				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.NORTH));
+		
+		setHardness(3.0f);
+		setHarvestLevel("pickaxe", 3);
 	}
 
 	// ------------------------------------------------------------------------

@@ -117,6 +117,14 @@
     "sounds": [
       "aunis:transportrings/rings_transport"
     ]
+  },
+  
+  "rings_controller_button": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.rings_controller_button",
+    "sounds": [
+      "aunis:transportrings/rings_controller_button"
+    ]
   }
 }
 

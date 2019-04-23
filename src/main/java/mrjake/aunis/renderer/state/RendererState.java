@@ -5,7 +5,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
- * Base class for all renderer states.
+ * Base class for all states(ex. RendererStates or GuiStates)
  * 
  * Defines methods to write NBT tags from abstract byte methods(used by TileUpdatePacketToClient)
  *
@@ -13,10 +13,6 @@ import net.minecraft.nbt.NBTTagCompound;
 public abstract class RendererState {
 	
 	public RendererState() {}
-	
-//	public RendererState(ByteBuf buf) {
-//		fromBytes(buf);
-//	}
 	
 	/**
 	 * Should write all parameters that matter to client-side renderer(ex. vortexState in StargateRenderer)

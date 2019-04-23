@@ -50,6 +50,7 @@ public class AunisItems {
 	public static Item crystalArray = ItemHelper.createGenericItem("crystal_array");
 		
 	public static Item stargateRingFragment = ItemHelper.createGenericItem("stargate_ring_fragment");
+	public static Item trRingFragment = ItemHelper.createGenericItem("transportrings_ring_fragment");
 	public static Item holderCrystal = ItemHelper.createGenericItem("holder_crystal");
 	
 	public static Item dhdBrb = ItemHelper.createGenericItem("dhd_brb");
@@ -76,6 +77,7 @@ public class AunisItems {
 		crystalArray,
 		
 		stargateRingFragment,
+		trRingFragment,
 		holderCrystal,
 		
 		dhdBrb

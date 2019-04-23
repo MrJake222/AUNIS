@@ -1,4 +1,4 @@
-package mrjake.aunis.dhd;
+package mrjake.aunis.raycaster.util;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +12,10 @@ public class Box {
 	public Box(Ray ray, Ray ray2, Ray ray3, Ray ray4, int index) {
 		this.rays = Arrays.asList(ray, ray2, ray3, ray4);
 		this.verticalIndex = index;
+		
+//		for (Ray ray5 : rays) {
+//			Aunis.info(ray5.toString());
+//		}
 	}
 	
 	public Box(List<Ray> rays) {
