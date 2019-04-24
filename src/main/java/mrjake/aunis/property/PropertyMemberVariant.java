@@ -27,7 +27,10 @@ public class PropertyMemberVariant extends PropertyHelper<EnumMemberVariant> {
 
 	@Override
 	public Optional<EnumMemberVariant> parseValue(String value) {
-		return Optional.of(EnumMemberVariant.byName(value));
+		if (value == null || value.isEmpty())
+			return Optional.of(EnumMemberVariant.RING);
+		
+		return Optional.of(EnumMemberVariant.byName(value));			
 	}
 
 	@Override
