@@ -1,0 +1,30 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		
+	},
+	"variants": {
+		"facing": {
+			"south": { "y": 180 },
+			"west": { "y": 270 },
+			"north": {},
+			"east": { "y": 90 },
+			"up": {},
+			"down": {}
+		},
+		
+		"member_variant": {
+			"ring": {
+				"model": "aunis:stargate_member_block_ring"
+			},
+			"chevron": {
+				"model": "aunis:stargate_member_block_chevron"
+			}
+		},
+		
+		"render_block": {
+			"false": {},
+			"true": {}
+		}
+	}
+}

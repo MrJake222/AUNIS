@@ -1,0 +1,32 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"NRN",
+		"BCB",
+		"NRN"
+	],
+	
+	"key": {
+		"R": {
+			"item": "aunis:crystal_red"
+		},
+
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+
+		"C": {
+			"item": "aunis:crystal_array"
+		},
+		
+		"B": {
+			"item": "aunis:crystal_blue"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:transportrings_ring_fragment",
+		"count": 1,
+		"data": 0
+	}
+}

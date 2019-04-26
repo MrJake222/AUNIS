@@ -1,0 +1,36 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"GGG",
+		"BLB",
+		"NRN"
+	],
+	
+	"key": {
+		"G": {
+			"item": "minecraft:gold_ingot"
+		},
+
+		"B": {
+			"item": "minecraft:stone_button"
+		},
+		
+		"L": {
+			"item": "aunis:crystal_blue"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		},
+		
+		"N": {
+			"item": "aunis:naquadah_refined"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:transportrings_controller_block",
+		"count": 1,
+		"data": 0
+	}
+}

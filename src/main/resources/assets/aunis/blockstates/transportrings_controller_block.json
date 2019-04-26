@@ -1,0 +1,19 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "aunis:transportrings_controller_block"
+	},
+	"variants": {
+		"normal": [{}],
+		"inventory": [{
+		}],
+		"facing": {
+			"south": { "y": 180 },
+			"west": { "y": 270 },
+			"north": {},
+			"east": { "y": 90 },
+			"up": {},
+			"down": {}
+		}
+	}
+}

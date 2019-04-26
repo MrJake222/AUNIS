@@ -1,0 +1,32 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"NNN",
+		"FHF",
+		"NCN"
+	],
+	
+	"key": {
+		"F": {
+			"item": "aunis:transportrings_ring_fragment"
+		},
+
+		"C": {
+			"item": "aunis:crystal_array"
+		},
+
+		"N": {
+			"item": "aunis:naquadah_refined"
+		},
+		
+		"H": {
+			"item": "aunis:holder_crystal"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:transportrings_block",
+		"count": 1,
+		"data": 0
+	}
+}
