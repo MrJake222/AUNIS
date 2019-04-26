@@ -1,22 +1,23 @@
-*.log
-
-.directory
-.gradle/
-build/
-
-assets/
-bin/
-config/
-crash-reports/
-logs/
-mods/
-options.txt
-saves/
-usercache.json
-usernamecache.json
-screenshots/
-
+# eclipse
+bin
+*.launch
+.settings
+.metadata
 .classpath
 .project
-.settings/
-.metadata/
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
+.directory

@@ -11,9 +11,9 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.2-beta2"
+version = "1.12.2-1.2-beta2"
 group = "mrjake.aunis" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "aunis-1.12.2"
+archivesBaseName = "aunis"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 compileJava {
@@ -21,8 +21,8 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.4.2705"
-    runDir = "run"
+    version = "1.12.2-14.23.5.2768"
+    runDir = "../run"
     
     // the mappings can be changed at any time, and must be in the following format.
     // snapshot_YYYYMMDD   snapshot are built nightly.
