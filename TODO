@@ -1,3 +1,20 @@
 # Aunis Mod TODO list
 # 
-# Add autoclose menu
+# Hotfixes:
+#   Expand rings range
+#   Fix rings replacing blocks
+#   Messages and sound not handled properly on clients
+#   Balance craftings(more naqadah?) 
+#
+# Near-future:
+#   Rings controller button animations
+#   Goa'uld glove(Rings activation)   
+#
+# Future:
+#   Power, item etc. transport through gate
+#   Add config menu
+#   GUIs
+#
+# Release:
+#   Guidelines(maybe book)
+#   Achievements
