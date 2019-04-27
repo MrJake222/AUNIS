@@ -7,7 +7,7 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
-import mrjake.aunis.stargate.merge.MergeHelper;
+import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.StargateMemberTile;

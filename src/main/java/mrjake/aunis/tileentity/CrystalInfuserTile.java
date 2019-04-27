@@ -2,6 +2,7 @@ package mrjake.aunis.tileentity;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisConfig;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.infuser.EnergyStoredToClient;
@@ -49,7 +50,7 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 			
 			TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 			
-			int rx = energyStorage.extractEnergy(14000, true);
+			int rx = energyStorage.extractEnergy(AunisConfig.powerConfig.dhdCrystalMaxEnergyTransfer, true);
 			boolean stopWaveRender = false;
 			
 			if (rx > 0) {
@@ -117,10 +118,8 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 	
 	// ------------------------------------------------------------------------
 	// Power buffer
-	EnergyStorageSerializable energyStorage = new EnergyStorageSerializable(140000, 140000) {
-		protected void onEnergyChanged() {
-//			Aunis.info(pos.toString() + ": energy: " + getEnergyStored());
-			
+	EnergyStorageSerializable energyStorage = new EnergyStorageSerializable(AunisConfig.powerConfig.dhdCrystalMaxEnergyTransfer * 4, AunisConfig.powerConfig.dhdCrystalMaxEnergyTransfer * 4) {
+		protected void onEnergyChanged() {			
 			markDirty();
 		};
 	};

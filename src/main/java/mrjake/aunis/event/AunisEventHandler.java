@@ -1,5 +1,6 @@
 package mrjake.aunis.event;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.item.AunisItems;
@@ -14,9 +15,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
+import net.minecraftforge.common.config.Config.Type;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -24,6 +28,15 @@ import net.minecraftforge.fml.relauncher.Side;
 
 @EventBusSubscriber(Side.CLIENT)
 public class AunisEventHandler {
+	
+	@SubscribeEvent
+    public static void onConfigChangedEvent(OnConfigChangedEvent event) {
+		Aunis.info("onConfigChangedEvent");
+		
+        if (event.getModID().equals(Aunis.ModID)) {
+            ConfigManager.sync(Aunis.ModID, Type.INSTANCE);
+        }
+	}
 	
 	@SubscribeEvent
 	public static void onDrawHighlight(DrawBlockHighlightEvent event) {		

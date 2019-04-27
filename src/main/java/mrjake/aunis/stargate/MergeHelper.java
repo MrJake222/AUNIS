@@ -1,4 +1,4 @@
-package mrjake.aunis.stargate.merge;
+package mrjake.aunis.stargate;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,7 +9,6 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
-import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.StargateMemberTile;
@@ -144,17 +143,17 @@ public class MergeHelper {
 	}
 	
 	public static boolean checkBlocks(World world, BlockPos basePos) {	
-		EnumFacing facing = world.getBlockState(basePos).getValue(AunisProps.FACING_HORIZONTAL);
-		
-		for ( EnumMemberVariant variant : blockMap.keySet() ) {			
-			for (BlockPos checkPos : blockMap.get(variant)) {	
-				IBlockState state = world.getBlockState(rotateAndGlobal(checkPos, facing, basePos));
-				
-				if (state.getBlock() != AunisBlocks.stargateMemberBlock || state.getValue(AunisProps.MEMBER_VARIANT) != variant) {					
-					return false;
-				}
-			}
-		}
+//		EnumFacing facing = world.getBlockState(basePos).getValue(AunisProps.FACING_HORIZONTAL);
+//		
+//		for ( EnumMemberVariant variant : blockMap.keySet() ) {			
+//			for (BlockPos checkPos : blockMap.get(variant)) {	
+//				IBlockState state = world.getBlockState(rotateAndGlobal(checkPos, facing, basePos));
+//				
+//				if (state.getBlock() != AunisBlocks.stargateMemberBlock || state.getValue(AunisProps.MEMBER_VARIANT) != variant) {					
+//					return false;
+//				}
+//			}
+//		}
 				
 		return true;
 	}

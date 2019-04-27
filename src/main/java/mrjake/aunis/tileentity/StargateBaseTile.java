@@ -9,12 +9,15 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
 
+import org.lwjgl.input.Mouse;
+
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.capability.EnergyStorageSerializable;
+import mrjake.aunis.capability.EnergyStorageUncapped;
+import mrjake.aunis.gui.StargateGUI;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
@@ -35,14 +38,20 @@ import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.TeleportHelper;
-import mrjake.aunis.stargate.merge.MergeHelper;
+import mrjake.aunis.state.EnergyState;
+import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.state.ITileEntityStateProvider;
+import mrjake.aunis.state.StargateGuiState;
+import mrjake.aunis.state.State;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.StargateUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -65,7 +74,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 
-public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider {		
+public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider, ITileEntityStateProvider {		
 	private ISpecialRenderer<StargateRendererState> renderer;
 	private RendererState rendererState;
 	
@@ -195,7 +204,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		if (isInitiating) {
 //			Aunis.info("Opening gate, drawing " + openCost);
-			getEnergyStorage(openCost).extractEnergy(openCost, false);
+			((EnergyStorageUncapped) getEnergyStorage(openCost)).extractEnergyUncapped(openCost);
 		}
 		
 		markDirty();
@@ -220,14 +229,10 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	public void updateEnergyStatus() {
 		long ticks = world.getTotalWorldTime() - gateOpenTime;
 		int energy = (int) (ticks * keepAliveCostPerTick);
-					
-//		Aunis.info("Consumed: " + energyConsumed + ", should be: " + energy);
-		
+				
 		energy -= energyConsumed;
-
-//		Aunis.info("Consuming " + energy);
 		
-		energyStorage.extractEnergy(energy, false);
+		energyStorage.extractEnergyUncapped(energy);
 	}
 	
 	/**
@@ -772,7 +777,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			if (isInitiating) {
 
 				// If we have enough energy(minimal DHD operable)
-				if (getEnergyStorage(20000) != null) {
+				if (getEnergyStorage(AunisConfig.powerConfig.dhdMinimalEnergy + 10000) != null) {
 					IEnergyStorage energyStorage = getEnergyStorage(keepAliveCostPerTick);
 					
 					if (energyStorage != null) {
@@ -782,7 +787,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 						 * If energy can sustain connection for less than 10 seconds
 						 * Start flickering
 						 */
-						if (energyStorage.getEnergyStored() < sec*10 && !getStargateRendererState().horizonUnstable || energyStorage.getEnergyStored() > sec*10 && getStargateRendererState().horizonUnstable) {
+						if (energyStorage.getEnergyStored() < sec*AunisConfig.powerConfig.instabilitySeconds && !getStargateRendererState().horizonUnstable || energyStorage.getEnergyStored() > sec*AunisConfig.powerConfig.instabilitySeconds && getStargateRendererState().horizonUnstable) {
 							// Toggle horizon status
 							getStargateRendererState().horizonUnstable ^= true;
 							
@@ -800,7 +805,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 //							}
 						}
 						
-						energyConsumed += energyStorage.extractEnergy(keepAliveCostPerTick, false);
+						energyConsumed += ((EnergyStorageUncapped) energyStorage).extractEnergyUncapped(keepAliveCostPerTick);
 						
 //						Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
 					}
@@ -896,14 +901,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	private int openCost = 0;
 	private int keepAliveCostPerTick = 0;
 	
-	private EnergyStorageSerializable energyStorage = new EnergyStorageSerializable(AunisConfig.stargateEnergyStorage, AunisConfig.stargateMaxEnergyTransfer, AunisConfig.stargateEnergyStorage) {
-		protected void onEnergyChanged() {
-//			IEnergyStorage energyStorage = getEnergyStorage(1);
-			
-//			Aunis.info("Stargate energy: " + this.getEnergyStored() + " / " + this.getMaxEnergyStored() + "\t\tAlive for: " + (float)(getEnergyStored())/keepAliveCostPerTick/20);
-			
-			
-			
+	private EnergyStorageUncapped energyStorage = new EnergyStorageUncapped(AunisConfig.powerConfig.stargateEnergyStorage, AunisConfig.powerConfig.stargateMaxEnergyTransfer) {
+		protected void onEnergyChanged() {			
 			markDirty();
 		};
 	};
@@ -916,7 +915,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 * @param distance - distance in blocks to target gate
 	 * @param targetWorld - target world, used for multiplier
 	 */
-	public boolean hasEnergyToDial(int distance, int mul) {		
+	public boolean hasEnergyToDial(int distance, double multiplier) {		
 		/* double mul;
 		
 		switch (targetWorld.provider.getDimensionType()) {
@@ -927,10 +926,10 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			default: mul = 1; break;
 		}*/
 		
-		int energy = (int) (distance * AunisConfig.openingBlockToEnergyRatio * mul);
-		int keepAlive = (int) Math.ceil(distance * AunisConfig.keepAliveBlockToEnergyRatioPerTick * mul);
+		int energy = (int) (distance * AunisConfig.powerConfig.openingBlockToEnergyRatio * multiplier);
+		int keepAlive = (int) Math.ceil(distance * AunisConfig.powerConfig.keepAliveBlockToEnergyRatioPerTick * multiplier);
 		
-		Aunis.info("Energy required to dial [distance="+distance+", mul="+mul+"] = " + energy + " / keepAlive: "+(keepAlive*20)+"/s, stored: " + (getEnergyStorage(1) != null ? getEnergyStorage(1).getEnergyStored() : 0));
+		Aunis.info("Energy required to dial [distance="+distance+", mul="+multiplier+"] = " + energy + " / keepAlive: "+(keepAlive*20)+"/s, stored: " + (getEnergyStorage(1) != null ? getEnergyStorage(1).getEnergyStored() : 0));
 				
 		if (getEnergyStorage(energy) != null) {
 			this.openCost = energy;
@@ -959,8 +958,69 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	}
 	
 	// -----------------------------------------------------------------
-	// Upgrade
+	// States
+	@Override
+	public State getState(EnumStateType stateType) {
+		switch (stateType) {
+			case GUI_STATE:
+				return new StargateGuiState(gateAddress, hasUpgrade, energyStorage.getMaxEnergyStored(), new EnergyState(energyStorage.getEnergyStored()));
+				
+			case ENERGY_STATE:
+				return new EnergyState(energyStorage.getEnergyStored());
+				
+			default:
+				return null;
+		}
+	}
 	
+	@Override
+	public State createState(EnumStateType stateType) {
+		switch (stateType) {
+			case GUI_STATE:
+				return new StargateGuiState();
+				
+			case ENERGY_STATE:
+				return new EnergyState();
+				
+			default:
+				return null;
+		}
+	}
+	
+	private StargateGUI openGui;
+	
+	@Override
+	public void setState(EnumStateType stateType, State state) {
+		Mouse.setGrabbed(false);
+		
+		switch (stateType) {
+			case GUI_STATE:
+				if (openGui == null || !openGui.isOpen) {
+					openGui = new StargateGUI(pos, (StargateGuiState) state);
+					Minecraft.getMinecraft().displayGuiScreen(openGui);
+				}
+				
+				else {
+					openGui.state = (StargateGuiState) state;
+				}
+				
+				break;
+				
+			case ENERGY_STATE:
+				if (openGui != null && openGui.isOpen) {
+					openGui.state.energyState = (EnergyState) state;
+				}
+				
+				break;
+				
+			default:
+				break;
+		}
+	}
+	
+	
+	// -----------------------------------------------------------------
+	// Upgrade
 	private boolean hasUpgrade = false;
 	
 	@Override

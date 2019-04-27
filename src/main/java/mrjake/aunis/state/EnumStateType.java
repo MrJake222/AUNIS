@@ -17,7 +17,8 @@ public enum EnumStateType {
 	UPGRADE_RENDERER_STATE(1, "upgradeRendererState"),
 	GUI_STATE(2, "guiState"),
 	CAMO_STATE(3, "camoState"),
-	LIGHT_STATE(4, "lightState");
+	LIGHT_STATE(4, "lightState"),
+	ENERGY_STATE(5, "energyState");
 	
 	public int id;
 	private String key;

@@ -10,6 +10,7 @@ import org.lwjgl.input.Mouse;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisConfig;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.RingsGUI;
 import mrjake.aunis.gui.state.RingsGuiState;
@@ -325,7 +326,9 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 		int x = pos.getX();
 		int z = pos.getZ();
 		
-		for (BlockPos newRings : BlockPos.getAllInBoxMutable(new BlockPos(x-25, 0, z-25), new BlockPos(x+25, 255, z+25))) {
+		int radius = AunisConfig.ringsConfig.rangeFlat;
+		
+		for (BlockPos newRings : BlockPos.getAllInBoxMutable(new BlockPos(x-radius, 0, z-radius), new BlockPos(x+radius, 255, z+radius))) {
 			
 			if (world.getBlockState(newRings).getBlock() == AunisBlocks.transportRingsBlock && !pos.equals(newRings)) {
 				
