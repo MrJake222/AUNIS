@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisConfig;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.item.AunisItems;
@@ -150,7 +151,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 //							
 //							int energy = Math.max(energyStorage.getEnergyStored(), stargateEnergyStorage.getEnergyStored());
 							
-							IEnergyStorage energyStorage = gateTile.getEnergyStorage(10000);
+							IEnergyStorage energyStorage = gateTile.getEnergyStorage(AunisConfig.powerConfig.dhdMinimalEnergy);
 							
 							if (energyStorage == null) {
 								player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.no_enough_power")), true);
@@ -203,7 +204,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 //									BlockPos sourceTranslated
 									
 									int distance = (int) pos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ());
-									int multiplier = 1;
+									double multiplier = 1;
 									
 									// It the dimensions are the same, no multiplier
 									if (targetWorld.provider.getDimensionType() != world.provider.getDimensionType()) { 
@@ -211,7 +212,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 											distance /= 8;
 										}
 										
-										multiplier = 2;
+										multiplier = AunisConfig.powerConfig.crossDimensionMul;
 									}
 //									boolean nether = targetWorld.provider.getDimensionType() == DimensionType.NETHER;
 //									int x = targetPos.getX() * (nether ? 8 : 1);

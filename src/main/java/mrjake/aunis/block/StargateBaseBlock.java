@@ -4,11 +4,12 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
+import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.DHDLinkHelper;
+import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.stargate.StargateNetwork;
-import mrjake.aunis.stargate.merge.MergeHelper;
+import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.upgrade.UpgradeHelper;
@@ -31,8 +32,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.EnergyStorage;
 
 public class StargateBaseBlock extends Block {
 
@@ -130,13 +129,8 @@ public class StargateBaseBlock extends Block {
 		// Server side
 		if (!world.isRemote) {			
 			if (heldItem.getItem() == AunisItems.analyzerAncient) {
-				AunisPacketHandler.INSTANCE.sendTo(new OpenStargateAddressGuiToClient(pos, gateTile.hasUpgrade() ? 7 : 6), (EntityPlayerMP) player);
-				
-				EnergyStorage energyStorage = (EnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
-
-				// TODO: Move this to GUI
-				Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored());
-				
+				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(gateTile.getPos(), EnumStateType.GUI_STATE, gateTile.getState(EnumStateType.GUI_STATE)), (EntityPlayerMP) player);
+								
 				return true;
 			}
 			

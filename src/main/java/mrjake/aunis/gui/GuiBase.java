@@ -63,6 +63,17 @@ public class GuiBase extends GuiScreen {
 	 */
 	protected int id;
 	
+	/**
+	 * Constructor. Defines basic parameters.
+	 * 
+	 * @param w Image width with frame
+	 * @param h Image height with frame
+	 * @param frameThickness Frame thickness
+	 * @param frameColor Frame color
+	 * @param bgColor Background color
+	 * @param textColor Default text color
+	 * @param padding Inner padding
+	 */
 	public GuiBase(int w, int h, int frameThickness, int frameColor, int bgColor, int textColor, int padding) {
 		this.imageWidth = w;
 		this.imageHeight = h;
@@ -74,6 +85,14 @@ public class GuiBase extends GuiScreen {
 		this.padding = padding;
 		
 		this.id = 0;
+	}
+	
+	public void setImageWidth(int imageWidth) {
+		this.imageWidth = imageWidth;
+	}
+	
+	public void setImageHeight(int imageHeight) {
+		this.imageHeight = imageHeight;
 	}
 	
 	protected int getTopLeftInside() {

@@ -16,7 +16,7 @@ import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.stargate.merge.MergeHelper;
+import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.multiplayer.WorldClient;

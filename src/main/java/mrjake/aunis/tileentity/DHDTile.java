@@ -150,32 +150,6 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 			if (world.isRemote)
 				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos) );
 		}
-		
-		// Server
-		if (!world.isRemote) {
-			/*
-			 * Lets transfer some power to the gate, if possible
-			 */
-			
-//			StargateBaseTile gateTile = getLinkedGate(world);
-//			
-//			if (gateTile != null) {			
-//				ItemStack energyItemStack = inventory.getStackInSlot(0);
-//				
-//				if (!energyItemStack.isEmpty()) {
-//					EnergyStorage dhdEnergyStorage = (EnergyStorage) energyItemStack.getCapability(CapabilityEnergy.ENERGY, null);
-//					EnergyStorage stargateEnergyStorage = (EnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
-//					
-//					int toTransmit = stargateEnergyStorage.getMaxEnergyStored() - stargateEnergyStorage.getEnergyStored();
-//					
-//					toTransmit = Math.min(toTransmit, dhdEnergyStorage.getEnergyStored());
-//					
-//					if (toTransmit > 0) {						
-//						stargateEnergyStorage.receiveEnergy(dhdEnergyStorage.extractEnergy(toTransmit, false), false);
-//					}
-//				}
-//			}
-		}
 	}
 	
 	private boolean hasUpgrade = false;

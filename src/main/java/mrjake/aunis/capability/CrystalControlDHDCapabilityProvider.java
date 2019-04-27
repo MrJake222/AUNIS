@@ -12,7 +12,7 @@ public class CrystalControlDHDCapabilityProvider implements ICapabilitySerializa
 	private EnergyStorageSerializable energyStorage;
 	
 	public CrystalControlDHDCapabilityProvider() {		
-		energyStorage = new EnergyStorageSerializable(AunisConfig.dhdCrystalEnergyStorage, AunisConfig.dhdCrystalMaxEnergyTransfer * 10);
+		energyStorage = new EnergyStorageUncapped(AunisConfig.powerConfig.dhdCrystalEnergyStorage, AunisConfig.powerConfig.dhdCrystalMaxEnergyTransfer);
 	}
 
 	@Override

@@ -12,11 +12,18 @@ import net.minecraft.world.World;
 
 public class DHDLinkHelper {
 
+	private static BlockPos getDhdRange() {
+		int xz = AunisConfig.dhdConfig.rangeFlat;
+		int y = AunisConfig.dhdConfig.rangeVertical;
+		
+		return new BlockPos(xz, y ,xz);
+	}
+	
 	public static void findAndLinkGate(DHDTile dhdTile) {
 		World world = dhdTile.getWorld();
 		BlockPos pos = dhdTile.getPos();
 		
-		for ( BlockPos sg : BlockPos.getAllInBox(pos.subtract(AunisConfig.dhdRange), pos.add(AunisConfig.dhdRange)) ) {
+		for ( BlockPos sg : BlockPos.getAllInBoxMutable(pos.subtract(getDhdRange()), pos.add(getDhdRange())) ) {
 			IBlockState gateState = world.getBlockState(sg);
 			
 			if ( gateState.getBlock() instanceof StargateBaseBlock) {		
@@ -34,7 +41,7 @@ public class DHDLinkHelper {
 		World world = gateTile.getWorld();
 		BlockPos pos = gateTile.getPos();
 		
-		for ( BlockPos dhdPos : BlockPos.getAllInBox(pos.subtract(AunisConfig.dhdRange), pos.add(AunisConfig.dhdRange)) ) {			
+		for ( BlockPos dhdPos : BlockPos.getAllInBoxMutable(pos.subtract(getDhdRange()), pos.add(getDhdRange())) ) {			
 			if (world.getBlockState(dhdPos).getBlock() == AunisBlocks.dhdBlock) {
 				DHDTile dhdTile = (DHDTile) world.getTileEntity(dhdPos);
 				

@@ -1,136 +1,120 @@
 package mrjake.aunis.gui;
 
-import java.util.List;
-
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
-import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.packet.state.StateUpdateRequestToServer;
+import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.state.StargateGuiState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 
-public class StargateGUI extends GuiScreen {
-	
-	private int color;
-	
-	private StargateBaseTile gateTile;
-	private List<EnumSymbol> gateAddress;
-	
-	public StargateGUI(StargateBaseTile gateTile, int sections) {
-		this.gateTile = gateTile;
-		this.gateAddress = gateTile.gateAddress;
+public class StargateGUI extends GuiBase {
 		
-		if (gateAddress == null) {
-			AunisPacketHandler.INSTANCE.sendToServer( new GateAddressRequestToServer(gateTile.getPos()) );
-		}
-		
-		this.sections = sections;
-		bgWidth = sectionSize*sections + (sections+1)*frameThickness;
-		imageWidth = bgWidth + 2*frameThickness;
-	}
-
+	private BlockPos pos;
+	public StargateGuiState state;
+	public boolean isOpen = false;
+	
+	private final static int sectionSize = 90;
+	private final static int frameThickness = 8;
+	
+	private final static int bgHeight = sectionSize + 2*frameThickness;
+	private final static int imageHeight = bgHeight + 2*frameThickness;
+	
 	private int sections;
 	
-	private final int sectionSize = 90;
-	private final int frameThickness = 8;
-	
-	// 6 symbols, 5 spaces, 2 margins
-	// private final int bgWidth = sectionSize*6 + 7*frameThickness;
-	private final int bgWidth;
-	private final int bgHeight = sectionSize + 2*frameThickness;
+	private int calcWidth(int sections) {
+		int bgWidth = sectionSize*sections + (sections+1)*frameThickness;
 		
-	// private final int imageWidth = bgWidth + 2*frameThickness;
-	private final int imageWidth;
-	private final int imageHeight = bgHeight + 2*frameThickness;
+		return bgWidth + 2*frameThickness;
+	}
 	
-	private final boolean drawSymbolBackground = false;
+	public StargateGUI(BlockPos pos, StargateGuiState state) {
+		super(0, imageHeight, frameThickness, FRAME_COLOR, BG_COLOR, TEXT_COLOR, 0);
+		
+		sections = state.hasUpgrade() ? 7 : 6;
+		setImageWidth(calcWidth(sections));
+		
+		this.state = state;
+		this.pos = pos;
+	}	
+	
+	@Override
+	public void initGui() {
+		isOpen = true;
+	}
+	
+	@Override
+	public void onGuiClosed() {
+		isOpen = false;
+	}
 	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 //		drawDefaultBackground();
 		
-		GlStateManager.pushMatrix();
-				
+		GlStateManager.pushMatrix();		
 		if (width < imageWidth) {
-			GlStateManager.translate( (width - imageWidth/2f)/2f, (height - imageHeight/2f)/2f, 0 );
+			GlStateManager.translate((width - imageWidth/2f)/2f, (height - imageHeight/2f)/2f, 0);
 			GlStateManager.scale( 0.5, 0.5, 0 );
 		}
-		else 
-			GlStateManager.translate( (width - imageWidth)/2f, (height - imageHeight)/2f, 0 );
-		
-		setColor(24, 26, 31, 255);
-		frame(imageWidth, imageHeight, frameThickness);
-		
-		setColor(39, 43, 51, 242);
-		drawRect(frameThickness, frameThickness, bgWidth+frameThickness, bgHeight+frameThickness, color);
-		
-		if (gateAddress != null) {
-			for (int i=0; i<sections; i++) {
-				String name = gateAddress.get(i).name;
-				Minecraft.getMinecraft().getTextureManager().bindTexture( new ResourceLocation("aunis:textures/gui/symbol/" + name.toLowerCase() + ".png") );
-				
-				int firstPos = frameThickness*2;
-				int x = firstPos + (sectionSize+frameThickness)*i;
-				
-				if (drawSymbolBackground) {
-					setColor(128, 128, 128, 75);
-					drawRect(x, firstPos, sectionSize+x, sectionSize+firstPos, color);
-					
-					GlStateManager.color(1, 1, 1, 1);
-				}
-				
-				GlStateManager.enableBlend();
-				
-				drawModalRectWithCustomSizedTexture(x, firstPos, 0, 0, sectionSize, sectionSize, sectionSize, sectionSize);
-				
-//				setColor(78, 86, 102, 255);
-				setColor(88, 97, 115, 255);
-				fontRenderer.drawStringWithShadow(name, x + (sectionSize - fontRenderer.getStringWidth(name))/2, firstPos + sectionSize - frameThickness, color);		
-				
-				GlStateManager.disableBlend();
-			}
-		}
-		
+	
 		else {
-			gateAddress = gateTile.gateAddress;
+			translateToCenter();
 		}
+		
+		
+		drawBackground();
+				
+		for (int i=0; i<sections; i++) {
+			String name = state.getGateAddress().get(i).name;
+			Minecraft.getMinecraft().getTextureManager().bindTexture( new ResourceLocation("aunis:textures/gui/symbol/" + name.toLowerCase() + ".png") );
+			
+			int firstPos = frameThickness*2;
+			int x = firstPos + (sectionSize+frameThickness)*i;
+			
+			GlStateManager.enableBlend();
+			
+			drawModalRectWithCustomSizedTexture(x, firstPos, 0, 0, sectionSize, sectionSize, sectionSize, sectionSize);
+			fontRenderer.drawStringWithShadow(name, x + (sectionSize - fontRenderer.getStringWidth(name))/2, firstPos + sectionSize - frameThickness, textColor);		
+			
+			GlStateManager.disableBlend();
+		}
+		
+		
+		// Power
+		GlStateManager.translate(10, imageHeight+4, 0);
+		
+		// width: width minus double x-axis translate
+		// height: 20
+		// frame: 4
+		frame(imageWidth-20, 20, 4, frameColor);
+		
+		// x: frame
+		// y: frame
+		// w: frame width(above) - 2*frame
+		// h: height(above) - frame
+		
+		double energyLevel = state.energyState.energy / ((double) state.maxEnergy);
+		int width = (int) (4 + (imageWidth-28) * energyLevel);
+		drawRect(4, 4, width, 16, 0xB0E01F09);
+		
+		String energy = String.format("%,d", state.energyState.energy);
+		String maxEnergy = String.format("%,d", state.maxEnergy);
+		
+		String energyString = energy + " / " + maxEnergy + " uI";
+		
+		// x: frame width
+		// y: frame height + 4
+		fontRenderer.drawStringWithShadow(energyString, imageWidth-20 - fontRenderer.getStringWidth(energyString), 24, 0x8896B3);
 		
 		GlStateManager.popMatrix();
 		
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 	
-	private void frame(int w, int h, int thickness) {
-		// Up
-		drawRect(0, 0, w, thickness, color);
-		
-		// Down
-		drawRect(0, h-thickness, w, h, color);
-				
-		// Left
-		drawRect(0, thickness, thickness, h-thickness, color);
-		
-		// Right
-		drawRect(w-thickness, thickness, w, h-thickness, color);
-	}
-	
-	private void setColor(int red, int green, int blue, int alpha) {
-		color = color( red, green, blue, alpha );
-	}
-	
-	private int color(int red, int green, int blue, int alpha) {
-		alpha = (alpha & 0xFF) << 24;
-		red = (red & 0xFF) << 16;
-		green = (green & 0xFF) << 8;
-		blue = (blue & 0xFF);
-		
-		return alpha | red | green | blue;
-	}
-	
 	@Override
-	public boolean doesGuiPauseGame() {
-		return false;
+	public void updateScreen() {
+		AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, EnumStateType.ENERGY_STATE));
 	}
 }

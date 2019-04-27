@@ -1,15 +1,9 @@
 package mrjake.aunis.packet;
 
-import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient;
-import mrjake.aunis.packet.dhd.OpenStargateAddressGuiToClient.OpenStargateAddressGuiClientHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient;
 import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient.DHDIncomingWormholePacketToClientHandler;
-import mrjake.aunis.packet.gate.addressUpdate.GateAddressPacketToClient;
-import mrjake.aunis.packet.gate.addressUpdate.GateAddressPacketToClient.GateAddressPacketToClientHandler;
-import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer;
-import mrjake.aunis.packet.gate.addressUpdate.GateAddressRequestToServer.GateAddressRequestToServerHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient.GateRenderingUpdatePacketToClientHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
@@ -27,16 +21,16 @@ import mrjake.aunis.packet.state.StateUpdatePacketToClient.StateUpdateClientHand
 import mrjake.aunis.packet.state.StateUpdateRequestToServer;
 import mrjake.aunis.packet.state.StateUpdateRequestToServer.StateUpdateServerHandler;
 import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer;
+import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer.SaveRingsParametersServerHandler;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient.StartPlayerFadeOutToClientHandler;
 import mrjake.aunis.packet.transportrings.StartRingsAnimationToClient;
-import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer.SaveRingsParametersServerHandler;
 import mrjake.aunis.packet.transportrings.StartRingsAnimationToClient.StartRingsAnimationToClientHandler;
 import mrjake.aunis.packet.transportrings.TRControllerActivatedToServer;
 import mrjake.aunis.packet.transportrings.TRControllerActivatedToServer.TRControllerActivatedServerHandler;
 import mrjake.aunis.packet.update.renderer.RendererUpdatePacketToClient;
-import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
 import mrjake.aunis.packet.update.renderer.RendererUpdatePacketToClient.TileUpdateClientHandler;
+import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
 import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer.TileUpdateServerHandler;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient.UpgradeSlotInteractHandler;
@@ -56,9 +50,6 @@ public class AunisPacketHandler {
 		/*INSTANCE.registerMessage(OnLoadUpdateRequest.onLoadUpdateRequestToClientHandler.class, OnLoadUpdateRequest.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(OnLoadUpdateRequest.onLoadUpdateRequestToClientHandler.class, OnLoadUpdateRequest.class, id, Side.SERVER); id++;*/
 		
-		INSTANCE.registerMessage(GateAddressRequestToServerHandler.class, GateAddressRequestToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(GateAddressPacketToClientHandler.class, GateAddressPacketToClient.class, id, Side.CLIENT); id++;
-		
 		INSTANCE.registerMessage(DHDIncomingWormholePacketToClientHandler.class, DHDIncomingWormholePacketToClient.class, id, Side.CLIENT); id++;
 		
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, RetrieveMotionToClient.class, id, Side.CLIENT); id++;
@@ -74,9 +65,7 @@ public class AunisPacketHandler {
 		
 		INSTANCE.registerMessage(UpgradeSlotInteractHandler.class, UpgradeSlotInteractToClient.class, id, Side.CLIENT); id++;
 //		INSTANCE.registerMessage(UpgradeTileUpdateToServer.UpgradeTileUpdateHandler.class, UpgradeTileUpdateToServer.class, id, Side.SERVER); id++;
-		
-		INSTANCE.registerMessage(OpenStargateAddressGuiClientHandler.class, OpenStargateAddressGuiToClient.class, id, Side.CLIENT); id++;
-		
+				
 		INSTANCE.registerMessage(EnergyStorageToClientHandler.class, EnergyStoredToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(ShouldRenderWavesToClientHandler.class, ShouldRenderWavesToClient.class, id, Side.CLIENT); id++;
 		

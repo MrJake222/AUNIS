@@ -3,7 +3,7 @@ package mrjake.aunis.renderer.state;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.renderer.stargate.StargateRenderer.EnumVortexState;
-import mrjake.aunis.stargate.merge.MergeHelper;
+import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.tileentity.StargateMemberTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;

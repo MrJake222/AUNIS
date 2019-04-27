@@ -4,7 +4,6 @@ import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.capability.CrystalControlDHDCapabilityProvider;
-import mrjake.aunis.capability.EnergyStorageSerializable;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -65,7 +64,7 @@ public class CrystalControlDHDItem extends Item {
 	
 	@Override
 	public double getDurabilityForDisplay(ItemStack stack) {
-		EnergyStorageSerializable energyStorage = (EnergyStorageSerializable) stack.getCapability(CapabilityEnergy.ENERGY, null);
+		IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
 		
 		return 1 - (double)energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored();
 	}
