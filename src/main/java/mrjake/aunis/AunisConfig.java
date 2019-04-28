@@ -20,6 +20,9 @@ public class AunisConfig {
 	@Name("Power draw options")
 	public static PowerConfig powerConfig = new PowerConfig();
 	
+	@Name("Debug options")
+	public static DebugConfig debugConfig = new DebugConfig();
+	
 	
 	public static class PowerConfig {
 		@Name("Stargate's internal buffer size")
@@ -93,5 +96,10 @@ public class AunisConfig {
 		@Name("DHD range's radius vertical")
 		@RangeInt(min=1)
 		public int rangeVertical = 5;
+	}
+	
+	public static class DebugConfig {
+		@Name("Check gate merge")
+		public boolean checkGateMerge = true;
 	}
 }

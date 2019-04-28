@@ -1,6 +1,5 @@
 package mrjake.aunis.tileentity;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
@@ -23,6 +22,8 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -170,7 +171,9 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 				return null;
 		}
 	}
+	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void setState(EnumStateType stateType, State state) {
 		switch (stateType) {
 			case CAMO_STATE:
@@ -183,13 +186,9 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 				break;
 				
 			case LIGHT_STATE:
-				Aunis.info("LIGHT_STATE");
-				
 				isLitUp = ((LightState) state).isLitUp();
 				world.notifyLightSet(pos);
 				world.checkLightFor(EnumSkyBlock.BLOCK, pos);
-//				world.markBlockRangeForRenderUpdate(pos.add(-16, -16, -16), pos.add(16, 16, 16));
-//				world.notifyAll();
 				
 				break;
 				

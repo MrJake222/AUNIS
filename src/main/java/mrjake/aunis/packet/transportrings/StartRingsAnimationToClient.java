@@ -1,11 +1,13 @@
 package mrjake.aunis.packet.transportrings;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -43,7 +45,8 @@ public class StartRingsAnimationToClient extends PositionedPacket {
 		public IMessage onMessage(StartRingsAnimationToClient message, MessageContext ctx) {
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
-				World world = Minecraft.getMinecraft().world;
+				EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
+				World world = player.getEntityWorld();
 				
 				TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(message.pos);
 				ringsTile.getTransportRingsRenderer().animationStart(message.animationStart);		

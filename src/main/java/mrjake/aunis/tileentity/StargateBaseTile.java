@@ -70,6 +70,8 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -990,6 +992,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	private StargateGUI openGui;
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void setState(EnumStateType stateType, State state) {
 		Mouse.setGrabbed(false);
 		

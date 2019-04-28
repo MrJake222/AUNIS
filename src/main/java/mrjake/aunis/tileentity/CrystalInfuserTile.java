@@ -37,7 +37,7 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 			
 			// Client
 			if (world.isRemote) {
-				Aunis.info("TileUpdateRequestToServer " + pos.toString());
+//				Aunis.info("TileUpdateRequestToServer " + pos.toString());
 				
 				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos));
 			}

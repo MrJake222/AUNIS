@@ -1,6 +1,8 @@
 package mrjake.aunis.state;
 
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Implemented by {@link TileEntity} which provides at least one {@link State}
@@ -33,5 +35,6 @@ public interface ITileEntityStateProvider {
 	 * @param stateType {@link EnumStateType} State to be applied
 	 * @param state {@link State} instance obtained from packet
 	 */
+	@SideOnly(Side.CLIENT)
 	public abstract void setState(EnumStateType stateType, State state);
 }

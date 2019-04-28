@@ -1,9 +1,10 @@
 package mrjake.aunis.packet.dhd.renderingUpdate;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.tileentity.DHDTile;
-import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -38,7 +39,9 @@ public class ClearLinkedDHDButtons extends PositionedPacket {
 			}
 			
 			else {*/
-			World world = Minecraft.getMinecraft().player.getEntityWorld();
+			EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
+			World world = player.getEntityWorld();
+			
 			DHDTile dhdTile = ((DHDTile)world.getTileEntity(message.pos));
 			
 			if (dhdTile != null) {

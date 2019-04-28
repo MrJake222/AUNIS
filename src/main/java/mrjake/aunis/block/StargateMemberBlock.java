@@ -76,7 +76,7 @@ public class StargateMemberBlock extends Block {
 		StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
 				
 		if (memberTile != null)
-			return memberTile.isLitUp(state) ? 15 : 0;
+			return memberTile.isLitUp(state) ? 7 : 0;
 		
 		else
 			return 0;
@@ -301,7 +301,7 @@ public class StargateMemberBlock extends Block {
 	
 	@Override
 	public BlockRenderLayer getBlockLayer() {
-		return BlockRenderLayer.TRANSLUCENT;
+		return BlockRenderLayer.SOLID;
 	}
 		
 	@Override

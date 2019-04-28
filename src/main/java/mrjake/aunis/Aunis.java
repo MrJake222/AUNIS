@@ -22,8 +22,8 @@ public class Aunis {
     public static final String MCVersion = "[1.12.2]";
  
     public static final boolean DEBUG = false;
-    public static final String CLIENT = "mrjake.aunis.proxy.ClientProxy";
-    public static final String SERVER = "mrjake.aunis.proxy.ServerProxy";
+    public static final String CLIENT = "mrjake.aunis.proxy.ProxyClient";
+    public static final String SERVER = "mrjake.aunis.proxy.ProxyServer";
     
     public static final AunisCreativeTab aunisCreativeTab = new AunisCreativeTab();
     

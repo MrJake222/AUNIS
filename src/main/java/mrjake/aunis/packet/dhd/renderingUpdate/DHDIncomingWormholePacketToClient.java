@@ -3,10 +3,12 @@ package mrjake.aunis.packet.dhd.renderingUpdate;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -54,7 +56,8 @@ public class DHDIncomingWormholePacketToClient extends PositionedPacket {
 
 		@Override
 		public IMessage onMessage(DHDIncomingWormholePacketToClient message, MessageContext ctx) {
-			World world = Minecraft.getMinecraft().world;
+			EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
+			World world = player.getEntityWorld();
 						
 			Minecraft.getMinecraft().addScheduledTask(() -> {
 				DHDTile te = (DHDTile) world.getTileEntity( message.pos );

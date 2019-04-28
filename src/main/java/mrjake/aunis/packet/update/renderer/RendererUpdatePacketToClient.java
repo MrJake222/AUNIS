@@ -1,13 +1,14 @@
 package mrjake.aunis.packet.update.renderer;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.ITileEntityRendered;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -64,7 +65,7 @@ public class RendererUpdatePacketToClient extends PositionedPacket {
 		@SuppressWarnings("unchecked")
 		@Override
 		public IMessage onMessage(RendererUpdatePacketToClient message, MessageContext ctx) {			
-			EntityPlayerSP player = Minecraft.getMinecraft().player;
+			EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
 			World world = player.getEntityWorld();
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {

@@ -1,10 +1,12 @@
 package mrjake.aunis.packet.infuser;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.renderer.crystalinfuser.CrystalInfuserRenderer;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -43,7 +45,8 @@ public class EnergyStoredToClient extends PositionedPacket {
 		public IMessage onMessage(EnergyStoredToClient message, MessageContext ctx) {
 			
 			Minecraft.getMinecraft().addScheduledTask(() -> {
-				World world = Minecraft.getMinecraft().player.world;
+				EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
+				World world = player.getEntityWorld();
 
 				CrystalInfuserTile infuserTile = (CrystalInfuserTile) world.getTileEntity(message.pos);
 				

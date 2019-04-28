@@ -47,7 +47,9 @@ public class StargateGuiState extends State {
 			gateAddress.add(EnumSymbol.valueOf(id));
 		}
 		
-		if (buf.readBoolean())
+		hasUpgrade = buf.readBoolean();
+		
+		if (hasUpgrade)
 			gateAddress.add(EnumSymbol.valueOf(buf.readInt()));
 		
 		maxEnergy = buf.readInt();

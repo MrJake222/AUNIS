@@ -1,9 +1,11 @@
 package mrjake.aunis.item;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.capability.CrystalControlDHDCapabilityProvider;
+import mrjake.aunis.capability.EnergyStorageUncapped;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -49,12 +51,16 @@ public class CrystalControlDHDItem extends Item {
 	
 	@Override
 	public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+//		stack.
 		IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
 		
 		String energy = String.format("%,d", energyStorage.getEnergyStored());
 		String capacity = String.format("%,d", energyStorage.getMaxEnergyStored());
 		
 		tooltip.add(energy + " / " + capacity + " µI");
+		String percent = new DecimalFormat("00.00").format(100 * energyStorage.getEnergyStored() / ((double)energyStorage.getMaxEnergyStored())); 
+		
+		tooltip.add(percent + " %");
 	}
 	
 	@Override
@@ -67,5 +73,33 @@ public class CrystalControlDHDItem extends Item {
 		IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
 		
 		return 1 - (double)energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored();
+	}
+	
+	@Override
+	public boolean getShareTag() {
+		return true;
+	}
+	
+	@Override
+	public NBTTagCompound getNBTShareTag(ItemStack stack) {
+		IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
+		
+		NBTTagCompound compound = super.getNBTShareTag(stack);
+		
+		if (compound == null)
+			compound = new NBTTagCompound();
+		
+		compound.setInteger("aunisEnergy", energyStorage.getEnergyStored());
+		
+		return compound;
+	}
+	
+	@Override
+	public void readNBTShareTag(ItemStack stack, NBTTagCompound nbt) {		
+		if (nbt != null && nbt.hasKey("aunisEnergy")) {
+			EnergyStorageUncapped energyStorage = (EnergyStorageUncapped) stack.getCapability(CapabilityEnergy.ENERGY, null);
+		
+			energyStorage.setEnergyStored(nbt.getInteger("aunisEnergy"));
+		}
 	}
 }

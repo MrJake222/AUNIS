@@ -1,6 +1,7 @@
 package mrjake.aunis.packet.gate.renderingUpdate;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
@@ -69,7 +70,7 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 		
 		@Override
 		public IMessage onMessage(GateRenderingUpdatePacketToClient message, MessageContext ctx) {	
-			EntityPlayer player = Minecraft.getMinecraft().player;
+			EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
 			World world = player.getEntityWorld();
 						
 			Minecraft.getMinecraft().addScheduledTask(() -> {

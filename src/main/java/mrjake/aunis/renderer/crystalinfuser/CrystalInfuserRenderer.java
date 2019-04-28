@@ -132,6 +132,7 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 		
 		GlStateManager.rotate(45, 0, 0, 1);
 		
+		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.enableBlend();
 		itemRenderer.render();
 		
@@ -232,12 +233,12 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 		if (state.renderWaves) {
 			waves.clear();
 			
-			Aunis.info("requesting start crystalRotation: " + crystalRotation);
+//			Aunis.info("requesting start crystalRotation: " + crystalRotation);
 			getSpinHelper().requestStart(crystalRotation);
 		}
 		
 		else {
-			Aunis.info("requesting stop");
+//			Aunis.info("requesting stop");
 			getSpinHelper().requestStop();
 		}
 	}
@@ -247,6 +248,7 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 		this.state = rendererState;
 		
 		setEnergyStored(state.energyStored);
+		shouldRenderWaves(rendererState.renderWaves);
 	}
 
 	@Override

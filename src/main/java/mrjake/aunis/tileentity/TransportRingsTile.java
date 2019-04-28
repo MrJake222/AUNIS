@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.input.Mouse;
-
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
@@ -37,6 +35,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class TransportRingsTile extends TileEntity implements ITileEntityRendered, ITickable, ITileEntityStateProvider {
 
@@ -429,11 +429,17 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 		}
 	}
 	
+	@SideOnly(Side.CLIENT)
 	private RingsGUI openGui;
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void setState(EnumStateType stateType, State state) {
-		Mouse.setGrabbed(false);
+//		Mouse.setGrabbed(false);
+		
+//		Aunis.guiProxy.openGui("ringsGui", stateType, state);
+		
+//		RingsGUI.class.newInstance();
 		
 		switch (stateType) {
 			case GUI_STATE:
