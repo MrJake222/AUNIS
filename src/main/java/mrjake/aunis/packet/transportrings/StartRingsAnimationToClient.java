@@ -51,7 +51,7 @@ public class StartRingsAnimationToClient extends PositionedPacket {
 				TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(message.pos);
 				ringsTile.getTransportRingsRenderer().animationStart(message.animationStart);		
 				
-				AunisSoundHelper.playSound((WorldClient) world, message.pos.add(0, 4, 0), AunisSoundHelper.ringsTransport);
+				AunisSoundHelper.playSound((WorldClient) world, message.pos.add(0, 4, 0), AunisSoundHelper.ringsTransport, 0.8f);
 			});
 						
 			return null;

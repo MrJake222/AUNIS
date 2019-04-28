@@ -6,7 +6,6 @@ import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -57,11 +56,11 @@ public class TRControllerActivatedToServer extends PositionedPacket {
 				if (ringsTile != null) {
 					world.playSound(player, message.pos, AunisSoundHelper.ringsControllerButton, SoundCategory.AMBIENT, 1.0f, 1.0f);
 					
-					ringsTile.attemptTransportTo(message.address);
+					ringsTile.attemptTransportTo(player, message.address);
 				}
 				
 				else
-					Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_controller_block.not_linked")), true);
+					player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_controller_block.not_linked")), true);
 			});
 			
 			return null;

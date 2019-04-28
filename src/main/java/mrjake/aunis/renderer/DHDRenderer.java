@@ -96,9 +96,9 @@ public class DHDRenderer implements ISpecialRenderer<DHDRendererState> {
 	
 	public void activateButton(int buttonID) {
 		if ( buttonID == 38 )
-			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPressBRB);
+			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPressBRB, 0.5f);
 		else
-			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPress);
+			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPress, 0.5f);
 		
 		if (activation == -1) {
 			if ( buttonID == 38 )

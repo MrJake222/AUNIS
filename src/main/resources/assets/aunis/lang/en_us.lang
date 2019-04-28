@@ -2,6 +2,7 @@ itemGroup.aunis=Aunis
 
 item.aunis.analyzer_ancient.name=Ancient Analyzer
 item.aunis.crystal_control_dhd.name=DHD Control Crystal
+item.aunis.dialer_fast.name=Fast dialer (debug)
 
 item.aunis.crystal_glyph_dhd.name=DHD Glyph Crystal
 item.aunis.crystal_glyph_empty.name=Empty Glyph Crystal
@@ -42,3 +43,6 @@ tile.aunis.transportrings_controller_block.not_linked=Controller not linked
 
 tile.aunis.transportrings_block.name=Transport rings
 tile.aunis.transportrings_block.non_existing_address=Unable to reach this address
+tile.aunis.transportrings_block.duplicate_address=Duplicate address
+tile.aunis.transportrings_block.wrong_address=Wrong address, should be 1-6
+tile.aunis.transportrings_block.obstructed=Rings obstructed, clear 7x7 area around rings

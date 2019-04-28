@@ -7,6 +7,7 @@ import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.TransportRingsTile;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -48,10 +49,11 @@ public class SaveRingsParametersToServer extends PositionedPacket {
 
 		@Override
 		public StateUpdatePacketToClient onMessage(SaveRingsParametersToServer message, MessageContext ctx) {
-			World world = ctx.getServerHandler().player.getEntityWorld();
+			EntityPlayer player = ctx.getServerHandler().player;
+			World world = player.getEntityWorld();
 			
 			TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(message.pos);
-			ringsTile.setRingsParams(message.address, message.name);
+			ringsTile.setRingsParams(player, message.address, message.name);
 			
 			return new StateUpdatePacketToClient(message.pos, EnumStateType.GUI_STATE, ringsTile.getState(EnumStateType.GUI_STATE));
 		}

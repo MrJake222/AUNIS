@@ -26,7 +26,9 @@ import mrjake.aunis.state.State;
 import mrjake.aunis.transportrings.TransportRings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
@@ -186,9 +188,16 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	 * Checks if Rings are linked to Rings at given address.
 	 * If yes, it starts teleportation.
 	 * 
+	 * @param player Initiating player
 	 * @param address Target rings address
 	 */
-	public void attemptTransportTo(int address) {
+	public void attemptTransportTo(EntityPlayerMP player, int address) {
+		if (checkIfObstructed()) {
+			player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.obstructed")), true);
+			
+			return;
+		}
+		
 		TransportRings rings = ringsMap.get(address);
 				
 		// Binding exists
@@ -204,7 +213,7 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 		}
 		
 		else {
-			Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.non_existing_address")), true);
+			player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.non_existing_address")), true);
 		}
 	}
 	
@@ -215,6 +224,23 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 			new BlockPos(2, 2, 2),
 			new BlockPos(3, 2, 1)
 	);
+	
+	private boolean checkIfObstructed() {
+		for(int y=0; y<4; y++) {
+			for (Rotation rotation : Rotation.values()) {
+				for (BlockPos invPos : invisibleBlocksTemplate) {
+					
+					BlockPos newPos = new BlockPos(this.pos).add(invPos.rotate(rotation)).add(0, y, 0);
+					
+					if (world.getBlockState(newPos).getBlock() != Blocks.AIR) {
+						return true;
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
 	
 	private List<BlockPos> invisibleBlocks = new ArrayList<BlockPos>();
 	
@@ -230,7 +256,6 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 												
 						world.setBlockState(newPos, AunisBlocks.invisibleBlock.getDefaultState(), 3);
 						
-//							if (y == 1)
 						invisibleBlocks.add(newPos);
 					}
 				}
@@ -239,11 +264,9 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 		
 		else {
 			for (BlockPos invPos : invisibleBlocks) {
-//					world.setBlockState(invPos, Blocks.DIAMOND_BLOCK.getDefaultState(), 3);
 				world.setBlockToAir(invPos);
 			}
 		}
-//			if (set)world.setBlockState(pos.add(0,2,0), Blocks.GLASS.getDefaultState());
 	}
 	
 	
@@ -317,26 +340,37 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 		}
 	}
 	
-	public void setRingsParams(int address, String name) {
+	public void setRingsParams(EntityPlayer player, int address, String name) {
+		int x = pos.getX();
+		int z = pos.getZ();
+
+		int radius = AunisConfig.ringsConfig.rangeFlat;
+		
+		List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
+		
+		for (BlockPos newRingsPos : BlockPos.getAllInBoxMutable(new BlockPos(x-radius, 0, z-radius), new BlockPos(x+radius, 255, z+radius))) {
+			if (world.getBlockState(newRingsPos).getBlock() == AunisBlocks.transportRingsBlock && !pos.equals(newRingsPos)) {
+				
+				TransportRingsTile newRingsTile = (TransportRingsTile) world.getTileEntity(newRingsPos);	
+				ringsTilesInRange.add(newRingsTile);
+
+				int newRingsAddress = newRingsTile.getClonedRings(pos).getAddress();
+				if (newRingsAddress == address && newRingsAddress != -1) {
+					player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.duplicate_address")), true);
+					
+					return;
+				}
+			}
+		}
+		
 		removeAllRings();
 		
 		getRings().setAddress(address);
 		getRings().setName(name);
 		
-		int x = pos.getX();
-		int z = pos.getZ();
-		
-		int radius = AunisConfig.ringsConfig.rangeFlat;
-		
-		for (BlockPos newRings : BlockPos.getAllInBoxMutable(new BlockPos(x-radius, 0, z-radius), new BlockPos(x+radius, 255, z+radius))) {
-			
-			if (world.getBlockState(newRings).getBlock() == AunisBlocks.transportRingsBlock && !pos.equals(newRings)) {
-				
-				TransportRingsTile newRingsTile = (TransportRingsTile) world.getTileEntity(newRings);		
-				
-				this.addRings(newRingsTile);
-				newRingsTile.addRings(this);
-			}
+		for (TransportRingsTile newRingsTile : ringsTilesInRange) {
+			this.addRings(newRingsTile);
+			newRingsTile.addRings(this);
 		}
 		
 		markDirty();

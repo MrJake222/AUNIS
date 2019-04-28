@@ -23,7 +23,7 @@ public class RingsGUI extends GuiBase {
 	public boolean isOpen;
 	
 	public RingsGUI(BlockPos pos, RingsGuiState state) {
-		super(196, 128, 8, FRAME_COLOR, BG_COLOR, TEXT_COLOR, 4);
+		super(196, 160, 8, FRAME_COLOR, BG_COLOR, TEXT_COLOR, 4);
 		
 		this.pos = pos;
 		this.state = state;
@@ -38,7 +38,7 @@ public class RingsGUI extends GuiBase {
 	
 	@Override
 	public void initGui() {			
-		addressTextField = createTextField(50, 20, 1, state.isInGrid() ? "" + state.getAddress() : "0");
+		addressTextField = createTextField(50, 20, 1, state.isInGrid() ? "" + state.getAddress() : "");
 		textFields.add(addressTextField);
 		
 		nameTextField = createTextField(50, 35, 16, state.getName());
@@ -67,7 +67,7 @@ public class RingsGUI extends GuiBase {
 		drawBackground();
 
 		if (state.isInGrid()) {
-			drawVerticallCenteredString("Rings No. " + state.getAddress(), 0, 0, TEXT_COLOR);
+			drawVerticallCenteredString("Rings No. " + state.getAddress(), 0, 0, 0xAA5500);
 //			drawText("Connected to:", 0, 13, color(88, 97, 115, 255));
 		}
 		
@@ -75,8 +75,8 @@ public class RingsGUI extends GuiBase {
 			drawVerticallCenteredString("Rings not in grid", 0, 0, 0xB36262);
 		}	
 		
-		drawString("Address: ", 0, 20, textColor);
-		drawString("Name: ", 0, 35, textColor);
+		drawString("Address: ", 0, 20, 0x00AA00);
+		drawString("Name: ", 0, 35, 0x00AAAA);
 //		this.addressTextField.drawTextBox();
 		
 		for (GuiTextField tf : textFields)
@@ -84,9 +84,10 @@ public class RingsGUI extends GuiBase {
 		
 		int y = 50;
 		for (TransportRings rings : state.getRings()) {			
-			drawVerticallCenteredString(rings.getAddress() + ": " + rings.getName(), 0, y, textColor);
+			drawString(""+rings.getAddress(), 60, y, 0x00AA00);
+			drawString(rings.getName(), 70, y, 0x00AAAA);
 			
-			y += 10;
+			y += 12;
 //			drawString(rings.getName(), len, 40+i*10, textColor);
 		}
 		
@@ -107,14 +108,20 @@ public class RingsGUI extends GuiBase {
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == saveButton) {
-			int address = Integer.valueOf(addressTextField.getText());
-			String name = nameTextField.getText();
-			
-			if (address > 0 && address <= 6) {
-				AunisPacketHandler.INSTANCE.sendToServer(new SaveRingsParametersToServer(pos, address, name));
+			try {
+				int address = Integer.valueOf(addressTextField.getText());
+				String name = nameTextField.getText();
+				
+				if (address > 0 && address <= 6) {
+					AunisPacketHandler.INSTANCE.sendToServer(new SaveRingsParametersToServer(pos, address, name));
+				}
+				
+				else {
+					Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.wrong_address")), true);
+				}
 			}
 			
-			else {
+			catch (NumberFormatException e) {
 				Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.wrong_address")), true);
 			}
 		}

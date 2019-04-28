@@ -26,7 +26,7 @@ public class AunisPositionedSound extends AunisSound {
 	
 	private PositionedSoundRecord getRecord() {		
 		if (positionedSoundRecord == null)
-			positionedSoundRecord = new PositionedSoundRecord(resourceLocation, soundCategory, 1.0f, 1.0f, repeat, 0, AttenuationType.LINEAR, pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f);
+			positionedSoundRecord = new PositionedSoundRecord(resourceLocation, soundCategory, 0.5f, 1.0f, repeat, 0, AttenuationType.LINEAR, pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f);
 				
 		return positionedSoundRecord;
 	}

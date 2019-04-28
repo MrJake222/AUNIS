@@ -77,7 +77,7 @@ public class ControllerActivation extends Activation {
 		num += (x == 1 ? 1 : 0);
 				
 		player.swingArm(EnumHand.MAIN_HAND);
-		world.playSound(player, pos, AunisSoundHelper.ringsControllerButton, SoundCategory.AMBIENT, 1.0f, 1.0f);
+		world.playSound(player, pos, AunisSoundHelper.ringsControllerButton, SoundCategory.AMBIENT, 0.5f, 1.0f);
 		
 		AunisPacketHandler.INSTANCE.sendToServer(new TRControllerActivatedToServer(pos, num));
 	}

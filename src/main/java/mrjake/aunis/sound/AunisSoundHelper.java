@@ -84,7 +84,7 @@ public class AunisSoundHelper {
 		aunisSounds.put("wormhole", new AunisSound(AunisSoundHelper.wormholeLoop, SoundCategory.AMBIENT, true));
 	}
 	
-	public static void playSound(WorldClient world, BlockPos pos, SoundEvent soundEvent) {
-		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEvent, SoundCategory.AMBIENT, 1.0f, 1.0f, false);
+	public static void playSound(WorldClient world, BlockPos pos, SoundEvent soundEvent, float volume) {
+		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEvent, SoundCategory.AMBIENT, volume, 1.0f, false);
 	}
 }
