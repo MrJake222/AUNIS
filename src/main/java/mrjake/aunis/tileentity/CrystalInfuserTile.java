@@ -1,7 +1,6 @@
 package mrjake.aunis.tileentity;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -61,11 +60,11 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 					energyStorage.extractEnergy(rx, false);
 					
 					getInfuserRendererState().energyStored = crystalEnergyStorage.getEnergyStored();
-					AunisPacketHandler.INSTANCE.sendToAllAround(new EnergyStoredToClient(pos, getInfuserRendererState().energyStored), point);
+					AunisPacketHandler.INSTANCE.sendToAllTracking(new EnergyStoredToClient(pos, getInfuserRendererState().energyStored), point);
 					
 					if (!getInfuserRendererState().renderWaves) {
 						getInfuserRendererState().renderWaves = true;
-						AunisPacketHandler.INSTANCE.sendToAllAround(new ShouldRenderWavesToClient(pos, getInfuserRendererState().renderWaves), point);
+						AunisPacketHandler.INSTANCE.sendToAllTracking(new ShouldRenderWavesToClient(pos, getInfuserRendererState().renderWaves), point);
 					}
 				}
 				
@@ -85,7 +84,7 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 			if (stopWaveRender || ticksBufferEmpty >= 20) {
 				if (getInfuserRendererState().renderWaves) {
 					getInfuserRendererState().renderWaves = false;
-					AunisPacketHandler.INSTANCE.sendToAllAround(new ShouldRenderWavesToClient(pos, getInfuserRendererState().renderWaves), point);
+					AunisPacketHandler.INSTANCE.sendToAllTracking(new ShouldRenderWavesToClient(pos, getInfuserRendererState().renderWaves), point);
 				}
 			}
 		}
@@ -143,7 +142,7 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 				getInfuserRendererState().energyStored = stack.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored();
 			
 			TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-			AunisPacketHandler.INSTANCE.sendToAllAround(new EnergyStoredToClient(pos, getInfuserRendererState().energyStored), point);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new EnergyStoredToClient(pos, getInfuserRendererState().energyStored), point);
 //			AunisPacketHandler.INSTANCE.sendToAllAround(new ShouldRenderWavesToClient(pos, getInfuserRendererState().renderWaves), point);
 		};
 	};

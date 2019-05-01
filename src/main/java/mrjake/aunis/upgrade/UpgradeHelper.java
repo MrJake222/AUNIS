@@ -39,7 +39,7 @@ public class UpgradeHelper {
 				upgradeable.getUpgradeRendererState().doUpgradeRender = false;
 				upgradeable.setUpgrade(false);
 				
-				AunisPacketHandler.INSTANCE.sendToAllAround(new UpgradeSlotInteractToClient(pos, EnumUpgradeAction.POP_UPGRADE), target);
+				AunisPacketHandler.INSTANCE.sendToAllTracking(new UpgradeSlotInteractToClient(pos, EnumUpgradeAction.POP_UPGRADE), target);
 				
 				if (heldItemStack.getItem() == upgradeable.getAcceptedUpgradeItem())
 					player.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(heldItemStack.getItem(), heldItemStack.getCount() + 1));
@@ -52,7 +52,7 @@ public class UpgradeHelper {
 				
 				upgradeable.getUpgradeRendererState().doUpgradeRender = true;
 				
-				AunisPacketHandler.INSTANCE.sendToAllAround(new UpgradeSlotInteractToClient(pos, EnumUpgradeAction.REMOVE_UPGRADE), target);
+				AunisPacketHandler.INSTANCE.sendToAllTracking(new UpgradeSlotInteractToClient(pos, EnumUpgradeAction.REMOVE_UPGRADE), target);
 			}
 		}
 		
@@ -63,7 +63,7 @@ public class UpgradeHelper {
 				upgradeable.getUpgradeRendererState().doUpgradeRender = false;
 				upgradeable.setUpgrade(true);
 				
-				AunisPacketHandler.INSTANCE.sendToAllAround(new UpgradeSlotInteractToClient(pos, EnumUpgradeAction.INSERT_UPGRADE), target);
+				AunisPacketHandler.INSTANCE.sendToAllTracking(new UpgradeSlotInteractToClient(pos, EnumUpgradeAction.INSERT_UPGRADE), target);
 			}
 			
 			else {
@@ -72,7 +72,7 @@ public class UpgradeHelper {
 				if (heldItemStack.getItem() == upgradeable.getAcceptedUpgradeItem()) {
 					upgradeable.getUpgradeRendererState().doUpgradeRender = true;
 					
-					AunisPacketHandler.INSTANCE.sendToAllAround(new UpgradeSlotInteractToClient(pos, EnumUpgradeAction.PUT_UPGRADE), target);
+					AunisPacketHandler.INSTANCE.sendToAllTracking(new UpgradeSlotInteractToClient(pos, EnumUpgradeAction.PUT_UPGRADE), target);
 					
 					player.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(heldItemStack.getItem(), heldItemStack.getCount() - 1) );
 				}

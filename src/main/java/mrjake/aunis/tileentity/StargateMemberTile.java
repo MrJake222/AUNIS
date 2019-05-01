@@ -73,7 +73,7 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 	
 	public void syncLightUp() {
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-		AunisPacketHandler.INSTANCE.sendToAllAround(new StateUpdatePacketToClient(pos, EnumStateType.LIGHT_STATE, getState(EnumStateType.LIGHT_STATE)), point);
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.LIGHT_STATE, getState(EnumStateType.LIGHT_STATE)), point);
 	}
 	
 	public void setLitUp(boolean isLitUp) {

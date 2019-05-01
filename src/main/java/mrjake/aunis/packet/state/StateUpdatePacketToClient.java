@@ -45,13 +45,16 @@ public class StateUpdatePacketToClient extends PositionedPacket {
 		stateType = EnumStateType.byId(buf.readInt());
 		
 		ITileEntityStateProvider te = (ITileEntityStateProvider) Minecraft.getMinecraft().world.getTileEntity(pos);
-		state = te.createState(stateType);
 		
-		if (state != null)
-			state.fromBytes(buf);
+		if (te != null) {
+			state = te.createState(stateType);
 		
-		else
-			throw new NotImplementedError("State not implemented on " + te.toString());
+			if (state != null)
+				state.fromBytes(buf);
+			
+			else
+				throw new NotImplementedError("State not implemented on " + te.toString());
+		}
 	}
 	
 	public static class StateUpdateClientHandler implements IMessageHandler<StateUpdatePacketToClient, IMessage> {
@@ -65,7 +68,8 @@ public class StateUpdatePacketToClient extends PositionedPacket {
 								
 				ITileEntityStateProvider te = (ITileEntityStateProvider) world.getTileEntity(message.pos);
 				
-				te.setState(message.stateType, message.state);				
+				if (te != null && message.state != null)
+					te.setState(message.stateType, message.state);				
 			});
 			
 			return null;

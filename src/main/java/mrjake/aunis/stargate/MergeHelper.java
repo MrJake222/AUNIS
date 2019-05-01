@@ -180,7 +180,7 @@ public class MergeHelper {
 						InventoryHelper.spawnItemStack(world, checkPos.getX(), checkPos.getY(), checkPos.getZ(), camoStack);
 						
 						TargetPoint point = new TargetPoint(world.provider.getDimension(), checkPos.getX(), checkPos.getY(), checkPos.getZ(), 512);
-						AunisPacketHandler.INSTANCE.sendToAllAround(new StateUpdatePacketToClient(checkPos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
+						AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(checkPos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
 					}
 					
 					world.setBlockState(checkPos, blockState

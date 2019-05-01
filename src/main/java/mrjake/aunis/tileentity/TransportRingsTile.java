@@ -181,7 +181,7 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 		getTransportRingsRendererState().isAnimationActive = true;
 				
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-		AunisPacketHandler.INSTANCE.sendToAllAround(new StartRingsAnimationToClient(pos, getTransportRingsRendererState().animationStart), point);
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StartRingsAnimationToClient(pos, getTransportRingsRendererState().animationStart), point);
 	}
 
 	/**

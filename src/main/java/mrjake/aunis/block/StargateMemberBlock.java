@@ -233,7 +233,7 @@ public class StargateMemberBlock extends Block {
 				}
 				
 				TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-				AunisPacketHandler.INSTANCE.sendToAllAround(new StateUpdatePacketToClient(pos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
+				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
 			}
 			
 			return true;

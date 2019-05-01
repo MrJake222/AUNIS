@@ -280,7 +280,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		gateCloseTimeout = 5;
 		
 		if (fastDialer) {
-			AunisPacketHandler.INSTANCE.sendToAllAround(new RendererUpdatePacketToClient(pos, getRendererState()), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 32768));
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new RendererUpdatePacketToClient(pos, getRendererState()), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 32768));
 			fastDialer = false;
 		}
 		
@@ -796,14 +796,14 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 							EnumGateAction action = getStargateRendererState().horizonUnstable ? EnumGateAction.UNSTABLE_HORIZON : EnumGateAction.STABLE_HORIZON;
 							
 							TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-							AunisPacketHandler.INSTANCE.sendToAllAround(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, pos), point);
+							AunisPacketHandler.INSTANCE.sendToAllTracking(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, pos), point);
 							
 //							if (isEngaged) {
 								StargatePos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
 								BlockPos tPos = targetPos.getPos();
 
 								TargetPoint targetPoint = new TargetPoint(targetPos.getDimension(), tPos.getX(), tPos.getY(), tPos.getZ(), 512);
-								AunisPacketHandler.INSTANCE.sendToAllAround(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, tPos), targetPoint);
+								AunisPacketHandler.INSTANCE.sendToAllTracking(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, tPos), targetPoint);
 //							}
 						}
 						
@@ -848,7 +848,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		if (clearingButtons) {
 			if (world.getTotalWorldTime()-waitForClear >= clearDelay) { 				
 				if (linkedDHD != null)
-					AunisPacketHandler.INSTANCE.sendToAllAround(new ClearLinkedDHDButtons(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+					AunisPacketHandler.INSTANCE.sendToAllTracking(new ClearLinkedDHDButtons(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
 				
 				clearingButtons = false;
 			}

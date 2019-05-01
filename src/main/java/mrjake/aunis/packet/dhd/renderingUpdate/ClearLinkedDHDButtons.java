@@ -19,26 +19,9 @@ public class ClearLinkedDHDButtons extends PositionedPacket {
 	}	
 	
 	public static class ClearLinkedDHDButtonsHandler implements IMessageHandler<ClearLinkedDHDButtons, IMessage> {
-		// TODO Cleanup
+
 		@Override
 		public IMessage onMessage(ClearLinkedDHDButtons message, MessageContext ctx) {
-			
-			/*if (ctx.side == Side.SERVER) {
-				WorldServer world = ctx.getServerHandler().player.getServerWorld();
-				
-				if ( world.getBlockState(message.pos).getBlock() instanceof StargateBaseBlock ) {
-					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.pos);
-					
-					if ( gateTile.isLinked() ) {
-						BlockPos dhd = gateTile.getLinkedDHD();
-						TargetPoint point = new TargetPoint(world.provider.getDimension(), dhd.getX(), dhd.getY(), dhd.getZ(), 512);
-						
-						AunisPacketHandler.INSTANCE.sendToAllAround(new ClearLinkedDHDButtons(dhd), point);
-					}
-				}
-			}
-			
-			else {*/
 			EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
 			World world = player.getEntityWorld();
 			

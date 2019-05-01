@@ -3,7 +3,6 @@ package mrjake.aunis.renderer.crystalinfuser;
 import java.util.ArrayList;
 import java.util.List;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
