@@ -1,31 +1,31 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"GGG",
-		"BLB",
-		"NRN"
+		"BGB",
+		"GIG",
+		"NEN"
 	],
 	
 	"key": {
 		"G": {
 			"item": "minecraft:gold_ingot"
 		},
+		
+		"N": {
+			"item": "aunis:naquadah_alloy"
+		},
 
 		"B": {
 			"item": "minecraft:stone_button"
 		},
 		
-		"L": {
-			"item": "aunis:crystal_blue"
+		"E": {
+			"item": "aunis:crystal_ender"
 		},
 		
-		"R": {
-			"item": "aunis:crystal_red"
-		},
-		
-		"N": {
-			"item": "aunis:naquadah_refined"
-		}
+		"I": {
+			"item": "aunis:circuit_control_naquadah"
+		}		
 	},
 	
 	"result": {

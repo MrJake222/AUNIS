@@ -41,7 +41,7 @@ public class DHDBlock extends Block {
 		super(Material.IRON);
 		
 		setRegistryName(Aunis.ModID + ":" + blockName);
-		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		setTranslationKey(Aunis.ModID + "." + blockName);
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -96,7 +96,7 @@ public class DHDBlock extends Block {
 		
 		if (!worldIn.isRemote) {
 			if (hand == EnumHand.MAIN_HAND) {
-				EnumFacing dhdFacingOpposite = EnumFacing.getHorizontal( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
+				EnumFacing dhdFacingOpposite = EnumFacing.byHorizontalIndex( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
 								
 				// Back side of block
 				if (facing == dhdFacingOpposite) {

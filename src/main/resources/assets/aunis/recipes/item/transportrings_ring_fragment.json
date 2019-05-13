@@ -1,27 +1,27 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"NRN",
-		"BCB",
-		"NRN"
+		"NNN",
+		"BIE",
+		"NNN"
 	],
 	
 	"key": {
-		"R": {
-			"item": "aunis:crystal_red"
-		},
-
 		"N": {
-			"item": "aunis:naquadah_refined"
+			"item": "aunis:naquadah_alloy"
 		},
 
-		"C": {
-			"item": "aunis:crystal_array"
+		"I": {
+			"item": "aunis:circuit_control_naquadah"
 		},
 		
 		"B": {
 			"item": "aunis:crystal_blue"
-		}
+		},
+		
+		"E": {
+			"item": "aunis:crystal_ender"
+		}		
 	},
 	
 	"result": {

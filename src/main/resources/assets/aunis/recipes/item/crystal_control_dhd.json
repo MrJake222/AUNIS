@@ -1,18 +1,14 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"SRS",
-		"RWR",
-		"SRS"
+		" R ",
+		"RSR",
+		" R "
 	],
 	
 	"key": {
 		"R": {
 			"item": "aunis:crystal_red"
-		},
-
-		"W": {
-			"item": "aunis:crystal_blank"
 		},
 		
 		"S": {

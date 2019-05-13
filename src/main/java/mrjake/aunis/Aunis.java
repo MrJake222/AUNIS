@@ -2,9 +2,12 @@ package mrjake.aunis;
 
 import org.apache.logging.log4j.Logger;
 
+import mrjake.aunis.fluid.AunisFluids;
+import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
 import mrjake.aunis.worldgen.AunisWorldGen;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -14,11 +17,11 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-@Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion )
+@Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion, dependencies = "required-after:cofhcore@[4.6.0,);" )
 public class Aunis {	
     public static final String ModID = "aunis";
     public static final String Name = "AUNIS";
-    public static final String Version = "1.2 Beta";
+    public static final String Version = "1.3 Beta";
     public static final String MCVersion = "[1.12.2]";
  
     public static final boolean DEBUG = false;
@@ -33,12 +36,17 @@ public class Aunis {
     @SidedProxy(clientSide = Aunis.CLIENT, serverSide = Aunis.SERVER)
     public static IProxy proxy;
     public static Logger logger;
+    
+    static {
+    	FluidRegistry.enableUniversalBucket();
+    }
 	
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         
         AunisPacketHandler.registerPackets();
+        AunisFluids.registerFluids();
         
         proxy.preInit(event);
     }
@@ -46,6 +54,8 @@ public class Aunis {
     @EventHandler
     public void init(FMLInitializationEvent event) {
     	GameRegistry.registerWorldGenerator(new AunisWorldGen(), 0);
+    	
+    	ThermalIntegration.registerRecipes();
     	
     	proxy.init(event);
     }

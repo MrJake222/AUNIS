@@ -1,26 +1,38 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"NNN",
-		"FHF",
-		"NCN"
+		"FYF",
+		"BIE",
+		"ORO"
 	],
 	
 	"key": {
+		"O": {
+			"item": "aunis:naquadah_block"
+		},
+	
 		"F": {
 			"item": "aunis:transportrings_ring_fragment"
 		},
-
-		"C": {
-			"item": "aunis:crystal_array"
-		},
-
-		"N": {
-			"item": "aunis:naquadah_refined"
+		
+		"I": {
+			"item": "aunis:circuit_control_naquadah"
 		},
 		
-		"H": {
-			"item": "aunis:holder_crystal"
+		"B": {
+			"item": "aunis:crystal_blue"
+		},
+		
+		"E": {
+			"item": "aunis:crystal_ender"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		},
+		
+		"Y": {
+			"item": "aunis:crystal_yellow"
 		}
 	},
 	

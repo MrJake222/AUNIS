@@ -24,7 +24,7 @@ public class AunisItems {
 	 * These allow for dialing 8th glyph(cross dimension travel)
 	 */
 	public static Item crystalGlyphDhd = ItemHelper.createGenericItem("crystal_glyph_dhd");
-	public static Item crystalGlyphEmpty = ItemHelper.createGenericItem("crystal_glyph_empty");
+//	public static Item crystalGlyphEmpty = ItemHelper.createGenericItem("crystal_glyph_empty");
 	public static Item crystalGlyphStargate = ItemHelper.createGenericItem("crystal_glyph_stargate");
 	
 	/**
@@ -36,18 +36,22 @@ public class AunisItems {
 	/**
 	 * Diffrent Naquadah(main Stargate building material) stages of purity
 	 */
-	public static Item naquadahOrePure = ItemHelper.createGenericItem("naquadah_ore_pure");
-	public static Item naquadahOreShard = ItemHelper.createGenericItem("naquadah_ore_shard");
-	public static Item naquadahRefined = ItemHelper.createGenericItem("naquadah_refined");
+	public static Item naquadahShard = ItemHelper.createGenericItem("naquadah_shard");
+	public static Item naquadahAlloy = ItemHelper.createGenericItem("naquadah_alloy");
 	
 	/**
 	 * Crafting items
 	 */
-	public static Item crystalFragment = ItemHelper.createGenericItem("crystal_fragment");
-	public static Item crystalBlank = ItemHelper.createGenericItem("crystal_blank");
+	public static Item crystalSeed = ItemHelper.createGenericItem("crystal_fragment");
 	public static Item crystalBlue = ItemHelper.createGenericItem("crystal_blue");
 	public static Item crystalRed = ItemHelper.createGenericItem("crystal_red");
-	public static Item crystalArray = ItemHelper.createGenericItem("crystal_array");
+	public static Item crystalEnder = ItemHelper.createGenericItem("crystal_ender");
+	public static Item crystalYellow = ItemHelper.createGenericItem("crystal_yellow");
+	public static Item crystalWhite = ItemHelper.createGenericItem("crystal_white");
+	
+	public static Item circuitControlBase = ItemHelper.createGenericItem("circuit_control_base");
+	public static Item circuitControlCrystal = ItemHelper.createGenericItem("circuit_control_crystal");
+	public static Item circuitControlNaquadah = ItemHelper.createGenericItem("circuit_control_naquadah");
 		
 	public static Item stargateRingFragment = ItemHelper.createGenericItem("stargate_ring_fragment");
 	public static Item trRingFragment = ItemHelper.createGenericItem("transportrings_ring_fragment");
@@ -61,20 +65,23 @@ public class AunisItems {
 		crystalControlDhd,
 		
 		crystalGlyphDhd,
-		crystalGlyphEmpty,
 		crystalGlyphStargate,
 		
 		dialerFast,
 		
-		naquadahOrePure,
-		naquadahOreShard,
-		naquadahRefined,
+		naquadahShard,
+		naquadahAlloy,
 		
-		crystalFragment,
-		crystalBlank,
+		crystalSeed,
 		crystalBlue,
 		crystalRed,
-		crystalArray,
+		crystalEnder,
+		crystalYellow,
+		crystalWhite,
+		
+		circuitControlBase,
+		circuitControlCrystal,
+		circuitControlNaquadah,
 		
 		stargateRingFragment,
 		trRingFragment,

@@ -2,6 +2,8 @@ package mrjake.aunis.proxy;
 
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.color.GrassBlockColor;
+import mrjake.aunis.fluid.AunisBlockFluid;
+import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.color.CrystalControlDHDItemColor;
 import mrjake.aunis.tesr.CrystalInfuserTESR;
@@ -15,8 +17,10 @@ import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -27,9 +31,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class ProxyClient implements IProxy {
 	public void preInit(FMLPreInitializationEvent event) {
 		registerRenderers();
+		
+		registerFluidRenderers();
 	}
- 
-    public void init(FMLInitializationEvent event) {
+
+	public void init(FMLInitializationEvent event) {
     	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new CrystalControlDHDItemColor(), AunisItems.crystalControlDhd);
 		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.stargateMemberBlock);
     }
@@ -51,6 +57,13 @@ public class ProxyClient implements IProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, new CrystalInfuserTESR());
 		ClientRegistry.bindTileEntitySpecialRenderer(TransportRingsTile.class, new TransportRingsTESR());
 		ClientRegistry.bindTileEntitySpecialRenderer(TRControllerTile.class, new TRControllerTESR());
+	}
+	
+
+    private void registerFluidRenderers() {
+		for (AunisBlockFluid blockFluid : AunisFluids.blockFluidMap.values()) {
+			ModelLoader.setCustomStateMapper(blockFluid, new StateMap.Builder().ignore(AunisBlockFluid.LEVEL).build());
+		}
 	}
 
 	@Override

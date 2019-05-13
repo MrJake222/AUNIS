@@ -21,7 +21,7 @@ public class CrystalControlDHDItem extends Item {
 	
 	public CrystalControlDHDItem() {		
 		setRegistryName(Aunis.ModID + ":" + itemName);
-		setUnlocalizedName(Aunis.ModID + "." + itemName);
+		setTranslationKey(Aunis.ModID + "." + itemName);
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
 		

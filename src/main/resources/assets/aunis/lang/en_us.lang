@@ -5,13 +5,14 @@ item.aunis.crystal_control_dhd.name=DHD Control Crystal
 item.aunis.dialer_fast.name=Fast dialer (debug)
 
 item.aunis.crystal_glyph_dhd.name=DHD Glyph Crystal
-item.aunis.crystal_glyph_empty.name=Empty Glyph Crystal
 item.aunis.crystal_glyph_stargate.name=Stargate Glyph Crystal
 
 tile.aunis.naquadah_ore.name=Naquadah Ore
-item.aunis.naquadah_ore_pure.name=Pure Naquadah Ore
-item.aunis.naquadah_ore_shard.name=Naquadah Ore Shard
-item.aunis.naquadah_refined.name=Refined Naquadah
+tile.aunis.naquadah_block.name=Naquadah Block
+item.aunis.naquadah_shard.name=Naquadah Shard
+item.aunis.naquadah_alloy.name=Naquadah Alloy Ingot
+
+tile.aunis.invisible_block.name=You can't see me block
 
 tile.aunis.stargatebase_block.name=Stargate Base
 tile.aunis.stargate_member_block_ring.name=Stargate Ring
@@ -20,15 +21,34 @@ tile.aunis.dhd_block.name=Dial Home Device (DHD)
 
 tile.aunis.crystal_infuser_block.name=Crystal Infuser
 
-item.aunis.crystal_fragment.name=Crystal Fragment
+item.aunis.crystal_fragment.name=Crystal Seed
 item.aunis.crystal_blank.name=Blank Crystal
-item.aunis.crystal_blue.name=Blue Crystal
-item.aunis.crystal_red.name=Red Crystal
-item.aunis.crystal_array.name=Crystal Array
+item.aunis.crystal_blue.name=Teleportation Crystal
+item.aunis.crystal_red.name=Power Crystal
+item.aunis.crystal_ender.name=Ender Crystal
+item.aunis.crystal_yellow.name=Light Crystal
+item.aunis.crystal_white.name=White Crystal
+
+item.aunis.circuit_control_base.name=Control Circuit Base 
+item.aunis.circuit_control_naquadah.name=Naquadah Control Circuit 
+item.aunis.circuit_control_crystal.name=Crystal Control Circuit 
+
 item.aunis.dhd_brb.name=Bright Red Button (BRB)
 
 item.aunis.stargate_ring_fragment.name=Stargate Ring Fragment
 item.aunis.holder_crystal.name=Crystal Holder
+
+fluid.silicon_molten_black=Molten Silicon
+fluid.silicon_molten_white=Refined Silicon
+fluid.silicon_molten_red=Power Blend
+fluid.silicon_molten_blue=Teleportation Blend
+fluid.silicon_molten_ender=Ender Blend
+fluid.silicon_molten_yellow=Light Blend
+fluid.naquadah_molten_raw=Liquid Naquadah
+fluid.naquadah_molten_refined=Refined Naquadah
+fluid.naquadah_molten_alloy=Liquid Naquadah Alloy
+
+
 
 tile.aunis.dhd_block.incoming_wormhole_warn=Unable to close the gate on this end
 tile.aunis.dhd_block.not_linked_warn=DHD is not linked to the gate

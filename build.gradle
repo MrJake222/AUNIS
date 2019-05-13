@@ -10,8 +10,18 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
+// Define properties file
+ext.configFile = file "build.properties"
 
-version = "1.12.2-1.2-beta4.1"
+configFile.withReader {
+	// Load config. It shall from now be referenced as simply config or project.config
+	def prop = new Properties()
+	prop.load(it)
+	project.ext.config = new ConfigSlurper().parse prop
+}
+
+
+version = "${config.mc_version}-${config.mod_version}"
 group = "mrjake.aunis" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "aunis"
 
@@ -21,7 +31,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2768"
+    version = "${config.mc_version}-${config.forge_version}"
     runDir = "../run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -29,8 +39,22 @@ minecraft {
     // stable_#            stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20171003"
+    mappings = "${config.mappings}"
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+}
+
+
+
+repositories {
+	maven {
+		name = "CoFH Maven"
+		url = "http://maven.covers1624.net"
+	}
+	
+	maven {
+		name = "JEI Maven"
+		url = "http://dvs1.progwml6.com/files/maven"
+	}
 }
 
 dependencies {
@@ -54,7 +78,11 @@ dependencies {
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+    
+	deobfCompile "cofh:RedstoneFlux:${config.rf_mc_version}-${config.rf_version}:universal"
+	deobfCompile "cofh:CoFHCore:${config.mc_version}-${config.cofh_core_version}:universal"
 
+	deobfCompile "mezz.jei:jei_${config.jei_mc_version}:${config.jei_version}"
 }
 
 processResources {

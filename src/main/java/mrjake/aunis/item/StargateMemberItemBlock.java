@@ -15,7 +15,7 @@ public class StargateMemberItemBlock extends ItemBlock {
 	}
 	
 	@Override
-	public String getUnlocalizedName(ItemStack stack) {		
-		return super.getUnlocalizedName(stack) + ((stack.getMetadata() & 0x08) != 0 ? "_chevron" : "_ring");
+	public String getTranslationKey(ItemStack stack) {		
+		return super.getTranslationKey(stack) + ((stack.getMetadata() & 0x08) != 0 ? "_chevron" : "_ring");
 	}	
 }

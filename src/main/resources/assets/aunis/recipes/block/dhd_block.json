@@ -1,17 +1,13 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"BGB",
-		"NHN",
-		"NCN"
+		"SGS",
+		"RIE",
+		"NHN"
 	],
 	
 	"key": {
-		"C": {
-			"item": "aunis:crystal_array"
-		},
-
-		"B": {
+		"S": {
 			"item": "minecraft:stone_button"
 		},
 
@@ -20,11 +16,23 @@
 		},
 
 		"N": {
-			"item": "aunis:naquadah_refined"
+			"item": "aunis:naquadah_alloy"
 		},
 		
 		"H": {
 			"item": "aunis:holder_crystal"
+		},
+		
+		"I": {
+			"item": "aunis:circuit_control_naquadah"
+		},
+		
+		"E": {
+			"item": "aunis:crystal_ender"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
 		}
 	},
 	

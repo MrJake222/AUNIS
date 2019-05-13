@@ -35,7 +35,7 @@ public class TRControllerBlock extends Block {
 		super(Material.ROCK);
 		
 		setRegistryName(Aunis.ModID + ":" + blockName);
-		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		setTranslationKey(Aunis.ModID + "." + blockName);
 		
 		setSoundType(SoundType.STONE); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -63,7 +63,7 @@ public class TRControllerBlock extends Block {
 	@Override
 	public IBlockState getStateFromMeta(int meta) {		
 		return getDefaultState()
-				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.getHorizontal(meta & 0x03));
+				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.byHorizontalIndex(meta & 0x03));
 	}
 	
 	

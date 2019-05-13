@@ -1,5 +1,6 @@
 package mrjake.aunis.block;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.item.StargateMemberItemBlock;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
@@ -8,6 +9,7 @@ import mrjake.aunis.tileentity.StargateMemberTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -22,6 +24,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 @EventBusSubscriber
 public class AunisBlocks {
 	public static NaquadahOreBlock naquadahOreBlock = new NaquadahOreBlock();
+	public static Block naquadahBlock = new Block(Material.IRON).setRegistryName(Aunis.ModID, "naquadah_block").setTranslationKey(Aunis.ModID + ".naquadah_block");
 	
 	public static StargateBaseBlock stargateBaseBlock = new StargateBaseBlock();	
 	public static DHDBlock dhdBlock = new DHDBlock();
@@ -31,13 +34,13 @@ public class AunisBlocks {
 	public static TRControllerBlock trControllerBlock = new TRControllerBlock();
 	public static InvisibleBlock invisibleBlock = new InvisibleBlock();	
 	
-	
 	// -----------------------------------------------------------------------------
 	public static StargateMemberBlock stargateMemberBlock = new StargateMemberBlock();
 	
 	
 	private static Block[] blocks = {
 		naquadahOreBlock,
+		naquadahBlock,
 		
 		stargateBaseBlock,
 		

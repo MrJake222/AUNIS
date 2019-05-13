@@ -1,26 +1,26 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		" RB",
-		" CL",
-		"B  "
+		" YW",
+		" IE",
+		"W  "
 	],
 	
 	"key": {
-		"C": {
-			"item": "aunis:crystal_glyph_empty"
-		},
-
-		"L": {
-			"item": "aunis:crystal_blue"
-		},
-
-		"B": {
-			"item": "aunis:crystal_blank"
+		"Y": {
+			"item": "aunis:crystal_yellow"
 		},
 		
-		"R": {
-			"item": "aunis:crystal_red"
+		"E": {
+			"item": "aunis:crystal_ender"
+		},
+		
+		"I": {
+			"item": "aunis:circuit_control_crystal"
+		},
+		
+		"W": {
+			"item": "aunis:crystal_white"
 		}
 	},
 	

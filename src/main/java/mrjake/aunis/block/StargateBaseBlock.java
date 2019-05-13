@@ -41,7 +41,7 @@ public class StargateBaseBlock extends Block {
 		super(Material.IRON);
 		
 		setRegistryName(Aunis.ModID + ":" + blockName);
-		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		setTranslationKey(Aunis.ModID + "." + blockName);
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -72,7 +72,7 @@ public class StargateBaseBlock extends Block {
 	public IBlockState getStateFromMeta(int meta) {		
 		return getDefaultState()
 				.withProperty(AunisProps.RENDER_BLOCK, (meta & 0x04) != 0)
-				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.getHorizontal(meta & 0x03));
+				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.byHorizontalIndex(meta & 0x03));
 	}
 	
 	// ------------------------------------------------------------------------
@@ -160,7 +160,7 @@ public class StargateBaseBlock extends Block {
 		
 		// Client side
 		else {
-			// Aunis.info("horizontalRotation: " + gateTile.getRenderer().getHorizontalRotation());
+			// Aunis.info("horizontalRotation: " + gateTile.getRenderer().byHorizontalIndexRotation());
 			
 			return  heldItem.getItem() == AunisItems.analyzerAncient ||
 					heldItem.getItem() == AunisItems.dialerFast || 

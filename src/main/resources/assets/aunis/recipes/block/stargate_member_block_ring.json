@@ -1,14 +1,18 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"NNN",
-		"RRR",
-		"NNN"
+		" N ",
+		"RCR",
+		" N "
 	],
 	
 	"key": {
 		"N": {
-			"item": "aunis:naquadah_refined"
+			"item": "aunis:naquadah_alloy"
+		},
+		
+		"C": {
+			"item": "aunis:crystal_red"
 		},
 		
 		"R": {

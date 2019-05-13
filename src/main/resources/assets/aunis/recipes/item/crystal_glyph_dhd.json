@@ -2,17 +2,17 @@
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
 		"   ",
-		"RCR",
+		"ECE",
 		"   "
 	],
 	
 	"key": {
 		"C": {
-			"item": "aunis:crystal_glyph_empty"
+			"item": "aunis:circuit_control_crystal"
 		},
 		
-		"R": {
-			"item": "aunis:crystal_red"
+		"E": {
+			"item": "aunis:crystal_ender"
 		}
 	},
 	

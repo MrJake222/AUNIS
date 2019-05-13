@@ -8,7 +8,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
 public class NaquadahOreBlock extends Block {
 	
@@ -18,7 +22,7 @@ public class NaquadahOreBlock extends Block {
 		super(Material.ROCK);
 		
 		setRegistryName(Aunis.ModID + ":" + blockName);
-		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		setTranslationKey(Aunis.ModID + "." + blockName);
 		
 		setSoundType(SoundType.STONE); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -28,12 +32,11 @@ public class NaquadahOreBlock extends Block {
 	}
 	
 	@Override
-	public int quantityDropped(Random random) {
-		return 5 + random.nextInt(4);
-	}
-	
-	@Override
-	public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-		return AunisItems.naquadahOreShard;
+	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+		Random random = world instanceof World ? ((World)world).rand : RANDOM;
+		
+		int quantity = 5 + random.nextInt(4) + (fortune * random.nextInt(3));
+		
+		drops.add(new ItemStack(AunisItems.naquadahShard, quantity));
 	}
 }

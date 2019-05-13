@@ -1,18 +1,14 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"NPN",
+		"NNN",
 		"   ",
-		"NPN"
+		"NNN"
 	],
 	
 	"key": {
 		"N": {
-			"item": "aunis:naquadah_refined"
-		},
-		
-		"P": {
-			"item": "aunis:naquadah_ore_pure"
+			"item": "aunis:naquadah_alloy"
 		}
 	},
 	

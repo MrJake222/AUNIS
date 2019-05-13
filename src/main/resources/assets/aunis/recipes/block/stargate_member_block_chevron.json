@@ -1,9 +1,9 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"RGR",
-		"NCN",
-		"NLN"
+		"NGN",
+		"RYR",
+		"NEN"
 	],
 	
 	"key": {
@@ -16,15 +16,15 @@
 		},
 		
 		"N": {
-			"item": "aunis:naquadah_refined"
+			"item": "aunis:naquadah_alloy"
 		},
 		
-		"C": {
-			"item": "aunis:crystal_red"
+		"Y": {
+			"item": "aunis:crystal_yellow"
 		},
 		
-		"L": {
-			"item": "minecraft:glowstone"
+		"E": {
+			"item": "aunis:crystal_ender"
 		}
 	},
 	

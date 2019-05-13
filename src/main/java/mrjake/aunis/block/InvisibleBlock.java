@@ -14,7 +14,7 @@ public class InvisibleBlock extends Block {
 		super(Material.AIR);
 		
 		setRegistryName(Aunis.ModID + ":" + blockName);
-		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		setTranslationKey(Aunis.ModID + "." + blockName);
 		
 		setLightLevel(1.0f);
 		setLightOpacity(0);

@@ -3,16 +3,12 @@
 	"pattern": [
 		"   ",
 		"N N",
-		"RNB"
+		"RNR"
 	],
 	
 	"key": {
 		"N": {
-			"item": "aunis:naquadah_refined"
-		},
-
-		"B": {
-			"item": "aunis:crystal_blue"
+			"item": "aunis:naquadah_alloy"
 		},
 		
 		"R": {
