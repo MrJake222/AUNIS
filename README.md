@@ -7,8 +7,9 @@
 
 ## Resources used by AUNIS
 * Stargate, transport rings sounds and textures from **Carter's Addon Pack**
-        * *https://github.com/RafaelDeJongh/cap_resources*
+  * *https://github.com/RafaelDeJongh/cap_resources*
 * Event horizon texture from **MclatchyT** on DeviantArt
-        * *https://www.deviantart.com/mclatchyt/art/Event-Horizon-173205058*
+  * *https://www.deviantart.com/mclatchyt/art/Event-Horizon-173205058*
 * Stargate DHD's model from **blenderjunky** on BlendSwap
-        * *https://www.blendswap.com/blends/view/75540*
+  * *https://www.blendswap.com/blends/view/75540*
+
