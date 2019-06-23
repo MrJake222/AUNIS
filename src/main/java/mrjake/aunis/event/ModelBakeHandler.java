@@ -1,6 +1,7 @@
 package mrjake.aunis.event;
 
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.item.AunisItems;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.registry.IRegistry;
@@ -17,5 +18,6 @@ public class ModelBakeHandler {
 		IRegistry<ModelResourceLocation, IBakedModel> registry = event.getModelRegistry();
 		
 		AunisBlocks.stargateMemberBlock.registerCustomModel(registry);
+		AunisItems.notebookPageItem.registerCustomModel(registry);
 	}
 }

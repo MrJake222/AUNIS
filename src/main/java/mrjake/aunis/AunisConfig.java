@@ -101,5 +101,8 @@ public class AunisConfig {
 	public static class DebugConfig {
 		@Name("Check gate merge")
 		public boolean checkGateMerge = true;
+		
+		@Name("Allow charging the crystal by hand")
+		public boolean allowHandCrystalCharging = false;
 	}
 }

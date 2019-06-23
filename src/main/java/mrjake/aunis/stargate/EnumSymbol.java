@@ -79,6 +79,16 @@ public enum EnumSymbol {
 		return out;
 	}
 	
+	// Convert ID list to list of EnumSymbols
+	public static List<EnumSymbol> toSymbolList(List<Integer> list) {
+		List<EnumSymbol> out = new ArrayList<EnumSymbol>();
+		
+		for (int id : list)
+			out.add(EnumSymbol.valueOf(id));
+		
+		return out;
+	}
+	
 	// Serialize address to long
 	public static long toLong(List<EnumSymbol> address) {
 		long out = 0;

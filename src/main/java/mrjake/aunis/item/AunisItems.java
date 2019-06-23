@@ -59,6 +59,8 @@ public class AunisItems {
 	
 	public static Item dhdBrb = ItemHelper.createGenericItem("dhd_brb");
 	
+	public static NotebookPageItem notebookPageItem = new NotebookPageItem();
+	
 	private static Item[] items = {
 		analyzerAncient,
 		
@@ -95,6 +97,8 @@ public class AunisItems {
 		for (Item item : items) {
 			event.getRegistry().register(item);
 		}
+		
+		event.getRegistry().register(notebookPageItem);
 	}
 	
 	@SubscribeEvent
@@ -102,5 +106,9 @@ public class AunisItems {
 		for (Item item : items) {
 			ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
 		}
+		
+		ModelLoader.setCustomModelResourceLocation(notebookPageItem, 0, new ModelResourceLocation(notebookPageItem.getRegistryName() + "_empty", "inventory"));
+		ModelLoader.setCustomModelResourceLocation(notebookPageItem, 1, new ModelResourceLocation(notebookPageItem.getRegistryName() + "_filled", "inventory"));
+
 	}
 }
