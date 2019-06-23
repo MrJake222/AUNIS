@@ -1,0 +1,29 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"   ",
+		"PI ",
+		" F "
+	],
+	
+	"key": {
+		"P": {
+			"item": "minecraft:paper"
+		},
+		
+		"I": {
+			"item": "minecraft:dye",
+			"data": 0			
+		},
+		
+		"F": {
+			"item": "minecraft:feather"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:notebook_page",
+		"count": 1,
+		"data": 0
+	}
+}
