@@ -7,6 +7,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
+import mrjake.aunis.raycaster.ControllerActivation;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
@@ -88,16 +89,20 @@ public class TRControllerBlock extends Block {
 		
 		TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(pos);
 		
-		if (!world.isRemote) {
-			ItemStack heldItemStack = player.getHeldItem(hand);
+		ItemStack heldItemStack = player.getHeldItem(hand);
 			
-			if (heldItemStack.getItem() == AunisItems.analyzerAncient) {
+		if (heldItemStack.getItem() == AunisItems.analyzerAncient) {
+			if (!world.isRemote) {
 				TransportRingsTile ringsTile = controllerTile.getLinkedRingsTile(world);
 				
 				if (ringsTile != null) {
 					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(ringsTile.getPos(), EnumStateType.GUI_STATE, ringsTile.getState(EnumStateType.GUI_STATE)), (EntityPlayerMP) player);
 				}				
 			}
+		}
+		
+		else {
+			ControllerActivation.INSTANCE.onActivated(world, pos, player);
 		}
 		
 		return false;

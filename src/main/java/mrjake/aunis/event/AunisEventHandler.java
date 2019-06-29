@@ -4,7 +4,6 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.raycaster.ControllerActivation;
 import mrjake.aunis.raycaster.DHDActivation;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -90,10 +89,6 @@ public class AunisEventHandler {
 
 					if (block == AunisBlocks.dhdBlock) {
 						DHDActivation.INSTANCE.onActivated(world, activatedBlock, player);
-					}
-					
-					else if (block == AunisBlocks.trControllerBlock) {
-						ControllerActivation.INSTANCE.onActivated(world, activatedBlock, player);
 					}
 				}
 			}
