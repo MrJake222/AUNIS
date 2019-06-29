@@ -592,7 +592,6 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		public void teleport(Entity entity) {
 			TeleportHelper.teleportEntity(entity, sourceGatePos, targetGatePos, rotation, motionVector);
 			
-			if (entity instanceof EntityPlayerMP)
 				entity.getEntityWorld().playSound(null, targetGatePos.getPos(), AunisSoundHelper.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
 		}
 
