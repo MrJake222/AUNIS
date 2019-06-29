@@ -114,6 +114,10 @@ public class AunisConfig {
 		@RangeInt(min=1, max=30000000)
 		public int maxOverworldCoords = 30000;
 		
+		@Name("Min overworld XZ-coords generation")
+		@RangeInt(min=1, max=30000000)
+		public int minOverworldCoords = 15000;
+		
 		@Name("Chance of despawning Crystal")
 		@RangeDouble(min=0, max=1)
 		public double despawnCrystalChance = 0.05;

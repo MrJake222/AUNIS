@@ -45,8 +45,8 @@ public class StargateGenerator {
 		WorldServer worldToSpawn = world.getMinecraftServer().getWorld(0);
 		
 		do {
-			int x = rand.nextInt() % AunisConfig.mysteriousConfig.maxOverworldCoords;
-			int z = rand.nextInt() % AunisConfig.mysteriousConfig.maxOverworldCoords;
+			int x = (int) (AunisConfig.mysteriousConfig.minOverworldCoords + (rand.nextFloat() * (AunisConfig.mysteriousConfig.maxOverworldCoords - AunisConfig.mysteriousConfig.minOverworldCoords))) * (rand.nextBoolean() ? -1 : 1);
+			int z = (int) (AunisConfig.mysteriousConfig.minOverworldCoords + (rand.nextFloat() * (AunisConfig.mysteriousConfig.maxOverworldCoords - AunisConfig.mysteriousConfig.minOverworldCoords))) * (rand.nextBoolean() ? -1 : 1);
 			
 			pos = StargateGenerator.checkForPlace(worldToSpawn, x/16, z/16);
 			tries++;
@@ -79,6 +79,9 @@ public class StargateGenerator {
 	private static final int SG_SIZE_Z_PLAINS = 11;
 	
 	private static BlockPos checkForPlace(World world, int chunkX, int chunkZ) {
+		if (world.isChunkGeneratedAt(chunkX, chunkZ))
+			return null;
+		
 		Chunk chunk = world.getChunk(chunkX, chunkZ);
 		
 		int y = chunk.getHeightValue(8, 8);

@@ -1,6 +1,7 @@
 package mrjake.aunis.stargate;
 
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.block.AunisBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.state.IBlockState;
@@ -31,15 +32,17 @@ public class BoundingHelper {
 			}
 		}
 		
-		else {			
-			state = state.getBlock().getExtendedState(state, access, pos);
-			IBlockState camoState = ((IExtendedBlockState) state).getValue(AunisProps.CAMO_BLOCKSTATE);
-			
-			if (camoState != null) {
-				Block block = camoState.getBlock();
-			
-				if (block instanceof BlockSlab && !((BlockSlab) block).isDouble()) {
-					return new AxisAlignedBB(0, 0, 0, 1, 0.5, 1);
+		else {	
+			if (state.getBlock() == AunisBlocks.stargateMemberBlock) {
+				state = state.getBlock().getExtendedState(state, access, pos);
+				IBlockState camoState = ((IExtendedBlockState) state).getValue(AunisProps.CAMO_BLOCKSTATE);
+				
+				if (camoState != null) {
+					Block block = camoState.getBlock();
+				
+					if (block instanceof BlockSlab && !((BlockSlab) block).isDouble()) {
+						return new AxisAlignedBB(0, 0, 0, 1, 0.5, 1);
+					}
 				}
 			}
 		}
