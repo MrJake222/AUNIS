@@ -1,8 +1,13 @@
 package mrjake.aunis.stargate;
 
 import mrjake.aunis.AunisProps;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockSlab;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.common.property.IExtendedBlockState;
 
 public class BoundingHelper {
 	
@@ -14,7 +19,7 @@ public class BoundingHelper {
 	 * @return {@link AxisAlignedBB} appropriate for the rotation
 	 */
 	@SuppressWarnings("incomplete-switch")
-	public static AxisAlignedBB getStargateBlockBoundingBox(IBlockState state) {
+	public static AxisAlignedBB getStargateBlockBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
 				
 		if (!state.getValue(AunisProps.RENDER_BLOCK)) {
 			switch(state.getValue(AunisProps.FACING_HORIZONTAL).getAxis()) {
@@ -23,6 +28,19 @@ public class BoundingHelper {
 					
 				case Z:
 					return new AxisAlignedBB(0, 0, 0.2, 1, 1, 0.8);
+			}
+		}
+		
+		else {			
+			state = state.getBlock().getExtendedState(state, access, pos);
+			IBlockState camoState = ((IExtendedBlockState) state).getValue(AunisProps.CAMO_BLOCKSTATE);
+			
+			if (camoState != null) {
+				Block block = camoState.getBlock();
+			
+				if (block instanceof BlockSlab && !((BlockSlab) block).isDouble()) {
+					return new AxisAlignedBB(0, 0, 0, 1, 0.5, 1);
+				}
 			}
 		}
 		

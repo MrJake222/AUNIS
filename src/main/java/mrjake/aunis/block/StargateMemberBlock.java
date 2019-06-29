@@ -181,14 +181,14 @@ public class StargateMemberBlock extends Block {
 		Block heldBlock = Block.getBlockFromItem(heldItemStack.getItem());
 		
 		StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
-		StargateBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
+//		StargateBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
 		
 		if (!world.isRemote) {	
 			IBlockState camoBlockState = memberTile.getCamoState();
 			
 			if (heldItem == Item.getItemFromBlock(AunisBlocks.stargateMemberBlock) ||
 				heldItem == Item.getItemFromBlock(AunisBlocks.stargateBaseBlock) ||
-				!gateTile.isMerged())
+				!memberTile.isMerged())
 				
 				return false;
 			
@@ -259,6 +259,9 @@ public class StargateMemberBlock extends Block {
 					BlockSlab blockSlab = (BlockSlab) camoBlockState.getBlock();
 					meta = blockSlab.getMetaFromState(camoBlockState);
 					
+					if (facing != EnumFacing.UP)
+						return false;
+					
 					if (blockSlab == Blocks.STONE_SLAB)
 						block = Blocks.DOUBLE_STONE_SLAB;
 					
@@ -322,7 +325,7 @@ public class StargateMemberBlock extends Block {
 //			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
 			StargateBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
 							
-			if (gateTile != null)
+			if (gateTile != null && !gateTile.isMerged())
 				gateTile.updateMergeState(MergeHelper.checkBlocks(world, gateTile.getPos()), null);
 		}
 	}
@@ -331,9 +334,9 @@ public class StargateMemberBlock extends Block {
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		if (!world.isRemote) {
 			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
-			StargateBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
+			StargateBaseTile gateTile = memberTile.getBaseTile(world);
 			
-			if (gateTile != null)
+			if (gateTile != null && memberTile.isMerged())
 				gateTile.updateMergeState(false, state);
 			
 			if (memberTile.getCamoItemStack() != null)
@@ -393,12 +396,12 @@ public class StargateMemberBlock extends Block {
 	}
 	
 	@Override
-	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-		return BoundingHelper.getStargateBlockBoundingBox(state);
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
+		return BoundingHelper.getStargateBlockBoundingBox(state, access, pos);
 	}
 	
 	@Override
-	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-		return BoundingHelper.getStargateBlockBoundingBox(state);
+	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
+		return BoundingHelper.getStargateBlockBoundingBox(state, access, pos);
 	}
 }

@@ -147,11 +147,37 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 	}
 	
 	// ---------------------------------------------------------------------------------
+	private BlockPos basePos;
+	
+	public boolean isMerged() {
+		return basePos != null;
+	}
+	
+	public BlockPos getBasePos() {
+		return basePos;
+	}
+	
+	public StargateBaseTile getBaseTile(World world) {
+		if (basePos != null)
+			return (StargateBaseTile) world.getTileEntity(basePos);
+		
+		return null;
+	}
+	
+	public void setBasePos(BlockPos basePos) {
+		this.basePos = basePos;
+		
+		markDirty();
+	}
+	// ---------------------------------------------------------------------------------
 	// NBT
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		compound.setBoolean("isLitUp", isLitUp);		
+		
+		if (basePos != null)
+			compound.setLong("basePos", basePos.toLong());
 		
 		if (camoBlockState != null) {
 			compound.setString("doubleSlabBlock", camoBlockState.getBlock().getRegistryName().toString());
@@ -165,6 +191,9 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {		
 		isLitUp = compound.getBoolean("isLitUp");
+		
+		if (compound.hasKey("basePos"))
+			basePos = BlockPos.fromLong(compound.getLong("basePos"));
 		
 		if (compound.hasKey("doubleSlabBlock")) {
 			Block dblSlabBlock = Block.getBlockFromName(compound.getString("doubleSlabBlock"));

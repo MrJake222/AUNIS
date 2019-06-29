@@ -25,7 +25,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class MergeHelper {
 	
-	public static BlockPos findBasePos(IBlockAccess blockAccess, BlockPos currentPos, IBlockState state) {
+	private static BlockPos findBasePos(IBlockAccess blockAccess, BlockPos currentPos, IBlockState state) {
 		// 5x9x5
 		
 		int x = currentPos.getX();
@@ -174,17 +174,23 @@ public class MergeHelper {
 				if (blockState.getBlock() == AunisBlocks.stargateMemberBlock) {		
 					StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(checkPos);
 					
-					ItemStack camoStack = memberTile.getCamoItemStack();
-					if (camoStack != null) {
-						InventoryHelper.spawnItemStack(world, checkPos.getX(), checkPos.getY(), checkPos.getZ(), camoStack);
-						memberTile.setCamoState(null);
+					if ((isMerged && !memberTile.isMerged()) || (memberTile.isMerged() && memberTile.getBasePos().equals(basePos))) {
 						
-						TargetPoint point = new TargetPoint(world.provider.getDimension(), checkPos.getX(), checkPos.getY(), checkPos.getZ(), 512);
-						AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(checkPos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
+						ItemStack camoStack = memberTile.getCamoItemStack();
+						if (camoStack != null) {
+							InventoryHelper.spawnItemStack(world, checkPos.getX(), checkPos.getY(), checkPos.getZ(), camoStack);
+							memberTile.setCamoState(null);
+							
+							TargetPoint point = new TargetPoint(world.provider.getDimension(), checkPos.getX(), checkPos.getY(), checkPos.getZ(), 512);
+							AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(checkPos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
+						}
+						
+						memberTile.setBasePos(isMerged ? basePos : null);
+						
+						
+						world.setBlockState(checkPos, blockState
+							.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 3);
 					}
-					
-					world.setBlockState(checkPos, blockState
-						.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 3);
 				}
 			}
 		}

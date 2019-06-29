@@ -206,12 +206,12 @@ public class StargateBaseBlock extends Block {
 	}
 	
 	@Override
-	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-		return BoundingHelper.getStargateBlockBoundingBox(state);
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
+		return BoundingHelper.getStargateBlockBoundingBox(state, access, pos);
 	}
 	
 	@Override
-	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-		return BoundingHelper.getStargateBlockBoundingBox(state);
+	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
+		return BoundingHelper.getStargateBlockBoundingBox(state, access, pos);
 	}
 }
