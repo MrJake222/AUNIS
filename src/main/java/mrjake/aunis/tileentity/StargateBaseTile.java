@@ -96,7 +96,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 //	private int dialedChevrons;
 	private int playersPassed;
 		
-	public List<EnumSymbol> gateAddress;
+	public List<EnumSymbol> gateAddress = null;
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
 	
 	private StargateRingSpinHelper serverRingSpinHelper;
@@ -863,7 +863,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		}
 	}
 	
-	public void generateAddress() {
+	public List<EnumSymbol> generateAddress() {
 		
 		// Server
 		if ( !world.isRemote ) {			
@@ -894,6 +894,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				// Possibly TODO: Add region, so if we break the stargate and place it nearby, it keeps the address
 			}			
 		}
+		
+		return gateAddress;
 	}
 	
 	

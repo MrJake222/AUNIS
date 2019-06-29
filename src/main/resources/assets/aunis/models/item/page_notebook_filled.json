@@ -1,7 +1,7 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "items/map_empty",
+        "layer0": "aunis:items/page_base",
         "layer1": "items/map_filled_markings"
     }
 }

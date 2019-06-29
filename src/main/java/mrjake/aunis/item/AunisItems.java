@@ -59,7 +59,8 @@ public class AunisItems {
 	
 	public static Item dhdBrb = ItemHelper.createGenericItem("dhd_brb");
 	
-	public static NotebookPageItem notebookPageItem = new NotebookPageItem();
+	public static PageNotebookItem pageNotebookItem = new PageNotebookItem();
+	public static PageMysteriousItem pageMysteriousItem = new PageMysteriousItem();
 	
 	private static Item[] items = {
 		analyzerAncient,
@@ -89,7 +90,8 @@ public class AunisItems {
 		trRingFragment,
 		holderCrystal,
 		
-		dhdBrb
+		dhdBrb,
+		pageMysteriousItem
 	};
 	
 	@SubscribeEvent
@@ -98,7 +100,7 @@ public class AunisItems {
 			event.getRegistry().register(item);
 		}
 		
-		event.getRegistry().register(notebookPageItem);
+		event.getRegistry().register(pageNotebookItem);
 	}
 	
 	@SubscribeEvent
@@ -107,8 +109,8 @@ public class AunisItems {
 			ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
 		}
 		
-		ModelLoader.setCustomModelResourceLocation(notebookPageItem, 0, new ModelResourceLocation(notebookPageItem.getRegistryName() + "_empty", "inventory"));
-		ModelLoader.setCustomModelResourceLocation(notebookPageItem, 1, new ModelResourceLocation(notebookPageItem.getRegistryName() + "_filled", "inventory"));
+		ModelLoader.setCustomModelResourceLocation(pageNotebookItem, 0, new ModelResourceLocation(pageNotebookItem.getRegistryName() + "_empty", "inventory"));
+		ModelLoader.setCustomModelResourceLocation(pageNotebookItem, 1, new ModelResourceLocation(pageNotebookItem.getRegistryName() + "_filled", "inventory"));
 
 	}
 }

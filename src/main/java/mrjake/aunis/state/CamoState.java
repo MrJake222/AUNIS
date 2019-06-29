@@ -1,9 +1,8 @@
 package mrjake.aunis.state;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 
 /**
  * Holds {@link IBlockState} of camouflage block to be displayed instead.
@@ -13,28 +12,32 @@ import net.minecraft.item.ItemStack;
 public class CamoState extends State {
 	public CamoState() {}
 	
-	private int id;
-	private int meta;
+	private IBlockState state;
 		
-	public CamoState(ItemStack itemStack) {
-		this.id = Item.getIdFromItem(itemStack.getItem());
-		this.meta = itemStack.getMetadata();
+	public CamoState(IBlockState state) {
+		this.state = state;
 	}
-
-	public ItemStack getItemStack() {
-		return new ItemStack(Item.getItemById(id), 1, meta);
+	
+	public IBlockState getState() {
+		return state;
 	}
 	
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeInt(id);
-		buf.writeInt(meta);
+		buf.writeBoolean(state != null);
+		if (state != null) {
+			buf.writeInt(Block.getIdFromBlock(state.getBlock()));
+			buf.writeInt(state.getBlock().getMetaFromState(state));
+		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		id = buf.readInt();
-		meta = buf.readInt();
-	}
+		if (buf.readBoolean()) {
+			Block block = Block.getBlockById(buf.readInt());
+			state = block.getStateFromMeta(buf.readInt());
+		}
+	}	
 }

@@ -1,0 +1,7 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "aunis:items/page_base",
+        "layer1": "aunis:items/page_mysterious_overlay"
+    }
+}

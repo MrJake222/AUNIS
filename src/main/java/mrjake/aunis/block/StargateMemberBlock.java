@@ -2,7 +2,6 @@ package mrjake.aunis.block;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
@@ -12,6 +11,7 @@ import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.StargateMemberTile;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSlab;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -42,8 +43,6 @@ import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class StargateMemberBlock extends Block {	
 	
@@ -132,20 +131,15 @@ public class StargateMemberBlock extends Block {
 	
 	
 	// ------------------------------------------------------------------------		
-	@SuppressWarnings("deprecation")
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
 		StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
 
 		if (memberTile != null) {
-			ItemStack itemStack = memberTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).getStackInSlot(0);
+			IBlockState doubleSlabState = memberTile.getCamoState();
 			
-			if (!itemStack.isEmpty()) {
-				ItemBlock itemBlock = (ItemBlock) itemStack.getItem();
-			
-				IBlockState stateForPlacement = itemBlock.getBlock().getStateFromMeta(itemStack.getMetadata());
-
-				return ((IExtendedBlockState) state).withProperty(AunisProps.CAMO_BLOCKSTATE, stateForPlacement);
+			if (doubleSlabState != null) {
+				return ((IExtendedBlockState) state).withProperty(AunisProps.CAMO_BLOCKSTATE, doubleSlabState);
 			}
 		}
 		
@@ -179,70 +173,139 @@ public class StargateMemberBlock extends Block {
 	
 
 	// ------------------------------------------------------------------------	
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		ItemStack heldItemStack = player.getHeldItem(hand);
+		ItemStack heldItemStack = player.getHeldItem(EnumHand.MAIN_HAND);
 		Item heldItem = heldItemStack.getItem();
+		Block heldBlock = Block.getBlockFromItem(heldItemStack.getItem());
 		
 		StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
 		StargateBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
-		ItemStackHandler handler = (ItemStackHandler) memberTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 		
-		ItemStack stack = handler.getStackInSlot(0);
-		
-		if (!world.isRemote) {
-			if (heldItem == AunisItems.analyzerAncient) {
-				Aunis.info("camo block: " + handler.getStackInSlot(0));
+		if (!world.isRemote) {	
+			IBlockState camoBlockState = memberTile.getCamoState();
+			
+			if (heldItem == Item.getItemFromBlock(AunisBlocks.stargateMemberBlock) ||
+				heldItem == Item.getItemFromBlock(AunisBlocks.stargateBaseBlock) ||
+				!gateTile.isMerged())
+				
+				return false;
+			
+			if (camoBlockState != null) {
+				Block camoBlock = camoBlockState.getBlock();
+				
+				if (camoBlock.getMetaFromState(camoBlockState) == heldItemStack.getMetadata()) {
+					if (camoBlock instanceof BlockSlab && heldBlock instanceof BlockSlab) {
+						if (((BlockSlab) camoBlock).isDouble()) {
+							return false;
+						}
+					}
+					
+					else {
+						if (camoBlock == heldBlock) {
+							return false;
+						}
+					}
+				}
 			}
 			
-			else {
-				if (heldItem == Item.getItemFromBlock(AunisBlocks.stargateMemberBlock) ||
-					heldItem == Item.getItemFromBlock(AunisBlocks.stargateBaseBlock) ||
-					!gateTile.isMerged() ||
-					heldItemStack.isItemEqual(stack))
-						return false;
+			if (camoBlockState != null && !(camoBlockState.getBlock() instanceof BlockSlab && heldBlock instanceof BlockSlab && !((BlockSlab) camoBlockState.getBlock()).isDouble())) {
+				Block camoBlock = camoBlockState.getBlock();
+				int quantity = 1;
+				int meta;
 				
-				if (!stack.isEmpty()) {		
-					ItemStack extract = handler.extractItem(0, 1, false);
-
-					SoundType soundtype = Block.getBlockFromItem(stack.getItem()).getSoundType(Block.getBlockFromItem(stack.getItem()).getDefaultState(), world, pos, player);
-					world.playSound(null, pos, soundtype.getBreakSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+				if (camoBlock instanceof BlockSlab) {
+					BlockSlab blockSlab = (BlockSlab) camoBlock;
+					meta = blockSlab.getMetaFromState(camoBlockState);
 					
-					if (!player.capabilities.isCreativeMode) {
-						InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), extract);
+					if (blockSlab.isDouble()) {
+						 quantity = 2;
+						
+						if (blockSlab == Blocks.DOUBLE_STONE_SLAB)
+							camoBlock = Blocks.STONE_SLAB;
+						
+						else if (blockSlab == Blocks.DOUBLE_STONE_SLAB2)
+							camoBlock = Blocks.STONE_SLAB2;
+						
+						else if (blockSlab == Blocks.DOUBLE_WOODEN_SLAB)
+							camoBlock = Blocks.WOODEN_SLAB;
+						
+						else if (blockSlab == Blocks.PURPUR_DOUBLE_SLAB)
+							camoBlock = Blocks.PURPUR_SLAB;
 					}
 				}
 				
-				if (heldItem instanceof ItemBlock) {
-					ItemStack insert = heldItemStack.copy();
-					insert.setCount(1);
-					
-					handler.insertItem(0, insert, false);
-					
-					if (!player.capabilities.isCreativeMode)
-						heldItemStack.shrink(1);
-					
-					SoundType soundtype = Block.getBlockFromItem(heldItem).getSoundType(Block.getBlockFromItem(heldItem).getDefaultState(), world, pos, player);
-					world.playSound(null, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-					
-					world.setBlockState(pos, state.withProperty(AunisProps.RENDER_BLOCK, true), 0);
+				else {
+					meta = camoBlock.getMetaFromState(camoBlockState);
 				}
 				
-				else {						
-					world.setBlockState(pos, state.withProperty(AunisProps.RENDER_BLOCK, false), 0);
+				if (!player.capabilities.isCreativeMode) {
+					InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(camoBlock, quantity, meta));
 				}
 				
-				TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
+				SoundType soundtype = camoBlock.getSoundType(camoBlock.getDefaultState(), world, pos, player);
+				world.playSound(null, pos, soundtype.getBreakSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+				
+				memberTile.setCamoState(null);
+				camoBlockState = null;
 			}
 			
+			if (heldItem instanceof ItemBlock) {	
+				Block block = null;
+				int meta;
+				
+				if (camoBlockState != null && camoBlockState.getBlock() == heldBlock && camoBlockState.getBlock().getMetaFromState(camoBlockState) == heldItemStack.getMetadata()) {						
+					BlockSlab blockSlab = (BlockSlab) camoBlockState.getBlock();
+					meta = blockSlab.getMetaFromState(camoBlockState);
+					
+					if (blockSlab == Blocks.STONE_SLAB)
+						block = Blocks.DOUBLE_STONE_SLAB;
+					
+					else if (blockSlab == Blocks.STONE_SLAB2)
+						block = Blocks.DOUBLE_STONE_SLAB2;
+					
+					else if (blockSlab == Blocks.WOODEN_SLAB)
+						block = Blocks.DOUBLE_WOODEN_SLAB;
+					
+					else if (blockSlab == Blocks.PURPUR_SLAB)
+						block = Blocks.PURPUR_DOUBLE_SLAB;						
+				}
+				
+				else {
+					if (camoBlockState != null && !player.capabilities.isCreativeMode) {
+						InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(camoBlockState.getBlock(), 1, camoBlockState.getBlock().getMetaFromState(camoBlockState)));
+					}
+					
+					block = Block.getBlockFromItem(heldItemStack.getItem());
+					meta = heldItemStack.getMetadata();
+				}
+				
+				memberTile.setCamoState(block.getStateFromMeta(meta));
+				
+				if (!player.capabilities.isCreativeMode)
+					heldItemStack.shrink(1);
+				
+				SoundType soundtype = block.getSoundType(block.getDefaultState(), world, pos, player);
+				world.playSound(null, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+				
+				world.setBlockState(pos, state.withProperty(AunisProps.RENDER_BLOCK, true), 0);
+			}
+			
+			else {						
+				world.setBlockState(pos, state.withProperty(AunisProps.RENDER_BLOCK, false), 0);
+			}
+			
+			TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
+		
 			return true;
 		}
 		
 		else {			
 			return 	heldItem != Item.getItemFromBlock(AunisBlocks.stargateMemberBlock) &&
-					heldItem != Item.getItemFromBlock(AunisBlocks.stargateBaseBlock) &&
-					!heldItemStack.isItemEqual(stack);
+					heldItem != Item.getItemFromBlock(AunisBlocks.stargateBaseBlock);// &&
+//					!heldItemStack.isItemEqual(stack);
 		}
 		
 	}
@@ -273,8 +336,8 @@ public class StargateMemberBlock extends Block {
 			if (gateTile != null)
 				gateTile.updateMergeState(false, state);
 			
-			ItemStackHandler handler = (ItemStackHandler) memberTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-			InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), handler.getStackInSlot(0));
+			if (memberTile.getCamoItemStack() != null)
+				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), memberTile.getCamoItemStack());
 		}
 		
 		super.breakBlock(world, pos, state);

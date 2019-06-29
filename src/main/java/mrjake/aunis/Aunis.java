@@ -2,6 +2,7 @@ package mrjake.aunis;
 
 import org.apache.logging.log4j.Logger;
 
+import mrjake.aunis.command.CommandQueryStargate;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -15,13 +16,14 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion, dependencies = "required-after:cofhcore@[4.6.0,);" )
 public class Aunis {	
     public static final String ModID = "aunis";
     public static final String Name = "AUNIS";
-    public static final String Version = "1.3.1 Beta";
+    public static final String Version = "1.4 Beta";
     public static final String MCVersion = "[1.12.2]";
  
     public static final boolean DEBUG = false;
@@ -64,7 +66,11 @@ public class Aunis {
     public void postInit(FMLPostInitializationEvent event) {
     	proxy.postInit(event);
     }
-
+    
+    @EventHandler
+    public void serverStarting(FMLServerStartingEvent event) {
+    	event.registerServerCommand(new CommandQueryStargate());
+    }
     
 	public static void log(String msg) {
 		if (DEBUG) {

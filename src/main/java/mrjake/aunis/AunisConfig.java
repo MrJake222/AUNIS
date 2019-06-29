@@ -23,6 +23,9 @@ public class AunisConfig {
 	@Name("Debug options")
 	public static DebugConfig debugConfig = new DebugConfig();
 	
+	@Name("Mysterious Page options")
+	public static MysteriousConfig mysteriousConfig = new MysteriousConfig();
+	
 	
 	public static class PowerConfig {
 		@Name("Stargate's internal buffer size")
@@ -104,5 +107,19 @@ public class AunisConfig {
 		
 		@Name("Allow charging the crystal by hand")
 		public boolean allowHandCrystalCharging = false;
+	}
+	
+	public static class MysteriousConfig {
+		@Name("Max overworld XZ-coords generation")
+		@RangeInt(min=1, max=30000000)
+		public int maxOverworldCoords = 30000;
+		
+		@Name("Chance of despawning Crystal")
+		@RangeDouble(min=0, max=1)
+		public double despawnCrystalChance = 0.05;
+		
+		@Name("Chance of despawning DHD")
+		@RangeDouble(min=0, max=1)
+		public double despawnDhdChance = 0.05;
 	}
 }

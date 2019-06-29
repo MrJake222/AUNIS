@@ -3,20 +3,25 @@ package mrjake.aunis.item.renderer;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.lwjgl.opengl.GL11;
 
-import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.item.PageNotebookBakedModel;
 import mrjake.aunis.stargate.EnumSymbol;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Timer;
 import net.minecraft.util.math.MathHelper;
 
 public class NotebookPageTEISR extends TileEntityItemStackRenderer {
@@ -56,7 +61,7 @@ public class NotebookPageTEISR extends TileEntityItemStackRenderer {
         }
         else
         {
-            renderplayer.renderLeftArm(abstractclientplayer);
+            renderplayer.renderLeftArm(abstractclientplayer);	
         }
 
         GlStateManager.enableCull();
@@ -78,6 +83,27 @@ public class NotebookPageTEISR extends TileEntityItemStackRenderer {
             GlStateManager.rotate(f * 10.0F, 0.0F, 0.0F, 1.0F);
             this.renderArmFirstPerson(p_187465_1_, p_187465_3_, hand);
             GlStateManager.popMatrix();
+        }
+    }
+	
+	/**
+	 * Copied from {@link EntityRenderer}
+	 * 
+	 * @param partialTicks
+	 */
+	private void applyBobbing(float partialTicks) {
+		Minecraft mc = Minecraft.getMinecraft();
+		
+        if (mc.getRenderViewEntity() instanceof EntityPlayer) {
+            EntityPlayer entityplayer = (EntityPlayer)mc.getRenderViewEntity();
+            float f = entityplayer.distanceWalkedModified - entityplayer.prevDistanceWalkedModified;
+            float f1 = -(entityplayer.distanceWalkedModified + f * partialTicks);
+            float f2 = entityplayer.prevCameraYaw + (entityplayer.cameraYaw - entityplayer.prevCameraYaw) * partialTicks;
+            float f3 = entityplayer.prevCameraPitch + (entityplayer.cameraPitch - entityplayer.prevCameraPitch) * partialTicks;
+            GlStateManager.translate(MathHelper.sin(f1 * (float)Math.PI) * f2 * 0.5F, -Math.abs(MathHelper.cos(f1 * (float)Math.PI) * f2), 0.0F);
+            GlStateManager.rotate(MathHelper.sin(f1 * (float)Math.PI) * f2 * 3.0F, 0.0F, 0.0F, 1.0F);
+            GlStateManager.rotate(Math.abs(MathHelper.cos(f1 * (float)Math.PI - 0.2F) * f2) * 5.0F, 1.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(f3, 1.0F, 0.0F, 0.0F);
         }
     }
 	
@@ -129,11 +155,24 @@ public class NotebookPageTEISR extends TileEntityItemStackRenderer {
 	
 	@Override
 	public void renderByItem(ItemStack itemStackIn, float partialTicks) {		
-		boolean mainhand = Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() == AunisItems.notebookPageItem;
+//		boolean mainhand = Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() == AunisItems.pageNotebookItem;
+		boolean mainhand = PageNotebookBakedModel.lastTransform == TransformType.FIRST_PERSON_RIGHT_HAND;
+		
 		EnumHandSide handSide = mainhand ? EnumHandSide.RIGHT : EnumHandSide.LEFT;
-	    
+				
+		try {
+			Timer timer = (Timer) FieldUtils.readField(Minecraft.getMinecraft(), "timer", true);
+			partialTicks = timer.renderPartialTicks;
+		}
+		
+		catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		
 		GlStateManager.pushMatrix();
 		GlStateManager.scale(20,20,20);
+				
+		applyBobbing(partialTicks);		
 		renderArmFirstPersonSide(0, handSide, 0, null);
 	    GlStateManager.popMatrix();
 		

@@ -77,6 +77,10 @@ public class StargateNetwork extends WorldSavedData {
 		}
 	}
 	
+	public Map<Long, StargatePos> queryStargates() {
+		return stargateMap;
+	}
+	
 	@Override
 	public String toString() {
 		return stargateMap.toString();

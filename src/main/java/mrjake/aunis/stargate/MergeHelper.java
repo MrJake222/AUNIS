@@ -22,7 +22,6 @@ import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
-import net.minecraftforge.items.CapabilityItemHandler;
 
 public class MergeHelper {
 	
@@ -175,9 +174,10 @@ public class MergeHelper {
 				if (blockState.getBlock() == AunisBlocks.stargateMemberBlock) {		
 					StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(checkPos);
 					
-					ItemStack camoStack = memberTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).extractItem(0, 1, false);
-					if (!camoStack.isEmpty()) {
+					ItemStack camoStack = memberTile.getCamoItemStack();
+					if (camoStack != null) {
 						InventoryHelper.spawnItemStack(world, checkPos.getX(), checkPos.getY(), checkPos.getZ(), camoStack);
+						memberTile.setCamoState(null);
 						
 						TargetPoint point = new TargetPoint(world.provider.getDimension(), checkPos.getX(), checkPos.getY(), checkPos.getZ(), 512);
 						AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(checkPos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
@@ -186,6 +186,17 @@ public class MergeHelper {
 					world.setBlockState(checkPos, blockState
 						.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 3);
 				}
+			}
+		}
+	}
+	
+	public static void updateChevRingRotation(World world, BlockPos basePos, EnumFacing facing) {	
+		
+		for ( EnumMemberVariant variant : blockMap.keySet() ) {			
+			for (BlockPos checkPos : blockMap.get(variant)) {
+				checkPos = rotateAndGlobal(checkPos, facing, basePos);
+				
+				world.setBlockState(checkPos, world.getBlockState(checkPos).withProperty(AunisProps.FACING_HORIZONTAL, facing));
 			}
 		}
 	}

@@ -79,7 +79,7 @@ public class DHDBlock extends Block {
 		// Server side
 		if ( !world.isRemote ) {
 			int facing = MathHelper.floor( (double)((placer.rotationYaw) * 16.0F / 360.0F) + 0.5D ) & 0x0F;
-			world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, facing), 2);
+			world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, facing), 3);
 			
 			DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
 			DHDLinkHelper.findAndLinkGate(dhdTile);

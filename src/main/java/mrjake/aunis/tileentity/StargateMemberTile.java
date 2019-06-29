@@ -11,20 +11,19 @@ import mrjake.aunis.state.ITileEntityStateProvider;
 import mrjake.aunis.state.LightState;
 import mrjake.aunis.state.State;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSlab;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 /**
@@ -99,44 +98,78 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 	}
 	
 	
-	// ---------------------------------------------------------------------------------
-	/**
-	 * {@link ItemStackHandler} for storing block that will be placed as a camouflage
-	 */
-	private ItemStackHandler itemStackHandler = new ItemStackHandler(1) {
-		protected void onContentsChanged(int slot) {
-			markDirty();
-		}
-	};
+	// ---------------------------------------------------------------------------------	
+	private IBlockState camoBlockState;
 	
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-
-		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && facing == null)
-			return (T) itemStackHandler;
+	public void setCamoState(IBlockState doubleSlabState) {
+		this.camoBlockState = doubleSlabState;
 		
-		return super.getCapability(capability, facing);
+		markDirty();
 	}
 	
+	public IBlockState getCamoState() {
+		return camoBlockState;
+	}
+	
+	public ItemStack getCamoItemStack() {
+		if (camoBlockState != null) {
+			Block block = camoBlockState.getBlock();
+			int quantity = 1;
+			int meta;
+			
+			if (block instanceof BlockSlab && ((BlockSlab) block).isDouble()) {
+				quantity = 2;
+				meta = block.getMetaFromState(camoBlockState);
+				
+				if (block == Blocks.DOUBLE_STONE_SLAB)
+					block = Blocks.STONE_SLAB;
+				
+				else if (block == Blocks.DOUBLE_STONE_SLAB2)
+					block = Blocks.STONE_SLAB2;
+				
+				else if (block == Blocks.DOUBLE_WOODEN_SLAB)
+					block = Blocks.WOODEN_SLAB;
+				
+				else if (block == Blocks.PURPUR_DOUBLE_SLAB)
+					block = Blocks.PURPUR_SLAB;
+			}
+			
+			else {
+				meta = block.getMetaFromState(camoBlockState);
+			}
+			
+			return new ItemStack(block, quantity, meta);
+		}
+		
+		else {
+			return null;
+		}
+	}
 	
 	// ---------------------------------------------------------------------------------
 	// NBT
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-		compound.setTag("inventory", itemStackHandler.serializeNBT());
 		compound.setBoolean("isLitUp", isLitUp);		
+		
+		if (camoBlockState != null) {
+			compound.setString("doubleSlabBlock", camoBlockState.getBlock().getRegistryName().toString());
+			compound.setInteger("doubleSlabMeta", camoBlockState.getBlock().getMetaFromState(camoBlockState));
+		}
 		
 		return super.writeToNBT(compound);
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {		
-		if (compound.hasKey("inventory"))
-			itemStackHandler.deserializeNBT((NBTTagCompound) compound.getTag("inventory"));
-		
 		isLitUp = compound.getBoolean("isLitUp");
+		
+		if (compound.hasKey("doubleSlabBlock")) {
+			Block dblSlabBlock = Block.getBlockFromName(compound.getString("doubleSlabBlock"));
+			camoBlockState = dblSlabBlock.getStateFromMeta(compound.getInteger("doubleSlabMeta"));
+		}
 		
 		super.readFromNBT(compound);
 	}
@@ -149,7 +182,7 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 	public State getState(EnumStateType stateType) {
 		switch (stateType) {
 			case CAMO_STATE:				
-				return new CamoState(itemStackHandler.getStackInSlot(0));
+				return new CamoState(camoBlockState);
 				
 			case LIGHT_STATE:
 				return new LightState(isLitUp);
@@ -177,10 +210,8 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 	public void setState(EnumStateType stateType, State state) {
 		switch (stateType) {
 			case CAMO_STATE:
-				CamoState memberState = (CamoState) state;
-				
-				ItemStack stack = memberState.getItemStack();
-				itemStackHandler.setStackInSlot(0, stack);
+				CamoState memberState = (CamoState) state;				
+				camoBlockState = memberState.getState();
 				
 				world.markBlockRangeForRenderUpdate(pos, pos);
 				break;

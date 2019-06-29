@@ -38,7 +38,9 @@ item.aunis.dhd_brb.name=Bright Red Button (BRB)
 item.aunis.stargate_ring_fragment.name=Stargate Ring Fragment
 item.aunis.holder_crystal.name=Crystal Holder
 
-item.aunis.notebook_page.name=Notebook Page
+item.aunis.page_notebook.name=Notebook Page
+item.aunis.page_mysterious.name=Mysterious Page
+item.aunis.mysterious_page.tooltip=Who knows where it leads
 
 fluid.silicon_molten_black=Molten Silicon
 fluid.silicon_molten_white=Refined Silicon

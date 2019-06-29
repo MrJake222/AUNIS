@@ -6,6 +6,8 @@ import mrjake.aunis.fluid.AunisBlockFluid;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.color.CrystalControlDHDItemColor;
+import mrjake.aunis.item.color.PageMysteriousItemColor;
+import mrjake.aunis.item.color.PageNotebookItemColor;
 import mrjake.aunis.tesr.CrystalInfuserTESR;
 import mrjake.aunis.tesr.DHD_TESR;
 import mrjake.aunis.tesr.StargateTESR;
@@ -36,7 +38,9 @@ public class ProxyClient implements IProxy {
 	}
 
 	public void init(FMLInitializationEvent event) {
-    	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new CrystalControlDHDItemColor(), AunisItems.crystalControlDhd);
+		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new CrystalControlDHDItemColor(), AunisItems.crystalControlDhd);
+		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageMysteriousItemColor(), AunisItems.pageMysteriousItem);
+    	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageNotebookItemColor(), AunisItems.pageNotebookItem);
 		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.stargateMemberBlock);
     }
  

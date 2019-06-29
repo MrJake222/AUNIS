@@ -22,11 +22,11 @@ import net.minecraft.util.registry.IRegistry;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
-public class NotebookPageItem extends Item {
+public class PageNotebookItem extends Item {
 
-	public static final String ITEM_NAME = "notebook_page";
+	public static final String ITEM_NAME = "page_notebook";
 
-	public NotebookPageItem() {
+	public PageNotebookItem() {
 		setRegistryName(Aunis.ModID + ":" + ITEM_NAME);
 		setTranslationKey(Aunis.ModID + "." + ITEM_NAME);
 		
@@ -41,7 +41,7 @@ public class NotebookPageItem extends Item {
 		ModelResourceLocation modelResourceLocation = new ModelResourceLocation(getRegistryName() + "_filled", "inventory");
 		
 		IBakedModel defaultModel = registry.getObject(modelResourceLocation);
-		NotebookPageBakedModel memberBlockBakedModel = new NotebookPageBakedModel(defaultModel);
+		PageNotebookBakedModel memberBlockBakedModel = new PageNotebookBakedModel(defaultModel);
 		
 		registry.putObject(modelResourceLocation, memberBlockBakedModel);
 	}
@@ -91,8 +91,12 @@ public class NotebookPageItem extends Item {
 					compound.setInteger("7th", gateTile.gateAddress.get(6).id);
 				else
 					compound.removeTag("7th");
-								
-				ItemStack stack = new ItemStack(AunisItems.notebookPageItem, 1, 1);
+				
+				
+				String reg = world.getBiome(pos).getRegistryName().getPath();
+				compound.setInteger("color", getColorForBiome(reg));
+				
+				ItemStack stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
 				stack.setTagCompound(compound);
 				
 				player.setHeldItem(hand, stack);
@@ -102,5 +106,33 @@ public class NotebookPageItem extends Item {
 		}
 	
 		return EnumActionResult.PASS;
+	}
+	
+	
+	/**
+	 * Returns color from the Biome
+	 * 
+	 * @param reg - Registry path of the Biome
+	 * @return color
+	 */
+	public static int getColorForBiome(String reg) {
+		int color = 0x303000;
+		
+		if (reg.contains("ocean") || reg.contains("river")) color = 0x2131A0;
+		else if (reg.contains("plains")) color = 0x48703D;
+		else if (reg.contains("desert") || reg.contains("beach")) color = 0x9B9C6E;
+		else if (reg.contains("extreme_hills")) color = 0x736150;
+		else if (reg.contains("forest")) color = 0x507341;
+		else if (reg.contains("taiga")) color = 0x7BA9A9;
+		else if (reg.contains("swamp")) color = 0x6B7337;
+		else if (reg.contains("hell")) color = 0x962A0B;
+		else if (reg.contains("sky")) color = 0x67897A;
+		else if (reg.contains("ice")) color = 0x69B8C6;
+		else if (reg.contains("mushroom")) color = 0x544B4D;
+		else if (reg.contains("jungle")) color = 0x104004;
+		else if (reg.contains("savanna")) color = 0x66622D;
+		else if (reg.contains("mesa")) color = 0x804117;
+		
+		return color;
 	}
 }

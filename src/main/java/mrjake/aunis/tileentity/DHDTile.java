@@ -1,6 +1,7 @@
 package mrjake.aunis.tileentity;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
@@ -12,6 +13,7 @@ import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.DHDUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -202,5 +204,14 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T)inventory : super.getCapability(capability, facing);	
+	}
+	
+	@Override
+	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+//		boolean b = oldState.getBlock() != newState.getBlock();
+		
+		Aunis.info("dhdTile refresh");
+		
+		return true;
 	}
 }

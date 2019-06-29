@@ -18,6 +18,6 @@ public class ModelBakeHandler {
 		IRegistry<ModelResourceLocation, IBakedModel> registry = event.getModelRegistry();
 		
 		AunisBlocks.stargateMemberBlock.registerCustomModel(registry);
-		AunisItems.notebookPageItem.registerCustomModel(registry);
+		AunisItems.pageNotebookItem.registerCustomModel(registry);
 	}
 }
