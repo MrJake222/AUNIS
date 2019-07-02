@@ -1,13 +1,16 @@
 package mrjake.aunis.proxy;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.color.GrassBlockColor;
 import mrjake.aunis.fluid.AunisBlockFluid;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.item.PageNotebookItem;
 import mrjake.aunis.item.color.CrystalControlDHDItemColor;
 import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
+import mrjake.aunis.item.renderer.PageNotebookTEISR;
 import mrjake.aunis.tesr.CrystalInfuserTESR;
 import mrjake.aunis.tesr.DHD_TESR;
 import mrjake.aunis.tesr.StargateTESR;
@@ -22,6 +25,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -73,5 +78,11 @@ public class ProxyClient implements IProxy {
 	@Override
 	public EntityPlayer getPlayerInMessageHandler(MessageContext ctx) {
 		return Minecraft.getMinecraft().player;
+	}
+
+	@Override
+	public void setTileEntityItemStackRenderer(Item item) {
+		if (item.getRegistryName().equals(new ResourceLocation(Aunis.ModID, PageNotebookItem.ITEM_NAME)))
+			item.setTileEntityItemStackRenderer(new PageNotebookTEISR());
 	}
 }

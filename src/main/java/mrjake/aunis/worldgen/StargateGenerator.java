@@ -90,11 +90,11 @@ public class StargateGenerator {
 			return null;
 		
 		BlockPos pos = new BlockPos(chunkX*16, y, chunkZ*16);
-		String biomeName = chunk.getBiome(pos, world.getBiomeProvider()).getBiomeName();
+		String biomeName = chunk.getBiome(pos, world.getBiomeProvider()).getRegistryName().getPath();
 					
-		boolean desert = biomeName.contains("Desert");		
+		boolean desert = biomeName.contains("desert");		
 		
-		if (!biomeName.contains("Ocean") && !biomeName.contains("River") && !biomeName.contains("Beach")) {
+		if (!biomeName.contains("ocean") && !biomeName.contains("river") && !biomeName.contains("beach")) {
 //		if (biomeName.contains("Ocean")) {
 			int x = desert ? SG_SIZE_X : SG_SIZE_X_PLAINS;
 			int z = desert ? SG_SIZE_Z : SG_SIZE_Z_PLAINS;
@@ -159,7 +159,7 @@ public class StargateGenerator {
 		MinecraftServer server = world.getMinecraftServer();
 
 		Biome biome = world.getBiome(pos);
-		boolean desert = biome.getBiomeName().contains("Desert");		
+		boolean desert = biome.getRegistryName().getPath().contains("desert");		
 		
 		TemplateManager templateManager = worldServer.getStructureTemplateManager();
 		Template template = templateManager.getTemplate(server, new ResourceLocation(Aunis.ModID, desert ? "sg_desert" : "sg_plains"));

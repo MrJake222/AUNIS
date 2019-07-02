@@ -4,7 +4,6 @@ import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.item.renderer.NotebookPageTEISR;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -32,7 +31,7 @@ public class PageNotebookItem extends Item {
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
 		
-		setTileEntityItemStackRenderer(new NotebookPageTEISR());
+		Aunis.proxy.setTileEntityItemStackRenderer(this);
 		setHasSubtypes(true);
 		setMaxDamage(0);
 	}

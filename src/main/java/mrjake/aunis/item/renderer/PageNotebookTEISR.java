@@ -24,7 +24,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.MathHelper;
 
-public class NotebookPageTEISR extends TileEntityItemStackRenderer {
+public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 	
 	/**
 	 * Copied from {@link ItemRenderer}

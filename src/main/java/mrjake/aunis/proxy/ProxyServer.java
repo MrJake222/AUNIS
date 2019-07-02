@@ -1,6 +1,7 @@
 package mrjake.aunis.proxy;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -28,5 +29,10 @@ public class ProxyServer implements IProxy {
 	@Override
 	public EntityPlayer getPlayerInMessageHandler(MessageContext ctx) {
 		return ctx.getServerHandler().player;
+	}
+
+	@Override
+	public void setTileEntityItemStackRenderer(Item item) {
+		
 	}
 }
