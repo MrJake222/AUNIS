@@ -160,9 +160,16 @@ public class NotebookPageTEISR extends TileEntityItemStackRenderer {
 		
 		EnumHandSide handSide = mainhand ? EnumHandSide.RIGHT : EnumHandSide.LEFT;
 				
-		try {
-			Timer timer = (Timer) FieldUtils.readField(Minecraft.getMinecraft(), "timer", true);
-			partialTicks = timer.renderPartialTicks;
+		try {			
+			try {
+				Timer timer = (Timer) FieldUtils.readField(Minecraft.getMinecraft(), "field_71428_T", true);
+				partialTicks = timer.renderPartialTicks;
+			}
+			
+			catch (IllegalArgumentException e) {
+				Timer timer = (Timer) FieldUtils.readField(Minecraft.getMinecraft(), "timer", true);
+				partialTicks = timer.renderPartialTicks;
+			}
 		}
 		
 		catch (IllegalAccessException e) {
