@@ -72,6 +72,10 @@ public class StargateMemberBlock extends Block {
 	
 	@Override
 	public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {	
+		// Optifine shit
+		if (world.getBlockState(pos).getBlock() != this)
+			return 0;
+		
 		StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
 				
 		if (memberTile != null)

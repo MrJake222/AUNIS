@@ -183,6 +183,7 @@ public class StargateGenerator {
 					
 					world.setBlockState(gatePos, world.getBlockState(gatePos).withProperty(AunisProps.FACING_HORIZONTAL, facing));
 					MergeHelper.updateChevRingRotation(world, gatePos, facing);
+					MergeHelper.updateChevRingBasePos(world, gatePos, facing);
 					
 					world.setBlockToAir(dataPos);
 					world.setBlockToAir(dataPos.down()); // save block

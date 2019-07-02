@@ -16,6 +16,7 @@ import mrjake.aunis.tileentity.StargateMemberTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
@@ -203,6 +204,21 @@ public class MergeHelper {
 				checkPos = rotateAndGlobal(checkPos, facing, basePos);
 				
 				world.setBlockState(checkPos, world.getBlockState(checkPos).withProperty(AunisProps.FACING_HORIZONTAL, facing));
+			}
+		}
+	}
+	
+	public static void updateChevRingBasePos(World world, BlockPos basePos, EnumFacing facing) {	
+		
+		for ( EnumMemberVariant variant : blockMap.keySet() ) {			
+			for (BlockPos checkPos : blockMap.get(variant)) {
+				checkPos = rotateAndGlobal(checkPos, facing, basePos);
+				
+				TileEntity tileEntity = world.getTileEntity(checkPos);
+				
+				if (tileEntity instanceof StargateMemberTile) {
+					((StargateMemberTile) tileEntity).setBasePos(basePos);
+				}
 			}
 		}
 	}

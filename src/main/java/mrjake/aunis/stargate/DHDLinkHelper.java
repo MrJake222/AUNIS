@@ -47,7 +47,7 @@ public class DHDLinkHelper {
 				
 				if (!dhdTile.isLinked()) {
 					dhdTile.setLinkedGate(pos);
-					gateTile.setLinkedDHD(dhdPos);
+					gateTile.setLinkedDHD(new BlockPos(dhdPos));
 				}
 			}
 		}

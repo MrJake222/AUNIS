@@ -368,7 +368,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		if (!isMerged) {
 			if (isLinked()) {
-				getLinkedDHD(world).setLinkedGate(null);			
+				getLinkedDHD(world).setLinkedGate(null);
+				
 				linkedDHD = null;
 			}
 			
@@ -391,6 +392,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			world.setBlockState(pos, actualState.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 2);
 		
 		MergeHelper.updateChevRingMergeState(world, pos, (state != null) ? state : actualState, isMerged);
+		
+		markDirty();
 	}
 	
 	@Override
