@@ -48,32 +48,33 @@ public enum EnumSymbol {
 	
 	public int id;
 	public String name;
+	public int angleIndex;
 	public float angle;
 	private static Map<Integer, EnumSymbol> idSymbolMap = new HashMap<Integer, EnumSymbol>();
 	private static Map<String, EnumSymbol> nameSymbolMap = new HashMap<String, EnumSymbol>();
+	private static Map<Integer,EnumSymbol> angleIndexSymbolMap = new HashMap<Integer, EnumSymbol>();
+	
+	public static final float ANGLE_PER_GLYPH = 9.2307692f;
 	
 	EnumSymbol(int id, String name, int angleIndex) {
 		this.id = id;
 		this.name = name;
+		this.angleIndex = angleIndex;
 		
 		// BRB angle = -1
 		// 360 / 39 = 9.2307692
 		if (angleIndex != -1)
-			this.angle = 360 - (angleIndex * 9.2307692f);
+			this.angle = 360 - (angleIndex * ANGLE_PER_GLYPH);
 		
 		else 
 			this.angle = -1;
-		
-//		this.angle = angleIndex == -1 ? -1 : (angleIndex * 9.2307692f);
 	}
 	
 	static {
 		for (EnumSymbol symbol : EnumSymbol.values()) {
 			idSymbolMap.put(symbol.id, symbol);
-		}
-		
-		for (EnumSymbol symbol : EnumSymbol.values()) {
 			nameSymbolMap.put(symbol.name, symbol);
+			angleIndexSymbolMap.put(symbol.angleIndex, symbol);
 		}
 	}
 	
@@ -83,6 +84,17 @@ public enum EnumSymbol {
 	
 	public static EnumSymbol forName(String name) {
 		return nameSymbolMap.get(name);
+	}
+	
+	public static EnumSymbol fromAngleIndex(int index) {
+		return angleIndexSymbolMap.get(index);
+	}
+	
+	public static EnumSymbol fromAngle(double angle) {
+		double angleIndex = (360 - angle) / ANGLE_PER_GLYPH;
+		int index = (int) Math.round(angleIndex);
+		
+		return fromAngleIndex(index);
 	}
 	
 	

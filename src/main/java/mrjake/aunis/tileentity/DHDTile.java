@@ -154,7 +154,7 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 			firstTick = false;
 			
 			if (world.isRemote)
-				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos) );
+				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerInMessageHandler(null)) );
 		}
 	}
 	

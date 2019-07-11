@@ -13,14 +13,14 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import scala.NotImplementedError;
 
 public class StateUpdatePacketToClient extends PositionedPacket {
 	public StateUpdatePacketToClient() {}
-		
 	
 	private EnumStateType stateType;
 	private State state;
+	
+	private ByteBuf stateBuf;
 	
 	public StateUpdatePacketToClient(BlockPos pos, EnumStateType stateType, State state) {
 		super(pos);
@@ -43,18 +43,7 @@ public class StateUpdatePacketToClient extends PositionedPacket {
 		super.fromBytes(buf);
 
 		stateType = EnumStateType.byId(buf.readInt());
-		
-		ITileEntityStateProvider te = (ITileEntityStateProvider) Minecraft.getMinecraft().world.getTileEntity(pos);
-		
-		if (te != null) {
-			state = te.createState(stateType);
-		
-			if (state != null)
-				state.fromBytes(buf);
-			
-			else
-				throw new NotImplementedError("State not implemented on " + te.toString());
-		}
+		stateBuf = buf.copy();
 	}
 	
 	public static class StateUpdateClientHandler implements IMessageHandler<StateUpdatePacketToClient, IMessage> {
@@ -68,8 +57,11 @@ public class StateUpdatePacketToClient extends PositionedPacket {
 								
 				ITileEntityStateProvider te = (ITileEntityStateProvider) world.getTileEntity(message.pos);
 				
-				if (te != null && message.state != null)
-					te.setState(message.stateType, message.state);				
+				State state = te.createState(message.stateType);
+				state.fromBytes(message.stateBuf);
+				
+				if (te != null && state != null)
+					te.setState(message.stateType, state);				
 			});
 			
 			return null;

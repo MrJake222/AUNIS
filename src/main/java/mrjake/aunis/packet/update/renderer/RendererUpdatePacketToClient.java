@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.renderer.state.RendererState;
+import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.ITileEntityRendered;
@@ -72,6 +73,7 @@ public class RendererUpdatePacketToClient extends PositionedPacket {
 								
 				ITileEntityRendered te = (ITileEntityRendered) world.getTileEntity(message.pos);
 				
+				if (message.rendererState instanceof StargateRendererState) Aunis.info("read: " + ((StargateRendererState) message.rendererState).ringCurrentSymbol);
 				te.getRenderer().setState(message.rendererState);
 				
 				if (message.supportsUpgrade)

@@ -18,7 +18,6 @@ import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.state.SpinStateRequest;
 import mrjake.aunis.tileentity.StargateBaseTile;
@@ -75,6 +74,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	@Override
 	public void setState(StargateRendererState state) {
 		this.state = state;
+		
+		ringAngularRotation = state.ringCurrentSymbol.angle;
 		
 		setActiveChevrons(state.getActiveChevrons(), state.isFinalActive());
 		
@@ -154,14 +155,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		}
 	}
 
-//	private double state.ringAngularRotation;
 	private boolean ringRollLoopPlayed;
-	private double targetAngle = -1;
-	private EnumSpinDirection direction = EnumSpinDirection.COUNTER_CLOCKWISE;
-	private boolean locking;
-//	
-//	boolean state.dialingComplete;
-	
 	private StargateRingSpinHelper ringSpinHelper;
 	
 	private StargateRingSpinHelper getRingSpinHelper() {
@@ -186,20 +180,13 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			AunisSoundHelper.playPositionedSound("ringRollStart", pos, true);
 			ringRollLoopPlayed = false;
 			
-			this.direction = stateRequest.direction;
-			this.targetAngle = stateRequest.targetAngle;
-			this.locking = stateRequest.lock;
+			state.spinState.direction = stateRequest.direction;
+			state.spinState.targetSymbol = stateRequest.targetSymbol;
+			state.spinState.finalChevron = stateRequest.lock;
 			
-			Aunis.info("targetAngle: " + targetAngle);
+			Aunis.info("ringCurrentSymbol: " + state.ringCurrentSymbol + ", direction: " + state.spinState.direction);
 			
-			getRingSpinHelper().requestStart(state.ringAngularRotation, direction);
-//			ringSpinStart = world.getTotalWorldTime();
-//			lastTick = -1;
-//			
-//			ringDecelerating = false;
-//			ringAccelerating = true;
-//			ringSpin = true;
-			
+			getRingSpinHelper().requestStart(state.ringCurrentSymbol.angle, state.spinState.direction);			
 		}
 		
 		else {
@@ -207,12 +194,6 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 						
 			Aunis.info("requesting stop");
 			getRingSpinHelper().requestStop();
-			
-//			lockSoundPlayed = false;
-//			ringDecelFirst = true;
-//			
-//			ringAccelerating = false;
-//			ringDecelerating = true;
 		}
 	}
 	
@@ -254,11 +235,13 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		finalChevronLocking = finalChevron;
 	}
 	
+	private double ringAngularRotation;
+	
 	private void renderRing(double x, double y, double z, double partialTicks) {
 //		ModelLoader.loadModel(EnumModel.RING_MODEL);
 		
 		Model ringModel = ModelLoader.getModel(EnumModel.RING_MODEL);
-		
+				
 		if (ringModel != null) {
 			
 			if (state.spinState.isSpinning) {				
@@ -271,16 +254,16 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 					AunisSoundHelper.playPositionedSound("ringRollLoop", pos, true);
 				}
 				
-				state.ringAngularRotation = getRingSpinHelper().spin(partialTicks) % 360;
+				ringAngularRotation = (float) (getRingSpinHelper().spin(partialTicks) % 360);
 				
 //				Aunis.info("position: " + state.ringAngularRotation + ", target: " + targetAngle + ", direction: " + direction + ", distance: " + direction.getDistance(state.ringAngularRotation, (float) targetAngle));
 				
-				if (targetAngle != -1 && direction.getDistance(state.ringAngularRotation, (float) targetAngle) <= StargateRingSpinHelper.getStopAngleTraveled()) {
-					Aunis.info("requested stop: " + state.ringAngularRotation + ", targetAngle: " + targetAngle);
+				if (state.spinState.targetSymbol != null && state.spinState.direction.getDistance(ringAngularRotation, (float) state.spinState.targetSymbol.angle) <= StargateRingSpinHelper.getStopAngleTraveled()) {
+//					Aunis.info("requested stop: " + ringAngularRotation + ", targetAngle: " + state.spinState.targetSymbol.angle);
 					
-					targetAngle = -1;
+					state.spinState.targetSymbol = null;
 					
-					getRingSpinHelper().requestStopByComputer(locking);
+					getRingSpinHelper().requestStopByComputer(state.spinState.finalChevron);
 				}
 				
 //				Aunis.info("state.ringAngularRotation: " + state.ringAngularRotation);
@@ -300,7 +283,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			
 //			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
 			
-			float angularRotation = (float) state.ringAngularRotation;
+			float angularRotation = (float) ringAngularRotation;
 			
 			if (horizontalRotation == 90 || horizontalRotation == 0)
 				angularRotation *= -1;
@@ -394,6 +377,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	}
 	
 	public void activateNextChevron(boolean setRingSpin) { 
+		Mouse.setGrabbed(false);
+
 		if (activation == -1) {			
 			activationStateChange = world.getTotalWorldTime();
 			dimChevron = false;

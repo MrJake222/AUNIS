@@ -1,6 +1,5 @@
 package mrjake.aunis.tileentity;
 
-import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,15 +14,10 @@ import li.cil.oc.api.Network;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
-import li.cil.oc.api.machine.Machine;
-import li.cil.oc.api.network.Component;
-import li.cil.oc.api.network.ComponentConnector;
-import li.cil.oc.api.network.Connector;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.Visibility;
-import li.cil.oc.server.network.Network.ComponentConnectorBuilder;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
@@ -94,7 +88,9 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
-public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider, ITileEntityStateProvider, Environment {		
+public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider, ITileEntityStateProvider, Environment {
+	public StargateBaseTile() {}
+	
 	private ISpecialRenderer<StargateRendererState> renderer;
 	private RendererState rendererState;
 	
@@ -130,7 +126,6 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 * Adds symbol to address. Called from GateRenderingUpdatePacketToServer. Handles all server-side consequences:
 	 * 	- server ring movement cache
 	 * 	- renderer's state
-	 *
 	 * 
 	 * @param symbol - Currently added symbol
 	 * @param dhdTile - Clicked DHD's Tile instance
@@ -153,7 +148,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		// First glyph is pressed
 		// Ring starts to spin
 		if (dialedAddress.size() == 0 && !computer) {
-			getServerRingSpinHelper().requestStart(getStargateRendererState().ringAngularRotation);
+			getServerRingSpinHelper().requestStart(getStargateRendererState().ringCurrentSymbol.angle);
 			
 			stargateState = EnumStargateState.DHD_DIALING;
 		}
@@ -162,7 +157,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		if (dhdTile != null)
 			dhdTile.getDHDRendererState().activeButtons.add(symbol.id);
 		
-		if (dialedAddress.size() == maxChevrons || symbol == EnumSymbol.ORIGIN) {
+		if (dialedAddress.size() == maxChevrons || (dialedAddress.size() == 7 && symbol == EnumSymbol.ORIGIN)) {
 			getStargateRendererState().setFinalActive(world, pos, true);
 			
 			if (!computer) {
@@ -311,7 +306,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		energyConsumed = 0;
 		
 		unstableVortex = false;
-		isEngaged = true;
+		isEngaged = true;//			ringSpinStart = world.getTotalWorldTime();
+//		lastTick = -1;
+//		
+//		ringDecelerating = false;
+//		ringAccelerating = true;
+//		ringSpin = true;
 		gateCloseTimeout = 5;
 		
 		if (fastDialer) {
@@ -725,14 +725,21 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			// Client loaded region, need to update
 			// Send rendererState to client's renderer
 			if (world.isRemote)
-				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos) );
+				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerInMessageHandler(null)) );
 			
 			// Can't do this in onLoad(), because in that method, world isn't fully loaded
 			generateAddress();
 			
 //			updateMergeState(MergeHelper.checkBlocks(this));
 						
-			if (!world.isRemote) {
+//			IBlockState state = world.getBlockState(pos);
+//			
+//			world.markBlockRangeForRenderUpdate(pos, pos);
+//			world.notifyBlockUpdate(pos, state, state, 3);
+//			world.scheduleBlockUpdate(pos,this.getBlockType(),0,0);
+//			markDirty();
+			
+			if (!world.isRemote) {				
 				String[] namesArray = new String[gateAddress.size()];
 				
 				for (int i=0; i<gateAddress.size(); i++)
@@ -945,12 +952,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		// Set ring rotation
 		// This will be synced to clients
 		if (!world.isRemote && getStargateRendererState().spinState.isSpinning) {
-			getStargateRendererState().ringAngularRotation = getServerRingSpinHelper().spin(0) % 360;
+			float ringAngularRotation = (float) (getServerRingSpinHelper().spin(0) % 360);
 			
 //			Aunis.info(this+": position: " + getStargateRendererState().ringAngularRotation + ", stopAngle: " + stopAngle);
 			
 			if (targetSymbolDialing) {				
-				if (spinDirection.getDistance(getStargateRendererState().ringAngularRotation, (float) this.targetSymbol.angle) <= StargateRingSpinHelper.getStopAngleTraveled()) {
+				if (spinDirection.getDistance(ringAngularRotation, (float) this.targetSymbol.angle) <= StargateRingSpinHelper.getStopAngleTraveled()) {
 					getServerRingSpinHelper().requestStopByComputer(false);
 				
 					targetSymbolDialing = false;
@@ -1154,6 +1161,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		return stargateState;
 	}
 	
+	public void setEndingSymbol(EnumSymbol symbol) {
+		getStargateRendererState().ringCurrentSymbol = symbol;
+		
+		markDirty();
+	}
+	
 	// function(arg:type[, optionArg:type]):resultType; Description.	
 	@Optional.Method(modid = "opencomputers")
 	@Callback(getter = true)
@@ -1199,8 +1212,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		spinDirection = spinDirection.opposite();
 		
-		double distance = spinDirection.getDistance(getStargateRendererState().ringAngularRotation, symbol.angle);
-		Aunis.info("position: " + getStargateRendererState().ringAngularRotation + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance);
+		double distance = spinDirection.getDistance(getStargateRendererState().ringCurrentSymbol.angle, symbol.angle);
+		Aunis.info("position: " + getStargateRendererState().ringCurrentSymbol.angle + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance);
 		
 		if (distance < (StargateRingSpinHelper.getStopAngleTraveled() + 5))
 			spinDirection = spinDirection.opposite();
@@ -1209,7 +1222,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		boolean lock = symbolCount == 8 || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN);
 		
 		stargateState = EnumStargateState.COMPUTER_DIALING;
-		getServerRingSpinHelper().requestStart(getStargateRendererState().ringAngularRotation, spinDirection, symbol, lock, context, moveOnly);
+		getServerRingSpinHelper().requestStart(getStargateRendererState().ringCurrentSymbol.angle, spinDirection, symbol, lock, context, moveOnly);
 		
 		OCHelper.sendSignalToReachable(node, context, "stargate_spin_start", new Object[] { symbolCount, lock, targetSymbol.name });
 		

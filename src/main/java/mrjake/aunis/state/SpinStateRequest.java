@@ -2,18 +2,19 @@ package mrjake.aunis.state;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.stargate.EnumSpinDirection;
+import mrjake.aunis.stargate.EnumSymbol;
 
 public class SpinStateRequest extends State {
 	public SpinStateRequest() {}
 	
 	public EnumSpinDirection direction = EnumSpinDirection.COUNTER_CLOCKWISE;
-	public double targetAngle = -1;
+	public EnumSymbol targetSymbol = null;
 	public boolean lock = false;
 	public boolean moveOnly;
 	
-	public SpinStateRequest(EnumSpinDirection direction, double stopAngle, boolean lock, boolean moveOnly) {
+	public SpinStateRequest(EnumSpinDirection direction, EnumSymbol targetSymbol, boolean lock, boolean moveOnly) {
 		this.direction = direction;
-		this.targetAngle = stopAngle;
+		this.targetSymbol = targetSymbol;
 		this.lock = lock;
 		this.moveOnly = moveOnly;
 	}
@@ -21,7 +22,9 @@ public class SpinStateRequest extends State {
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(direction.id);
-		buf.writeDouble(targetAngle);
+		
+		buf.writeInt(targetSymbol != null ? targetSymbol.id : -1);
+		
 		buf.writeBoolean(lock);
 		buf.writeBoolean(moveOnly);
 	}
@@ -29,7 +32,11 @@ public class SpinStateRequest extends State {
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		direction = EnumSpinDirection.valueOf(buf.readInt());
-		targetAngle = buf.readDouble();
+		
+		int targetSymbolId = buf.readInt();
+		if (targetSymbolId != -1)
+			targetSymbol = EnumSymbol.valueOf(targetSymbolId);
+		
 		lock = buf.readBoolean();
 		moveOnly = buf.readBoolean();
 	}

@@ -74,7 +74,7 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 			firstTick = false;
 			
 			if (world.isRemote) {
-				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos));
+				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerInMessageHandler(null)));
 			}
 		}
 		

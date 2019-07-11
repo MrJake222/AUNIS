@@ -1,6 +1,5 @@
 package mrjake.aunis.renderer;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.state.SpinState;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import net.minecraft.world.World;

@@ -8,56 +8,35 @@ public class SpinState extends RendererState {
 	/**
 	 * Stores world's time when rotation started.
 	 */
-	public long tickStart;
+	public long tickStart = 0;
 	
 	/**
 	 * Stores starting ring pos to correctly shift the next rotation
 	 * 
 	 * Set by requestStart()
 	 */
-	public double startingRotation;
+	public double startingRotation = 0;
 
 	/**
 	 * Defines when ring is spinning ie. no stop animation was performed.
 	 */
-	public boolean isSpinning;
+	public boolean isSpinning = false;
 	
 	/**
 	 * Set by requestStop(). Set when ring needs to be stopped.
 	 */
-	public boolean stopRequested;
+	public boolean stopRequested = false;
 	
 	/**
 	 * Time when requestStop() was called
 	 */
-	public long tickStopRequested;
+	public long tickStopRequested = 0;
 	
 	/**
 	 * Spin direction
 	 */
-	public EnumSpinDirection direction;
+	public EnumSpinDirection direction = EnumSpinDirection.COUNTER_CLOCKWISE;
 	
-
-	public SpinState() {
-		this(0, 0, false, false, 0, EnumSpinDirection.COUNTER_CLOCKWISE);
-	}
-	
-	public SpinState(
-			double startingRotation,
-			long tickStart,
-			boolean isSpinning,
-			boolean stopRequested,
-			long tickStopRequested,
-			EnumSpinDirection direction) {
-
-		this.startingRotation = startingRotation;
-		
-		this.tickStart = tickStart;
-		this.isSpinning = isSpinning;
-		this.stopRequested = stopRequested;
-		this.tickStopRequested = tickStopRequested;
-		this.direction = direction;
-	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {

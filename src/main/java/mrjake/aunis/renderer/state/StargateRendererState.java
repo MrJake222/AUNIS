@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.renderer.stargate.StargateRenderer.EnumVortexState;
+import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.tileentity.StargateMemberTile;
 import net.minecraft.block.state.IBlockState;
@@ -13,8 +14,8 @@ import net.minecraft.world.World;
 public class StargateRendererState extends RendererState {
 	
 	// Chevrons
-	private int activeChevrons;
-	private boolean isFinalActive;
+	private int activeChevrons = 0;
+	private boolean isFinalActive = false;
 	
 	public void setActiveChevrons(World world, BlockPos gatePos, int activeChevrons) {
 		this.activeChevrons = activeChevrons;
@@ -55,21 +56,21 @@ public class StargateRendererState extends RendererState {
 	}
 
 	// Ring		
-	public double ringAngularRotation;
-	public SpinState spinState;
+	public EnumSymbol ringCurrentSymbol = EnumSymbol.ORIGIN;
+	public StargateSpinState spinState = new StargateSpinState();
 	
 	// Gate
-	public boolean doEventHorizonRender;
-	public EnumVortexState vortexState;
-	public boolean openingSoundPlayed;
-	public boolean dialingComplete;
+	public boolean doEventHorizonRender = false;
+	public EnumVortexState vortexState = EnumVortexState.FORMING;
+	public boolean openingSoundPlayed = false;
+	public boolean dialingComplete = false;
 	
 	/**
 	 * When power is low, this becomes true. Flashing begins.
 	 *  
 	 * Individual flashes are handled client-side
 	 */
-	public boolean horizonUnstable;
+	public boolean horizonUnstable = false;
 	
 //	@Override
 //	public String toString() {
@@ -77,46 +78,12 @@ public class StargateRendererState extends RendererState {
 //				doEventHorizonRender, vortexState.toString(), openingSoundPlayed);
 //	}
 	
-	// Default state
-	public StargateRendererState() {
-		this(0, false, 0, new SpinState(), false, EnumVortexState.FORMING, false, false, false);
-	}
-	
-	public StargateRendererState(			
-			int activeChevrons,
-			boolean isFinalActive,
-			
-			float ringAngularRotation,
-			SpinState spinState,
-			
-			boolean doEventHorizonRender,
-			EnumVortexState vortexState,
-			boolean openingSoundPlayed,
-			boolean dialingComplete,
-			boolean horizonInstable) {
-				
-		// Chevrons
-		this.activeChevrons = activeChevrons;
-		this.isFinalActive = isFinalActive;
-		
-		// Ring		
-		this.ringAngularRotation = ringAngularRotation;
-		this.spinState = spinState;
-		
-		// Gate
-		this.doEventHorizonRender = doEventHorizonRender;
-		this.vortexState = vortexState;
-		this.openingSoundPlayed = openingSoundPlayed;
-		this.dialingComplete = dialingComplete;
-		this.horizonUnstable = horizonInstable;
-	}
-	
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(activeChevrons);
 		buf.writeBoolean(isFinalActive);
 		
-		buf.writeDouble(ringAngularRotation);
+		buf.writeInt(ringCurrentSymbol != null ? ringCurrentSymbol.id : EnumSymbol.ORIGIN.id);
 		spinState.toBytes(buf);
 		
 		buf.writeBoolean(doEventHorizonRender);
@@ -131,10 +98,10 @@ public class StargateRendererState extends RendererState {
 		activeChevrons = buf.readInt();
 		isFinalActive = buf.readBoolean();
 				
-		ringAngularRotation = buf.readDouble();
+		ringCurrentSymbol = EnumSymbol.valueOf(buf.readInt());
 		
 		if (spinState == null)
-			spinState = new SpinState();
+			spinState = new StargateSpinState();
 		
 		spinState.fromBytes(buf);
 		
