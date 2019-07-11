@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity;
 
+import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,15 +10,27 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
 
-import org.lwjgl.input.Mouse;
-
 import io.netty.buffer.ByteBuf;
+import li.cil.oc.api.Network;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.machine.Machine;
+import li.cil.oc.api.network.Component;
+import li.cil.oc.api.network.ComponentConnector;
+import li.cil.oc.api.network.Connector;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.Visibility;
+import li.cil.oc.server.network.Network.ComponentConnectorBuilder;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.capability.EnergyStorageUncapped;
 import mrjake.aunis.gui.StargateGUI;
+import mrjake.aunis.integration.opencomputers.OCHelper;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
@@ -37,6 +50,9 @@ import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.DHDLinkHelper;
+import mrjake.aunis.stargate.EnumGateState;
+import mrjake.aunis.stargate.EnumSpinDirection;
+import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.stargate.StargateNetwork;
@@ -45,6 +61,7 @@ import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.state.EnergyState;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.state.ITileEntityStateProvider;
+import mrjake.aunis.state.SpinStateRequest;
 import mrjake.aunis.state.StargateGuiState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
@@ -69,14 +86,15 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-
-public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider, ITileEntityStateProvider {		
+@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
+public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider, ITileEntityStateProvider, Environment {		
 	private ISpecialRenderer<StargateRendererState> renderer;
 	private RendererState rendererState;
 	
@@ -118,28 +136,40 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 * @param dhdTile - Clicked DHD's Tile instance
 	 * @return true if symbol was added
 	 */
-	public boolean addSymbolToAddress(EnumSymbol symbol, DHDTile dhdTile) {		
+	public boolean addSymbolToAddress(EnumSymbol symbol, DHDTile dhdTile, boolean computer) {		
 		if (dialedAddress.contains(symbol)) 
 			return false;
 		
-		int maxChevrons = (dhdTile.hasUpgrade() ? 8 : 7);
+		int maxChevrons;
+		
+		if (computer)
+			maxChevrons = 8;
+		else
+			maxChevrons = (dhdTile.hasUpgrade() ? 8 : 7);
 		
 		if (dialedAddress.size() == maxChevrons)
 			return false;
 		
 		// First glyph is pressed
 		// Ring starts to spin
-		if (dialedAddress.size() == 0) {
+		if (dialedAddress.size() == 0 && !computer) {
 			getServerRingSpinHelper().requestStart(getStargateRendererState().ringAngularRotation);
+			
+			stargateState = EnumStargateState.DHD_DIALING;
 		}
 		
 		dialedAddress.add(symbol);
-		dhdTile.getDHDRendererState().activeButtons.add(symbol.id);
+		if (dhdTile != null)
+			dhdTile.getDHDRendererState().activeButtons.add(symbol.id);
 		
 		if (dialedAddress.size() == maxChevrons || symbol == EnumSymbol.ORIGIN) {
 			getStargateRendererState().setFinalActive(world, pos, true);
 			
-			getServerRingSpinHelper().requestStop();
+			if (!computer) {
+				getServerRingSpinHelper().requestStop();
+				
+				stargateState = EnumStargateState.IDLE;
+			}
 		}
 		
 		else {
@@ -166,6 +196,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		if (dhdTile != null) {			
 			dhdTile.getDHDRendererState().activeButtons = EnumSymbol.toIntegerList(incomingAddress.subList(0, dialedAddressSize - 1), EnumSymbol.ORIGIN);
 		}
+		
+		OCHelper.sendSignalToReachable(node, null, "stargate_incoming_wormhole", new Object[] { dialedAddressSize });
 	}
 	
 	/**
@@ -208,6 +240,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 //			Aunis.info("Opening gate, drawing " + openCost);
 			((EnergyStorageUncapped) getEnergyStorage(openCost)).extractEnergyUncapped(openCost);
 		}
+		
+		stargateState = EnumStargateState.ENGAGED;
+		OCHelper.sendSignalToReachable(node, null, "stargate_open", new Object[] { isInitiating });
 		
 		markDirty();
 	}
@@ -292,8 +327,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 * Called either on pressing BRB on open gate or by pressing BRB on malformed address
 	 * 
 	 * @param dialingFailed - True if second case above
+	 * @param stopRing - If using DHD, then true
 	 */
-	public void closeGate(boolean dialingFailed) {
+	public void closeGate(boolean dialingFailed, boolean stopRing) {
 		if (!dialingFailed) {
 			waitForClose = world.getTotalWorldTime();
 		
@@ -304,10 +340,15 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			getStargateRendererState().doEventHorizonRender = false;
 			getStargateRendererState().openingSoundPlayed = false;
 			getStargateRendererState().dialingComplete = false;
+			
+			OCHelper.sendSignalToReachable(node, null, "stargate_close", new Object[] {});
 		}
 		
 		else {
-			getServerRingSpinHelper().requestStop();
+			if (stopRing)
+				getServerRingSpinHelper().requestStop();
+			
+			OCHelper.sendSignalToReachable(node, null, "stargate_failed", new Object[] {});
 		}
 			
 		dialedAddress.clear();
@@ -315,6 +356,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		getStargateRendererState().setActiveChevrons(world, pos, 0);
 		getStargateRendererState().setFinalActive(world, pos, false);
 		clearLinkedDHDButtons(dialingFailed);
+		
+		stargateState = EnumStargateState.IDLE;
 		
 //		Aunis.info("Closing isInitiating:" + isInitiating);
 //		if (isInitiating && !dialingFailed) {
@@ -398,7 +441,11 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		if (renderer == null)
 			renderer = new StargateRenderer(this);
 		
-		return (StargateRenderer) renderer;
+		return renderer;
+	}
+	
+	public StargateRenderer getStargateRenderer() {
+		return (StargateRenderer) getRenderer();
 	}
 	
 	public StargateRendererState getStargateRendererState() {
@@ -455,6 +502,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	}
 	
 	public void setLinkedDHD(BlockPos dhdPos) {
+		if (dhdPos != null)
+			dhdPos = new BlockPos(dhdPos);
+		
 		this.linkedDHD = dhdPos;
 		
 		markDirty();
@@ -502,6 +552,23 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		compound.setLong("gateOpenTime", gateOpenTime);
 		compound.setInteger("energyConsumed", energyConsumed);
+		
+		if (node != null) {
+			NBTTagCompound nodeCompound = new NBTTagCompound();
+			node.save(nodeCompound);
+			
+			compound.setTag("node", nodeCompound);
+		}
+		
+		compound.setBoolean("targetSymbolDialing", targetSymbolDialing);
+		if (targetSymbol != null)
+			compound.setInteger("targetSymbol", targetSymbol.id);
+		
+		if (spinDirection != null)
+			compound.setInteger("lastSpinDirection", spinDirection.id);
+		
+		if (stargateState != null)
+			compound.setInteger("stargateState", stargateState.id);
 		
 		return super.writeToNBT(compound);
 	}
@@ -554,6 +621,19 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		this.gateOpenTime = compound.getLong("gateOpenTime");
 		this.energyConsumed = compound.getInteger("energyConsumed");
+		
+		if (node != null)
+			node.load((NBTTagCompound) compound.getTag("node"));
+		
+		targetSymbolDialing = compound.getBoolean("targetSymbolDialing");
+
+		if (compound.hasKey("targetSymbol"))
+			targetSymbol = EnumSymbol.valueOf(compound.getInteger("targetSymbol"));
+		else
+			targetSymbol = null;
+		
+		spinDirection = EnumSpinDirection.valueOf(compound.getInteger("lastSpinDirection"));
+		stargateState = EnumStargateState.valueOf(compound.getInteger("stargateState"));
 		
 		super.readFromNBT(compound);
 	}
@@ -653,6 +733,13 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 //			updateMergeState(MergeHelper.checkBlocks(this));
 						
 			if (!world.isRemote) {
+				String[] namesArray = new String[gateAddress.size()];
+				
+				for (int i=0; i<gateAddress.size(); i++)
+					namesArray[i] = gateAddress.get(i).name;
+				
+				OCHelper.sendSignalToReachable(node, null, "stargate_added", (Object[]) namesArray);
+				
 				EnumFacing sourceGateFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 				
 				int x = pos.getX();
@@ -778,7 +865,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			if (isInitiating) {
 
 				// If we have enough energy(minimal DHD operable)
-				if (getEnergyStorage(AunisConfig.powerConfig.dhdMinimalEnergy + 10000) != null) {
+				if (getEnergyStorage(AunisConfig.powerConfig.dhdMinimalEnergy * 2) != null) {
 					IEnergyStorage energyStorage = getEnergyStorage(keepAliveCostPerTick);
 					
 					if (energyStorage != null) {
@@ -853,10 +940,23 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			}
 		}
 		
+//		if (!world.isRemote) Aunis.info(this+ ", " + this.pos+": isSpinning: " + getStargateRendererState().spinState.isSpinning);
+		
 		// Set ring rotation
 		// This will be synced to clients
 		if (!world.isRemote && getStargateRendererState().spinState.isSpinning) {
 			getStargateRendererState().ringAngularRotation = getServerRingSpinHelper().spin(0) % 360;
+			
+//			Aunis.info(this+": position: " + getStargateRendererState().ringAngularRotation + ", stopAngle: " + stopAngle);
+			
+			if (targetSymbolDialing) {				
+				if (spinDirection.getDistance(getStargateRendererState().ringAngularRotation, (float) this.targetSymbol.angle) <= StargateRingSpinHelper.getStopAngleTraveled()) {
+					getServerRingSpinHelper().requestStopByComputer(false);
+				
+					targetSymbolDialing = false;
+					markDirty();
+				}
+			}
 			
 			markDirty();
 		}
@@ -971,6 +1071,10 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			case ENERGY_STATE:
 				return new EnergyState(energyStorage.getEnergyStored());
 				
+			case SPIN_STATE:
+				return null;
+				// It shouldn't be done this way. This is only sent from the server(new instance each time). See StargateRingSpinHelper@syncStartToClient()
+				
 			default:
 				return null;
 		}
@@ -985,6 +1089,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			case ENERGY_STATE:
 				return new EnergyState();
 				
+			case SPIN_STATE:
+				return new SpinStateRequest();
+				
 			default:
 				return null;
 		}
@@ -994,9 +1101,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void setState(EnumStateType stateType, State state) {
-		Mouse.setGrabbed(false);
-		
+	public void setState(EnumStateType stateType, State state) {		
 		switch (stateType) {
 			case GUI_STATE:
 				if (openGui == null || !openGui.isOpen) {
@@ -1017,11 +1122,179 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				
 				break;
 				
+			case SPIN_STATE:			
+				SpinStateRequest spinStateRequest = (SpinStateRequest) state;
+				
+				if (spinStateRequest.moveOnly)
+					getStargateRenderer().requestFinalMove(spinStateRequest.lock);
+				
+				else
+					getStargateRenderer().setRingSpin(true, true, spinStateRequest);
+				
+				break;
+				
 			default:
 				break;
 		}
 	}
 	
+	
+	// -----------------------------------------------------------------
+	// OpenComputers	
+	private EnumSymbol targetSymbol = null;
+	private boolean targetSymbolDialing = false;
+	private EnumSpinDirection spinDirection = EnumSpinDirection.COUNTER_CLOCKWISE;
+	private EnumStargateState stargateState = EnumStargateState.IDLE;
+	
+	public void markStargateIdle() {
+		stargateState = EnumStargateState.IDLE;
+	}
+	
+	public EnumStargateState getStargateState() {
+		return stargateState;
+	}
+	
+	// function(arg:type[, optionArg:type]):resultType; Description.	
+	@Optional.Method(modid = "opencomputers")
+	@Callback(getter = true)
+	public Object[] stargateAddress(Context context, Arguments args) {
+		return new Object[] {gateAddress};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback(getter = true)
+	public Object[] dialedAddress(Context context, Arguments args) {
+		return new Object[] {dialedAddress};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback(doc = "function(symbolName:string) -- Spins the ring to the given symbol and engages/locks it")
+	public Object[] engageSymbol(Context context, Arguments args) {
+		if (!stargateState.idle()) {
+			return new Object[] {null, "stargate_busy", stargateState.toString()};
+		}
+		
+		if (gateAddress.size() == 8) {
+			return new Object[] {null, "stargate_failure_full", "Already dialed 8 chevrons"};
+		}
+		
+		String name = args.checkString(0);
+		
+		EnumSymbol symbol = EnumSymbol.forName(name);
+		
+		if (symbol == null)
+			throw new IllegalArgumentException("bad argument #1 (symbol name invalid)");
+		
+		boolean moveOnly = symbol == targetSymbol;
+//		if (symbol == targetSymbol) {
+//			return new Object[] {null, "stargate_failure_locked", "Stargate is locked onto this symbol already"};
+//		}
+		
+		if (dialedAddress.contains(symbol)) {
+			return new Object[] {null, "stargate_failure_contains", "Dialed address contains this symbol already"};
+		}
+		
+		this.targetSymbol = symbol;	
+		this.targetSymbolDialing = true;
+		
+		spinDirection = spinDirection.opposite();
+		
+		double distance = spinDirection.getDistance(getStargateRendererState().ringAngularRotation, symbol.angle);
+		Aunis.info("position: " + getStargateRendererState().ringAngularRotation + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance);
+		
+		if (distance < (StargateRingSpinHelper.getStopAngleTraveled() + 5))
+			spinDirection = spinDirection.opposite();
+		
+		int symbolCount = getEnteredSymbolsCount() + 1;
+		boolean lock = symbolCount == 8 || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN);
+		
+		stargateState = EnumStargateState.COMPUTER_DIALING;
+		getServerRingSpinHelper().requestStart(getStargateRendererState().ringAngularRotation, spinDirection, symbol, lock, context, moveOnly);
+		
+		OCHelper.sendSignalToReachable(node, context, "stargate_spin_start", new Object[] { symbolCount, lock, targetSymbol.name });
+		
+		markDirty();
+		
+		return new Object[] {"stargate_spin"};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback(doc = "function() -- Tries to open the gate")
+	public Object[] engageGate(Context context, Arguments args) {
+		EnumGateState gateState = GateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
+
+		if (gateState == EnumGateState.OK) {
+			
+			if (linkedDHD != null) {
+				TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
+			
+				AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, EnumSymbol.BRB, linkedDHD), point );
+			}
+		}
+		
+		else {
+			targetSymbol = null;
+			targetSymbolDialing = false;
+			
+			markStargateIdle();
+			markDirty();
+			
+			OCHelper.sendSignalToReachable(node, null, "stargate_failed", new Object[] {});
+		}
+		
+		return new Object[] {gateState.toString()};
+	}
+	
+	private Node node = Network.newNode(this, Visibility.Network).withComponent("stargate", Visibility.Network).create();
+	
+	@Optional.Method(modid = "opencomputers")
+	@Override
+	public Node node() {
+		return node;
+	}
+
+	@Optional.Method(modid = "opencomputers")
+	@Override
+	public void onConnect(Node node) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Optional.Method(modid = "opencomputers")
+	@Override
+	public void onDisconnect(Node node) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Optional.Method(modid = "opencomputers")
+	@Override
+	public void onMessage(Message message) {
+//		Aunis.info("onMessage '" + message.name());
+//		
+//		for (Object obj : message.data())
+//			Aunis.info("\t" + obj.toString());		
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Override
+	public void onLoad() {
+		Network.joinOrCreateNetwork(this);
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Override
+	public void onChunkUnload() {
+		if (node != null)
+			node.remove();
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Override
+	public void invalidate() {
+		if (node != null)
+			node.remove();
+	}
 	
 	// -----------------------------------------------------------------
 	// Upgrade

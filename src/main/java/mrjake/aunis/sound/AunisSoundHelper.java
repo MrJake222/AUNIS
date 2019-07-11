@@ -27,6 +27,10 @@ public class AunisSoundHelper {
 	public static SoundEvent ringsTransport;
 	public static SoundEvent ringsControllerButton;
 	
+	public static SoundEvent chevronShut;
+	public static SoundEvent chevronOpen;
+	public static SoundEvent chevronLocking;
+	
 	public static ResourceLocation ringRollStart;
 	public static ResourceLocation ringRollLoop;
 	public static ResourceLocation wormholeLoop;
@@ -75,6 +79,11 @@ public class AunisSoundHelper {
 		ringsTransport = new SoundEvent( new ResourceLocation("aunis", "rings_transport") );
 		ringsControllerButton = new SoundEvent( new ResourceLocation("aunis", "rings_controller_button") );
 		
+		chevronShut = new SoundEvent( new ResourceLocation("aunis", "chevron_shut") );
+		chevronOpen = new SoundEvent( new ResourceLocation("aunis", "chevron_open") );
+		chevronLocking = new SoundEvent( new ResourceLocation("aunis", "chevron_locking") );
+		
+		// ------------------------------------------------------------------------------------------------------------
 		ringRollStart = new ResourceLocation("aunis", "ring_roll_start");
 		ringRollLoop = new ResourceLocation("aunis", "ring_roll_loop");
 		wormholeLoop = new ResourceLocation("aunis", "wormhole_loop");

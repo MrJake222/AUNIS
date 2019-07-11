@@ -94,11 +94,13 @@ public class DHDRenderer implements ISpecialRenderer<DHDRendererState> {
 		changeButtons();
 	}
 	
-	public void activateButton(int buttonID) {
-		if ( buttonID == 38 )
-			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPressBRB, 0.5f);
-		else
-			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPress, 0.5f);
+	public void activateButton(int buttonID, boolean sound) {
+		if (sound) {
+			if ( buttonID == 38 )
+				AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPressBRB, 0.5f);
+			else
+				AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.dhdPress, 0.5f);
+		}
 		
 		if (activation == -1) {
 			if ( buttonID == 38 )

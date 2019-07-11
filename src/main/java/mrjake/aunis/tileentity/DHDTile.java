@@ -72,7 +72,11 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	}
 	
 	public void setLinkedGate(BlockPos gate) {		
+		if (gate != null)
+			gate = new BlockPos(gate);
+		
 		this.linkedGate = gate;
+		
 		markDirty();
 	}
 	

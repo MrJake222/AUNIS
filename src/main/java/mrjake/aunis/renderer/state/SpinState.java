@@ -1,6 +1,7 @@
 package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.stargate.EnumSpinDirection;
 
 public class SpinState extends RendererState {
 	
@@ -31,9 +32,14 @@ public class SpinState extends RendererState {
 	 */
 	public long tickStopRequested;
 	
+	/**
+	 * Spin direction
+	 */
+	public EnumSpinDirection direction;
+	
 
 	public SpinState() {
-		this(0, 0, false, false, 0);
+		this(0, 0, false, false, 0, EnumSpinDirection.COUNTER_CLOCKWISE);
 	}
 	
 	public SpinState(
@@ -41,7 +47,8 @@ public class SpinState extends RendererState {
 			long tickStart,
 			boolean isSpinning,
 			boolean stopRequested,
-			long tickStopRequested) {
+			long tickStopRequested,
+			EnumSpinDirection direction) {
 
 		this.startingRotation = startingRotation;
 		
@@ -49,6 +56,7 @@ public class SpinState extends RendererState {
 		this.isSpinning = isSpinning;
 		this.stopRequested = stopRequested;
 		this.tickStopRequested = tickStopRequested;
+		this.direction = direction;
 	}
 
 	@Override
@@ -59,6 +67,7 @@ public class SpinState extends RendererState {
 		buf.writeBoolean(isSpinning);
 		buf.writeBoolean(stopRequested);
 		buf.writeLong(tickStopRequested);
+		buf.writeInt(direction.id);
 	}
 
 	@Override
@@ -69,6 +78,7 @@ public class SpinState extends RendererState {
 		isSpinning = buf.readBoolean();
 		stopRequested = buf.readBoolean();
 		tickStopRequested = buf.readLong();
+		direction = EnumSpinDirection.valueOf(buf.readInt());
 		
 		return this;
 	}

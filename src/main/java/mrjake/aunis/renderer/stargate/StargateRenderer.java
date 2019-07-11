@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.input.Mouse;
+
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
@@ -16,7 +18,9 @@ import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.MergeHelper;
+import mrjake.aunis.state.SpinStateRequest;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -152,6 +156,9 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 
 //	private double state.ringAngularRotation;
 	private boolean ringRollLoopPlayed;
+	private double targetAngle = -1;
+	private EnumSpinDirection direction = EnumSpinDirection.COUNTER_CLOCKWISE;
+	private boolean locking;
 //	
 //	boolean state.dialingComplete;
 	
@@ -166,7 +173,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	
 	private long lastFailSoundPlayed = 0;
 	
-	public void setRingSpin(boolean spin, boolean dialingComplete) {
+	public void setRingSpin(boolean spin, boolean dialingComplete, SpinStateRequest stateRequest) {
 		this.state.dialingComplete = dialingComplete;
 				
 		if (!state.dialingComplete && (world.getTotalWorldTime() - lastFailSoundPlayed) > 54) {
@@ -178,9 +185,14 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		if (spin) {
 			AunisSoundHelper.playPositionedSound("ringRollStart", pos, true);
 			ringRollLoopPlayed = false;
-
-			getRingSpinHelper().requestStart(state.ringAngularRotation);
 			
+			this.direction = stateRequest.direction;
+			this.targetAngle = stateRequest.targetAngle;
+			this.locking = stateRequest.lock;
+			
+			Aunis.info("targetAngle: " + targetAngle);
+			
+			getRingSpinHelper().requestStart(state.ringAngularRotation, direction);
 //			ringSpinStart = world.getTotalWorldTime();
 //			lastTick = -1;
 //			
@@ -191,10 +203,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		}
 		
 		else {
-			ringRollLoopPlayed = true;
-			
-			AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
-			AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
+			stopRingSounds();
 						
 			Aunis.info("requesting stop");
 			getRingSpinHelper().requestStop();
@@ -205,6 +214,44 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 //			ringAccelerating = false;
 //			ringDecelerating = true;
 		}
+	}
+	
+	public void setRingSpin(boolean spin, boolean dialingComplete) {
+		setRingSpin(spin, dialingComplete, new SpinStateRequest());
+	}
+	
+	public void requestStopByComputer(boolean finalChevron) {
+		getRingSpinHelper().requestStopByComputer(finalChevron);
+	}
+	
+	public void stopRingSounds() {
+		ringRollLoopPlayed = true;
+		
+		AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
+		AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
+	}
+	
+	private boolean waitForFinalMove;
+	private boolean finalChevronLocking;
+	private long waitForFinalMoveStart;
+
+	public void requestFinalMove(boolean finalChevron) {
+		stopRingSounds();
+		waitForFinalMoveStart = world.getTotalWorldTime();
+		
+		// Play lock sound
+		if (finalChevron) {
+			waitForFinalMoveStart += 20;
+			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronShut, 1f);
+		}
+		
+		else {
+			waitForFinalMoveStart += 15;
+			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronLocking, 0.2f);
+		}
+		
+		waitForFinalMove = true;
+		finalChevronLocking = finalChevron;
 	}
 	
 	private void renderRing(double x, double y, double z, double partialTicks) {
@@ -226,7 +273,27 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				
 				state.ringAngularRotation = getRingSpinHelper().spin(partialTicks) % 360;
 				
+//				Aunis.info("position: " + state.ringAngularRotation + ", target: " + targetAngle + ", direction: " + direction + ", distance: " + direction.getDistance(state.ringAngularRotation, (float) targetAngle));
+				
+				if (targetAngle != -1 && direction.getDistance(state.ringAngularRotation, (float) targetAngle) <= StargateRingSpinHelper.getStopAngleTraveled()) {
+					Aunis.info("requested stop: " + state.ringAngularRotation + ", targetAngle: " + targetAngle);
+					
+					targetAngle = -1;
+					
+					getRingSpinHelper().requestStopByComputer(locking);
+				}
+				
 //				Aunis.info("state.ringAngularRotation: " + state.ringAngularRotation);
+			}
+			
+			if (waitForFinalMove && (world.getTotalWorldTime() - waitForFinalMoveStart) > 0) {
+				waitForFinalMove = false;
+				
+				moveFinalChevron(true);
+				
+				activationStateChange = world.getTotalWorldTime();
+				dimChevron = false;
+				activation = 8;
 			}
 			
 			GlStateManager.pushMatrix();
@@ -297,6 +364,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	
 	private int activation = -1;
 	private long activationStateChange = 0;
+	private boolean dimChevron;
 	
 	private int activeChevrons = 0;
 	private boolean changingChevrons = false;
@@ -305,31 +373,45 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	
 	private float finalChevronStart;
 	private boolean finalChevronMove;
+	private boolean finalChevronMoveComputer;
+	private boolean finalChevronShutSoundPlayed;
+	private boolean finalChevronNextChevronLitUp;
 	
-	public void activateFinalChevron() {
+	public void activateFinalChevron(boolean setRingSpin) {
 		activationStateChange = world.getTotalWorldTime();
+		dimChevron = false;
 		
 		// chevronActiveList.set(8, true);
 		activation = 8;
 		activeChevrons++;
 		
-		setRingSpin( false, true );
+		if (setRingSpin)
+			setRingSpin( false, true );
 	}
 	
-	public void activateNextChevron() { 
+	public void activateFinalChevron() {
+		activateFinalChevron(true);
+	}
+	
+	public void activateNextChevron(boolean setRingSpin) { 
 		if (activation == -1) {			
 			activationStateChange = world.getTotalWorldTime();
+			dimChevron = false;
 			
 			// chevronActiveList.set(activeChevrons, true);
 			activation = activeChevrons;
 						
-			if (activeChevrons == 0) {
+			if (activeChevrons == 0 && setRingSpin) {
 				setRingSpin( true, true );
 			}
 			
 			if (activeChevrons < 8)
 				activeChevrons++;
 		}
+	}
+	
+	public void activateNextChevron() {
+		activateNextChevron(true);
 	}
 	
 	public void clearChevrons(Long stateChange) {
@@ -369,9 +451,21 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		activation = 0;
 	}
 	
-	public void moveFinalChevron() {
+	public void moveFinalChevron(boolean computer) {
 		finalChevronStart = 0;
 		finalChevronMove = true;
+		
+		finalChevronMoveComputer = computer;
+		finalChevronShutSoundPlayed = false;
+		finalChevronNextChevronLitUp = false;
+		
+		if (computer && finalChevronLocking) {
+			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronOpen, 1);
+		}
+	}
+	
+	public void moveFinalChevron() {
+		moveFinalChevron(false);
 	}
 	
 	private void renderChevron(double x, double y, double z, int index, double partialTicks) {
@@ -408,8 +502,22 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				else if (arg <= Math.PI)
 					finalChevronOffset = 0.08333f; // 1 / 12
 				
-				else if (arg <= 3*Math.PI/2)
+				else if (arg <= 3*Math.PI/2) {
 					finalChevronOffset = -MathHelper.cos( arg ) / 12f;
+					
+					if (finalChevronMoveComputer && !finalChevronShutSoundPlayed) {
+						finalChevronShutSoundPlayed = true;
+						
+						if (!finalChevronLocking) {
+							activationStateChange = world.getTotalWorldTime() + 3;
+							dimChevron = true;
+							activation = 8;
+						}
+						
+						else
+							AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronShut, 1);
+					}
+				}
 				
 				else {
 					finalChevronOffset = 0;
@@ -453,7 +561,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 
 			if (stage < 0) return;
 			
-//			Aunis.info("Stage: " + stage);
+//			Aunis.info("activation: " + activation + ", stage: " + stage + ", changingChevrons: " + changingChevrons);
 			
 			if (stage < 11) {
 				if (changingChevrons) {
@@ -473,8 +581,13 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 					}
 				}
 				
-				else {
-					chevronTextureList.set(activation, textureTemplate+stage+".png");
+				else {					
+					int st = stage;
+					
+					if (dimChevron)
+						st = 10 - st;
+					
+					chevronTextureList.set(activation, textureTemplate+st+".png");
 				}
 			}
 				
@@ -515,10 +628,21 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				}
 				
 				else {
-					chevronTextureList.set(activation, textureTemplate+"10.png");
+					if (dimChevron)					
+						chevronTextureList.set(activation, textureTemplate+"0.png");
+					
+					else
+						chevronTextureList.set(activation, textureTemplate+"10.png");
 				}
-				
+
 				activation = -1;
+				
+				if (finalChevronMoveComputer && !finalChevronNextChevronLitUp) {
+					finalChevronNextChevronLitUp = true;
+					
+					if (!finalChevronLocking)
+						activateNextChevron(false);
+				}
 			}
 		}
 	}

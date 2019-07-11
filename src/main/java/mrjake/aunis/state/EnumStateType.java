@@ -18,7 +18,8 @@ public enum EnumStateType {
 	GUI_STATE(2, "guiState"),
 	CAMO_STATE(3, "camoState"),
 	LIGHT_STATE(4, "lightState"),
-	ENERGY_STATE(5, "energyState");
+	ENERGY_STATE(5, "energyState"),
+	SPIN_STATE(6, "spinState");
 	
 	public int id;
 	private String key;

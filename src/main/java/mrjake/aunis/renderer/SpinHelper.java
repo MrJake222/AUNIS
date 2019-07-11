@@ -1,6 +1,8 @@
 package mrjake.aunis.renderer;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.state.SpinState;
+import mrjake.aunis.stargate.EnumSpinDirection;
 import net.minecraft.world.World;
 
 /**
@@ -13,7 +15,9 @@ public class SpinHelper {
 	 * Defines how much angle is added to the ring's rotation
 	 * in one game's tick.
 	 */
-	public static final double anglePerTick = 2.0;
+	protected double getAnglePerTick() {
+		return 2.0;
+	}
 	
 	/**
 	 * Stores how much time it takes to speed up or stop the ring.
@@ -29,8 +33,8 @@ public class SpinHelper {
 	protected void setSpeedUpTimeTick(int speedUpTimeTick) {
 		this.speedUpTimeTick = speedUpTimeTick;
 				
-		a2 = this.speedUpTimeTick * anglePerTick;
-		b2 = this.speedUpTimeTick / anglePerTick;
+		a2 = this.speedUpTimeTick * getAnglePerTick();
+		b2 = this.speedUpTimeTick / getAnglePerTick();
 		
 		a = Math.sqrt(a2);
 		b = Math.sqrt(b2);
@@ -65,12 +69,17 @@ public class SpinHelper {
 	 * 
 	 * @param startingRotation - enter rotation value
 	 */
-	public void requestStart(double startingRotation) {
+	public void requestStart(double startingRotation, EnumSpinDirection direction) {
 		this.state.tickStart = world.getTotalWorldTime();
 
 		this.state.startingRotation = startingRotation;
 		this.state.isSpinning = true;
 		this.state.stopRequested = false;
+		this.state.direction = direction;
+	}
+	
+	public void requestStart(double startingRotation) {
+		requestStart(startingRotation, EnumSpinDirection.COUNTER_CLOCKWISE);
 	}
 	
 	/**
@@ -102,12 +111,12 @@ public class SpinHelper {
 	 * @return Ring's rotation
 	 */
 	public double spinFormula(double effectiveTick) {
-//		Aunis.info("spin = "+((2 * anglePerTick * tick) - a2));
+//		Aunis.info("spinFormula("+effectiveTick+") = "+((2 * getAnglePerTick() * effectiveTick) - a2));
 //		Aunis.info("horRot: " + renderer.getHorizontalRotation());
 		
 //		Aunis.info("spinFormula-("+effectiveTick+")");
 		
-		return (2 * anglePerTick * effectiveTick) - a2;
+		return (2 * getAnglePerTick() * effectiveTick) - a2;
 	}
 	
 	/**
@@ -145,14 +154,15 @@ public class SpinHelper {
 			if (state.stopRequested) {
 				stopRequestedAction(effectiveTick);
 				
+				angle += spinDownFormula(effectiveTick) * state.direction.mul;
+				
 				if (effectiveTick >= (state.tickStopRequested + speedUpTimeTick)) {
 					state.stopRequested = false;
 					state.isSpinning = false;
 					
-					onStopReached();
+					onStopReached(angle);
 				}
-				
-				angle += spinDownFormula(effectiveTick);
+//				Aunis.info("Angle: " + angle);
 			}
 			
 			else {			
@@ -161,17 +171,20 @@ public class SpinHelper {
 				// If still below speed up time
 				// Do the square function
 				if (effectiveTick < speedUpTimeTick) {
-					angle += spinUpFormula(effectiveTick);
+					angle += spinUpFormula(effectiveTick) * state.direction.mul;
 				}
 				
 				else {
 					// Just add ring's rotation linearly
-					angle += spinFormula(effectiveTick);
+					angle += spinFormula(effectiveTick) * state.direction.mul;
 				}
 			}
 		}
 		
-		return angle;
+		if (angle < 0)
+			angle += 360;
+		
+		return angle % 360;
 	}
 	
 	/**
@@ -185,8 +198,10 @@ public class SpinHelper {
 	/**
 	 * Called when spin came to full stop
 	 * StargateRingSpinHelper puts it to use to clear flags
+	 * 
+	 * @param angle Ending angle
 	 */
-	protected void onStopReached() {}
+	protected void onStopReached(double angle) {}
 	
 	protected double getStopTickShift() {
 		return 0;
