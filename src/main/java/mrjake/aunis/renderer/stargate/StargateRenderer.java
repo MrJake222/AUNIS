@@ -6,15 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.input.Mouse;
-
-import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.renderer.ISpecialRenderer;
+import mrjake.aunis.renderer.stargate.Activation.ActivationState;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
@@ -56,7 +54,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			horizontalRotation = (int) facing.getHorizontalAngle();
 		
 		for (int i=0; i<9; i++)
-			chevronTextureList.add(textureTemplate + "0.png");
+			chevronTextureList.add(CHEVRON_TEXTURE_BASE + "0.png");
 		
 		// Load chevron textures
 		for (int i=0; i<=10; i++)
@@ -76,9 +74,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	}
 	
 	@Override
-	public void setState(StargateRendererState state) {
-		Aunis.info("setState: ringCurrentSymbol: " + state.ringCurrentSymbol);
-		
+	public void setState(StargateRendererState state) {		
 		this.state = state;
 		
 		ringAngularRotation = state.ringCurrentSymbol.angle;
@@ -189,16 +185,13 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			state.spinState.direction = stateRequest.direction;
 			state.spinState.targetSymbol = stateRequest.targetSymbol;
 			state.spinState.finalChevron = stateRequest.lock;
-			
-			Aunis.info("ringCurrentSymbol: " + state.ringCurrentSymbol + ", direction: " + state.spinState.direction);
-			
+						
 			getRingSpinHelper().requestStart(ringAngularRotation, state.spinState.direction);			
 		}
 		
 		else {
 			stopRingSounds();
 						
-			Aunis.info("requesting stop");
 			getRingSpinHelper().requestStop();
 		}
 	}
@@ -228,12 +221,10 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		
 		// Play lock sound
 		if (finalChevron) {
-			waitForFinalMoveStart += 20;
 			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronShut, 1f);
 		}
 		
 		else {
-			waitForFinalMoveStart += 15;
 			AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronLocking, 0.2f);
 		}
 		
@@ -261,28 +252,30 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				}
 				
 				ringAngularRotation = (float) (getRingSpinHelper().spin(partialTicks) % 360);
-				
-//				Aunis.info("position: " + state.ringAngularRotation + ", target: " + targetAngle + ", direction: " + direction + ", distance: " + direction.getDistance(state.ringAngularRotation, (float) targetAngle));
-				
-				if (state.spinState.targetSymbol != null && state.spinState.direction.getDistance(ringAngularRotation, (float) state.spinState.targetSymbol.angle) <= StargateRingSpinHelper.getStopAngleTraveled()) {
-//					Aunis.info("requested stop: " + ringAngularRotation + ", targetAngle: " + state.spinState.targetSymbol.angle);
-					
+								
+				if (state.spinState.targetSymbol != null && state.spinState.direction.getDistance(ringAngularRotation, (float) state.spinState.targetSymbol.angle) <= StargateRingSpinHelper.getStopAngleTraveled()) {					
 					state.spinState.targetSymbol = null;
 					
 					getRingSpinHelper().requestStopByComputer(state.spinState.finalChevron);
 				}
-				
-//				Aunis.info("state.ringAngularRotation: " + state.ringAngularRotation);
 			}
 			
-			if (waitForFinalMove && (world.getTotalWorldTime() - waitForFinalMoveStart) > 0) {
+			if (waitForFinalMove && (world.getTotalWorldTime() - waitForFinalMoveStart) > (finalChevronLocking ? 20 : 15)) {
 				waitForFinalMove = false;
 				
-				moveFinalChevron(true);
+				moveFinalChevron(waitForFinalMoveStart + (finalChevronLocking ? 20 : 15), true);
 				
-				activationStateChange = world.getTotalWorldTime();
-				dimChevron = false;
-				activation = 8;
+				activationList.add(new Activation(8, world.getTotalWorldTime()) {
+					@Override
+					protected void onActivated() {
+						if (finalChevronMoveComputer && !finalChevronNextChevronLitUp) {
+							finalChevronNextChevronLitUp = true;
+							
+							if (!finalChevronLocking)
+								activateNextChevron(false);
+						}
+					}
+				});
 			}
 			
 			GlStateManager.pushMatrix();
@@ -349,16 +342,11 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	}
 	
 	private List<String> chevronTextureList = new ArrayList<String>();
-	private static final String textureTemplate = "stargate/chevron/chevron";
+	private static final String CHEVRON_TEXTURE_BASE = "stargate/chevron/chevron";
 	
-	private int activation = -1;
-	private long activationStateChange = 0;
-	private boolean dimChevron;
+	private List<Activation> activationList = new ArrayList<>();
 	
 	private int activeChevrons = 0;
-	private boolean changingChevrons = false;
-	private boolean clearingChevrons;
-	private int chevronsToLightUp;
 	
 	private float finalChevronStart;
 	private boolean finalChevronMove;
@@ -367,11 +355,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	private boolean finalChevronNextChevronLitUp;
 	
 	public void activateFinalChevron(boolean setRingSpin) {
-		activationStateChange = world.getTotalWorldTime();
-		dimChevron = false;
-		
-		// chevronActiveList.set(8, true);
-		activation = 8;
+		activationList.add(new Activation(8, world.getTotalWorldTime()));
 		activeChevrons++;
 		
 		if (setRingSpin)
@@ -382,23 +366,15 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		activateFinalChevron(true);
 	}
 	
-	public void activateNextChevron(boolean setRingSpin) {
-		Aunis.info("activation: " + activation);
-		
-		if (activation == -1) {			
-			activationStateChange = world.getTotalWorldTime();
-			dimChevron = false;
-			
-			// chevronActiveList.set(activeChevrons, true);
-			activation = activeChevrons;
-						
-			if (activeChevrons == 0 && setRingSpin) {
-				setRingSpin( true, true );
-			}
-			
-			if (activeChevrons < 8)
-				activeChevrons++;
+	public void activateNextChevron(boolean setRingSpin) {		
+		activationList.add(new Activation(activeChevrons, world.getTotalWorldTime()));
+					
+		if (activeChevrons == 0 && setRingSpin) {
+			setRingSpin( true, true );
 		}
+		
+		if (activeChevrons < 8)
+			activeChevrons++;
 	}
 	
 	public void activateNextChevron() {
@@ -406,7 +382,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	}
 	
 	public void clearChevrons(Long stateChange) {
-		changeChevrons(true, stateChange);
+		changeChevrons(true, stateChange, activeChevrons, isLastChevronActive());
 	}
 	
 	public void clearChevrons() {
@@ -416,34 +392,41 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	public void lightUpChevrons(int chevronsToLightUp) {
 		AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronIncoming, 0.5f);
 		
-		this.chevronsToLightUp = chevronsToLightUp;
 		this.state.dialingComplete = true;
 		
-		changeChevrons(false, null);
+		changeChevrons(false, null, chevronsToLightUp, true);
 	}
 	
-	public void changeChevrons(boolean clear, Long stateChange) {	
-		changingChevrons = true;
-		
-		clearingChevrons = clear;
+	private void changeChevrons(boolean clear, Long stateChange, int chevronsToChange, boolean changeFinal) {			
+		long activationStateChange;
 		
 		if (stateChange != null)
 			activationStateChange = stateChange;
 		else
 			activationStateChange = world.getTotalWorldTime();
 		
-		if (clearingChevrons) {
+		if (clear) {
 			if (state.dialingComplete)
 				activationStateChange += 10;
 			else
 				activationStateChange += 40;
 		}
+
+		if (isLastChevronActive())
+			chevronsToChange--;
 		
-		activation = 0;
+		for (int i=0; i<chevronsToChange; i++) {
+			activationList.add(new Activation(i, activationStateChange, clear));
+		}
+		
+		if (changeFinal)
+			activationList.add(new Activation(8, activationStateChange, clear));
+		
+		activeChevrons = clear ? 0 : chevronsToChange;
 	}
 	
-	public void moveFinalChevron(boolean computer) {
-		finalChevronStart = 0;
+	public void moveFinalChevron(long finalChevronStart, boolean computer) {
+		this.finalChevronStart = finalChevronStart;
 		finalChevronMove = true;
 		
 		finalChevronMoveComputer = computer;
@@ -455,8 +438,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		}
 	}
 	
-	public void moveFinalChevron() {
-		moveFinalChevron(false);
+	public void moveFinalChevron(long finalChevronStart) {
+		moveFinalChevron(finalChevronStart, false);
 	}
 	
 	private void renderChevron(double x, double y, double z, int index, double partialTicks) {
@@ -479,8 +462,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			ModelLoader.bindTexture( chevronTextureList.get(index) );
 			
 			if (index == 8 && finalChevronMove) {
-				if (finalChevronStart == 0)
-					finalChevronStart = world.getTotalWorldTime();
+//				if (finalChevronStart == 0)
+//					finalChevronStart = world.getTotalWorldTime();
 				
 				float tick = (float) (world.getTotalWorldTime() - finalChevronStart + partialTicks);
 				float arg = tick / 6.0f;
@@ -499,11 +482,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 					if (finalChevronMoveComputer && !finalChevronShutSoundPlayed) {
 						finalChevronShutSoundPlayed = true;
 						
-						if (!finalChevronLocking) {
-							activationStateChange = world.getTotalWorldTime() + 3;
-							dimChevron = true;
-							activation = 8;
-						}
+						if (!finalChevronLocking)
+							activationList.add(new Activation(8, world.getTotalWorldTime() + 3, true));
 						
 						else
 							AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronShut, 1);
@@ -547,94 +527,19 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		for (int i=0; i<9; i++)
 			renderChevron(x, y, z, i, partialTicks);
 		
-		if (activation != -1) {
-			int stage = (int) (((world.getTotalWorldTime() - activationStateChange) + partialTicks) * 3);
-
-			if (stage < 0) return;
+		long ticks = world.getTotalWorldTime();
+		
+		for (int i=0; i<activationList.size();) {
+			Activation activation = activationList.get(i);
+			ActivationState activationState = activation.activate(ticks, partialTicks);
 			
-//			Aunis.info("activation: " + activation + ", stage: " + stage + ", changingChevrons: " + changingChevrons);
+			chevronTextureList.set(activation.getChevronIndex(), CHEVRON_TEXTURE_BASE + activationState.stage + ".png");
 			
-			if (stage < 11) {
-				if (changingChevrons) {
-					for (int i=0; i<9; i++) {
-						
-						if (clearingChevrons) {
-							if ( !chevronTextureList.get(i).contains("n0") ) {
-								chevronTextureList.set(i, textureTemplate+(10-stage)+".png");
-							}
-						}
-						
-						else {
-							if ( !chevronTextureList.get(i).contains("10") && (i < chevronsToLightUp-1 || i == 8) ) {
-								chevronTextureList.set(i, textureTemplate+stage+".png");
-							}
-						}
-					}
-				}
-				
-				else {					
-					int st = stage;
-					
-					if (dimChevron)
-						st = 10 - st;
-					
-					chevronTextureList.set(activation, textureTemplate+st+".png");
-				}
+			if (activationState.remove) {				
+				activationList.remove(activation);
 			}
-				
-			else {
-				if (changingChevrons) {
-					changingChevrons = false;
-					
-					if (clearingChevrons)
-						activeChevrons = 0;
-					else
-						activeChevrons = chevronsToLightUp;
-					
-					// This is needed because if the gate isn't rendered(player not looking at it)
-					// render code isn't running and gate can't perform any animation(not necessary in this case)
-					// So we need to check if chevron's states didn't change and perform correction
-					
-					if (clearingChevrons) {
-						String tex = textureTemplate+"0.png";
-
-						for (int i=0; i<9; i++) {
-//							BlockPos chevPos = MergeHelper.rotateAndGlobal(MergeHelper.chevronBlocks.get(0), facing, pos);
-//							StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(chevPos);
-//							
-//							memberTile.setLitUpClient(false);
-							
-							chevronTextureList.set(i, tex);
-						}
-					}
-					
-					else {
-						String tex = textureTemplate+"10.png";
-						
-						for (int i=0; i<chevronsToLightUp-1; i++)
-							chevronTextureList.set(i, tex);
-						
-						chevronTextureList.set(8, tex);
-					}
-				}
-				
-				else {
-					if (dimChevron)					
-						chevronTextureList.set(activation, textureTemplate+"0.png");
-					
-					else
-						chevronTextureList.set(activation, textureTemplate+"10.png");
-				}
-
-				activation = -1;
-				
-				if (finalChevronMoveComputer && !finalChevronNextChevronLitUp) {
-					finalChevronNextChevronLitUp = true;
-					
-					if (!finalChevronLocking)
-						activateNextChevron(false);
-				}
-			}
+			
+			else i++;
 		}
 	}
 	
@@ -654,7 +559,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		this.activeChevrons = activeChevrons;
 		
 		for (int i=0; i<9; i++) {	
-			String tex = textureTemplate;
+			String tex = CHEVRON_TEXTURE_BASE;
 			
 			if ( i < activeChevrons || (i == 8 && lastChevronActive) )
 				tex += "10.png";
@@ -1027,20 +932,15 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		if (tick > 100) {
 			resetFlashing();
 			
-			Aunis.info("setka!");
-
 			return false;
 		}
 		
 		tick -= nextFlashIn;
-		
-//		Aunis.info("tick: " + tick + "\t\tflashDuration2*4:  " + (flashDuration2 * 4));
-		
+				
 		if (tick > 0) {
 			if (!soundPlayed) {
 				soundPlayed = true;
 				
-				Aunis.info("sound");
 				AunisSoundHelper.playSound((WorldClient) world, pos.up(), AunisSoundHelper.wormholeFlicker, 0.5f);
 			}
 			
@@ -1051,7 +951,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			else {
 				resetFlashing();
 				
-				Aunis.info("nextFlashIn: " + nextFlashIn + ", flashDuration1: " + flashDuration1 + ", flashDuration2: " + flashDuration2);
+//				Aunis.info("nextFlashIn: " + nextFlashIn + ", flashDuration1: " + flashDuration1 + ", flashDuration2: " + flashDuration2);
 				
 				return false;
 			}

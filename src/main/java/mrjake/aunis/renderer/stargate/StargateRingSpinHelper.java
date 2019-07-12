@@ -63,7 +63,6 @@ public class StargateRingSpinHelper extends SpinHelper {
 		setSpeedUpTimeTick(25);
 		
 		super.requestStart(startingRotation, direction);
-		Aunis.info("startingRotation: " + startingRotation);
 	}
 	
 	public void requestStart(double startingRotation, EnumSpinDirection direction, EnumSymbol targetSymbol, boolean lock, boolean moveOnly) {
@@ -127,7 +126,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 										
 					// Play final chevron lock sound
 					if (renderer.getState().dialingComplete) {
-						renderer.moveFinalChevron();
+						renderer.moveFinalChevron((long) effectiveTick);
 						AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronLockDHD, 0.5f);
 					}
 				}

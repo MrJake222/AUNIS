@@ -11,7 +11,7 @@ public enum EnumSymbol {
 	CENTAURUS(2, "Centaurus", 4),
 	MONOCEROS(3, "Monoceros", 31),
 	ORIGIN(4, "Point of Origin", 0),
-	PEGASUS(5, "Pegasus", 19),
+	PEGASUS(5, "Pegasus", 18),
 	ANDROMEDA(6, "Andromeda", 21),
 	SERPENSCAPUT(7, "Serpens Caput", 6),
 	ARIES(8, "Aries", 23),
@@ -93,6 +93,9 @@ public enum EnumSymbol {
 	public static EnumSymbol fromAngle(double angle) {
 		double angleIndex = (360 - angle) / ANGLE_PER_GLYPH;
 		int index = (int) Math.round(angleIndex);
+		
+		if (index == 12)
+			index = 11;
 		
 		return fromAngleIndex(index);
 	}

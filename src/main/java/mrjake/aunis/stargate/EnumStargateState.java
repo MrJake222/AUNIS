@@ -4,7 +4,8 @@ public enum EnumStargateState {
 	IDLE(0),
 	COMPUTER_DIALING(1),
 	DHD_DIALING(2),
-	ENGAGED(3);
+	ENGAGED(3),
+	FAILING(4);
 	
 	public int id;
 	

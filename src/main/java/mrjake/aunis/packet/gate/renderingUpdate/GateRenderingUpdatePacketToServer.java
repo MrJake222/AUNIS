@@ -225,7 +225,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 					}
 					
 					if (dhdTile != null && gateTile != null) {	
-						if ((gateTile.getStargateState() != EnumStargateState.COMPUTER_DIALING)) {
+						if ((gateTile.getStargateState() != EnumStargateState.COMPUTER_DIALING && gateTile.getStargateState() != EnumStargateState.FAILING)) {
 							EnumSymbol symbol = EnumSymbol.valueOf(message.objectID);
 							
 							/*
@@ -305,7 +305,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 							}
 							
 							// Not BRB, some glyph pressed
-							else {
+							else {								
 								if ( gateTile.addSymbolToAddress(symbol, dhdTile, false) ) {
 									// We can still add glyphs(no limit reached)
 									int symbolCount = gateTile.getEnteredSymbolsCount();				
@@ -336,7 +336,18 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 						} // Not busy if
 						
 						else { 
-							player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.computer_dial")), true);
+							switch (gateTile.getStargateState()) {
+								case COMPUTER_DIALING:
+									player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.computer_dial")), true);
+									break;
+									
+//								case FAILING:
+//									player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.failing_dial")), true);
+//									break;
+									
+								default:
+									break;
+							}
 						}
 					} // gateTile and dhdTile not null if
 					

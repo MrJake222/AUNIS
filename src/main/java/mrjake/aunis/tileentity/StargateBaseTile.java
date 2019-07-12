@@ -330,12 +330,15 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 * @param stopRing - If using DHD, then true
 	 */
 	public void closeGate(boolean dialingFailed, boolean stopRing) {
-		if (!dialingFailed) {
-			waitForClose = world.getTotalWorldTime();
+		waitForClose = world.getTotalWorldTime();
 		
+		if (!dialingFailed) {		
 			isClosing = true;
 			isEngaged = false;
 			gateCloseTimeout = 5;
+			
+//			stargateState = EnumStargateState.CLOSING;
+			// TODO: Move all the logic of isClosing to StargateState
 			
 			getStargateRendererState().doEventHorizonRender = false;
 			getStargateRendererState().openingSoundPlayed = false;
@@ -348,6 +351,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			if (stopRing)
 				getServerRingSpinHelper().requestStop();
 			
+			stargateState = EnumStargateState.FAILING;
+			
 			OCHelper.sendSignalToReachable(node, null, "stargate_failed", new Object[] {});
 		}
 			
@@ -356,9 +361,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		getStargateRendererState().setActiveChevrons(world, pos, 0);
 		getStargateRendererState().setFinalActive(world, pos, false);
 		clearLinkedDHDButtons(dialingFailed);
-		
-		stargateState = EnumStargateState.IDLE;
-		
+				
 //		Aunis.info("Closing isInitiating:" + isInitiating);
 //		if (isInitiating && !dialingFailed) {
 //			
@@ -936,6 +939,11 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		if (isClosing) {
 			if (world.getTotalWorldTime()-waitForClose >= 56) 
 				disconnectGate();
+		}
+		
+		if (stargateState == EnumStargateState.FAILING) {
+			if (world.getTotalWorldTime()-waitForClose >= 50) // Length of failing sound in ticks
+				stargateState = EnumStargateState.IDLE;
 		}
 		
 		if (clearingButtons) {
