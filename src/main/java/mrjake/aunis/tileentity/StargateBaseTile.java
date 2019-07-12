@@ -33,6 +33,7 @@ import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPa
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
+import mrjake.aunis.packet.sound.PlayPositionedSoundToClient;
 import mrjake.aunis.packet.update.renderer.RendererUpdatePacketToClient;
 import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
 import mrjake.aunis.renderer.ISpecialRenderer;
@@ -43,6 +44,7 @@ import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.stargate.EnumGateState;
 import mrjake.aunis.stargate.EnumSpinDirection;
@@ -149,6 +151,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		// Ring starts to spin
 		if (dialedAddress.size() == 0 && !computer) {
 			getServerRingSpinHelper().requestStart(getStargateRendererState().ringCurrentSymbol.angle);
+			ringRollLoopPlayed = false;
 			
 			stargateState = EnumStargateState.DHD_DIALING;
 		}
@@ -331,6 +334,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 */
 	public void closeGate(boolean dialingFailed, boolean stopRing) {
 		waitForClose = world.getTotalWorldTime();
+//		ringRollLoopPlayed = false;
 		
 		if (!dialingFailed) {		
 			isClosing = true;
@@ -420,9 +424,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			
 			if (isEngaged()) {
 				GateRenderingUpdatePacketToServer.closeGatePacket(this, true);
-				AunisSoundHelper.playPositionedSound("wormhole", pos, false);
-				AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
-				AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
+//				AunisSoundHelper.playPositionedSound("wormhole", pos, false);
+//				AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
+//				AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
 			}
 		}
 		
@@ -543,6 +547,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		compound.setLong("waitForClose", waitForClose);
 		compound.setBoolean("clearingButtons", clearingButtons);
 		compound.setLong("waitForClear", waitForClear);
+		compound.setBoolean("ringRollLoopPlayed", ringRollLoopPlayed);
 				
 		compound.setInteger("playersPassed", playersPassed);
 		
@@ -611,6 +616,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		waitForClose = compound.getLong("waitForClose");
 		clearingButtons = compound.getBoolean("clearingButtons");
 		waitForClear = compound.getLong("waitForClear");
+		ringRollLoopPlayed = compound.getBoolean("ringRollLoopPlayed");
 				
 		playersPassed = compound.getInteger("playersPassed");
 		
@@ -701,6 +707,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		scheduledTeleportMap.remove(entityId);
 	}
 	
+	private boolean ringRollLoopPlayed = true;
+	
+	public void setRollPlayed() {
+		ringRollLoopPlayed = true;
+	}
+	
 	private boolean clearingButtons;
 	private long waitForClear;
 	private int clearDelay;
@@ -732,15 +744,6 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			
 			// Can't do this in onLoad(), because in that method, world isn't fully loaded
 			generateAddress();
-			
-//			updateMergeState(MergeHelper.checkBlocks(this));
-						
-//			IBlockState state = world.getBlockState(pos);
-//			
-//			world.markBlockRangeForRenderUpdate(pos, pos);
-//			world.notifyBlockUpdate(pos, state, state, 3);
-//			world.scheduleBlockUpdate(pos,this.getBlockType(),0,0);
-//			markDirty();
 			
 			if (!world.isRemote) {				
 				String[] namesArray = new String[gateAddress.size()];
@@ -953,6 +956,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				
 				clearingButtons = false;
 			}
+		}
+		
+		if (!ringRollLoopPlayed && (world.getTotalWorldTime() - getStargateRendererState().spinState.tickStart) > 98) {
+			ringRollLoopPlayed = true;
+			
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new PlayPositionedSoundToClient(pos, EnumAunisPositionedSound.RING_ROLL_LOOP), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
 		}
 		
 //		if (!world.isRemote) Aunis.info(this+ ", " + this.pos+": isSpinning: " + getStargateRendererState().spinState.isSpinning);
@@ -1231,6 +1240,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		stargateState = EnumStargateState.COMPUTER_DIALING;
 		getServerRingSpinHelper().requestStart(getStargateRendererState().ringCurrentSymbol.angle, spinDirection, symbol, lock, context, moveOnly);
+		ringRollLoopPlayed = false;
 		
 		OCHelper.sendSignalToReachable(node, context, "stargate_spin_start", new Object[] { symbolCount, lock, targetSymbol.name });
 		

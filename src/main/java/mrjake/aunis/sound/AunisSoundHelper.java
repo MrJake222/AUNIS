@@ -35,13 +35,13 @@ public class AunisSoundHelper {
 	public static ResourceLocation ringRollLoop;
 	public static ResourceLocation wormholeLoop;
 		
-	private static Map<String, AunisSound> aunisSounds = new HashMap<>();
+	private static Map<EnumAunisPositionedSound, AunisSound> aunisSounds = new HashMap<>();
 	private static List<AunisPositionedSound> aunisPositionedSounds = new ArrayList<>();
 	
-	public static void playPositionedSound(String soundName, BlockPos pos, boolean play) {
+	public static void playPositionedSound(EnumAunisPositionedSound enumSound, BlockPos pos, boolean play) {
 		// Mouse.setGrabbed(false);
 		
-		AunisSound sound = aunisSounds.get(soundName);
+		AunisSound sound = aunisSounds.get(enumSound);
 		
 		if (sound == null)
 			return;
@@ -88,9 +88,9 @@ public class AunisSoundHelper {
 		ringRollLoop = new ResourceLocation("aunis", "ring_roll_loop");
 		wormholeLoop = new ResourceLocation("aunis", "wormhole_loop");
 		
-		aunisSounds.put("ringRollStart", new AunisSound(AunisSoundHelper.ringRollStart, SoundCategory.AMBIENT, false));
-		aunisSounds.put("ringRollLoop", new AunisSound(AunisSoundHelper.ringRollLoop, SoundCategory.AMBIENT, true));
-		aunisSounds.put("wormhole", new AunisSound(AunisSoundHelper.wormholeLoop, SoundCategory.AMBIENT, true));
+		aunisSounds.put(EnumAunisPositionedSound.RING_ROLL_START, new AunisSound(AunisSoundHelper.ringRollStart, SoundCategory.AMBIENT, false));
+		aunisSounds.put(EnumAunisPositionedSound.RING_ROLL_LOOP, new AunisSound(AunisSoundHelper.ringRollLoop, SoundCategory.AMBIENT, true));
+		aunisSounds.put(EnumAunisPositionedSound.WORMHOLE, new AunisSound(AunisSoundHelper.wormholeLoop, SoundCategory.AMBIENT, true));
 	}
 	
 	public static void playSound(WorldClient world, BlockPos pos, SoundEvent soundEvent, float volume) {

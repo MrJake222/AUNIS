@@ -317,6 +317,8 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 									//if ( gateTile.getMaxSymbols() > symbolCount ) {
 									if ( (dhdTile.hasUpgrade() && symbolCount == 8) || (!dhdTile.hasUpgrade() && symbolCount == 7) || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN) ) {
 										AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.ACTIVATE_FINAL, gateTile), point );
+										
+										gateTile.setRollPlayed();
 									}
 									
 									else {

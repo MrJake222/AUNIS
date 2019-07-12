@@ -74,4 +74,9 @@ public class ProxyClient implements IProxy {
 	public EntityPlayer getPlayerInMessageHandler(MessageContext ctx) {
 		return Minecraft.getMinecraft().player;
 	}
+
+	@Override
+	public void addScheduledTask(MessageContext ctx, Runnable runnable) {
+		Minecraft.getMinecraft().addScheduledTask(runnable);
+	}
 }

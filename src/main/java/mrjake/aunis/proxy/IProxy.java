@@ -14,4 +14,6 @@ public interface IProxy {
 	public String localize(String unlocalized, Object... args);
 	
 	public EntityPlayer getPlayerInMessageHandler(MessageContext ctx);
+	
+	public void addScheduledTask(MessageContext ctx, Runnable runnable);
 }

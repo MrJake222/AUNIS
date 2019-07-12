@@ -16,6 +16,8 @@ import mrjake.aunis.packet.infuser.EnergyStoredToClient;
 import mrjake.aunis.packet.infuser.EnergyStoredToClient.EnergyStorageToClientHandler;
 import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient;
 import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient.ShouldRenderWavesToClientHandler;
+import mrjake.aunis.packet.sound.PlayPositionedSoundToClient;
+import mrjake.aunis.packet.sound.PlayPositionedSoundToClient.PlayPositionedSoundClientHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient.StateUpdateClientHandler;
 import mrjake.aunis.packet.state.StateUpdateRequestToServer;
@@ -63,6 +65,7 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(StartRingsAnimationToClientHandler.class, StartRingsAnimationToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(StartPlayerFadeOutToClientHandler.class, StartPlayerFadeOutToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(StateUpdateClientHandler.class, StateUpdatePacketToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(PlayPositionedSoundClientHandler.class, PlayPositionedSoundToClient.class, id, Side.CLIENT); id++;
 
 	}
 }

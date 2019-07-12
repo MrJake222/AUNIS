@@ -132,6 +132,11 @@ public class StargateRingSpinHelper extends SpinHelper {
 				}
 			}
 		}
+		
+		else {
+			StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+			gateTile.setRollPlayed();
+		}
 	}
 		
 	@Override

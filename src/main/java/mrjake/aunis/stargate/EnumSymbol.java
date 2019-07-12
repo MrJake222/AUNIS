@@ -97,6 +97,9 @@ public enum EnumSymbol {
 		if (index == 12)
 			index = 11;
 		
+		else if (index == 39)
+			index = 0;
+		
 		return fromAngleIndex(index);
 	}
 	

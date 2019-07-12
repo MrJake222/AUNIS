@@ -16,6 +16,7 @@ import mrjake.aunis.renderer.stargate.Activation.ActivationState;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.state.SpinStateRequest;
 import mrjake.aunis.tileentity.StargateBaseTile;
@@ -81,13 +82,13 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		
 		setActiveChevrons(state.getActiveChevrons(), state.isFinalActive());
 		
-		this.ringRollLoopPlayed = state.spinState.isSpinning;
+//		this.ringRollLoopPlayed = state.spinState.isSpinning;
 		ringSpinHelper = new StargateRingSpinHelper(world, pos, this, state.spinState);
 		
 		
-		AunisSoundHelper.playPositionedSound("wormhole", pos, state.doEventHorizonRender);
-		AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
-		AunisSoundHelper.playPositionedSound("ringRollLoop", pos, state.spinState.isSpinning);
+		AunisSoundHelper.playPositionedSound(EnumAunisPositionedSound.WORMHOLE, pos, state.doEventHorizonRender);
+		AunisSoundHelper.playPositionedSound(EnumAunisPositionedSound.RING_ROLL_START, pos, false);
+		AunisSoundHelper.playPositionedSound(EnumAunisPositionedSound.RING_ROLL_LOOP, pos, state.spinState.isSpinning);
 	}
 	
 	private int skyLight;
@@ -157,7 +158,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		}
 	}
 
-	private boolean ringRollLoopPlayed;
+//	private boolean ringRollLoopPlayed;
 	private StargateRingSpinHelper ringSpinHelper;
 	
 	private StargateRingSpinHelper getRingSpinHelper() {
@@ -179,8 +180,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		}
 		
 		if (spin) {
-			AunisSoundHelper.playPositionedSound("ringRollStart", pos, true);
-			ringRollLoopPlayed = false;
+			AunisSoundHelper.playPositionedSound(EnumAunisPositionedSound.RING_ROLL_START, pos, true);
+//			ringRollLoopPlayed = false;
 			
 			state.spinState.direction = stateRequest.direction;
 			state.spinState.targetSymbol = stateRequest.targetSymbol;
@@ -205,10 +206,10 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	}
 	
 	public void stopRingSounds() {
-		ringRollLoopPlayed = true;
+//		ringRollLoopPlayed = true;
 		
-		AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
-		AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
+		AunisSoundHelper.playPositionedSound(EnumAunisPositionedSound.RING_ROLL_START, pos, false);
+		AunisSoundHelper.playPositionedSound(EnumAunisPositionedSound.RING_ROLL_LOOP, pos, false);
 	}
 	
 	private boolean waitForFinalMove;
@@ -245,11 +246,11 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				// Play looped ring sound
 				// ringRollStart duration in 4.891s
 				// 4.891 * 20 = 98 ticks
-				if (!ringRollLoopPlayed && (world.getTotalWorldTime() - state.spinState.tickStart) > 98) {
-					ringRollLoopPlayed = true;
-										
-					AunisSoundHelper.playPositionedSound("ringRollLoop", pos, true);
-				}
+//				if (!ringRollLoopPlayed && (world.getTotalWorldTime() - state.spinState.tickStart) > 98) {
+//					ringRollLoopPlayed = true;
+//										
+//					AunisSoundHelper.playPositionedSound("ringRollLoop", pos, true);
+//				}
 				
 				ringAngularRotation = (float) (getRingSpinHelper().spin(partialTicks) % 360);
 								
@@ -602,7 +603,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	}
 	
 	public void closeGate() {
-		AunisSoundHelper.playPositionedSound("wormhole", pos, false);
+		AunisSoundHelper.playPositionedSound(EnumAunisPositionedSound.WORMHOLE, pos, false);
 		
 		AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.gateClose, 0.3f);
 		gateWaitClose = world.getTotalWorldTime();
@@ -644,7 +645,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	
 	private void engageGate() {
 		state.vortexState = EnumVortexState.STILL;
-		AunisSoundHelper.playPositionedSound("wormhole", pos, true);
+		AunisSoundHelper.playPositionedSound(EnumAunisPositionedSound.WORMHOLE, pos, true);
 	}
 	
 	public void unstableHorizon(boolean unstable) {

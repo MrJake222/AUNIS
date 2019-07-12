@@ -2,6 +2,7 @@ package mrjake.aunis.proxy;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -28,5 +29,10 @@ public class ProxyServer implements IProxy {
 	@Override
 	public EntityPlayer getPlayerInMessageHandler(MessageContext ctx) {
 		return ctx.getServerHandler().player;
+	}
+
+	@Override
+	public void addScheduledTask(MessageContext ctx, Runnable runnable) {
+		((WorldServer) getPlayerInMessageHandler(ctx).world).addScheduledTask(runnable);
 	}
 }
