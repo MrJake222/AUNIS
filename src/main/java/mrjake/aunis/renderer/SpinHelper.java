@@ -146,22 +146,25 @@ public class SpinHelper {
 		
 		double angle = this.state.startingRotation;
 		
-		if (state.isSpinning) {	
+		if (state.isSpinning) {
 			
 			// If user requested ring to stop
 			// Run decceleration function
 			if (state.stopRequested) {
 				stopRequestedAction(effectiveTick);
 				
-				angle += spinDownFormula(effectiveTick) * state.direction.mul;
-				
 				if (effectiveTick >= (state.tickStopRequested + speedUpTimeTick)) {
 					state.stopRequested = false;
 					state.isSpinning = false;
+										
+					angle += spinDownFormula(state.tickStopRequested + speedUpTimeTick) * state.direction.mul;
 					
 					onStopReached(angle);
 				}
-//				Aunis.info("Angle: " + angle);
+				
+				else {
+					angle += spinDownFormula(effectiveTick) * state.direction.mul;
+				}
 			}
 			
 			else {			

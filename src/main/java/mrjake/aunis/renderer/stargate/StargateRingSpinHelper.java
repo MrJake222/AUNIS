@@ -126,7 +126,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 					getStargateSpinState().lockSoundPlayed = true;
 										
 					// Play final chevron lock sound
-					if (renderer.state.dialingComplete) {
+					if (renderer.getState().dialingComplete) {
 						renderer.moveFinalChevron();
 						AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronLockDHD, 0.5f);
 					}
@@ -167,7 +167,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 		
 		// Client
 		else {
-			gateTile.getStargateRenderer().state.ringCurrentSymbol = symbol;
+			gateTile.getStargateRenderer().getState().ringCurrentSymbol = symbol;
 		}
 	}
 }

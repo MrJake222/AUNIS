@@ -69,10 +69,16 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		return horizontalRotation;
 	}
 	
-	StargateRendererState state = new StargateRendererState();
+	private StargateRendererState state = new StargateRendererState();
+	
+	public StargateRendererState getState() {
+		return state;
+	}
 	
 	@Override
 	public void setState(StargateRendererState state) {
+		Aunis.info("setState: ringCurrentSymbol: " + state.ringCurrentSymbol);
+		
 		this.state = state;
 		
 		ringAngularRotation = state.ringCurrentSymbol.angle;
@@ -186,7 +192,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			
 			Aunis.info("ringCurrentSymbol: " + state.ringCurrentSymbol + ", direction: " + state.spinState.direction);
 			
-			getRingSpinHelper().requestStart(state.ringCurrentSymbol.angle, state.spinState.direction);			
+			getRingSpinHelper().requestStart(ringAngularRotation, state.spinState.direction);			
 		}
 		
 		else {
@@ -376,9 +382,9 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		activateFinalChevron(true);
 	}
 	
-	public void activateNextChevron(boolean setRingSpin) { 
-		Mouse.setGrabbed(false);
-
+	public void activateNextChevron(boolean setRingSpin) {
+		Aunis.info("activation: " + activation);
+		
 		if (activation == -1) {			
 			activationStateChange = world.getTotalWorldTime();
 			dimChevron = false;
