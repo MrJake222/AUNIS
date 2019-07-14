@@ -4,11 +4,10 @@ import java.util.Iterator;
 
 import javax.vecmath.Vector2f;
 
-import org.lwjgl.util.vector.Matrix2f;
-
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.vector.Matrix2f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketEntityEffect;
