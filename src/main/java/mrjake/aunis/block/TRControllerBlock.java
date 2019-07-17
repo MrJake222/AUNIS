@@ -102,7 +102,10 @@ public class TRControllerBlock extends Block {
 		}
 		
 		else {
-			ControllerActivation.INSTANCE.onActivated(world, pos, player);
+			if (world.isRemote) {
+				if (hand == EnumHand.MAIN_HAND)
+					ControllerActivation.INSTANCE.onActivated(world, pos, player);
+			}
 		}
 		
 		return false;

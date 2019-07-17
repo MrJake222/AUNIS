@@ -3,7 +3,6 @@ package mrjake.aunis.packet.gate.teleportPlayer;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -35,8 +34,8 @@ public class RetrieveMotionToClient implements IMessage {
 		@Override
 		public IMessage onMessage(RetrieveMotionToClient message, MessageContext ctx) {
 			
-			Minecraft.getMinecraft().addScheduledTask(() -> {
-				EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
+			Aunis.proxy.addScheduledTaskClientSide(() -> {
+				EntityPlayer player = Aunis.proxy.getPlayerClientSide();
 								
 				AunisPacketHandler.INSTANCE.sendToServer( new MotionToServer(player.getEntityId(), message.gatePos, (float)player.motionX, (float)player.motionZ) );
 			});

@@ -27,13 +27,12 @@ import mrjake.aunis.gui.StargateGUI;
 import mrjake.aunis.integration.opencomputers.OCHelper;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
+import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtonsToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
-import mrjake.aunis.packet.sound.PlayPositionedSoundToClient;
 import mrjake.aunis.packet.update.renderer.RendererUpdatePacketToClient;
 import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
 import mrjake.aunis.renderer.ISpecialRenderer;
@@ -45,8 +44,10 @@ import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
+import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.stargate.EnumGateState;
+import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
@@ -61,6 +62,7 @@ import mrjake.aunis.state.SpinStateRequest;
 import mrjake.aunis.state.StargateGuiState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.tileentity.tasks.IScheduledTaskExecutor;
 import mrjake.aunis.upgrade.StargateUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
 import net.minecraft.block.state.IBlockState;
@@ -73,7 +75,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -90,7 +91,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
-public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider, ITileEntityStateProvider, Environment {
+public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider, ITileEntityStateProvider, IScheduledTaskExecutor, Environment {
 	public StargateBaseTile() {}
 	
 	private ISpecialRenderer<StargateRendererState> renderer;
@@ -104,12 +105,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	private boolean isEngaged;
 	private boolean isInitiating;
 	
-	private long waitForEngage;
-	private long waitForClose;
 	private boolean unstableVortex;
 	private boolean isClosing;
-	
-//	private int dialedChevrons;
+		
 	private int playersPassed;
 		
 	public List<EnumSymbol> gateAddress = null;
@@ -123,6 +121,11 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		return serverRingSpinHelper;
 	}
+	
+	/**
+	 * List of scheduled tasks to be performed on {@link ITickable#update()}.
+	 */
+	private List<ScheduledTask> scheduledTasks = new ArrayList<>();
 	
 	/**
 	 * Adds symbol to address. Called from GateRenderingUpdatePacketToServer. Handles all server-side consequences:
@@ -215,7 +218,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		unstableVortex = true;
 		playersPassed = 0;
-		waitForEngage = world.getTotalWorldTime();
+//		waitForEngage = world.getTotalWorldTime();
 		
 		if (isInitiating)
 			getStargateRendererState().setActiveChevrons(world, pos, dialedAddress.size() - 1);
@@ -226,8 +229,10 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		getStargateRendererState().doEventHorizonRender = true;
 		getStargateRendererState().vortexState = EnumVortexState.STILL;
-		getStargateRendererState().openingSoundPlayed = true;
 		getStargateRendererState().dialingComplete = true;
+		
+		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_OPEN_SOUND));
+		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ENGAGE));
 		
 		DHDTile dhdTile = getLinkedDHD(world);
 		if (dhdTile != null) {
@@ -309,12 +314,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		energyConsumed = 0;
 		
 		unstableVortex = false;
-		isEngaged = true;//			ringSpinStart = world.getTotalWorldTime();
-//		lastTick = -1;
-//		
-//		ringDecelerating = false;
-//		ringAccelerating = true;
-//		ringSpin = true;
+		isEngaged = true;
 		gateCloseTimeout = 5;
 		
 		if (fastDialer) {
@@ -332,20 +332,18 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 * @param dialingFailed - True if second case above
 	 * @param stopRing - If using DHD, then true
 	 */
-	public void closeGate(boolean dialingFailed, boolean stopRing) {
-		waitForClose = world.getTotalWorldTime();
-//		ringRollLoopPlayed = false;
-		
+	public void closeGate(boolean dialingFailed, boolean stopRing) {		
 		if (!dialingFailed) {		
 			isClosing = true;
 			isEngaged = false;
 			gateCloseTimeout = 5;
 			
+			addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CLOSE));
+			
 //			stargateState = EnumStargateState.CLOSING;
 			// TODO: Move all the logic of isClosing to StargateState
 			
 			getStargateRendererState().doEventHorizonRender = false;
-			getStargateRendererState().openingSoundPlayed = false;
 			getStargateRendererState().dialingComplete = false;
 			
 			OCHelper.sendSignalToReachable(node, null, "stargate_close", new Object[] {});
@@ -357,6 +355,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			
 			stargateState = EnumStargateState.FAILING;
 			
+			addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_FAIL));
+			
 			OCHelper.sendSignalToReachable(node, null, "stargate_failed", new Object[] {});
 		}
 			
@@ -365,13 +365,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		getStargateRendererState().setActiveChevrons(world, pos, 0);
 		getStargateRendererState().setFinalActive(world, pos, false);
 		clearLinkedDHDButtons(dialingFailed);
-				
-//		Aunis.info("Closing isInitiating:" + isInitiating);
-//		if (isInitiating && !dialingFailed) {
-//			
-//			
-//		}
-//		
+
 		markDirty();
 	}
 	
@@ -424,9 +418,6 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			
 			if (isEngaged()) {
 				GateRenderingUpdatePacketToServer.closeGatePacket(this, true);
-//				AunisSoundHelper.playPositionedSound("wormhole", pos, false);
-//				AunisSoundHelper.playPositionedSound("ringRollStart", pos, false);
-//				AunisSoundHelper.playPositionedSound("ringRollLoop", pos, false);
 			}
 		}
 		
@@ -542,9 +533,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		}
 		
 		compound.setBoolean("unstableVortex", unstableVortex);
-		compound.setLong("waitForEngage", waitForEngage);
 		compound.setBoolean("isClosing", isClosing);
-		compound.setLong("waitForClose", waitForClose);
 		compound.setBoolean("clearingButtons", clearingButtons);
 		compound.setLong("waitForClear", waitForClear);
 		compound.setBoolean("ringRollLoopPlayed", ringRollLoopPlayed);
@@ -577,6 +566,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		if (stargateState != null)
 			compound.setInteger("stargateState", stargateState.id);
+		
+		for (int i=0; i<scheduledTasks.size(); i++)
+			compound.setTag("scheduledTask"+i, scheduledTasks.get(i).serializeNBT());
 		
 		return super.writeToNBT(compound);
 	}
@@ -611,9 +603,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			dialedAddress.add( EnumSymbol.valueOf(compound.getInteger("dialedSymbol"+i)) );
 		}
 		
-		waitForEngage = compound.getLong("waitForEngage");
 		isClosing = compound.getBoolean("isClosing");
-		waitForClose = compound.getLong("waitForClose");
 		clearingButtons = compound.getBoolean("clearingButtons");
 		waitForClear = compound.getLong("waitForClear");
 		ringRollLoopPlayed = compound.getBoolean("ringRollLoopPlayed");
@@ -643,6 +633,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		spinDirection = EnumSpinDirection.valueOf(compound.getInteger("lastSpinDirection"));
 		stargateState = EnumStargateState.valueOf(compound.getInteger("stargateState"));
+		
+		for (int i=0; i<scheduledTasks.size(); i++)
+			scheduledTasks.add(new ScheduledTask(this, (NBTTagCompound) compound.getTag("scheduledTask"+i)));
 		
 		super.readFromNBT(compound);
 	}
@@ -681,7 +674,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		public void teleport(Entity entity) {
 			TeleportHelper.teleportEntity(entity, sourceGatePos, targetGatePos, rotation, motionVector);
 			
-				entity.getEntityWorld().playSound(null, targetGatePos.getPos(), AunisSoundHelper.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
+			AunisSoundHelper.playSoundEvent(targetGatePos.getWorld(), targetGatePos.getPos(), EnumAunisSoundEvent.WORMHOLE_GO, 1.0f);
 		}
 
 		public TeleportPacket setMotion(Vector2f motion) {
@@ -696,6 +689,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	public void teleportEntity(int entityId) {
 		Entity entity = world.getEntityByID(entityId);
 		scheduledTeleportMap.get(entityId).teleport(entity);
+		
+		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.WORMHOLE_GO, 1.0f);
 		
 		if (entity instanceof EntityPlayerMP)
 			entityPassing();
@@ -713,6 +708,10 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		ringRollLoopPlayed = true;
 	}
 	
+	public boolean getRollPlayed() {
+		return ringRollLoopPlayed;
+	}
+		
 	private boolean clearingButtons;
 	private long waitForClear;
 	private int clearDelay;
@@ -740,7 +739,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			// Client loaded region, need to update
 			// Send rendererState to client's renderer
 			if (world.isRemote)
-				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerInMessageHandler(null)) );
+				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide()) );
 			
 			// Can't do this in onLoad(), because in that method, world isn't fully loaded
 			generateAddress();
@@ -934,51 +933,43 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			}
 		}
 		
-		if (unstableVortex) {
-			if (world.getTotalWorldTime()-waitForEngage >= 86 && !isClosing)
-				engageGate();
-		}
-		
-		if (isClosing) {
-			if (world.getTotalWorldTime()-waitForClose >= 56) 
-				disconnectGate();
-		}
-		
-		if (stargateState == EnumStargateState.FAILING) {
-			if (world.getTotalWorldTime()-waitForClose >= 50) // Length of failing sound in ticks
-				stargateState = EnumStargateState.IDLE;
-		}
-		
-		if (clearingButtons) {
-			if (world.getTotalWorldTime()-waitForClear >= clearDelay) { 				
-				if (linkedDHD != null)
-					AunisPacketHandler.INSTANCE.sendToAllTracking(new ClearLinkedDHDButtons(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+		if (!world.isRemote) {
+			if (clearingButtons) {
+				if (world.getTotalWorldTime()-waitForClear >= clearDelay) { 				
+					if (linkedDHD != null)
+						AunisPacketHandler.INSTANCE.sendToAllTracking(new ClearLinkedDHDButtonsToClient(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+					
+					clearingButtons = false;
+				}
+			}
+			
+			if (!ringRollLoopPlayed && (world.getTotalWorldTime() - getStargateRendererState().spinState.tickStart) > 98) {
+				ringRollLoopPlayed = true;
 				
-				clearingButtons = false;
+				AunisSoundHelper.playPositionedSound(world,  pos, EnumAunisPositionedSound.RING_ROLL_LOOP, true);
+			}
+			
+			for (int i=0; i<scheduledTasks.size();) {			
+				ScheduledTask scheduledTask = scheduledTasks.get(i);
+				
+				if (scheduledTask.isActive()) {								
+					if (scheduledTask.update(world.getTotalWorldTime()))
+						scheduledTasks.remove(scheduledTask);
+					
+					else i++;
+				}
+				
+				else i++;
 			}
 		}
-		
-		if (!ringRollLoopPlayed && (world.getTotalWorldTime() - getStargateRendererState().spinState.tickStart) > 98) {
-			ringRollLoopPlayed = true;
-			
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new PlayPositionedSoundToClient(pos, EnumAunisPositionedSound.RING_ROLL_LOOP), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
-		}
-		
-//		if (!world.isRemote) Aunis.info(this+ ", " + this.pos+": isSpinning: " + getStargateRendererState().spinState.isSpinning);
-		
-		// Set ring rotation
-		// This will be synced to clients
 		if (!world.isRemote && getStargateRendererState().spinState.isSpinning) {
 			float ringAngularRotation = (float) (getServerRingSpinHelper().spin(0) % 360);
-			
-//			Aunis.info(this+": position: " + getStargateRendererState().ringAngularRotation + ", stopAngle: " + stopAngle);
-			
+						
 			if (targetSymbolDialing) {				
 				if (spinDirection.getDistance(ringAngularRotation, (float) this.targetSymbol.angle) <= StargateRingSpinHelper.getStopAngleTraveled()) {
-					getServerRingSpinHelper().requestStopByComputer(false);
+					getServerRingSpinHelper().requestStopByComputer(world.getTotalWorldTime(), false);
 				
 					targetSymbolDialing = false;
-					markDirty();
 				}
 			}
 			
@@ -1150,8 +1141,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				SpinStateRequest spinStateRequest = (SpinStateRequest) state;
 				
 				if (spinStateRequest.moveOnly)
-					getStargateRenderer().requestFinalMove(spinStateRequest.lock);
-				
+					getStargateRenderer().requestFinalMove(world.getTotalWorldTime(), spinStateRequest.lock);
 				else
 					getStargateRenderer().setRingSpin(true, true, spinStateRequest);
 				
@@ -1162,10 +1152,54 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		}
 	}
 	
+	// -----------------------------------------------------------------
+	// Scheduled tasks
+	@Override
+	public void executeTask(EnumScheduledTask scheduledTask) {
+		switch (scheduledTask) {
+			case STARGATE_OPEN_SOUND:
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_OPEN, 0.3f);
+				break;
+				
+			case STARGATE_CLOSE:
+				disconnectGate();
+				break;
+				
+			case STARGATE_ENGAGE:
+				engageGate();
+				break;
+				
+			case STARGATE_FAIL:
+				stargateState = EnumStargateState.IDLE;
+				markDirty();
+				break;
+				
+			case STARGATE_CHEVRON_SHUT_SOUND:
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_SHUT, 1.0f);
+				break;
+				
+			case STARGATE_CHEVRON_OPEN_SOUND:
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_OPEN, 1.0f);
+				break;
+				
+			case STARGATE_CHEVRON_LOCK_DHD_SOUND:
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_LOCK_DHD, 0.5f);
+				break;
+				
+			default:
+				throw new UnsupportedOperationException("EnumScheduledTask."+scheduledTask.name()+" not implemented on "+this.getClass().getName());
+		}
+	}
+	
+	public void addTask(ScheduledTask scheduledTask) {
+		scheduledTasks.add(scheduledTask);
+		
+		markDirty();
+	}
 	
 	// -----------------------------------------------------------------
 	// OpenComputers	
-	private EnumSymbol targetSymbol = null;
+	private EnumSymbol targetSymbol = EnumSymbol.ORIGIN;
 	private boolean targetSymbolDialing = false;
 	private EnumSpinDirection spinDirection = EnumSpinDirection.COUNTER_CLOCKWISE;
 	private EnumStargateState stargateState = EnumStargateState.IDLE;
@@ -1216,9 +1250,6 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			throw new IllegalArgumentException("bad argument #1 (symbol name invalid)");
 		
 		boolean moveOnly = symbol == targetSymbol;
-//		if (symbol == targetSymbol) {
-//			return new Object[] {null, "stargate_failure_locked", "Stargate is locked onto this symbol already"};
-//		}
 		
 		if (dialedAddress.contains(symbol)) {
 			return new Object[] {null, "stargate_failure_contains", "Dialed address contains this symbol already"};
@@ -1230,7 +1261,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		spinDirection = spinDirection.opposite();
 		
 		double distance = spinDirection.getDistance(getStargateRendererState().ringCurrentSymbol.angle, symbol.angle);
-		Aunis.info("position: " + getStargateRendererState().ringCurrentSymbol.angle + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance);
+		Aunis.info("position: " + getStargateRendererState().ringCurrentSymbol.angle + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance + ", moveOnly: " + moveOnly);
 		
 		if (distance < (StargateRingSpinHelper.getStopAngleTraveled() + 5))
 			spinDirection = spinDirection.opposite();
@@ -1238,9 +1269,21 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		int symbolCount = getEnteredSymbolsCount() + 1;
 		boolean lock = symbolCount == 8 || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN);
 		
+		if (moveOnly) {
+			if (lock) {
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_SHUT, 1f);
+				
+				addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_SHUT_SOUND));
+				addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_OPEN_SOUND));
+			}
+			
+			else
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_LOCKING, 0.2f);
+		}
+		
 		stargateState = EnumStargateState.COMPUTER_DIALING;
 		getServerRingSpinHelper().requestStart(getStargateRendererState().ringCurrentSymbol.angle, spinDirection, symbol, lock, context, moveOnly);
-		ringRollLoopPlayed = false;
+		ringRollLoopPlayed = false || moveOnly;
 		
 		OCHelper.sendSignalToReachable(node, context, "stargate_spin_start", new Object[] { symbolCount, lock, targetSymbol.name });
 		
@@ -1286,26 +1329,15 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 
 	@Optional.Method(modid = "opencomputers")
 	@Override
-	public void onConnect(Node node) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void onConnect(Node node) {}
 
 	@Optional.Method(modid = "opencomputers")
 	@Override
-	public void onDisconnect(Node node) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void onDisconnect(Node node) {}
 
 	@Optional.Method(modid = "opencomputers")
 	@Override
-	public void onMessage(Message message) {
-//		Aunis.info("onMessage '" + message.name());
-//		
-//		for (Object obj : message.data())
-//			Aunis.info("\t" + obj.toString());		
-	}
+	public void onMessage(Message message) {}
 	
 	@Optional.Method(modid = "opencomputers")
 	@Override
@@ -1369,9 +1401,6 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
 		return new AxisAlignedBB(getPos().add(-7, 0, -7), getPos().add(7, 12, 7));
-//		Aunis.info("getRenderBoundingBox");
-		
-//		return INFINITE_EXTENT_AABB;
 	}
 		
 	@Override

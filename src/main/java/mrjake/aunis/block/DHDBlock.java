@@ -87,8 +87,8 @@ public class DHDBlock extends Block {
 	}
 	
 	/*
-	 * Maybe not-so-late-future TODO:
-	 * Rewrite upgrade system using GUIs not some stupid lazy-ass sides ;)
+	 * Maybe not-so-late-future:
+	 * TODO Rewrite upgrade system using GUIs not some stupid lazy-ass sides ;)
 	 */
 	@Override
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {

@@ -14,11 +14,13 @@ public class PlayPositionedSoundToClient extends PositionedPacket {
 	public PlayPositionedSoundToClient() {}
 	
 	public EnumAunisPositionedSound soundEnum;
+	public boolean play;
 	
-	public PlayPositionedSoundToClient(BlockPos pos, EnumAunisPositionedSound soundEnum) {
+	public PlayPositionedSoundToClient(BlockPos pos, EnumAunisPositionedSound soundEnum, boolean play) {
 		super(pos);
 		
 		this.soundEnum = soundEnum;
+		this.play = play;
 	}
 	
 	@Override
@@ -26,6 +28,7 @@ public class PlayPositionedSoundToClient extends PositionedPacket {
 		super.toBytes(buf);
 		
 		buf.writeInt(soundEnum.id);
+		buf.writeBoolean(play);
 	}
 	
 	@Override
@@ -33,6 +36,7 @@ public class PlayPositionedSoundToClient extends PositionedPacket {
 		super.fromBytes(buf);
 		
 		soundEnum = EnumAunisPositionedSound.valueOf(buf.readInt());
+		play = buf.readBoolean();
 	}
 	
 	
@@ -40,9 +44,8 @@ public class PlayPositionedSoundToClient extends PositionedPacket {
 
 		@Override
 		public IMessage onMessage(PlayPositionedSoundToClient message, MessageContext ctx) {
-			Aunis.proxy.addScheduledTask(ctx, () -> {
-				AunisSoundHelper.playPositionedSound(message.soundEnum, message.pos, true);
-				Aunis.info("playing sound: " + message.soundEnum + " at pos: " + message.pos);
+			Aunis.proxy.addScheduledTaskClientSide(() -> {
+				AunisSoundHelper.playPositionedSoundClientSide(message.soundEnum, message.pos, message.play);
 			});
 			
 			return null;

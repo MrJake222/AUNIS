@@ -10,7 +10,6 @@ import mrjake.aunis.renderer.stargate.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -80,10 +79,10 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 		
 		@Override
 		public IMessage onMessage(GateRenderingUpdatePacketToClient message, MessageContext ctx) {	
-			EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
+			EntityPlayer player = Aunis.proxy.getPlayerClientSide();
 			World world = player.getEntityWorld();
 						
-			Minecraft.getMinecraft().addScheduledTask(() -> {
+			Aunis.proxy.addScheduledTaskClientSide(() -> {
 				TileEntity te = world.getTileEntity( message.pos );
 				StargateBaseTile gateTile = null;
 				DHDTile dhdTile = null;

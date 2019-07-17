@@ -32,7 +32,6 @@ public class StargateUpgradeRenderer extends UpgradeRenderer{
 
 	@Override
 	protected boolean insertDoneCondition() {
-		// TODO Auto-generated method stub
 		return mul < 0.7f;
 	}
 	

@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
@@ -46,8 +47,8 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 			firstTick = false;
 			
 			if (world.isRemote) {				
-				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, EnumStateType.CAMO_STATE));
-				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, EnumStateType.LIGHT_STATE));
+				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), EnumStateType.CAMO_STATE));
+				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), EnumStateType.LIGHT_STATE));
 			}
 		}
 		

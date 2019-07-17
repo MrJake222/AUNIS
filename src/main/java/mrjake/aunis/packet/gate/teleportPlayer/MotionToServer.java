@@ -6,11 +6,9 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.packet.PositionedPacket;
-import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -72,7 +70,6 @@ public class MotionToServer extends PositionedPacket {
 					if (TeleportHelper.frontSide(sourceFacing, motionVector)) {
 						gateTile.scheduledTeleportMap.put(message.entityId, gateTile.scheduledTeleportMap.get(message.entityId).setMotion(motionVector));
 						
-						world.playSound(null, message.pos, AunisSoundHelper.wormholeGo, SoundCategory.BLOCKS, 1.0f, 1.0f);
 						gateTile.teleportEntity(message.entityId);
 					}
 					

@@ -28,7 +28,6 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class ProxyClient implements IProxy {
 	public void preInit(FMLPreInitializationEvent event) {
@@ -71,12 +70,12 @@ public class ProxyClient implements IProxy {
 	}
 
 	@Override
-	public EntityPlayer getPlayerInMessageHandler(MessageContext ctx) {
+	public EntityPlayer getPlayerClientSide() {
 		return Minecraft.getMinecraft().player;
 	}
 
 	@Override
-	public void addScheduledTask(MessageContext ctx, Runnable runnable) {
+	public void addScheduledTaskClientSide(Runnable runnable) {
 		Minecraft.getMinecraft().addScheduledTask(runnable);
 	}
 }

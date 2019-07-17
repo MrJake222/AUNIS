@@ -20,6 +20,8 @@ import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.TransportRingsRendererState;
 import mrjake.aunis.renderer.transportrings.TransportRingsRenderer;
+import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.state.ITileEntityStateProvider;
 import mrjake.aunis.state.State;
@@ -74,7 +76,7 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 			firstTick = false;
 			
 			if (world.isRemote) {
-				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerInMessageHandler(null)));
+				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide()));
 			}
 		}
 		
@@ -182,6 +184,9 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 				
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 		AunisPacketHandler.INSTANCE.sendToAllTracking(new StartRingsAnimationToClient(pos, getTransportRingsRendererState().animationStart), point);
+		
+		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
+		AunisSoundHelper.playSoundEvent(world, targetRingsPos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
 	}
 
 	/**

@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.UpgradeRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -40,11 +39,10 @@ public class UpgradeSlotInteractToClient implements IMessage {
 
 		@Override
 		public IMessage onMessage(UpgradeSlotInteractToClient message, MessageContext ctx) {
+			EntityPlayer player = Aunis.proxy.getPlayerClientSide();
+			World world = player.getEntityWorld();	
 						
-			Minecraft.getMinecraft().addScheduledTask(() -> {
-				EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
-				World world = player.getEntityWorld();
-				
+			Aunis.proxy.addScheduledTaskClientSide(() -> {
 				ITileEntityUpgradeable upgradeable = (ITileEntityUpgradeable) world.getTileEntity(message.pos);
 				UpgradeRenderer renderer = upgradeable.getUpgradeRenderer();
 								

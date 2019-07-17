@@ -6,7 +6,6 @@ import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.state.ITileEntityStateProvider;
 import mrjake.aunis.state.State;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -50,10 +49,10 @@ public class StateUpdatePacketToClient extends PositionedPacket {
 
 		@Override
 		public IMessage onMessage(StateUpdatePacketToClient message, MessageContext ctx) {			
-			EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
+			EntityPlayer player = Aunis.proxy.getPlayerClientSide();
 			World world = player.getEntityWorld();
 			
-			Minecraft.getMinecraft().addScheduledTask(() -> {
+			Aunis.proxy.addScheduledTaskClientSide(() -> {
 								
 				ITileEntityStateProvider te = (ITileEntityStateProvider) world.getTileEntity(message.pos);
 				

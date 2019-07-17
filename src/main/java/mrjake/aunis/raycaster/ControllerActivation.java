@@ -10,11 +10,9 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.transportrings.TRControllerActivatedToServer;
 import mrjake.aunis.raycaster.util.Ray;
 import mrjake.aunis.renderer.transportrings.TRControllerRenderer;
-import mrjake.aunis.sound.AunisSoundHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -77,8 +75,6 @@ public class ControllerActivation extends Activation {
 		num += (x == 1 ? 1 : 0);
 				
 		player.swingArm(EnumHand.MAIN_HAND);
-		world.playSound(player, pos, AunisSoundHelper.ringsControllerButton, SoundCategory.AMBIENT, 0.5f, 1.0f);
-		
 		AunisPacketHandler.INSTANCE.sendToServer(new TRControllerActivatedToServer(pos, num));
 	}
 	

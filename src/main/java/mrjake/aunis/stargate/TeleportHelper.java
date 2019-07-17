@@ -140,7 +140,7 @@ public class TeleportHelper {
 		World world = entity.getEntityWorld();
 		int sourceDim = world.provider.getDimension();
 		
-		// Cross dimension entity teleport not supported YET, possibly TODO
+		// TODO Cross dimension entity teleport not supported YET
 //		if (sourceDim != targetGatePos.getDimension() && !(entity instanceof EntityPlayerMP))
 //			return;
 		

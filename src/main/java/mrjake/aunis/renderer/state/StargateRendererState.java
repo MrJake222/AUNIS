@@ -62,7 +62,7 @@ public class StargateRendererState extends RendererState {
 	// Gate
 	public boolean doEventHorizonRender = false;
 	public EnumVortexState vortexState = EnumVortexState.FORMING;
-	public boolean openingSoundPlayed = false;
+//	public boolean openingSoundPlayed = false;
 	public boolean dialingComplete = false;
 	
 	/**
@@ -88,7 +88,6 @@ public class StargateRendererState extends RendererState {
 		
 		buf.writeBoolean(doEventHorizonRender);
 		buf.writeInt(vortexState.index);
-		buf.writeBoolean(openingSoundPlayed);
 		buf.writeBoolean(dialingComplete);
 		buf.writeBoolean(horizonUnstable);
 	}
@@ -107,7 +106,6 @@ public class StargateRendererState extends RendererState {
 		
 		doEventHorizonRender = buf.readBoolean();
 		vortexState = EnumVortexState.valueOf( buf.readInt() );
-		openingSoundPlayed = buf.readBoolean();
 		dialingComplete = buf.readBoolean();
 		horizonUnstable = buf.readBoolean();
 		

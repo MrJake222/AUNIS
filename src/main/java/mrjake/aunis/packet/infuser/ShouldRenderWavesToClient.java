@@ -5,7 +5,6 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.renderer.crystalinfuser.CrystalInfuserRenderer;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -43,11 +42,10 @@ public class ShouldRenderWavesToClient extends PositionedPacket {
 		
 		@Override
 		public IMessage onMessage(ShouldRenderWavesToClient message, MessageContext ctx) {
-			
-			Minecraft.getMinecraft().addScheduledTask(() -> {
-				EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
-				World world = player.getEntityWorld();
-
+			EntityPlayer player = Aunis.proxy.getPlayerClientSide();
+			World world = player.getEntityWorld();
+				
+			Aunis.proxy.addScheduledTaskClientSide(() -> {
 				CrystalInfuserTile infuserTile = (CrystalInfuserTile) world.getTileEntity(message.pos);
 				CrystalInfuserRenderer infuserRenderer = (CrystalInfuserRenderer) infuserTile.getRenderer();
 				

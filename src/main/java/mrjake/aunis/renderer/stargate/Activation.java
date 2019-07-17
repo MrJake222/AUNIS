@@ -1,8 +1,5 @@
 package mrjake.aunis.renderer.stargate;
 
-import org.lwjgl.input.Mouse;
-
-import mrjake.aunis.Aunis;
 import net.minecraft.world.World;
 
 /**
@@ -43,6 +40,11 @@ public class Activation {
 	private ActivationState state;
 	
 	/**
+	 * Is this {@link Activation} actively called from the render loop?
+	 */
+	private boolean active;
+	
+	/**
 	 * Main constructor
 	 * 
 	 * @param chevronIndex Chevron index on the chevronTextureList.
@@ -55,9 +57,7 @@ public class Activation {
 		this.dimChevron = dimChevron;
 		
 		state = new ActivationState(dimChevron ? 10 : 0);
-		
-//		Mouse.setGrabbed(false);
-		Aunis.info("Creating new Activation("+chevronIndex+", "+stateChange+", "+dimChevron+")");
+		active = true;
 	}
 	
 	/**
@@ -71,6 +71,39 @@ public class Activation {
 	}
 	
 	/**
+	 * Mark this {@link Activation} inactive.
+	 * Prevents {@link Activation#activate(long, double)} from being called in the render loop.
+	 * 
+	 * @return This instance.
+	 */
+	public Activation inactive() {
+		this.active = false;
+		
+		return this;
+	}
+	
+	/**
+	 * Mark this {@link Activation} active.
+	 * @see Activation#inactive().
+	 * 
+	 * @return This instance.
+	 */
+	public Activation active() {
+		this.active = true;
+		
+		return this;
+	}
+	
+	/**
+	 * Getter for active
+	 * 
+	 * @return active state.
+	 */
+	public boolean isActive() {
+		return active;
+	}
+	
+	/**
 	 * Main calculations function. Call this in render loop.
 	 * 
 	 * @param worldTicks Usually {@link World#getTotalWorldTime()}.
@@ -80,17 +113,13 @@ public class Activation {
 	 */
 	public ActivationState activate(long worldTicks, double partialTicks) {
 		int stage = (int) ((worldTicks - stateChange + partialTicks) * 3);
-
-//		if (stage < 0) return new ActivationState(dimChevron ? 10 : 0);
 				
 		if (stage >= 0) {
 			
 			if (stage <= 10) {			
 				if (dimChevron)
 					stage = 10 - stage;
-				
-//				if (chevronIndex == 0) Aunis.info("stage: " + stage + ", dim: " + dimChevron);
-				
+								
 				state.stage = stage;
 			}
 				
@@ -99,8 +128,6 @@ public class Activation {
 				
 				state.stage = (dimChevron ? 0 : 10);
 				state.remove = true;
-				
-				Aunis.info("Removing Activation("+chevronIndex+", "+stateChange+", "+dimChevron+")");
 			}
 		}
 		

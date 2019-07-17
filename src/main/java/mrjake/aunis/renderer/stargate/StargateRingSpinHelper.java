@@ -7,16 +7,20 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.gate.renderingUpdate.RequestStopToClient;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.renderer.SpinHelper;
 import mrjake.aunis.renderer.state.StargateSpinState;
 import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.EnumAunisPositionedSound;
+import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.state.SpinStateRequest;
+import mrjake.aunis.tileentity.ScheduledTask;
 import mrjake.aunis.tileentity.StargateBaseTile;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
@@ -29,9 +33,8 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 public class StargateRingSpinHelper extends SpinHelper {
 	
 	private static final double ANGLE_PER_TICK = 1.0;
-	private static final int STOP_TIME_TICK = 35;
+	public static final int STOP_TIME_TICK = 35;
 
-	
 	private BlockPos pos;
 	private StargateRenderer renderer;
 	private TargetPoint targetPoint;
@@ -61,22 +64,26 @@ public class StargateRingSpinHelper extends SpinHelper {
 	@Override
 	public void requestStart(double startingRotation, EnumSpinDirection direction) {
 		setSpeedUpTimeTick(25);
-		
+		Aunis.info("requestStart isSpinning: " + state.isSpinning + ", startingRotation: " + startingRotation + ", state.startingRotation: " + state.startingRotation);
+
 		super.requestStart(startingRotation, direction);
 	}
 	
 	public void requestStart(double startingRotation, EnumSpinDirection direction, EnumSymbol targetSymbol, boolean lock, boolean moveOnly) {
 		getStargateSpinState().targetSymbol = targetSymbol;
+		getStargateSpinState().finalChevron = lock;
 		
 		if (moveOnly) {
-			getStargateSpinState().computerInitializedStop = true;
+//			getStargateSpinState().computerInitializedStop = true;
+			requestStopByComputer(world.getTotalWorldTime(), true);
 			onStopReached(targetSymbol.angle);
 		}
 		
 		else
 			this.requestStart(startingRotation, direction);
 		
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.SPIN_STATE, new SpinStateRequest(direction, targetSymbol, lock, moveOnly)), this.targetPoint);
+		if (!world.isRemote)
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.SPIN_STATE, new SpinStateRequest(direction, targetSymbol, lock, moveOnly)), this.targetPoint);
 	}
 	
 	public void requestStart(double startingRotation, EnumSpinDirection direction, EnumSymbol targetSymbol, boolean lock, Context context, boolean moveOnly) {
@@ -86,18 +93,35 @@ public class StargateRingSpinHelper extends SpinHelper {
 	}
 		
 	@Override
-	public void requestStop() {
+	public void requestStop(long worldTicks) {
 		setSpeedUpTimeTick(STOP_TIME_TICK);		
 		getStargateSpinState().computerInitializedStop = false;
 		
-		super.requestStop();
+		super.requestStop(worldTicks);
 	}
 	
-	public void requestStopByComputer(boolean finalChevron) {
-		requestStop();
+	public void requestStopByComputer(long worldTicks, boolean moveOnly) {
+		if (!moveOnly)
+			requestStop(worldTicks);
 		
 		getStargateSpinState().computerInitializedStop = true;
-		getStargateSpinState().finalChevron = finalChevron;
+		
+		if (!world.isRemote) {			
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new RequestStopToClient(pos, worldTicks, moveOnly), this.targetPoint);
+		}
+		
+		else {
+			StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+
+			long time;
+			
+			if (moveOnly)
+				time = world.getTotalWorldTime();
+			else
+				time = state.tickStart + state.tickStopRequested + speedUpTimeTick - 5;
+			
+			gateTile.getStargateRenderer().addComputerActivation(time, getStargateSpinState().finalChevron);
+		}			
 	}
 	
 	public static double getStopAngleTraveled() {
@@ -116,7 +140,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 				if (!getStargateSpinState().lockSoundPlayed && (effectiveTick >= (state.tickStopRequested + speedUpTimeTick - 5))) {
 					getStargateSpinState().lockSoundPlayed = true;
 					
-					renderer.requestFinalMove(getStargateSpinState().finalChevron);
+					renderer.requestFinalMove(state.tickStart + state.tickStopRequested + speedUpTimeTick - 5, getStargateSpinState().finalChevron);
 				}
 			}
 				
@@ -125,9 +149,8 @@ public class StargateRingSpinHelper extends SpinHelper {
 					getStargateSpinState().lockSoundPlayed = true;
 										
 					// Play final chevron lock sound
-					if (renderer.getState().dialingComplete) {
-						renderer.moveFinalChevron((long) effectiveTick);
-						AunisSoundHelper.playSound((WorldClient) world, pos, AunisSoundHelper.chevronLockDHD, 0.5f);
+					if (renderer.getState().dialingComplete) {						
+						renderer.moveFinalChevron(state.tickStart + state.tickStopRequested + 15);
 					}
 				}
 			}
@@ -135,7 +158,29 @@ public class StargateRingSpinHelper extends SpinHelper {
 		
 		else {
 			StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
-			gateTile.setRollPlayed();
+			
+			if (getStargateSpinState().computerInitializedStop) {
+				if (!getStargateSpinState().lockSoundPlayed && (effectiveTick >= (state.tickStopRequested + speedUpTimeTick - 5))) {
+					getStargateSpinState().lockSoundPlayed = true;
+					
+					if (gateTile.getRollPlayed())
+						AunisSoundHelper.playPositionedSound(world, pos, EnumAunisPositionedSound.RING_ROLL_LOOP, false);
+					else
+						AunisSoundHelper.playPositionedSound(world, pos, EnumAunisPositionedSound.RING_ROLL_START, false);
+										
+					if (getStargateSpinState().finalChevron) {
+						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_SHUT, 1f);
+						
+						gateTile.addTask(new ScheduledTask(gateTile, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_SHUT_SOUND));
+						gateTile.addTask(new ScheduledTask(gateTile, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_OPEN_SOUND));
+					} 
+					
+					else
+						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_LOCKING, 0.2f);
+					
+					gateTile.setRollPlayed();
+				}
+			}
 		}
 	}
 		
@@ -144,6 +189,10 @@ public class StargateRingSpinHelper extends SpinHelper {
 		getStargateSpinState().lockSoundPlayed = false;
 				
 		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+		
+		if (angle < 0)
+			angle += 360;
+		
 		EnumSymbol symbol = EnumSymbol.fromAngle(angle % 360);
 		Aunis.info("ending angle: " + angle + ", symbol: " + symbol);
 		

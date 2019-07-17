@@ -18,12 +18,14 @@ import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.stargate.EnumGateState;
+import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.ScheduledTask;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -151,7 +153,9 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 			if (sourceGateTile.hasEnergyToDial(distance, multiplier)) {
 				StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 				
-				if (sourceDhdTile != null) AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, EnumSymbol.BRB.id, sourceDhdTile), point );
+				if (sourceDhdTile != null) 
+					AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, EnumSymbol.BRB.id, sourceDhdTile), point );
+				
 				AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, sourceGateTile), point );
 				
 				sourceGateTile.openGate(true, 0, null);
@@ -318,6 +322,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 									if ( (dhdTile.hasUpgrade() && symbolCount == 8) || (!dhdTile.hasUpgrade() && symbolCount == 7) || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN) ) {
 										AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.ACTIVATE_FINAL, gateTile), point );
 										
+										gateTile.addTask(new ScheduledTask(gateTile, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_LOCK_DHD_SOUND));										
 										gateTile.setRollPlayed();
 									}
 									
