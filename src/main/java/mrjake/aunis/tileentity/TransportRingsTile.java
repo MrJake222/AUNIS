@@ -20,10 +20,13 @@ import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.TransportRingsRendererState;
 import mrjake.aunis.renderer.transportrings.TransportRingsRenderer;
+import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.state.ITileEntityStateProvider;
 import mrjake.aunis.state.State;
 import mrjake.aunis.transportrings.TransportRings;
+import mrjake.aunis.util.ILinkable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,11 +39,12 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TransportRingsTile extends TileEntity implements ITileEntityRendered, ITickable, ITileEntityStateProvider {
+public class TransportRingsTile extends TileEntity implements ITileEntityRendered, ITickable, ITileEntityStateProvider, ILinkable {
 
 //	public TransportRingsTile() {
 ////		stateMap.put(EnumStateType.GUI_STATE, new RingsGuiState());
@@ -74,7 +78,7 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 			firstTick = false;
 			
 			if (world.isRemote) {
-				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos));
+				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide()));
 			}
 		}
 		
@@ -182,6 +186,9 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 				
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 		AunisPacketHandler.INSTANCE.sendToAllTracking(new StartRingsAnimationToClient(pos, getTransportRingsRendererState().animationStart), point);
+		
+		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
+		AunisSoundHelper.playSoundEvent(world, targetRingsPos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
 	}
 
 	/**
@@ -272,16 +279,25 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	
 	// ---------------------------------------------------------------------------------
 	// Controller
-	private boolean isLinked = false;
+	private BlockPos linkedController;
 	
-	public void setLinked(boolean linked) {
-		isLinked = linked;
+	public void setLinkedController(BlockPos pos) {
+		this.linkedController = pos;
 		
 		markDirty();
 	}
 	
+	public BlockPos getLinkedController() {
+		return linkedController;
+	}
+	
+	@Override
 	public boolean isLinked() {
-		return isLinked;
+		return linkedController != null;
+	}
+	
+	public TRControllerTile getLinkedControllerTile(World world) {
+		return (linkedController != null ? ((TRControllerTile) world.getTileEntity(linkedController)) : null);
 	}
 	
 	
@@ -385,7 +401,8 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 		getRendererState().toNBT(compound);
 		
 		compound.setTag("ringsData", getRings().serializeNBT());
-		compound.setBoolean("isLinked", isLinked);
+		if (linkedController != null)
+			compound.setLong("linkedController", linkedController.toLong());
 		
 		compound.setInteger("ringsMapLength", ringsMap.size());
 		
@@ -411,7 +428,8 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 		if (compound.hasKey("ringsData"))
 			getRings().deserializeNBT((NBTTagCompound) compound.getTag("ringsData"));
 		
-		isLinked = compound.getBoolean("isLinked");
+		if (compound.hasKey("linkedController"))
+			linkedController = BlockPos.fromLong(compound.getLong("linkedController"));
 		
 		if (compound.hasKey("ringsMapLength")) {
 			int len = compound.getInteger("ringsMapLength");

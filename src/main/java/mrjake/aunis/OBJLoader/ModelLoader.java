@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.stargate.EnumSymbol;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.util.ResourceLocation;
@@ -111,6 +112,10 @@ public class ModelLoader {
 			if (this.textureResource != null) {
 				Minecraft.getMinecraft().getTextureManager().bindTexture(textureResource);
 			}
+		}
+		
+		public static EnumModel getModelForSymbol(EnumSymbol symbol) {
+			return EnumModel.values()[symbol.id];
 		}
 	}
 		

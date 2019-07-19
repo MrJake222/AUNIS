@@ -125,6 +125,35 @@
     "sounds": [
       "aunis:transportrings/rings_controller_button"
     ]
+  },
+  
+  "chevron_shut": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.chevron_shut",
+    "sounds": [
+      "aunis:gate/chevron/chevron_shut_1",
+      "aunis:gate/chevron/chevron_shut_2",
+      "aunis:gate/chevron/chevron_shut_3"
+    ]
+  },
+  
+  "chevron_open": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.chevron_open",
+    "sounds": [
+      "aunis:gate/chevron/chevron_open_1",
+      "aunis:gate/chevron/chevron_open_2",
+      "aunis:gate/chevron/chevron_open_3"
+    ]
+  },
+  
+  "chevron_locking": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.chevron_open",
+    "sounds": [
+      "aunis:gate/chevron/chevron_locking_1",
+      "aunis:gate/chevron/chevron_locking_2"
+    ]
   }
 }
 

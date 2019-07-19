@@ -29,9 +29,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class AunisEventHandler {
 	
 	@SubscribeEvent
-    public static void onConfigChangedEvent(OnConfigChangedEvent event) {
-		Aunis.info("onConfigChangedEvent");
-		
+    public static void onConfigChangedEvent(OnConfigChangedEvent event) {		
         if (event.getModID().equals(Aunis.ModID)) {
             ConfigManager.sync(Aunis.ModID, Type.INSTANCE);
         }

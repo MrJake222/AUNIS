@@ -5,7 +5,6 @@ import mrjake.aunis.renderer.ItemRenderer;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendererState> {
@@ -27,8 +26,8 @@ public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendere
 	 * 
 	 * @param te - TileEntity(required for world and position).
 	 */
-	public UpgradeRenderer(TileEntity te, float horizontalRotation) {
-		this.world = te.getWorld();
+	public UpgradeRenderer(World world, float horizontalRotation) {
+		this.world = world;
 		
 		this.horizontalRotation = horizontalRotation;
 		

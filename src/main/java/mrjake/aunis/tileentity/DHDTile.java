@@ -1,19 +1,28 @@
 package mrjake.aunis.tileentity;
 
-import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
+import java.util.List;
+
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
+import mrjake.aunis.packet.state.StateUpdatePacketToClient;
+import mrjake.aunis.packet.state.StateUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRenderer;
-import mrjake.aunis.renderer.ISpecialRenderer;
-import mrjake.aunis.renderer.state.DHDRendererState;
-import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
+import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.state.DHDActivateButtonState;
+import mrjake.aunis.state.DHDRendererState;
+import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.state.ITileEntityStateProvider;
+import mrjake.aunis.state.State;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.DHDUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
-import net.minecraft.block.state.IBlockState;
+import mrjake.aunis.util.ILinkable;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -23,59 +32,41 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable {
+public class DHDTile extends TileEntity implements ITileEntityUpgradeable, ITickable, ILinkable, ITileEntityStateProvider {
 	
-	private ISpecialRenderer<DHDRendererState> renderer;
-	private RendererState rendererState;
+	private DHDRenderer renderer;
+	private DHDRendererState rendererState;
 	
 	private DHDUpgradeRenderer upgradeRenderer;
 	private UpgradeRendererState upgradeRendererState;
 	
 	private BlockPos linkedGate = null;
 	
-	@Override
-	public ISpecialRenderer<DHDRendererState> getRenderer() {
+	public DHDRenderer getDHDRenderer() {
 		if (renderer == null)
 			renderer = new DHDRenderer(this);
 		
-		return (DHDRenderer) renderer;
-	}
-	
-	public DHDRenderer getDHDRenderer() {
-		return (DHDRenderer) getRenderer();
+		return renderer;
 	}
 	
 	public DHDRendererState getDHDRendererState() {
-		return (DHDRendererState) getRendererState();
-	}
-	
-	@Override
-	public RendererState getRendererState() {	
 		if (rendererState == null)
 			rendererState = new DHDRendererState();
-				
+		
 		return rendererState;
 	}
-	
-	@Override
-	public RendererState createRendererState(ByteBuf buf) {
-		return new DHDRendererState().fromBytes(buf);
-	}
-	
-	public void clearRendererButtons() {
-		getDHDRendererState().activeButtons.clear();
+
+	public void setLinkedGate(BlockPos gate) {		
+		this.linkedGate = gate;
 		
 		markDirty();
 	}
 	
-	public void setLinkedGate(BlockPos gate) {		
-		this.linkedGate = gate;
-		markDirty();
-	}
-	
+	@Override
 	public boolean isLinked() {
 		return this.linkedGate != null;
 	}
@@ -83,7 +74,7 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	@Override
 	public UpgradeRenderer getUpgradeRenderer() {
 		if (upgradeRenderer == null)
-			upgradeRenderer = new DHDUpgradeRenderer(this);
+			upgradeRenderer = new DHDUpgradeRenderer(world, world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL));
 		
 		return upgradeRenderer;
 	}
@@ -116,7 +107,7 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 		compound.setBoolean("hasUpgrade", hasUpgrade);
 		compound.setBoolean("insertAnimation", insertAnimation);
 		
-		getRendererState().toNBT(compound);
+		compound.setTag("rendererState", getDHDRendererState().serializeNBT());
 		getUpgradeRendererState().toNBT(compound);
 		
 		compound.setTag("inventory", inventory.serializeNBT());
@@ -127,7 +118,9 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		
-		getRendererState().fromNBT(compound);
+		if (compound.hasKey("rendererState") && compound.getTag("rendererState") instanceof NBTTagCompound) // Check for versions below 1.5
+			getDHDRendererState().deserializeNBT((NBTTagCompound) compound.getTag("rendererState"));
+		
 		getUpgradeRendererState().fromNBT(compound);
 		
 		linkedGate = BlockPos.fromLong( compound.getLong("linkedGate") );
@@ -150,7 +143,7 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 			firstTick = false;
 			
 			if (world.isRemote)
-				AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos) );
+				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), EnumStateType.RENDERER_STATE));
 		}
 	}
 	
@@ -185,7 +178,87 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	}
 	
 	// -----------------------------------------------------------------------------
+	// Symbol activation
+	public void activateSymbol(int id) {
+		activateSymbols(Arrays.asList(id));
+	}
 	
+	public void activateSymbols(List<Integer> idList) {		
+		if (idList.size() == 1) {
+			if (idList.get(0) == EnumSymbol.BRB.id)
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS_BRB, 0.5f);
+			else
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS, 0.5f);
+		}
+		
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.DHD_ACTIVATE_BUTTON_STATE, new DHDActivateButtonState(idList)), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+		
+		getDHDRendererState().activeButtons.addAll(idList);
+		markDirty();
+	}
+	
+	public void clearSymbols() {
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.DHD_ACTIVATE_BUTTON_STATE, new DHDActivateButtonState(true)), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+		
+		getDHDRendererState().activeButtons.clear();
+		markDirty();
+	}
+	
+	// -----------------------------------------------------------------------------
+	// States
+	@Override
+	public State getState(EnumStateType stateType) {
+		switch (stateType) {
+			case RENDERER_STATE:
+				return getDHDRendererState();
+		
+			case DHD_ACTIVATE_BUTTON_STATE:
+				return null;
+				// Should send this directly from the server
+				
+			default:
+				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
+		}
+	}
+
+	@Override
+	public State createState(EnumStateType stateType) {
+		switch (stateType) {
+			case RENDERER_STATE:
+				return new DHDRendererState();
+		
+			case DHD_ACTIVATE_BUTTON_STATE:
+				return new DHDActivateButtonState();
+				
+			default:
+				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
+		}
+	}
+
+	@Override
+	public void setState(EnumStateType stateType, State state) {
+		switch (stateType) {
+			case RENDERER_STATE:
+				getDHDRenderer().activateSymbols(((DHDRendererState) state).activeButtons); 
+				
+				break;
+		
+			case DHD_ACTIVATE_BUTTON_STATE:
+				DHDActivateButtonState activateState = (DHDActivateButtonState) state;
+				
+				if (activateState.clearOnly)
+					getDHDRenderer().clearSymbols();
+				else
+					getDHDRenderer().activateSymbols(activateState.idList);
+				
+				break;
+				
+			default:
+				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
+		}
+	}
+	
+	// -----------------------------------------------------------------------------
 	private ItemStackHandler inventory = new ItemStackHandler(1) {
 		
 		protected void onContentsChanged(int slot) {
@@ -204,14 +277,5 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T)inventory : super.getCapability(capability, facing);	
-	}
-	
-	@Override
-	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
-//		boolean b = oldState.getBlock() != newState.getBlock();
-		
-		Aunis.info("dhdTile refresh");
-		
-		return true;
 	}
 }

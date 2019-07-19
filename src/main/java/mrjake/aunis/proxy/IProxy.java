@@ -16,4 +16,6 @@ public interface IProxy {
 	
 	public EntityPlayer getPlayerInMessageHandler(MessageContext ctx);
 	public void setTileEntityItemStackRenderer(Item item);
+	public EntityPlayer getPlayerClientSide();
+	public void addScheduledTaskClientSide(Runnable runnable);
 }

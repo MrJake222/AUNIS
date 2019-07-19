@@ -6,7 +6,7 @@ import java.util.Map;
 public class GateRenderingUpdatePacket {
 	
 	public enum EnumPacket {
-		DHD_RENDERER_UPDATE(0),
+//		DHD_RENDERER_UPDATE(0),
 		GATE_RENDERER_UPDATE(1);
 		//ENGAGE_GATE(2),
 		
@@ -39,8 +39,10 @@ public class GateRenderingUpdatePacket {
 		GATE_DIAL_FAILED(5),
 		LIGHT_UP_7_CHEVRONS(6),
 		LIGHT_UP_8_CHEVRONS(7), 
-		UNSTABLE_HORIZON(8),
-		STABLE_HORIZON(9);
+//		UNSTABLE_HORIZON(8),
+//		STABLE_HORIZON(9),
+		ACTIVATE_NEXT_COMPUTER(10),
+		ACTIVATE_FINAL_COMPUTER(11);
 		
 		public int actionID;
 		private static Map<Integer, EnumGateAction> map = new HashMap<Integer, EnumGateAction>();

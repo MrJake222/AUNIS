@@ -18,7 +18,10 @@ public enum EnumStateType {
 	GUI_STATE(2, "guiState"),
 	CAMO_STATE(3, "camoState"),
 	LIGHT_STATE(4, "lightState"),
-	ENERGY_STATE(5, "energyState");
+	ENERGY_STATE(5, "energyState"),
+	SPIN_STATE(6, "spinState"),
+	FLASH_STATE(7, "flashState"),
+	DHD_ACTIVATE_BUTTON_STATE(8, "dhdActivateButtonState");
 	
 	public int id;
 	private String key;

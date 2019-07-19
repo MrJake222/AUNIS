@@ -7,7 +7,6 @@ import mrjake.aunis.renderer.state.RendererState;
 import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.ITileEntityRendered;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -22,6 +21,7 @@ public class RendererUpdatePacketToClient extends PositionedPacket {
 	
 	private boolean supportsUpgrade;
 	private UpgradeRendererState upgradeRendererState;
+	private ByteBuf stateBuf;
 	
 	public RendererUpdatePacketToClient(BlockPos pos, RendererState rendererState) {
 		super(pos);
@@ -51,13 +51,8 @@ public class RendererUpdatePacketToClient extends PositionedPacket {
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		super.fromBytes(buf);
-
-		ITileEntityRendered te = (ITileEntityRendered) Minecraft.getMinecraft().world.getTileEntity(pos);
-		rendererState = te.createRendererState(buf);
 		
-		supportsUpgrade = buf.readBoolean();
-		if (supportsUpgrade)
-			this.upgradeRendererState = (UpgradeRendererState) new UpgradeRendererState().fromBytes(buf);
+		stateBuf = buf.copy();
 	}
 	
 	public static class TileUpdateClientHandler implements IMessageHandler<RendererUpdatePacketToClient, IMessage> {
@@ -65,18 +60,17 @@ public class RendererUpdatePacketToClient extends PositionedPacket {
 		@SuppressWarnings("unchecked")
 		@Override
 		public IMessage onMessage(RendererUpdatePacketToClient message, MessageContext ctx) {			
-			EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
+			EntityPlayer player = Aunis.proxy.getPlayerClientSide();
 			World world = player.getEntityWorld();
 			
-			Minecraft.getMinecraft().addScheduledTask(() -> {
-								
+			Aunis.proxy.addScheduledTaskClientSide(() -> {
 				ITileEntityRendered te = (ITileEntityRendered) world.getTileEntity(message.pos);
+				te.getRenderer().setState(te.createRendererState(message.stateBuf));
 				
-				te.getRenderer().setState(message.rendererState);
-				
-				if (message.supportsUpgrade)
-					((ITileEntityUpgradeable) te).getUpgradeRenderer().setState(message.upgradeRendererState);
-				
+				// supportsUpgrade
+				if (message.stateBuf.readBoolean()) {
+					((ITileEntityUpgradeable) te).getUpgradeRenderer().setState((UpgradeRendererState) new UpgradeRendererState().fromBytes(message.stateBuf));	
+				}
 			});
 			
 			return null;

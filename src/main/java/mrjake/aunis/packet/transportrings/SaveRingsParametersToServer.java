@@ -3,24 +3,26 @@ package mrjake.aunis.packet.transportrings;
 import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.packet.PositionedPacket;
+import mrjake.aunis.packet.PositionedPlayerPacket;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class SaveRingsParametersToServer extends PositionedPacket {
+public class SaveRingsParametersToServer extends PositionedPlayerPacket {
 	public SaveRingsParametersToServer() {}
 	
 	int address;
 	String name;
 	
-	public SaveRingsParametersToServer(BlockPos pos, int address, String name) {
-		super(pos);
+	public SaveRingsParametersToServer(BlockPos pos, EntityPlayer player, int address, String name) {
+		super(pos, player);
 		
 		this.address = address;
 		this.name = name;
@@ -45,17 +47,21 @@ public class SaveRingsParametersToServer extends PositionedPacket {
 	}
 	
 	
-	public static class SaveRingsParametersServerHandler implements IMessageHandler<SaveRingsParametersToServer, StateUpdatePacketToClient> {
+	public static class SaveRingsParametersServerHandler implements IMessageHandler<SaveRingsParametersToServer, IMessage> {
 
 		@Override
 		public StateUpdatePacketToClient onMessage(SaveRingsParametersToServer message, MessageContext ctx) {
-			EntityPlayer player = ctx.getServerHandler().player;
-			World world = player.getEntityWorld();
+			EntityPlayerMP player = ctx.getServerHandler().player;
+			WorldServer world = player.getServerWorld();
 			
-			TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(message.pos);
-			ringsTile.setRingsParams(player, message.address, message.name);
+			world.addScheduledTask(() -> {
+				TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(message.pos);
+				ringsTile.setRingsParams(player, message.address, message.name);
 			
-			return new StateUpdatePacketToClient(message.pos, EnumStateType.GUI_STATE, ringsTile.getState(EnumStateType.GUI_STATE));
+				message.respond(world, new StateUpdatePacketToClient(message.pos, EnumStateType.GUI_STATE, ringsTile.getState(EnumStateType.GUI_STATE)));
+			});
+			
+			return null;
 		}
 		
 	}

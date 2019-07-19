@@ -5,12 +5,10 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
-import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.stargate.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -25,6 +23,13 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 	
 	private int packetID;
 	private int objectID;
+	private boolean sound;
+	
+	public GateRenderingUpdatePacketToClient setSound(boolean sound) {
+		this.sound = sound;
+		
+		return this;
+	}
 	
 	public GateRenderingUpdatePacketToClient(EnumPacket packet, EnumSymbol symbol, BlockPos pos) {
 		this(packet.packetID, symbol.id, pos);
@@ -47,6 +52,7 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 		
 		this.packetID = packetID;
 		this.objectID = objectID;
+		setSound(true);
 	}
 
 	@Override
@@ -55,6 +61,7 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 		
 		buf.writeInt(packetID);
 		buf.writeInt(objectID);
+		buf.writeBoolean(sound);
 	}
 	
 	@Override
@@ -63,6 +70,7 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 		
 		packetID = buf.readInt();
 		objectID = buf.readInt();
+		sound = buf.readBoolean();
 	}
 
 	
@@ -70,10 +78,10 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 		
 		@Override
 		public IMessage onMessage(GateRenderingUpdatePacketToClient message, MessageContext ctx) {	
-			EntityPlayer player = Aunis.proxy.getPlayerInMessageHandler(ctx);
+			EntityPlayer player = Aunis.proxy.getPlayerClientSide();
 			World world = player.getEntityWorld();
 						
-			Minecraft.getMinecraft().addScheduledTask(() -> {
+			Aunis.proxy.addScheduledTaskClientSide(() -> {
 				TileEntity te = world.getTileEntity( message.pos );
 				StargateBaseTile gateTile = null;
 				DHDTile dhdTile = null;
@@ -91,22 +99,7 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 					return;
 				}
 				
-				switch ( EnumPacket.valueOf(message.packetID) ) {
-					case DHD_RENDERER_UPDATE:
-						DHDRenderer dhdRenderer = dhdTile.getDHDRenderer();
-						
-						if (message.objectID == -1) 
-							dhdRenderer.clearButtons();
-						
-						else {
-							if (message.objectID == EnumSymbol.BRB.id)
-								dhdRenderer.brbToActivate = true;
-							
-							dhdRenderer.activateButton(message.objectID);
-						}
-						
-						break;
-						
+				switch ( EnumPacket.valueOf(message.packetID) ) {						
 					case GATE_RENDERER_UPDATE:
 						gateRendererUpdate(EnumGateAction.valueOf(message.objectID), gateTile);
 						
@@ -125,9 +118,17 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 				case ACTIVATE_NEXT:
 					renderer.activateNextChevron();
 					break;
+					
+				case ACTIVATE_NEXT_COMPUTER:
+					renderer.activateNextChevron(false);
+					break;
 				
 				case ACTIVATE_FINAL:
 					renderer.activateFinalChevron();
+					break;
+					
+				case ACTIVATE_FINAL_COMPUTER:
+					renderer.activateFinalChevron(false);
 					break;
 					
 				case OPEN_GATE:
@@ -149,14 +150,6 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 					
 				case LIGHT_UP_8_CHEVRONS:
 					renderer.lightUpChevrons( 8 );
-					break;
-					
-				case UNSTABLE_HORIZON:
-					renderer.unstableHorizon(true);
-					break;
-					
-				case STABLE_HORIZON:
-					renderer.unstableHorizon(false);
 					break;
 			}
 		}

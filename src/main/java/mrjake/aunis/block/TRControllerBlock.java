@@ -11,6 +11,7 @@ import mrjake.aunis.raycaster.ControllerActivation;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
+import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -68,20 +69,51 @@ public class TRControllerBlock extends Block {
 	}
 	
 	
-	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------	
 	@Override
-	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-		world.setBlockState(pos, state.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite()), 2); // 2 - send update to clients
+	public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
+		return super.canPlaceBlockOnSide(worldIn, pos, side) && AunisProps.FACING_HORIZONTAL.getAllowedValues().contains(side);
+	}
+	
+	@Override
+	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand) {
+		return getDefaultState().withProperty(AunisProps.FACING_HORIZONTAL, facing);
+	}
+	
+	@Override
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block block, BlockPos fromPos) {
+		EnumFacing backFacing = state.getValue(AunisProps.FACING_HORIZONTAL).getOpposite();
 		
+		if (world.isAirBlock(pos.offset(backFacing))) {
+			this.dropBlockAsItem(world, pos, state, 0);
+            world.setBlockToAir(pos);
+		}
+	}
+	
+	@Override
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {		
 		TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(pos);
 		
-		for (BlockPos rings : BlockPos.getAllInBoxMutable(pos.add(-10, -5, -10), pos.add(10, 5, 10))) {
-			if (world.getBlockState(rings).getBlock() == AunisBlocks.transportRingsBlock) {
-				controllerTile.setLinkedRings(rings);
+		if (!world.isRemote) {			
+			BlockPos closestRings = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.transportRingsBlock);
+			
+			if (closestRings != null) {
+				TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(closestRings);
 				
-				break;
+				controllerTile.setLinkedRings(closestRings);
+				ringsTile.setLinkedController(pos);
 			}
 		}
+	}
+	
+	@Override
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {
+		TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(pos);
+		
+		if (!world.isRemote && controllerTile.isLinked())
+			controllerTile.getLinkedRingsTile(world).setLinkedController(null);
+		
+		super.breakBlock(world, pos, state);
 	}
 	
 	@Override
@@ -102,7 +134,10 @@ public class TRControllerBlock extends Block {
 		}
 		
 		else {
-			ControllerActivation.INSTANCE.onActivated(world, pos, player);
+			if (world.isRemote) {
+				if (hand == EnumHand.MAIN_HAND)
+					ControllerActivation.INSTANCE.onActivated(world, pos, player);
+			}
 		}
 		
 		return false;

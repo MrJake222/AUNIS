@@ -7,7 +7,7 @@ import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
-import mrjake.aunis.transportrings.TransportRings;
+import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -48,14 +48,6 @@ private static final String blockName = "transportrings_block";
 		if (!world.isRemote) {			
 			if (player.getHeldItem(hand).getItem() == AunisItems.analyzerAncient)
 				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, EnumStateType.GUI_STATE, ringsTile.getState(EnumStateType.GUI_STATE)), (EntityPlayerMP) player);
-			
-			else {
-				Aunis.info(pos+": linked rings: ");
-								
-				for (TransportRings rings : ringsTile.ringsMap.values()) {
-					Aunis.info(rings.toString());
-				}
-			}	
 		}
 		
 		else {
@@ -68,17 +60,16 @@ private static final String blockName = "transportrings_block";
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		
-//		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
+		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
 		
-		if (!world.isRemote) {
-			for (BlockPos controller : BlockPos.getAllInBoxMutable(pos.add(-10, -5, -10), pos.add(10, 5, 10))) {
-				if (world.getBlockState(controller).getBlock() == AunisBlocks.trControllerBlock) {
-					
-					TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(controller);
-					controllerTile.setLinkedRings(pos);
-					
-					break;
-				}
+		if (!world.isRemote) {			
+			BlockPos closestController = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.trControllerBlock);
+			
+			if (closestController != null) {
+				TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(closestController);
+				
+				controllerTile.setLinkedRings(pos);
+				ringsTile.setLinkedController(closestController);
 			}
 		}
 	}
@@ -87,6 +78,9 @@ private static final String blockName = "transportrings_block";
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
 
+		if (ringsTile.isLinked())
+			ringsTile.getLinkedControllerTile(world).setLinkedRings(null);
+		
 		ringsTile.removeAllRings();
 	}
 	

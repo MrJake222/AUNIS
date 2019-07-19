@@ -5,39 +5,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.client.multiplayer.WorldClient;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.sound.PlayPositionedSoundToClient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public class AunisSoundHelper {
-	public static SoundEvent dhdPress;
-	public static SoundEvent dhdPressBRB;
-	
-	public static SoundEvent gateOpen;
-	public static SoundEvent gateClose;
-	public static SoundEvent gateDialFail;
-	
-	public static SoundEvent chevronLockDHD;
-	public static SoundEvent chevronIncoming;
-	public static SoundEvent wormholeGo;
-	
-	public static SoundEvent wormholeFlicker;
-	public static SoundEvent ringsTransport;
-	public static SoundEvent ringsControllerButton;
-	
-	public static ResourceLocation ringRollStart;
-	public static ResourceLocation ringRollLoop;
-	public static ResourceLocation wormholeLoop;
-		
-	private static Map<String, AunisSound> aunisSounds = new HashMap<>();
+	private static Map<EnumAunisPositionedSound, AunisSound> aunisSounds = new HashMap<>();
 	private static List<AunisPositionedSound> aunisPositionedSounds = new ArrayList<>();
 	
-	public static void playPositionedSound(String soundName, BlockPos pos, boolean play) {
-		// Mouse.setGrabbed(false);
-		
-		AunisSound sound = aunisSounds.get(soundName);
+	static {
+		aunisSounds.put(EnumAunisPositionedSound.RING_ROLL_START,	new AunisSound(new ResourceLocation("aunis", "ring_roll_start"),	SoundCategory.AMBIENT, false));
+		aunisSounds.put(EnumAunisPositionedSound.RING_ROLL_LOOP,	new AunisSound(new ResourceLocation("aunis", "ring_roll_loop"), 	SoundCategory.AMBIENT, true));
+		aunisSounds.put(EnumAunisPositionedSound.WORMHOLE,			new AunisSound(new ResourceLocation("aunis", "wormhole_loop"),		SoundCategory.AMBIENT, true));
+	}
+	
+	public static void playPositionedSoundClientSide(EnumAunisPositionedSound enumSound, BlockPos pos, boolean play) {		
+		AunisSound sound = aunisSounds.get(enumSound);
 		
 		if (sound == null)
 			return;
@@ -59,32 +47,39 @@ public class AunisSoundHelper {
 		
 	}
 	
-	static {		
-		dhdPress = new SoundEvent( new ResourceLocation("aunis", "dhd_press") );
-		dhdPressBRB = new SoundEvent( new ResourceLocation("aunis", "dhd_brb") );
-		
-		gateOpen = new SoundEvent( new ResourceLocation("aunis", "gate_open") );
-		gateClose = new SoundEvent( new ResourceLocation("aunis", "gate_close") );
-		gateDialFail = new SoundEvent( new ResourceLocation("aunis", "gate_dial_fail") );
-		
-		chevronLockDHD = new SoundEvent( new ResourceLocation("aunis", "chevron_lock_dhd") );	
-		chevronIncoming = new SoundEvent( new ResourceLocation("aunis", "chevron_incoming") );	
-		wormholeGo = new SoundEvent( new ResourceLocation("aunis", "wormhole_go") );
-		
-		wormholeFlicker = new SoundEvent( new ResourceLocation("aunis", "wormhole_flicker") );
-		ringsTransport = new SoundEvent( new ResourceLocation("aunis", "rings_transport") );
-		ringsControllerButton = new SoundEvent( new ResourceLocation("aunis", "rings_controller_button") );
-		
-		ringRollStart = new ResourceLocation("aunis", "ring_roll_start");
-		ringRollLoop = new ResourceLocation("aunis", "ring_roll_loop");
-		wormholeLoop = new ResourceLocation("aunis", "wormhole_loop");
-		
-		aunisSounds.put("ringRollStart", new AunisSound(AunisSoundHelper.ringRollStart, SoundCategory.AMBIENT, false));
-		aunisSounds.put("ringRollLoop", new AunisSound(AunisSoundHelper.ringRollLoop, SoundCategory.AMBIENT, true));
-		aunisSounds.put("wormhole", new AunisSound(AunisSoundHelper.wormholeLoop, SoundCategory.AMBIENT, true));
+	public static void playPositionedSound(World world, BlockPos pos, EnumAunisPositionedSound soundEnum, boolean play) {
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new PlayPositionedSoundToClient(pos, soundEnum, play), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
 	}
 	
-	public static void playSound(WorldClient world, BlockPos pos, SoundEvent soundEvent, float volume) {
-		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEvent, SoundCategory.AMBIENT, volume, 1.0f, false);
+	// ----------------------------------------------------------------------------------------------------------------
+	private static Map<EnumAunisSoundEvent, SoundEvent> aunisSoundEvents = new HashMap<>();
+	
+	static {
+		aunisSoundEvents.put(EnumAunisSoundEvent.DHD_PRESS, new SoundEvent(new ResourceLocation("aunis", "dhd_press")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.DHD_PRESS_BRB, new SoundEvent(new ResourceLocation("aunis", "dhd_brb")));
+		
+		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_OPEN, new SoundEvent(new ResourceLocation("aunis", "gate_open")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_CLOSE, new SoundEvent(new ResourceLocation("aunis", "gate_close")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_DIAL_FAILED, new SoundEvent(new ResourceLocation("aunis", "gate_dial_fail")));
+		
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_LOCK_DHD, new SoundEvent(new ResourceLocation("aunis", "chevron_lock_dhd")));	
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_INCOMING, new SoundEvent(new ResourceLocation("aunis", "chevron_incoming")));	
+		aunisSoundEvents.put(EnumAunisSoundEvent.WORMHOLE_GO, new SoundEvent(new ResourceLocation("aunis", "wormhole_go")));
+		
+		aunisSoundEvents.put(EnumAunisSoundEvent.WORMHOLE_FLICKER, new SoundEvent(new ResourceLocation("aunis", "wormhole_flicker")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.RINGS_TRANSPORT, new SoundEvent(new ResourceLocation("aunis", "rings_transport")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.RINGS_CONTROLLER_BUTTON, new SoundEvent(new ResourceLocation("aunis", "rings_controller_button")));
+		
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_SHUT, new SoundEvent(new ResourceLocation("aunis", "chevron_shut")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_OPEN, new SoundEvent(new ResourceLocation("aunis", "chevron_open")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_LOCKING, new SoundEvent(new ResourceLocation("aunis", "chevron_locking")));
+	}
+	
+	public static void playSoundEventClientSide(World world, BlockPos pos, EnumAunisSoundEvent soundEvent, float volume) {		
+		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, aunisSoundEvents.get(soundEvent), SoundCategory.AMBIENT, volume, 1.0f, false);
+	}	
+	
+	public static void playSoundEvent(World world, BlockPos pos, EnumAunisSoundEvent soundEnum, float volume) {		
+		world.playSound(null, pos, aunisSoundEvents.get(soundEnum), SoundCategory.AMBIENT, volume, 1.0f);
 	}
 }

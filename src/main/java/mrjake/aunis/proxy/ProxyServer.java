@@ -35,4 +35,12 @@ public class ProxyServer implements IProxy {
 	public void setTileEntityItemStackRenderer(Item item) {
 		
 	}
+
+	@Override
+	public EntityPlayer getPlayerClientSide() {
+		return null;
+	}
+
+	@Override
+	public void addScheduledTaskClientSide(Runnable runnable) {}
 }

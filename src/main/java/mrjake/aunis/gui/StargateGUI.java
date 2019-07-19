@@ -115,6 +115,6 @@ public class StargateGUI extends GuiBase {
 	
 	@Override
 	public void updateScreen() {
-		AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, EnumStateType.ENERGY_STATE));
+		AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Minecraft.getMinecraft().player, EnumStateType.ENERGY_STATE));
 	}
 }

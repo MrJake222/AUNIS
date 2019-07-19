@@ -55,6 +55,8 @@ repositories {
 		name = "JEI Maven"
 		url = "http://dvs1.progwml6.com/files/maven"
 	}
+	
+	maven { url = "http://maven.cil.li/" }
 }
 
 dependencies {
@@ -83,6 +85,8 @@ dependencies {
 	deobfCompile "cofh:CoFHCore:${config.mc_version}-${config.cofh_core_version}:universal"
 
 	deobfCompile "mezz.jei:jei_${config.jei_mc_version}:${config.jei_version}"
+	
+	deobfCompile "li.cil.oc:OpenComputers:MC1.12.2-1.7.+"
 }
 
 processResources {

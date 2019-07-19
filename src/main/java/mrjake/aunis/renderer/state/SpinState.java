@@ -1,55 +1,42 @@
 package mrjake.aunis.renderer.state;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.stargate.EnumSpinDirection;
 
 public class SpinState extends RendererState {
 	
 	/**
 	 * Stores world's time when rotation started.
 	 */
-	public long tickStart;
+	public long tickStart = 0;
 	
 	/**
 	 * Stores starting ring pos to correctly shift the next rotation
 	 * 
 	 * Set by requestStart()
 	 */
-	public double startingRotation;
+	public double startingRotation = 0;
 
 	/**
 	 * Defines when ring is spinning ie. no stop animation was performed.
 	 */
-	public boolean isSpinning;
+	public boolean isSpinning = false;
 	
 	/**
 	 * Set by requestStop(). Set when ring needs to be stopped.
 	 */
-	public boolean stopRequested;
+	public boolean stopRequested = false;
 	
 	/**
 	 * Time when requestStop() was called
 	 */
-	public long tickStopRequested;
+	public long tickStopRequested = 0;
 	
-
-	public SpinState() {
-		this(0, 0, false, false, 0);
-	}
+	/**
+	 * Spin direction
+	 */
+	public EnumSpinDirection direction = EnumSpinDirection.COUNTER_CLOCKWISE;
 	
-	public SpinState(
-			double startingRotation,
-			long tickStart,
-			boolean isSpinning,
-			boolean stopRequested,
-			long tickStopRequested) {
-
-		this.startingRotation = startingRotation;
-		
-		this.tickStart = tickStart;
-		this.isSpinning = isSpinning;
-		this.stopRequested = stopRequested;
-		this.tickStopRequested = tickStopRequested;
-	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
@@ -59,6 +46,7 @@ public class SpinState extends RendererState {
 		buf.writeBoolean(isSpinning);
 		buf.writeBoolean(stopRequested);
 		buf.writeLong(tickStopRequested);
+		buf.writeInt(direction.id);
 	}
 
 	@Override
@@ -69,6 +57,7 @@ public class SpinState extends RendererState {
 		isSpinning = buf.readBoolean();
 		stopRequested = buf.readBoolean();
 		tickStopRequested = buf.readLong();
+		direction = EnumSpinDirection.valueOf(buf.readInt());
 		
 		return this;
 	}

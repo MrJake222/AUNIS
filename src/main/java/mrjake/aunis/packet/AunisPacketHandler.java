@@ -1,13 +1,11 @@
 package mrjake.aunis.packet;
 
-import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons;
-import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtons.ClearLinkedDHDButtonsHandler;
-import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient;
-import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient.DHDIncomingWormholePacketToClientHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient.GateRenderingUpdatePacketToClientHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer.GateRenderingUpdatePacketToServerHandler;
+import mrjake.aunis.packet.gate.renderingUpdate.RequestStopToClient.RequestStopClientHandler;
+import mrjake.aunis.packet.gate.renderingUpdate.RequestStopToClient;
 import mrjake.aunis.packet.gate.teleportPlayer.MotionToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.MotionToServer.MotionServerHandler;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
@@ -16,6 +14,8 @@ import mrjake.aunis.packet.infuser.EnergyStoredToClient;
 import mrjake.aunis.packet.infuser.EnergyStoredToClient.EnergyStorageToClientHandler;
 import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient;
 import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient.ShouldRenderWavesToClientHandler;
+import mrjake.aunis.packet.sound.PlayPositionedSoundToClient;
+import mrjake.aunis.packet.sound.PlayPositionedSoundToClient.PlayPositionedSoundClientHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient.StateUpdateClientHandler;
 import mrjake.aunis.packet.state.StateUpdateRequestToServer;
@@ -53,16 +53,15 @@ public class AunisPacketHandler {
 
 		
 		INSTANCE.registerMessage(GateRenderingUpdatePacketToClientHandler.class, GateRenderingUpdatePacketToClient.class, id, Side.CLIENT); id++;
-		INSTANCE.registerMessage(DHDIncomingWormholePacketToClientHandler.class, DHDIncomingWormholePacketToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, RetrieveMotionToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(TileUpdateClientHandler.class, RendererUpdatePacketToClient.class, id, Side.CLIENT); id++;
-		INSTANCE.registerMessage(ClearLinkedDHDButtonsHandler.class, ClearLinkedDHDButtons.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(UpgradeSlotInteractHandler.class, UpgradeSlotInteractToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(EnergyStorageToClientHandler.class, EnergyStoredToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(ShouldRenderWavesToClientHandler.class, ShouldRenderWavesToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(StartRingsAnimationToClientHandler.class, StartRingsAnimationToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(StartPlayerFadeOutToClientHandler.class, StartPlayerFadeOutToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(StateUpdateClientHandler.class, StateUpdatePacketToClient.class, id, Side.CLIENT); id++;
-
+		INSTANCE.registerMessage(PlayPositionedSoundClientHandler.class, PlayPositionedSoundToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(RequestStopClientHandler.class, RequestStopToClient.class, id, Side.CLIENT); id++;
 	}
 }

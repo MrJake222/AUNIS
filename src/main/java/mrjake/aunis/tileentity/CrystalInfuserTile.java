@@ -1,6 +1,7 @@
 package mrjake.aunis.tileentity;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -38,7 +39,7 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 			if (world.isRemote) {
 //				Aunis.info("TileUpdateRequestToServer " + pos.toString());
 				
-				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos));
+				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide()));
 			}
 		}
 		

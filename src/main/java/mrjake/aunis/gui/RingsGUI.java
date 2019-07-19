@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 
@@ -108,21 +109,23 @@ public class RingsGUI extends GuiBase {
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button == saveButton) {
+			EntityPlayer player = Minecraft.getMinecraft().player;
+			
 			try {
 				int address = Integer.valueOf(addressTextField.getText());
 				String name = nameTextField.getText();
 				
 				if (address > 0 && address <= 6) {
-					AunisPacketHandler.INSTANCE.sendToServer(new SaveRingsParametersToServer(pos, address, name));
+					AunisPacketHandler.INSTANCE.sendToServer(new SaveRingsParametersToServer(pos, player, address, name));
 				}
 				
 				else {
-					Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.wrong_address")), true);
+					player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.wrong_address")), true);
 				}
 			}
 			
 			catch (NumberFormatException e) {
-				Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.wrong_address")), true);
+				player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.wrong_address")), true);
 			}
 		}
 	}

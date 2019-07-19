@@ -85,4 +85,14 @@ public class ProxyClient implements IProxy {
 		if (item.getRegistryName().equals(new ResourceLocation(Aunis.ModID, PageNotebookItem.ITEM_NAME)))
 			item.setTileEntityItemStackRenderer(new PageNotebookTEISR());
 	}
+
+	@Override
+	public EntityPlayer getPlayerClientSide() {
+		return Minecraft.getMinecraft().player;
+	}
+
+	@Override
+	public void addScheduledTaskClientSide(Runnable runnable) {
+		Minecraft.getMinecraft().addScheduledTask(runnable);
+	}
 }
