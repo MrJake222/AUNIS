@@ -45,7 +45,6 @@ import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
-import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.stargate.EnumGateState;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
@@ -66,6 +65,8 @@ import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.tasks.IScheduledTaskExecutor;
 import mrjake.aunis.upgrade.StargateUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
+import mrjake.aunis.util.ILinkable;
+import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -92,7 +93,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
-public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider, ITileEntityStateProvider, IScheduledTaskExecutor, Environment {
+public class StargateBaseTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ICapabilityProvider, ITileEntityStateProvider, IScheduledTaskExecutor, ILinkable, Environment {
 	public StargateBaseTile() {}
 	
 	private ISpecialRenderer<StargateRendererState> renderer;
@@ -424,7 +425,14 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		}
 		
 		else {
-			DHDLinkHelper.findAndLinkDHD(this);
+			BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.dhdBlock);
+			
+			if (closestDhd != null) {
+				DHDTile dhdTile = (DHDTile) world.getTileEntity(closestDhd);
+				
+				dhdTile.setLinkedGate(pos);
+				setLinkedDHD(closestDhd);
+			}
 		}
 		
 		IBlockState actualState = world.getBlockState(pos);
@@ -497,14 +505,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		return (DHDTile) world.getTileEntity(linkedDHD);
 	}
 	
+	@Override
 	public boolean isLinked() {
 		return linkedDHD != null;
 	}
 	
-	public void setLinkedDHD(BlockPos dhdPos) {
-		if (dhdPos != null)
-			dhdPos = new BlockPos(dhdPos);
-		
+	public void setLinkedDHD(BlockPos dhdPos) {		
 		this.linkedDHD = dhdPos;
 		
 		markDirty();

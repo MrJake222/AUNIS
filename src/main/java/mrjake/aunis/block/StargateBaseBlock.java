@@ -6,13 +6,14 @@ import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
-import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.upgrade.UpgradeHelper;
+import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -91,8 +92,15 @@ public class StargateBaseBlock extends Block {
 			// ------------------------------------------------------------------------
 			state = world.getBlockState(pos);
 			
-			if (!state.getValue(AunisProps.RENDER_BLOCK)) {
-				DHDLinkHelper.findAndLinkDHD(gateTile);
+			if (!state.getValue(AunisProps.RENDER_BLOCK)) {				
+				BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.dhdBlock);
+				
+				if (closestDhd != null) {
+					DHDTile dhdTile = (DHDTile) world.getTileEntity(closestDhd);
+					
+					dhdTile.setLinkedGate(pos);
+					gateTile.setLinkedDHD(closestDhd);
+				}
 			}
 		}
 	}

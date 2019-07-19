@@ -5,11 +5,11 @@ import javax.annotation.Nullable;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.stargate.DHDLinkHelper;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.upgrade.UpgradeHelper;
+import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -82,7 +82,14 @@ public class DHDBlock extends Block {
 			world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, facing), 3);
 			
 			DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
-			DHDLinkHelper.findAndLinkGate(dhdTile);
+			BlockPos closestGate = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.stargateBaseBlock);
+			
+			if (closestGate != null) {
+				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(closestGate);
+				
+				dhdTile.setLinkedGate(closestGate);
+				gateTile.setLinkedDHD(pos);
+			}	
 		}
 	}
 	

@@ -13,6 +13,7 @@ import mrjake.aunis.renderer.state.UpgradeRendererState;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.DHDUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
+import mrjake.aunis.util.ILinkable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,7 +27,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable {
+public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEntityUpgradeable, ITickable, ILinkable {
 	
 	private ISpecialRenderer<DHDRendererState> renderer;
 	private RendererState rendererState;
@@ -72,14 +73,12 @@ public class DHDTile extends TileEntity implements ITileEntityRendered, ITileEnt
 	}
 	
 	public void setLinkedGate(BlockPos gate) {		
-		if (gate != null)
-			gate = new BlockPos(gate);
-		
 		this.linkedGate = gate;
 		
 		markDirty();
 	}
 	
+	@Override
 	public boolean isLinked() {
 		return this.linkedGate != null;
 	}
