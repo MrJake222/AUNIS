@@ -96,7 +96,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 	}
 	
 	public static void attemptLightUp(World world, StargateBaseTile sourceGateTile) {
-		 if (StargateNetwork.get(world).stargateInWorld(world, sourceGateTile.dialedAddress)) {	
+		if (StargateNetwork.get(world).stargateInWorld(world, sourceGateTile.dialedAddress) && !sourceGateTile.dialedAddress.subList(0, 6).equals(sourceGateTile.gateAddress.subList(0, 6))) {
 			StargatePos targetGate = StargateNetwork.get(world).getStargate(sourceGateTile.dialedAddress);
 			World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 			
@@ -129,7 +129,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), sourcePos.getX(), sourcePos.getY(), sourcePos.getZ(), 512);
 		
 		// Check if symbols entered match the range, last is ORIGIN, target gate exists, and if not dialing self
-		if (StargateNetwork.get(world).stargateInWorld(world, sourceGateTile.dialedAddress) && !sourceGateTile.dialedAddress.subList(0, 6).equals(sourceGateTile.gateAddress)) {
+		if (StargateNetwork.get(world).stargateInWorld(world, sourceGateTile.dialedAddress) && !sourceGateTile.dialedAddress.subList(0, 6).equals(sourceGateTile.gateAddress.subList(0, 6))) {
 			
 			StargatePos targetGate = StargateNetwork.get(world).getStargate( sourceGateTile.dialedAddress );
 			BlockPos targetPos = targetGate.getPos();
