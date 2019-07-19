@@ -83,6 +83,9 @@ public enum EnumSymbol {
 	}
 	
 	public static EnumSymbol forName(String name) {
+		if (name.equals("Bootes"))
+			return EnumSymbol.BOOTES;
+		
 		return nameSymbolMap.get(name);
 	}
 	
