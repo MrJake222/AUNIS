@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.input.Mouse;
-
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
@@ -379,7 +377,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	
 	private void changeChevrons(boolean clear, Long stateChange, int chevronsToChange, boolean changeFinal) {			
 		long activationStateChange;
-		Mouse.setGrabbed(false);
+
 		if (stateChange != null)
 			activationStateChange = stateChange;
 		else

@@ -375,6 +375,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	 */
 	private void disconnectGate() {	
 		isClosing = false;
+		stargateState = EnumStargateState.IDLE;
 				
 		markDirty();
 	}
