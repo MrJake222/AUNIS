@@ -302,8 +302,12 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 									// Check if symbols entered match the range, last is ORIGIN, target gate exists, and if not dialing self
 									EnumGateState gateState = attemptOpen(world, gateTile, dhdTile, true);
 									
-									if (gateState == EnumGateState.NOT_ENOUGH_POWER)
-										player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.stargatebase_block.not_enough_power")), true);
+									if (gateState != EnumGateState.OK) {
+										gateTile.setRollPlayed();
+										
+										if (gateState == EnumGateState.NOT_ENOUGH_POWER)
+											player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.stargatebase_block.not_enough_power")), true);
+									}
 								}	
 								
 							}
