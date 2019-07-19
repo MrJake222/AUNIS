@@ -37,6 +37,12 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 	private boolean active;
 	
 	/**
+	 * User can use {@link ScheduledTask#ScheduledTask(IScheduledTaskExecutor, long, EnumScheduledTask, int)} to set custom waiting time.
+	 */
+	private boolean customWaitTime;
+	private int waitTime;
+	
+	/**
 	 * Main constructor
 	 * 
 	 * @param taskCreated When the {@link ScheduledTask} was created.
@@ -47,6 +53,15 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 		this.taskCreated = taskCreated;
 		this.scheduledTask = scheduledTask;
 		this.active = true;
+		
+		this.customWaitTime = false;
+	}
+	
+	public ScheduledTask(IScheduledTaskExecutor executor, long taskCreated, EnumScheduledTask scheduledTask, int waitTime) {
+		this(executor, taskCreated, scheduledTask);
+		
+		this.customWaitTime = true;
+		this.waitTime = waitTime;
 	}
 	
 	public ScheduledTask(IScheduledTaskExecutor executor, NBTTagCompound compound) {
@@ -95,8 +110,10 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 	 * 
 	 * If this {@link ScheduledTask} should be removed.
 	 */
-	public boolean update(long worldTicks) {				
-		if (worldTicks-taskCreated >= scheduledTask.waitTicks) {
+	public boolean update(long worldTicks) {
+		int waitTime = customWaitTime ? this.waitTime : scheduledTask.waitTicks;
+		
+		if (worldTicks-taskCreated >= waitTime) {
 			try {
 				executor.executeTask(scheduledTask);
 			}

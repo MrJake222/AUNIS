@@ -65,13 +65,6 @@ public class StargateRendererState extends RendererState {
 //	public boolean openingSoundPlayed = false;
 	public boolean dialingComplete = false;
 	
-	/**
-	 * When power is low, this becomes true. Flashing begins.
-	 *  
-	 * Individual flashes are handled client-side
-	 */
-	public boolean horizonUnstable = false;
-	
 //	@Override
 //	public String toString() {
 //		return String.format(pos+": activeChevrons: %d, isFinalActive: %b, doEventHorizonRender: %b, vortexState: %s, openingSoundPlayed: %b", activeChevrons, isFinalActive,
@@ -89,7 +82,6 @@ public class StargateRendererState extends RendererState {
 		buf.writeBoolean(doEventHorizonRender);
 		buf.writeInt(vortexState.index);
 		buf.writeBoolean(dialingComplete);
-		buf.writeBoolean(horizonUnstable);
 	}
 	
 	@Override
@@ -107,7 +99,6 @@ public class StargateRendererState extends RendererState {
 		doEventHorizonRender = buf.readBoolean();
 		vortexState = EnumVortexState.valueOf( buf.readInt() );
 		dialingComplete = buf.readBoolean();
-		horizonUnstable = buf.readBoolean();
 		
 		return this;
 	}

@@ -28,11 +28,11 @@ import mrjake.aunis.integration.opencomputers.OCHelper;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtonsToClient;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
+import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.packet.update.renderer.RendererUpdatePacketToClient;
 import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
 import mrjake.aunis.renderer.ISpecialRenderer;
@@ -57,6 +57,7 @@ import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.TeleportHelper;
 import mrjake.aunis.state.EnergyState;
 import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.state.FlashState;
 import mrjake.aunis.state.ITileEntityStateProvider;
 import mrjake.aunis.state.SpinStateRequest;
 import mrjake.aunis.state.StargateGuiState;
@@ -361,6 +362,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		}
 			
 		dialedAddress.clear();
+		horizonFlashTask = null;
 		
 		getStargateRendererState().setActiveChevrons(world, pos, 0);
 		getStargateRendererState().setFinalActive(world, pos, false);
@@ -730,7 +732,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	}
 	
 	private int gateCloseTimeout = 5;
-	
+		
 	@Override
 	public void update() {
 		if (firstTick) {
@@ -884,29 +886,28 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 						int sec = keepAliveCostPerTick*20;
 
 						/*
-						 * If energy can sustain connection for less than 10 seconds
+						 * If energy can sustain connection for less than AunisConfig.powerConfig.instabilitySeconds seconds
 						 * Start flickering
 						 */
-						if (energyStorage.getEnergyStored() < sec*AunisConfig.powerConfig.instabilitySeconds && !getStargateRendererState().horizonUnstable || energyStorage.getEnergyStored() > sec*AunisConfig.powerConfig.instabilitySeconds && getStargateRendererState().horizonUnstable) {
-							// Toggle horizon status
-							getStargateRendererState().horizonUnstable ^= true;
+						
+						// Horizon becomes unstable
+						if (horizonFlashTask == null && energyStorage.getEnergyStored() < sec*AunisConfig.powerConfig.instabilitySeconds) {
+							resetFlashingSequence();
 							
-							EnumGateAction action = getStargateRendererState().horizonUnstable ? EnumGateAction.UNSTABLE_HORIZON : EnumGateAction.STABLE_HORIZON;
+							horizonFlashTask = new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.HORIZON_FLASH, (int) (Math.random() * 40) + 5);
+						}
+						
+						// Horizon becomes stable
+						if (horizonFlashTask != null && energyStorage.getEnergyStored() > sec*AunisConfig.powerConfig.instabilitySeconds) {
+							horizonFlashTask = null;
+							isCurrentlyUnstable = false;
 							
-							TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-							AunisPacketHandler.INSTANCE.sendToAllTracking(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, pos), point);
-							
-//							if (isEngaged) {
-								StargatePos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
-								BlockPos tPos = targetPos.getPos();
-
-								TargetPoint targetPoint = new TargetPoint(targetPos.getDimension(), tPos.getX(), tPos.getY(), tPos.getZ(), 512);
-								AunisPacketHandler.INSTANCE.sendToAllTracking(new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, action, tPos), targetPoint);
-//							}
+							updateFlashState(false);
 						}
 						
 						energyConsumed += ((EnergyStorageUncapped) energyStorage).extractEnergyUncapped(keepAliveCostPerTick);
 						
+						markDirty();
 //						Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
 					}
 					
@@ -961,7 +962,12 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				
 				else i++;
 			}
+			
+			if (horizonFlashTask != null && horizonFlashTask.isActive()) {
+				horizonFlashTask.update(world.getTotalWorldTime());
+			}
 		}
+		
 		if (!world.isRemote && getStargateRendererState().spinState.isSpinning) {
 			float ringAngularRotation = (float) (getServerRingSpinHelper().spin(0) % 360);
 						
@@ -1090,6 +1096,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				return null;
 				// It shouldn't be done this way. This is only sent from the server(new instance each time). See StargateRingSpinHelper@syncStartToClient()
 				
+			case FLASH_STATE:
+				return null;
+				
 			default:
 				return null;
 		}
@@ -1106,6 +1115,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				
 			case SPIN_STATE:
 				return new SpinStateRequest();
+				
+			case FLASH_STATE:
+				return new FlashState();
 				
 			default:
 				return null;
@@ -1147,9 +1159,34 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				
 				break;
 				
+			case FLASH_STATE:
+				getStargateRenderer().setHorizonUnstable(((FlashState) state).flash);
+				
+				break;
+				
 			default:
 				break;
 		}
+	}
+	
+	// -----------------------------------------------------------------
+	// Horizon flashing
+	private ScheduledTask horizonFlashTask;
+
+	private int flashIndex = 0;
+	private boolean isCurrentlyUnstable = false;
+	
+	private void resetFlashingSequence() {
+		flashIndex = 0;
+		isCurrentlyUnstable = false;
+	}
+	
+	private void updateFlashState(boolean flash) {
+		StargatePos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
+		BlockPos tPos = targetPos.getPos();
+				
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.FLASH_STATE, new FlashState(isCurrentlyUnstable)), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(tPos, EnumStateType.FLASH_STATE, new FlashState(isCurrentlyUnstable)), new TargetPoint(targetPos.getDimension(), tPos.getX(), tPos.getY(), tPos.getZ(), 512));
 	}
 	
 	// -----------------------------------------------------------------
@@ -1184,6 +1221,37 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				
 			case STARGATE_CHEVRON_LOCK_DHD_SOUND:
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_LOCK_DHD, 0.5f);
+				break;
+				
+			case HORIZON_FLASH:
+				isCurrentlyUnstable ^= true;
+				
+				if (isCurrentlyUnstable) {
+					flashIndex++;
+					
+					if (flashIndex == 1)
+						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.WORMHOLE_FLICKER, 0.5f);
+					
+					// Schedule change into stable state
+					horizonFlashTask = new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 3) + 3);
+				}
+				
+				else {
+					if (flashIndex == 1)
+						// Schedule second flash
+						horizonFlashTask = new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 4) + 1);
+					
+					else {
+						// Schedule next flash sequence
+						horizonFlashTask = new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 40) + 5);
+						
+						resetFlashingSequence();
+					}
+				}
+				
+				updateFlashState(isCurrentlyUnstable);
+				
+				markDirty();				
 				break;
 				
 			default:

@@ -549,7 +549,13 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	
 	private long gateWaitClose = 0;
 	private boolean zeroAlphaSet;	
+	
+	private boolean horizonUnstable = false;
 			
+	public void setHorizonUnstable(boolean horizonUnstable) {
+		this.horizonUnstable = horizonUnstable;
+	}
+	
 	public void openGate() {
 		gateWaitStart = world.getTotalWorldTime();
 		
@@ -605,10 +611,6 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	private void engageGate() {
 		state.vortexState = EnumVortexState.STILL;
 		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, pos, true);
-	}
-	
-	public void unstableHorizon(boolean unstable) {
-		state.horizonUnstable = unstable;
 	}
 		
 	private void renderKawoosh(double x, double y, double z, double partialTicks) {
@@ -782,15 +784,6 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		if (state.vortexState != null) {
 			if ( state.vortexState.equals(EnumVortexState.STILL) || state.vortexState.equals(EnumVortexState.CLOSING) ) {
 				
-				boolean horizonUnstable;
-				
-				
-				if (state.horizonUnstable)
-					horizonUnstable = getHorizonFlashing(partialTicks);
-				else
-					horizonUnstable = false;
-				
-				
 				if (horizonUnstable)
 					ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2_unstable.jpg"));
 
@@ -802,7 +795,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				if ( state.vortexState.equals(EnumVortexState.CLOSING) )
 					renderEventHorizon(x, y, z, partialTicks, true, whiteOverlayAlpha, false, 1.7f);
 				else
-					renderEventHorizon(x, y, z, partialTicks, false, null, false, horizonUnstable ? 1.5f : 1);
+					renderEventHorizon(x, y, z, partialTicks, false, null, false, horizonUnstable ? 1.2f : 1);
 					
 				GlStateManager.popMatrix();
 				GlStateManager.enableLighting();
@@ -865,57 +858,5 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		}
 		
 		GlStateManager.disableBlend();
-	}
-	
-	private long lastFlashEnded = 0;
-	private long nextFlashIn = 0;
-	private long flashDuration1 = 0;
-	private long flashDuration2 = 0;
-	
-	private boolean soundPlayed = false;
-		
-	private boolean getHorizonFlashing(double partialTicks) {
-		float tick = (float) (world.getTotalWorldTime() + partialTicks);
-		
-		tick -= lastFlashEnded;
-		
-		if (tick > 100) {
-			resetFlashing();
-			
-			return false;
-		}
-		
-		tick -= nextFlashIn;
-				
-		if (tick > 0) {
-			if (!soundPlayed) {
-				soundPlayed = true;
-				
-				AunisSoundHelper.playSoundEventClientSide((WorldClient) world, pos.up(), EnumAunisSoundEvent.WORMHOLE_FLICKER, 0.5f); // TODO Sound to be moved
-			}
-			
-			if (tick < flashDuration1) return true;
-			if (tick < flashDuration1 * 2) return false;
-			if (tick < flashDuration2 * 3) return true;
-			if (tick < flashDuration2 * 4) return true;
-			else {
-				resetFlashing();
-				
-//				Aunis.info("nextFlashIn: " + nextFlashIn + ", flashDuration1: " + flashDuration1 + ", flashDuration2: " + flashDuration2);
-				
-				return false;
-			}
-		}
-		
-		return false;
-	}
-	
-	private void resetFlashing() {
-		lastFlashEnded = world.getTotalWorldTime();
-		nextFlashIn = (long)(Math.random() * 40) + 5;
-		flashDuration1 = (long)(Math.random() * 4) + 1;
-		flashDuration2 = (long)(Math.random() * 4) + 1;
-		
-		soundPlayed = false;
 	}
 }

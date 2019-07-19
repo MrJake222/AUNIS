@@ -167,14 +167,6 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 				case LIGHT_UP_8_CHEVRONS:
 					renderer.lightUpChevrons( 8 );
 					break;
-					
-				case UNSTABLE_HORIZON:
-					renderer.unstableHorizon(true);
-					break;
-					
-				case STABLE_HORIZON:
-					renderer.unstableHorizon(false);
-					break;
 			}
 		}
 	}
