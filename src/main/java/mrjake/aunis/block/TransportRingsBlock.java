@@ -7,7 +7,6 @@ import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
-import mrjake.aunis.transportrings.TransportRings;
 import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -49,14 +48,6 @@ private static final String blockName = "transportrings_block";
 		if (!world.isRemote) {			
 			if (player.getHeldItem(hand).getItem() == AunisItems.analyzerAncient)
 				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, EnumStateType.GUI_STATE, ringsTile.getState(EnumStateType.GUI_STATE)), (EntityPlayerMP) player);
-			
-			else {
-				Aunis.info(pos+": linked rings: ");
-								
-				for (TransportRings rings : ringsTile.ringsMap.values()) {
-					Aunis.info(rings.toString());
-				}
-			}	
 		}
 		
 		else {

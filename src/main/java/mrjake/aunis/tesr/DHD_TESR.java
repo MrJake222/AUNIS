@@ -7,7 +7,7 @@ public class DHD_TESR extends TileEntitySpecialRenderer<DHDTile> {
 		
 	@Override
 	public void render(DHDTile te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {		
-		te.getRenderer().render(x, y, z, partialTicks);
+		te.getDHDRenderer().render(x, y, z, partialTicks);
 		te.getUpgradeRenderer().render(x, y, z, partialTicks);
 	}
 }

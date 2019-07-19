@@ -1,11 +1,8 @@
 package mrjake.aunis.renderer.stargate;
 
 import li.cil.oc.api.machine.Context;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.integration.opencomputers.OCHelper;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.renderingUpdate.RequestStopToClient;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
@@ -64,7 +61,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 	@Override
 	public void requestStart(double startingRotation, EnumSpinDirection direction) {
 		setSpeedUpTimeTick(25);
-		Aunis.info("requestStart isSpinning: " + state.isSpinning + ", startingRotation: " + startingRotation + ", state.startingRotation: " + state.startingRotation);
+//		Aunis.info("requestStart isSpinning: " + state.isSpinning + ", startingRotation: " + startingRotation + ", state.startingRotation: " + state.startingRotation);
 
 		super.requestStart(startingRotation, direction);
 	}
@@ -194,7 +191,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 			angle += 360;
 		
 		EnumSymbol symbol = EnumSymbol.fromAngle(angle % 360);
-		Aunis.info("ending angle: " + angle + ", symbol: " + symbol);
+//		Aunis.info("ending angle: " + angle + ", symbol: " + symbol);
 		
 		// Server side
 		if (!world.isRemote) {
@@ -205,7 +202,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 				if (gateTile.addSymbolToAddress(getStargateSpinState().targetSymbol, gateTile.getLinkedDHD(world), true)) {	
 					
 					if (gateTile.isLinked())
-						AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, getStargateSpinState().targetSymbol.id, gateTile.getLinkedDHD(world)), targetPoint );
+						gateTile.getLinkedDHD(world).activateSymbol(getStargateSpinState().targetSymbol.id);
 					
 					int symbolCount = gateTile.getEnteredSymbolsCount();
 					boolean lock = symbolCount == 8 || (symbolCount == 7 && getStargateSpinState().targetSymbol == EnumSymbol.ORIGIN);

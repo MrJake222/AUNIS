@@ -6,7 +6,7 @@ import java.util.Map;
 public class GateRenderingUpdatePacket {
 	
 	public enum EnumPacket {
-		DHD_RENDERER_UPDATE(0),
+//		DHD_RENDERER_UPDATE(0),
 		GATE_RENDERER_UPDATE(1);
 		//ENGAGE_GATE(2),
 		

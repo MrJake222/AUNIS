@@ -14,7 +14,6 @@ import mrjake.aunis.integration.opencomputers.OCHelper;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.PositionedPacket;
-import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
 import mrjake.aunis.stargate.EnumGateState;
@@ -113,7 +112,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 			
 			// To renderer: light up chevrons and target dhd glyphs																
 			if (targetDhdTile != null)
-				AunisPacketHandler.INSTANCE.sendToAllTracking( new DHDIncomingWormholePacketToClient(targetDhdTile.getPos(), sourceGateTile.gateAddress, eightChevronDial), targetPoint );	
+				targetDhdTile.activateSymbols(EnumSymbol.toIntegerList(eightChevronDial ? sourceGateTile.gateAddress : sourceGateTile.gateAddress.subList(0, 6), EnumSymbol.ORIGIN));
 			
 			EnumGateAction gateAction;
 			if (eightChevronDial)
@@ -154,7 +153,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 				StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 				
 				if (sourceDhdTile != null) 
-					AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, EnumSymbol.BRB.id, sourceDhdTile), point );
+					sourceDhdTile.activateSymbol(EnumSymbol.BRB.id);
 				
 				AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, sourceGateTile), point );
 				
@@ -165,9 +164,8 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 				
 				targetTile.openGate(false, sourceGateTile.dialedAddress.size(), sourceGateTile.gateAddress);
 				
-				// Open target gate
-				if (targetDhdTile != null)
-					AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, EnumSymbol.BRB.id, targetDhdTile), targetPoint );
+				if (targetDhdTile != null) 
+					targetDhdTile.activateSymbol(EnumSymbol.BRB.id);
 				
 				AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.GATE_RENDERER_UPDATE, EnumGateAction.OPEN_GATE, targetPos), targetPoint );
 			}
@@ -319,7 +317,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 									int symbolCount = gateTile.getEnteredSymbolsCount();				
 																	
 									// Update the DHD's renderer
-									AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, message.objectID, dhdTile), point );
+									dhdTile.activateSymbol(message.objectID);
 									
 									// Limit not reached, activating in order
 									//if ( gateTile.getMaxSymbols() > symbolCount ) {

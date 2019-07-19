@@ -1,9 +1,5 @@
 package mrjake.aunis.packet;
 
-import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtonsToClient;
-import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtonsToClient.ClearLinkedDHDButtonsClientHandler;
-import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient;
-import mrjake.aunis.packet.dhd.renderingUpdate.DHDIncomingWormholePacketToClient.DHDIncomingWormholePacketToClientHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient.GateRenderingUpdatePacketToClientHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
@@ -57,10 +53,8 @@ public class AunisPacketHandler {
 
 		
 		INSTANCE.registerMessage(GateRenderingUpdatePacketToClientHandler.class, GateRenderingUpdatePacketToClient.class, id, Side.CLIENT); id++;
-		INSTANCE.registerMessage(DHDIncomingWormholePacketToClientHandler.class, DHDIncomingWormholePacketToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, RetrieveMotionToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(TileUpdateClientHandler.class, RendererUpdatePacketToClient.class, id, Side.CLIENT); id++;
-		INSTANCE.registerMessage(ClearLinkedDHDButtonsClientHandler.class, ClearLinkedDHDButtonsToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(UpgradeSlotInteractHandler.class, UpgradeSlotInteractToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(EnergyStorageToClientHandler.class, EnergyStoredToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(ShouldRenderWavesToClientHandler.class, ShouldRenderWavesToClient.class, id, Side.CLIENT); id++;

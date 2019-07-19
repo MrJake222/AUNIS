@@ -165,7 +165,6 @@ public class StargateGenerator {
 		Template template = templateManager.getTemplate(server, new ResourceLocation(Aunis.ModID, desert ? "sg_desert" : "sg_plains"));
 		
 		if (template != null) {			
-			Aunis.info("Spawning at " + pos);
 			Random rand = new Random();
 			
 			PlacementSettings settings = new PlacementSettings().setIgnoreStructureBlock(false).setRotation(rotation);
@@ -193,7 +192,6 @@ public class StargateGenerator {
 					
 					if (rand.nextFloat() < AunisConfig.mysteriousConfig.despawnDhdChance) {						
 						world.setBlockToAir(dhdPos);
-						Aunis.info("despawning dhd");
 					}
 					
 					else {

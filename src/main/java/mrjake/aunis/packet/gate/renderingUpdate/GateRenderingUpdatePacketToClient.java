@@ -5,7 +5,6 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumGateAction;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
-import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.stargate.StargateRenderer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.DHDTile;
@@ -100,22 +99,7 @@ public class GateRenderingUpdatePacketToClient extends PositionedPacket {
 					return;
 				}
 				
-				switch ( EnumPacket.valueOf(message.packetID) ) {
-					case DHD_RENDERER_UPDATE:
-						DHDRenderer dhdRenderer = dhdTile.getDHDRenderer();
-						
-						if (message.objectID == -1) 
-							dhdRenderer.clearButtons();
-						
-						else {
-							if (message.objectID == EnumSymbol.BRB.id)
-								dhdRenderer.brbToActivate = true;
-							
-							dhdRenderer.activateButton(message.objectID, message.sound);
-						}
-						
-						break;
-						
+				switch ( EnumPacket.valueOf(message.packetID) ) {						
 					case GATE_RENDERER_UPDATE:
 						gateRendererUpdate(EnumGateAction.valueOf(message.objectID), gateTile);
 						

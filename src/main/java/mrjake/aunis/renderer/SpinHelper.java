@@ -1,6 +1,5 @@
 package mrjake.aunis.renderer;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.state.SpinState;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import net.minecraft.world.World;
@@ -87,7 +86,7 @@ public class SpinHelper {
 	 * turning off all the logic.  
 	 */
 	public void requestStop(long worldTicks) {
-		Aunis.info("requested stop: " + worldTicks);
+//		Aunis.info("requested stop: " + worldTicks);
 		state.tickStopRequested = worldTicks - state.tickStart;
 		
 		state.stopRequested = true;
@@ -164,7 +163,7 @@ public class SpinHelper {
 					state.isSpinning = false;
 										
 					angle += spinDownFormula(state.tickStopRequested + speedUpTimeTick) * state.direction.mul;
-					Aunis.info("tickStopRequested: " + state.tickStopRequested + ", speedUpTimeTick: " + speedUpTimeTick + ", sum: " + (state.tickStopRequested + speedUpTimeTick));
+//					Aunis.info("tickStopRequested: " + state.tickStopRequested + ", speedUpTimeTick: " + speedUpTimeTick + ", sum: " + (state.tickStopRequested + speedUpTimeTick));
 					
 					onStopReached(angle);
 				}

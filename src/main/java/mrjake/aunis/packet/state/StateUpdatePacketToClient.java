@@ -56,11 +56,17 @@ public class StateUpdatePacketToClient extends PositionedPacket {
 								
 				ITileEntityStateProvider te = (ITileEntityStateProvider) world.getTileEntity(message.pos);
 				
-				State state = te.createState(message.stateType);
-				state.fromBytes(message.stateBuf);
+				try {
+					State state = te.createState(message.stateType);
+					state.fromBytes(message.stateBuf);
+					
+					if (te != null && state != null)
+						te.setState(message.stateType, state);
+				}
 				
-				if (te != null && state != null)
-					te.setState(message.stateType, state);				
+				catch (UnsupportedOperationException e) {
+					e.printStackTrace();
+				}
 			});
 			
 			return null;

@@ -1,16 +1,15 @@
 package mrjake.aunis.upgrade;
 
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.tileentity.ITileEntityRendered;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 public class StargateUpgradeRenderer extends UpgradeRenderer{
 
-	public StargateUpgradeRenderer(TileEntity te) {
-		super(te, ((ITileEntityRendered) te).getRenderer().getHorizontalRotation());
+	public StargateUpgradeRenderer(World world, float horizontalRotation) {
+		super(world, horizontalRotation);
 	}
 
 	@Override

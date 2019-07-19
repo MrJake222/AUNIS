@@ -52,13 +52,19 @@ public class StateUpdateRequestToServer extends PositionedPlayerPacket {
 					ITileEntityStateProvider te = (ITileEntityStateProvider) world.getTileEntity(message.pos);
 				
 					if (te != null) {
-						State state = te.getState(message.stateType);
+						try {
+							State state = te.getState(message.stateType);
 						
-						if (state != null)
-							message.respond(world, new StateUpdatePacketToClient(message.pos, message.stateType, state));
+							if (state != null)
+								message.respond(world, new StateUpdatePacketToClient(message.pos, message.stateType, state));
+							
+							else
+								throw new NotImplementedError("State not implemented on " + te.toString());
+						}
 						
-						else
-							throw new NotImplementedError("State not implemented on " + te.toString());
+						catch (UnsupportedOperationException e) {
+							e.printStackTrace();
+						}
 					}
 				});
 			}

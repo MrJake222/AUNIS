@@ -6,14 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import mrjake.aunis.Aunis;
+import org.lwjgl.input.Mouse;
+
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.renderer.ISpecialRenderer;
-import mrjake.aunis.renderer.stargate.Activation.ActivationState;
+import mrjake.aunis.renderer.activation.Activation;
+import mrjake.aunis.renderer.activation.StargateActivation;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.renderer.state.StargateRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
@@ -223,20 +225,20 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	
 	public void addComputerActivation(long finalMoveStart, boolean finalChevron) {
 		long start = finalMoveStart + (finalChevron ? 20 : 15);		
-		Activation dim = new Activation(8, start + 19 + 3, true).inactive();
+		Activation dimActivation = new StargateActivation(8, start + 19 + 3, true).inactive();
 		
-		activationList.add(new Activation(8, start) {
+		activationList.add(new StargateActivation(8, start) {
 			@Override
 			protected void onActivated() {				
 				if (!finalChevron) {
 					activateNextChevron(false);
-					dim.active();
+					dimActivation.active();
 				}
 			}
 		});
 		
 		if (!finalChevron)
-			activationList.add(dim);
+			activationList.add(dimActivation);
 	}
 	
 	private double ringAngularRotation;
@@ -322,7 +324,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		}
 	}
 	
-	private List<String> chevronTextureList = new ArrayList<String>();
+	private List<String> chevronTextureList = new ArrayList<String>(9);
 	private static final String CHEVRON_TEXTURE_BASE = "stargate/chevron/chevron";
 	
 	private List<Activation> activationList = new ArrayList<>();
@@ -333,7 +335,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	private boolean finalChevronMove;
 	
 	public void activateFinalChevron(boolean setRingSpin) {
-		activationList.add(new Activation(8, world.getTotalWorldTime()));
+		activationList.add(new StargateActivation(8, world.getTotalWorldTime()));
 		activeChevrons++;
 		
 		if (setRingSpin)
@@ -344,10 +346,8 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		activateFinalChevron(true);
 	}
 	
-	public void activateNextChevron(boolean setRingSpin) {
-		Aunis.info("activateNextChevron, active: " + activeChevrons);
-		
-		activationList.add(new Activation(activeChevrons, world.getTotalWorldTime()));
+	public void activateNextChevron(boolean setRingSpin) {		
+		activationList.add(new StargateActivation(activeChevrons, world.getTotalWorldTime()));
 					
 		if (activeChevrons == 0 && setRingSpin) {
 			setRingSpin( true, true );
@@ -379,7 +379,7 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	
 	private void changeChevrons(boolean clear, Long stateChange, int chevronsToChange, boolean changeFinal) {			
 		long activationStateChange;
-		
+		Mouse.setGrabbed(false);
 		if (stateChange != null)
 			activationStateChange = stateChange;
 		else
@@ -396,11 +396,11 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 			chevronsToChange--;
 		
 		for (int i=0; i<chevronsToChange; i++) {
-			activationList.add(new Activation(i, activationStateChange, clear));
+			activationList.add(new StargateActivation(i, activationStateChange, clear));
 		}
 		
 		if (changeFinal)
-			activationList.add(new Activation(8, activationStateChange, clear));
+			activationList.add(new StargateActivation(8, activationStateChange, clear));
 		
 		activeChevrons = clear ? 0 : chevronsToChange;
 	}
@@ -487,25 +487,9 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		for (int i=0; i<9; i++)
 			renderChevron(x, y, z, i, partialTicks);
 		
-		long ticks = world.getTotalWorldTime();
-		
-		for (int i=0; i<activationList.size();) {			
-			Activation activation = activationList.get(i);
-			
-			if (activation.isActive()) {			
-				ActivationState activationState = activation.activate(ticks, partialTicks);
-				
-				chevronTextureList.set(activation.getChevronIndex(), CHEVRON_TEXTURE_BASE + activationState.stage + ".png");
-				
-				if (activationState.remove) {				
-					activationList.remove(activation);
-				}
-				
-				else i++;
-			}
-			
-			else i++;
-		}
+		Activation.iterate(activationList, world.getTotalWorldTime(), partialTicks, (index, stage) -> {
+			chevronTextureList.set(index, CHEVRON_TEXTURE_BASE + stage + ".png");
+		});
 	}
 	
 	public boolean isLastChevronActive() {

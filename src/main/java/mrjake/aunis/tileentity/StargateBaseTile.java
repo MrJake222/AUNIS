@@ -27,9 +27,6 @@ import mrjake.aunis.gui.StargateGUI;
 import mrjake.aunis.integration.opencomputers.OCHelper;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.dhd.renderingUpdate.ClearLinkedDHDButtonsToClient;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacket.EnumPacket;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
@@ -476,7 +473,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 	@Override
 	public UpgradeRenderer getUpgradeRenderer() {
 		if (upgradeRenderer == null)
-			upgradeRenderer = new StargateUpgradeRenderer(this);
+			upgradeRenderer = new StargateUpgradeRenderer(world, world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL).getHorizontalAngle());
 		
 		return upgradeRenderer;
 	}
@@ -728,9 +725,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		DHDTile dhdTile = getLinkedDHD(world);
 				
 		if (dhdTile != null) {
-			dhdTile.clearRendererButtons();
+//			dhdTile.clearRendererButtons();
 		
-			clearDelay = dialingFailed ? 39 : 65;
+			clearDelay = dialingFailed ? 39 : 62; // 39 : 65;
 			
 			waitForClear = world.getTotalWorldTime();
 			clearingButtons = true;
@@ -943,8 +940,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		if (!world.isRemote) {
 			if (clearingButtons) {
 				if (world.getTotalWorldTime()-waitForClear >= clearDelay) { 				
-					if (linkedDHD != null)
-						AunisPacketHandler.INSTANCE.sendToAllTracking(new ClearLinkedDHDButtonsToClient(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+					if (isLinked())
+						getLinkedDHD(world).clearSymbols();
+//						AunisPacketHandler.INSTANCE.sendToAllTracking(new ClearLinkedDHDButtonsToClient(linkedDHD), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
 					
 					clearingButtons = false;
 				}
@@ -1335,7 +1333,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		spinDirection = spinDirection.opposite();
 		
 		double distance = spinDirection.getDistance(getStargateRendererState().ringCurrentSymbol.angle, symbol.angle);
-		Aunis.info("position: " + getStargateRendererState().ringCurrentSymbol.angle + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance + ", moveOnly: " + moveOnly);
+//		Aunis.info("position: " + getStargateRendererState().ringCurrentSymbol.angle + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance + ", moveOnly: " + moveOnly);
 		
 		if (distance < (StargateRingSpinHelper.getStopAngleTraveled() + 5))
 			spinDirection = spinDirection.opposite();
@@ -1373,10 +1371,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 
 		if (gateState == EnumGateState.OK) {
 			
-			if (linkedDHD != null) {
-				TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-			
-				AunisPacketHandler.INSTANCE.sendToAllTracking( new GateRenderingUpdatePacketToClient(EnumPacket.DHD_RENDERER_UPDATE, EnumSymbol.BRB, linkedDHD), point );
+			if (isLinked()) {
+				getLinkedDHD(world).activateSymbol(EnumSymbol.BRB.id);
 			}
 		}
 		
