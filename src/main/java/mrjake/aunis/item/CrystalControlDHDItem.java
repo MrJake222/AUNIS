@@ -8,6 +8,7 @@ import mrjake.aunis.AunisConfig;
 import mrjake.aunis.capability.CrystalControlDHDCapabilityProvider;
 import mrjake.aunis.capability.EnergyStorageUncapped;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,6 +16,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -32,6 +34,20 @@ public class CrystalControlDHDItem extends Item {
 		
 		setMaxStackSize(1);
 		setNoRepair();
+		
+		setHasSubtypes(true);
+	}
+	
+	@Override
+	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+		if (isInCreativeTab(tab)) {
+			items.add(new ItemStack(this));
+			
+			ItemStack loadedCrystal = new ItemStack(this);
+			EnergyStorageUncapped energyStorage = (EnergyStorageUncapped) loadedCrystal.getCapability(CapabilityEnergy.ENERGY, null);
+			energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored());
+			items.add(loadedCrystal);
+		}
 	}
 	
 	@Override

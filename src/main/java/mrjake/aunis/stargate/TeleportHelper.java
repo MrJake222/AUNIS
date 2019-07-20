@@ -180,10 +180,8 @@ public class TeleportHelper {
 		
 		setMotion(entity, rotation, motionVector);
 		
-		if (entity instanceof EntityPlayerMP) {
-			StargateBaseTile targetTile = (StargateBaseTile) getWorld(targetGatePos.getDimension()).getTileEntity(targetGatePos.getPos());
-			targetTile.entityPassing();
-		}
+		StargateBaseTile targetTile = (StargateBaseTile) getWorld(targetGatePos.getDimension()).getTileEntity(targetGatePos.getPos());
+		targetTile.entityPassing(entity, true);
 	}
 	
 	/* public static void teleportPlayer(EntityPlayerMP player, BlockPos sourceGatePos, StargatePos targetGatePos, float rotation, Vector2f motionVector) {

@@ -679,8 +679,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		
 		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.WORMHOLE_GO, 1.0f);
 		
-		if (entity instanceof EntityPlayerMP)
-			entityPassing();
+		entityPassing(entity, false);
 		
 		removeEntityFromTeleportList(entityId);
 	}
@@ -1301,10 +1300,15 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		return playersPassed;
 	}
 	
-	public void entityPassing() {
-		playersPassed++;
+	public void entityPassing(Entity entity, boolean inbound) {
+		boolean player = entity instanceof EntityPlayerMP;
+				
+		if (player) {
+			playersPassed++;
+			markDirty();
+		}
 		
-		markDirty();
+		sendSignal(null, "stargate_traveler", new Object[] {inbound, player});
 	}
 	
 	@Override
