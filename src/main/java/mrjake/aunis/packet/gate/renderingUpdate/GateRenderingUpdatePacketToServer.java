@@ -10,7 +10,6 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.StargateBaseBlock;
-import mrjake.aunis.integration.opencomputers.OCHelper;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.PositionedPacket;
@@ -334,7 +333,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 															
 									boolean lock = symbol == EnumSymbol.ORIGIN;
 									
-									OCHelper.sendSignalToReachable(gateTile.node(), null, "stargate_dhd_chevron_engaged", new Object[] { symbolCount, lock, symbol.name });
+									gateTile.sendSignal(null, "stargate_dhd_chevron_engaged", new Object[] { symbolCount, lock, symbol.name });
 									
 									// Light up target gate, if exists
 									if (lock) {	

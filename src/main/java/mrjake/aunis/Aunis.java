@@ -5,10 +5,12 @@ import org.apache.logging.log4j.Logger;
 import mrjake.aunis.command.CommandQueryStargate;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.integration.ThermalIntegration;
+import mrjake.aunis.integration.opencomputers.OCWrapperInterface;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
 import mrjake.aunis.worldgen.AunisWorldGen;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -19,7 +21,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-@Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion, dependencies = "required-after:cofhcore@[4.6.0,);" )
+@Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion, dependencies = "required-after:cofhcore@[4.6.0,);after:opencomputers" )
 public class Aunis {	
     public static final String ModID = "aunis";
     public static final String Name = "AUNIS";
@@ -39,6 +41,27 @@ public class Aunis {
     public static IProxy proxy;
     public static Logger logger;
     
+	// ------------------------------------------------------------------------
+    // OpenComputers
+    private static final String OC_WRAPPER_LOADED = "mrjake.aunis.integration.opencomputers.OCWrapperLoaded";
+    private static final String OC_WRAPPER_NOT_LOADED = "mrjake.aunis.integration.opencomputers.OCWrapperNotLoaded";
+    
+    private static OCWrapperInterface ocWrapper;
+    public static OCWrapperInterface getOCWrapper() {
+    	if (ocWrapper == null) {
+    		try {
+				ocWrapper = (OCWrapperInterface) Class.forName(Loader.isModLoaded("opencomputers") ? OC_WRAPPER_LOADED : OC_WRAPPER_NOT_LOADED).newInstance();
+			}
+    		
+    		catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+    	}
+    	
+    	return ocWrapper;
+    }
+    
+	// ------------------------------------------------------------------------
     static {
     	FluidRegistry.enableUniversalBucket();
     }
@@ -63,7 +86,7 @@ public class Aunis {
     }
  
     @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
+    public void postInit(FMLPostInitializationEvent event) {    	
     	proxy.postInit(event);
     }
     

@@ -4,7 +4,6 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.item.StargateMemberItemBlock;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.StargateMemberTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
@@ -59,7 +58,7 @@ public class AunisBlocks {
 		registry.registerAll(blocks);
 		registry.register(stargateMemberBlock);
 		
-		GameRegistry.registerTileEntity(StargateBaseTile.class, AunisBlocks.stargateBaseBlock.getRegistryName());
+		Aunis.getOCWrapper().registerStargateBaseTile();
 		GameRegistry.registerTileEntity(StargateMemberTile.class, AunisBlocks.stargateMemberBlock.getRegistryName());
 		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.dhdBlock.getRegistryName());
 		GameRegistry.registerTileEntity(CrystalInfuserTile.class, AunisBlocks.crystalInfuserBlock.getRegistryName());

@@ -35,6 +35,10 @@ public class DHDRenderer {
 		buttonTextureList.add(BRB_TEXTURE_BASE + "0.png");
 	}
 	
+	public float getHorizontalRotation() {
+		return horizontalRotation;
+	}
+	
 	private List<Integer> getActiveSymbols() {
 		List<Integer> out = new ArrayList<>();
 		

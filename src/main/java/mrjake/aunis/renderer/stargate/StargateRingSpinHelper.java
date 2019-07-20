@@ -1,7 +1,5 @@
 package mrjake.aunis.renderer.stargate;
 
-import li.cil.oc.api.machine.Context;
-import mrjake.aunis.integration.opencomputers.OCHelper;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.renderingUpdate.RequestStopToClient;
@@ -39,7 +37,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 	/**
 	 * OpenComputers {@link Context} to send events to.
 	 */
-	private Context context;
+	private Object context;
 	
 	public StargateRingSpinHelper(World world, BlockPos pos, StargateRenderer renderer, StargateSpinState state) {
 		super(world, state);
@@ -83,7 +81,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.SPIN_STATE, new SpinStateRequest(direction, targetSymbol, lock, moveOnly)), this.targetPoint);
 	}
 	
-	public void requestStart(double startingRotation, EnumSpinDirection direction, EnumSymbol targetSymbol, boolean lock, Context context, boolean moveOnly) {
+	public void requestStart(double startingRotation, EnumSpinDirection direction, EnumSymbol targetSymbol, boolean lock, Object context, boolean moveOnly) {
 		this.context = context;
 		
 		this.requestStart(startingRotation, direction, targetSymbol, lock, moveOnly);
@@ -210,7 +208,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 					if (lock)
 						GateRenderingUpdatePacketToServer.attemptLightUp(world, gateTile);
 					
-					OCHelper.sendSignalToReachable(gateTile.node(), context, "stargate_spin_chevron_engaged", new Object[] { symbolCount, lock, getStargateSpinState().targetSymbol.name });
+					gateTile.sendSignal(context, "stargate_spin_chevron_engaged", new Object[] { symbolCount, lock, getStargateSpinState().targetSymbol.name });
 				}
 			}
 		}

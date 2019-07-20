@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
@@ -72,9 +71,9 @@ public class DHDTile extends TileEntity implements ITileEntityUpgradeable, ITick
 	}
 	
 	@Override
-	public UpgradeRenderer getUpgradeRenderer() {
+	public UpgradeRenderer getUpgradeRenderer() {		
 		if (upgradeRenderer == null)
-			upgradeRenderer = new DHDUpgradeRenderer(world, world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL));
+			upgradeRenderer = new DHDUpgradeRenderer(world, getDHDRenderer().getHorizontalRotation());
 		
 		return upgradeRenderer;
 	}
