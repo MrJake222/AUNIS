@@ -1,5 +1,6 @@
 package mrjake.aunis.renderer.stargate;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.renderingUpdate.RequestStopToClient;
@@ -204,6 +205,8 @@ public class StargateRingSpinHelper extends SpinHelper {
 					
 					int symbolCount = gateTile.getEnteredSymbolsCount();
 					boolean lock = symbolCount == 8 || (symbolCount == 7 && getStargateSpinState().targetSymbol == EnumSymbol.ORIGIN);
+					
+					Aunis.info("symbolCount: " + symbolCount + ", target: " + getStargateSpinState().targetSymbol + ", lock: " + lock);
 					
 					if (lock)
 						GateRenderingUpdatePacketToServer.attemptLightUp(world, gateTile);

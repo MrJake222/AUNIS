@@ -777,36 +777,44 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				// If entity not added to scheduled teleport list
 				if ( !scheduledTeleportMap.containsKey(entId) ) {
 					StargatePos targetGate = StargateNetwork.get(world).getStargate( dialedAddress );
-					if (targetGate != null) {					
-						World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
-						
-						BlockPos targetPos = targetGate.getPos();
-						// StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
-						
-						EnumFacing sourceFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
-						EnumFacing targetFacing = targetWorld.getBlockState(targetPos).getValue(AunisProps.FACING_HORIZONTAL);
-						
-						float rotation = (float) Math.toRadians( EnumFacing.fromAngle(targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle()).getOpposite().getHorizontalAngle() );
-	
-						TeleportPacket packet = new TeleportPacket(pos, targetGate, rotation);
-						
-						if (entity instanceof EntityPlayerMP) {
-							scheduledTeleportMap.put(entId, packet);
-							AunisPacketHandler.INSTANCE.sendTo(new RetrieveMotionToClient(pos), (EntityPlayerMP) entity);
-						}
-						
-						else {
-							Vector2f motion = new Vector2f( (float)entity.motionX, (float)entity.motionZ );
+					if (targetGate != null) {	
+						try {
+							World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 							
-							if (TeleportHelper.frontSide(sourceFacing, motion)) {
-								scheduledTeleportMap.put(entId, packet.setMotion(motion) );
-								teleportEntity(entId);
+							BlockPos targetPos = targetGate.getPos();
+							// StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
+							
+							EnumFacing sourceFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
+							EnumFacing targetFacing = targetWorld.getBlockState(targetPos).getValue(AunisProps.FACING_HORIZONTAL);
+							
+							float rotation = (float) Math.toRadians( EnumFacing.fromAngle(targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle()).getOpposite().getHorizontalAngle() );
+		
+							TeleportPacket packet = new TeleportPacket(pos, targetGate, rotation);
+							
+							if (entity instanceof EntityPlayerMP) {
+								scheduledTeleportMap.put(entId, packet);
+								AunisPacketHandler.INSTANCE.sendTo(new RetrieveMotionToClient(pos), (EntityPlayerMP) entity);
 							}
 							
-							/*else {
-								// TODO Make custom message appear
-								// entity.onKillCommand();
-							}*/
+							else {
+								Vector2f motion = new Vector2f( (float)entity.motionX, (float)entity.motionZ );
+								
+								if (TeleportHelper.frontSide(sourceFacing, motion)) {
+									scheduledTeleportMap.put(entId, packet.setMotion(motion) );
+									teleportEntity(entId);
+								}
+								
+								/*else {
+									// TODO Make custom message appear
+									// entity.onKillCommand();
+								}*/
+							}
+						}
+						
+						catch (Exception e) {
+							e.printStackTrace();
+							
+							scheduledTeleportMap.remove(entId);
 						}
 					}
 				}
@@ -973,7 +981,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 		// Server
 		if ( !world.isRemote ) {			
 			if ( gateAddress == null ) {
-				Random rand = new Random();
+				Random rand = new Random(pos.hashCode() * 31 + world.provider.getDimension());
 				List<EnumSymbol> address = new ArrayList<EnumSymbol>(); 
 					
 				while (true) {
@@ -986,7 +994,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 					}
 					
 					// Check if SOMEHOW Stargate with the same address doesn't exists
-					if ( !StargateNetwork.get(world).checkForStargate(address) )
+					if ( StargateNetwork.get(world).checkForStargate(address) )
+						rand = new Random();
+					else
 						break;
 				}
 							

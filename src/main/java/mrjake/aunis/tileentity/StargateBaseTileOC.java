@@ -141,6 +141,23 @@ public class StargateBaseTileOC extends StargateBaseTile implements Environment 
 		return new Object[] {gateState.toString()};
 	}
 	
+	@Callback(doc = "function() -- Tries to close the gate")
+	public Object[] disengageGate(Context context, Arguments args) {
+		if (stargateState == EnumStargateState.ENGAGED) {
+			if (isInitiating()) {
+				GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+				return new Object[] {};
+			}
+			
+			else
+				return new Object[] {null, "stargate_failure_wrong_end", "Unable to close the gate on this end"};
+		}
+		
+		else {
+			return new Object[] {null, "stargate_failure_not_open", "The gate is closed"};
+		}
+	}
+	
 	private Node node = Network.newNode(this, Visibility.Network).withComponent("stargate", Visibility.Network).create();
 
 	@Override
