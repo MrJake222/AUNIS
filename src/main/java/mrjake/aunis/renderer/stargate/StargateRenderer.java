@@ -508,6 +508,9 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 	public void setActiveChevrons(int activeChevrons, boolean lastChevronActive) {
 		chevronTextureList.clear();
 		this.activeChevrons = activeChevrons;
+				
+		if (lastChevronActive)
+			activeChevrons--;
 		
 		for (int i=0; i<9; i++) {	
 			String tex = CHEVRON_TEXTURE_BASE;

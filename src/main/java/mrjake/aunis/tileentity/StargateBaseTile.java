@@ -160,9 +160,7 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 			}
 		}
 		
-		else {
-			getStargateRendererState().setActiveChevrons(world, pos, getStargateRendererState().getActiveChevrons() + 1);
-		}
+		getStargateRendererState().setActiveChevrons(world, pos, getStargateRendererState().getActiveChevrons() + 1);
 		
 		markDirty();
 		
@@ -208,9 +206,9 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 //		waitForEngage = world.getTotalWorldTime();
 		
 		if (isInitiating)
-			getStargateRendererState().setActiveChevrons(world, pos, dialedAddress.size() - 1);
+			getStargateRendererState().setActiveChevrons(world, pos, dialedAddress.size());
 		else
-			getStargateRendererState().setActiveChevrons(world, pos, dialedAddressSize - 1);
+			getStargateRendererState().setActiveChevrons(world, pos, dialedAddressSize);
 		
 		getStargateRendererState().setFinalActive(world, pos, true);
 		
@@ -600,7 +598,17 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				
 		playersPassed = compound.getInteger("playersPassed");
 		
-		getRendererState().fromNBT(compound);
+		try {
+			getRendererState().fromNBT(compound);
+		}
+		
+		catch (NullPointerException | IndexOutOfBoundsException e) {
+			Aunis.info("Exception at reading RendererState");
+			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
+			
+			e.printStackTrace();
+		}
+		
 		getUpgradeRendererState().fromNBT(compound);
 		
 		energyStorage.deserializeNBT((NBTTagCompound) compound.getTag("energyStorage"));
@@ -985,6 +993,8 @@ public class StargateBaseTile extends TileEntity implements ITileEntityRendered,
 				List<EnumSymbol> address = new ArrayList<EnumSymbol>(); 
 					
 				while (true) {
+					address.clear();
+					
 					while (address.size() < 7) {
 						EnumSymbol symbol = EnumSymbol.valueOf( rand.nextInt(38) );
 							
