@@ -232,6 +232,10 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 					activateNextChevron(false);
 					dimActivation.active();
 				}
+				
+				else {
+					activeChevrons++;
+				}
 			}
 		});
 		
@@ -390,7 +394,9 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 				activationStateChange += 40;
 		}
 
-		if (isLastChevronActive())
+		activeChevrons = clear ? 0 : chevronsToChange;
+		
+		if (isLastChevronActive() || changeFinal)
 			chevronsToChange--;
 		
 		for (int i=0; i<chevronsToChange; i++) {
@@ -399,8 +405,6 @@ public class StargateRenderer implements ISpecialRenderer<StargateRendererState>
 		
 		if (changeFinal)
 			activationList.add(new StargateActivation(8, activationStateChange, clear));
-		
-		activeChevrons = clear ? 0 : chevronsToChange;
 	}
 	
 	public void moveFinalChevron(long finalChevronStart, boolean computer) {
