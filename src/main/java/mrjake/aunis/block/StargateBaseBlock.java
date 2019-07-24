@@ -11,7 +11,7 @@ import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import mrjake.aunis.upgrade.UpgradeHelper;
 import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.Block;
@@ -76,16 +76,18 @@ public class StargateBaseBlock extends Block {
 				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.byHorizontalIndex(meta & 0x03));
 	}
 	
-	// ------------------------------------------------------------------------
+	// ------------------------------------------------------------------------	
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+		Aunis.info("onBlockPlacedBy");
+		
 		if (!world.isRemote) {
 			state = state.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite())
 					.withProperty(AunisProps.RENDER_BLOCK, true); // 2 - send update to clients
 		
 			world.setBlockState(pos, state);
 					
-			StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+			StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
 //			MergeHelper.updateChevRingMergeState(world, pos, false);
 			gateTile.updateMergeState(MergeHelper.checkBlocks(world, pos), state);
 		
@@ -107,7 +109,7 @@ public class StargateBaseBlock extends Block {
 	
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {		
-		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+		StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
 						
 		if (!world.isRemote) {
 			gateTile.updateMergeState(false, state);
@@ -131,7 +133,7 @@ public class StargateBaseBlock extends Block {
 	
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+		StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
 		ItemStack heldItem = player.getHeldItem(hand);
 		
 		// Server side
@@ -184,7 +186,7 @@ public class StargateBaseBlock extends Block {
 	}
 	
 	@Override
-	public StargateBaseTile createTileEntity(World world, IBlockState state) {
+	public StargateBaseTileSG1 createTileEntity(World world, IBlockState state) {
 		return Aunis.getOCWrapper().createStargateBaseTile();
 	}
 	

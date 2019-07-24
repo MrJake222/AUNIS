@@ -3,6 +3,7 @@ package mrjake.aunis;
 import java.util.Arrays;
 
 import mrjake.aunis.block.StargateMemberBlock;
+import mrjake.aunis.block.StargateMemberBlockOrlin;
 import mrjake.aunis.property.PropertyMemberVariant;
 import mrjake.aunis.property.PropertyUnlistedCamoBlockState;
 import net.minecraft.block.properties.IProperty;
@@ -51,4 +52,9 @@ public class AunisProps {
 	 * Contains camouflage blockstate. Used later in rendering.
 	 */
 	public static final PropertyUnlistedCamoBlockState CAMO_BLOCKSTATE = new PropertyUnlistedCamoBlockState();
+
+	/**
+	 * Used to generate collision boxes in {@link StargateMemberBlockOrlin}.
+	 */
+	public static final PropertyDirection ORLIN_VARIANT = PropertyDirection.create("orlin_variant");
 }

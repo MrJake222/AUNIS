@@ -5,7 +5,9 @@ import java.util.List;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
@@ -18,6 +20,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -72,10 +75,11 @@ public class PageNotebookItem extends Item {
 	
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		if (world.getBlockState(pos).getBlock() == AunisBlocks.stargateBaseBlock) {
-						
-			if (!world.isRemote) {
-				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+		if (!world.isRemote) {
+			Block block = world.getBlockState(pos).getBlock();
+			
+			if (block == AunisBlocks.stargateBaseBlock) {
+				StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
 				NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
 				
 				if (compound == null)
@@ -99,9 +103,35 @@ public class PageNotebookItem extends Item {
 				stack.setTagCompound(compound);
 				
 				player.setHeldItem(hand, stack);
+				
+				return EnumActionResult.SUCCESS;
 			}
 			
-			return EnumActionResult.SUCCESS;
+			else if (block == AunisBlocks.stargateOrlinBlock) {
+				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
+				
+				NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
+				if (compound != null && compound.hasKey("address")) {
+					
+					EnumSymbol seventh = null;
+					
+					if (compound.hasKey("7th"))
+						seventh = EnumSymbol.valueOf(compound.getInteger("7th"));
+					
+					List<EnumSymbol> address = EnumSymbol.toSymbolList(EnumSymbol.fromLong(compound.getLong("address")));
+					
+					if (seventh != null)
+						address.add(seventh);
+					
+					address.add(EnumSymbol.ORIGIN);
+					gateTile.dialedAddress = address;
+					
+//					player.swingArm(EnumHand.MAIN_HAND);
+					player.sendMessage(new TextComponentString("Bound to: " + address));
+					
+					return EnumActionResult.SUCCESS;
+				}
+			}
 		}
 	
 		return EnumActionResult.PASS;

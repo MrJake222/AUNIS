@@ -19,6 +19,8 @@ import mrjake.aunis.state.EnumStateType;
 import mrjake.aunis.state.ITileEntityStateProvider;
 import mrjake.aunis.state.State;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.tesr.SpecialRendererProviderInterface;
+import mrjake.aunis.tileentity.stargate.StargateBaseTile;
 import mrjake.aunis.upgrade.DHDUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
 import mrjake.aunis.util.ILinkable;
@@ -32,10 +34,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class DHDTile extends TileEntity implements ITileEntityUpgradeable, ITickable, ILinkable, ITileEntityStateProvider {
+public class DHDTile extends TileEntity implements SpecialRendererProviderInterface, ITileEntityUpgradeable, ITickable, ILinkable, ITileEntityStateProvider {
 	
 	private DHDRenderer renderer;
 	private DHDRendererState rendererState;
@@ -44,6 +48,13 @@ public class DHDTile extends TileEntity implements ITileEntityUpgradeable, ITick
 	private UpgradeRendererState upgradeRendererState;
 	
 	private BlockPos linkedGate = null;
+	
+	@SideOnly(Side.CLIENT)
+	@Override
+	public void render(double x, double y, double z, float partialTicks) {
+		getDHDRenderer().render(x, y, z, partialTicks);
+		getUpgradeRenderer().render(x, y, z, partialTicks);
+	}
 	
 	public DHDRenderer getDHDRenderer() {
 		if (renderer == null)
@@ -190,14 +201,14 @@ public class DHDTile extends TileEntity implements ITileEntityUpgradeable, ITick
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS, 0.5f);
 		}
 		
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.DHD_ACTIVATE_BUTTON_STATE, new DHDActivateButtonState(idList)), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(idList)), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
 		
 		getDHDRendererState().activeButtons.addAll(idList);
 		markDirty();
 	}
 	
 	public void clearSymbols() {
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.DHD_ACTIVATE_BUTTON_STATE, new DHDActivateButtonState(true)), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(true)), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
 		
 		getDHDRendererState().activeButtons.clear();
 		markDirty();
@@ -211,7 +222,7 @@ public class DHDTile extends TileEntity implements ITileEntityUpgradeable, ITick
 			case RENDERER_STATE:
 				return getDHDRendererState();
 		
-			case DHD_ACTIVATE_BUTTON_STATE:
+			case DHD_ACTIVATE_BUTTON:
 				return null;
 				// Should send this directly from the server
 				
@@ -226,7 +237,7 @@ public class DHDTile extends TileEntity implements ITileEntityUpgradeable, ITick
 			case RENDERER_STATE:
 				return new DHDRendererState();
 		
-			case DHD_ACTIVATE_BUTTON_STATE:
+			case DHD_ACTIVATE_BUTTON:
 				return new DHDActivateButtonState();
 				
 			default:
@@ -242,7 +253,7 @@ public class DHDTile extends TileEntity implements ITileEntityUpgradeable, ITick
 				
 				break;
 		
-			case DHD_ACTIVATE_BUTTON_STATE:
+			case DHD_ACTIVATE_BUTTON:
 				DHDActivateButtonState activateState = (DHDActivateButtonState) state;
 				
 				if (activateState.clearOnly)

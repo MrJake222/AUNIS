@@ -8,8 +8,8 @@ import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.state.EnumStateType;
-import mrjake.aunis.tileentity.StargateBaseTile;
-import mrjake.aunis.tileentity.StargateMemberTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateMemberTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.SoundType;
@@ -327,7 +327,7 @@ public class StargateMemberBlock extends Block {
 			world.setBlockState(pos, state); 
 			
 //			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
-			StargateBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
+			StargateBaseTileSG1 gateTile = MergeHelper.findBaseTile(world, pos, state);
 							
 			if (gateTile != null && !gateTile.isMerged())
 				gateTile.updateMergeState(MergeHelper.checkBlocks(world, gateTile.getPos()), null);
@@ -338,7 +338,7 @@ public class StargateMemberBlock extends Block {
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		if (!world.isRemote) {
 			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
-			StargateBaseTile gateTile = memberTile.getBaseTile(world);
+			StargateBaseTileSG1 gateTile = memberTile.getBaseTile(world);
 			
 			if (gateTile != null && memberTile.isMerged())
 				gateTile.updateMergeState(false, state);

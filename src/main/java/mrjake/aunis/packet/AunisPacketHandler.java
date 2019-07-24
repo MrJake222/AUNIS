@@ -1,7 +1,5 @@
 package mrjake.aunis.packet;
 
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToClient.GateRenderingUpdatePacketToClientHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer.GateRenderingUpdatePacketToServerHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.RequestStopToClient.RequestStopClientHandler;
@@ -52,7 +50,6 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(TRControllerActivatedServerHandler.class, TRControllerActivatedToServer.class, id, Side.SERVER); id++;
 
 		
-		INSTANCE.registerMessage(GateRenderingUpdatePacketToClientHandler.class, GateRenderingUpdatePacketToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, RetrieveMotionToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(TileUpdateClientHandler.class, RendererUpdatePacketToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(UpgradeSlotInteractHandler.class, UpgradeSlotInteractToClient.class, id, Side.CLIENT); id++;

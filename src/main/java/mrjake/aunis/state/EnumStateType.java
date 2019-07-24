@@ -13,34 +13,24 @@ import mrjake.aunis.renderer.state.RendererState;
 public enum EnumStateType {
 	// This IDs MUST BE in order
 	// Also NBT keys must be unique
-	RENDERER_STATE(0, "rendererState"),
-	UPGRADE_RENDERER_STATE(1, "upgradeRendererState"),
-	GUI_STATE(2, "guiState"),
-	CAMO_STATE(3, "camoState"),
-	LIGHT_STATE(4, "lightState"),
-	ENERGY_STATE(5, "energyState"),
-	SPIN_STATE(6, "spinState"),
-	FLASH_STATE(7, "flashState"),
-	DHD_ACTIVATE_BUTTON_STATE(8, "dhdActivateButtonState");
+	RENDERER_STATE(0),
+	UPGRADE_RENDERER_STATE(1),
+	GUI_STATE(2),
+	CAMO_STATE(3),
+	LIGHT_STATE(4),
+	ENERGY_STATE(5),
+	SPIN_STATE(6),
+	FLASH_STATE(7),
+	DHD_ACTIVATE_BUTTON(8),
+	RENDERER_UPDATE(9);
 	
 	public int id;
-	private String key;
 	
-	private EnumStateType(int id, String key) {
+	private EnumStateType(int id) {
 		this.id = id;
-		this.key = key;
 	} 
 
 	public static EnumStateType byId(int id) {
 		return EnumStateType.values()[id];
-	}
-
-	/**
-	 * Gets NBT key
-	 * 
-	 * @return NBT key
-	 */
-	public String getKey() {
-		return key;
 	}
 }

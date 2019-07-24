@@ -73,7 +73,8 @@ public class ModelLoader {
 		
 		RingsBlack("RingsBlack", "transportrings/rings_black.obj", "transportrings/rings_black.png"),
 		RingsController_goauld("RingsController_goauld", "transportrings/plate_goauld.obj", "transportrings/goauld_panel.png"),
-		RingsController_goauld_buttons("RingsController_goauld_buttons", "transportrings/buttons_goauld.obj", "transportrings/goauld_buttons.png");
+		RingsController_goauld_buttons("RingsController_goauld_buttons", "transportrings/buttons_goauld.obj", "transportrings/goauld_buttons.png"),
+		ORLIN_GATE("OrlinGate", "stargate/orlin/gate_orlin.obj", "stargate/orlin/gate_orlin.png");
 		
 		private String name;
 		private String modelPath;

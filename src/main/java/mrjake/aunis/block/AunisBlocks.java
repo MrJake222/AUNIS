@@ -4,9 +4,10 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.item.StargateMemberItemBlock;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.StargateMemberTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
+import mrjake.aunis.tileentity.stargate.StargateMemberTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -26,6 +27,9 @@ public class AunisBlocks {
 	public static Block naquadahBlock = new Block(Material.IRON).setRegistryName(Aunis.ModID, "naquadah_block").setTranslationKey(Aunis.ModID + ".naquadah_block");
 	
 	public static StargateBaseBlock stargateBaseBlock = new StargateBaseBlock();	
+	public static StargateOrlinBlock stargateOrlinBlock = new StargateOrlinBlock();	
+	public static StargateMemberBlockOrlin stargateMemberBlockOrlin = new StargateMemberBlockOrlin();	
+	
 	public static DHDBlock dhdBlock = new DHDBlock();
 	public static CrystalInfuserBlock crystalInfuserBlock = new CrystalInfuserBlock();
 	
@@ -42,6 +46,8 @@ public class AunisBlocks {
 		naquadahBlock,
 		
 		stargateBaseBlock,
+		stargateOrlinBlock,
+		stargateMemberBlockOrlin,
 		
 		dhdBlock,
 		crystalInfuserBlock,
@@ -59,6 +65,8 @@ public class AunisBlocks {
 		registry.register(stargateMemberBlock);
 		
 		Aunis.getOCWrapper().registerStargateBaseTile();
+		GameRegistry.registerTileEntity(StargateBaseTileOrlin.class, AunisBlocks.stargateOrlinBlock.getRegistryName());
+		
 		GameRegistry.registerTileEntity(StargateMemberTile.class, AunisBlocks.stargateMemberBlock.getRegistryName());
 		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.dhdBlock.getRegistryName());
 		GameRegistry.registerTileEntity(CrystalInfuserTile.class, AunisBlocks.crystalInfuserBlock.getRegistryName());

@@ -12,15 +12,15 @@ import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
 import mrjake.aunis.item.renderer.PageNotebookTEISR;
 import mrjake.aunis.tesr.CrystalInfuserTESR;
-import mrjake.aunis.tesr.DHD_TESR;
-import mrjake.aunis.tesr.StargateTESR;
+import mrjake.aunis.tesr.SpecialRenderer;
 import mrjake.aunis.tesr.TRControllerTESR;
 import mrjake.aunis.tesr.TransportRingsTESR;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.StargateBaseTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.resources.I18n;
@@ -60,8 +60,11 @@ public class ProxyClient implements IProxy {
 	private void registerRenderers() {
 		OBJLoader.INSTANCE.addDomain("aunis");
 		
-		ClientRegistry.bindTileEntitySpecialRenderer(StargateBaseTile.class, new StargateTESR());
-		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, new DHD_TESR());
+		SpecialRenderer specialRenderer = new SpecialRenderer();
+		
+		ClientRegistry.bindTileEntitySpecialRenderer(StargateBaseTileSG1.class, specialRenderer);
+		ClientRegistry.bindTileEntitySpecialRenderer(StargateBaseTileOrlin.class, specialRenderer);
+		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, specialRenderer);
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, new CrystalInfuserTESR());
 		ClientRegistry.bindTileEntitySpecialRenderer(TransportRingsTile.class, new TransportRingsTESR());

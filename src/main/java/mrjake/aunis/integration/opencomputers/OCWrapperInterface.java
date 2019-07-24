@@ -1,7 +1,7 @@
 package mrjake.aunis.integration.opencomputers;
 
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 
 /**
  * Interface used to call OpenComputers specific functions.
@@ -24,5 +24,5 @@ public interface OCWrapperInterface {
 	 * 
 	 * @return {@link TileEntity}
 	 */
-	public StargateBaseTile createStargateBaseTile();
+	public StargateBaseTileSG1 createStargateBaseTile();
 }

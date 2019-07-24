@@ -1,7 +1,7 @@
 package mrjake.aunis.integration.opencomputers;
 
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class OCWrapperNotLoaded implements OCWrapperInterface {
@@ -9,12 +9,12 @@ public class OCWrapperNotLoaded implements OCWrapperInterface {
 	
 	@Override
 	public void registerStargateBaseTile() {
-		GameRegistry.registerTileEntity(StargateBaseTile.class, AunisBlocks.stargateBaseBlock.getRegistryName());
+		GameRegistry.registerTileEntity(StargateBaseTileSG1.class, AunisBlocks.stargateBaseBlock.getRegistryName());
 	}
 
 	@Override
-	public StargateBaseTile createStargateBaseTile() {
-		return new StargateBaseTile();
+	public StargateBaseTileSG1 createStargateBaseTile() {
+		return new StargateBaseTileSG1();
 	}
 
 }

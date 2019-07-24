@@ -10,7 +10,6 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
 import mrjake.aunis.worldgen.AunisWorldGen;
 import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -25,7 +24,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class Aunis {	
     public static final String ModID = "aunis";
     public static final String Name = "AUNIS";
-    public static final String Version = "1.5.0-beta-hotfix1";
+    public static final String Version = "1.6.0-alpha";
     public static final String MCVersion = "[1.12.2]";
  
     public static final boolean DEBUG = false;
@@ -43,14 +42,14 @@ public class Aunis {
     
 	// ------------------------------------------------------------------------
     // OpenComputers
-    private static final String OC_WRAPPER_LOADED = "mrjake.aunis.integration.opencomputers.OCWrapperLoaded";
+//    private static final String OC_WRAPPER_LOADED = "mrjake.aunis.integration.opencomputers.OCWrapperLoaded";
     private static final String OC_WRAPPER_NOT_LOADED = "mrjake.aunis.integration.opencomputers.OCWrapperNotLoaded";
     
     private static OCWrapperInterface ocWrapper;
     public static OCWrapperInterface getOCWrapper() {
     	if (ocWrapper == null) {
     		try {
-				ocWrapper = (OCWrapperInterface) Class.forName(Loader.isModLoaded("opencomputers") ? OC_WRAPPER_LOADED : OC_WRAPPER_NOT_LOADED).newInstance();
+				ocWrapper = (OCWrapperInterface) Class.forName(OC_WRAPPER_NOT_LOADED).newInstance();
 			}
     		
     		catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {

@@ -46,6 +46,9 @@ public abstract class State implements INBTSerializable<NBTTagCompound> {
 	
 	@Override
 	public void deserializeNBT(NBTTagCompound compound) {
+		if (compound == null)
+			return;
+		
 		byte[] dst = compound.getByteArray("byteArray");
 		
 		if (dst != null && dst.length > 0) {

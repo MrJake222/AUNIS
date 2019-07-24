@@ -3,13 +3,13 @@ package mrjake.aunis.renderer.activation;
 import java.util.List;
 
 import mrjake.aunis.renderer.DHDRenderer;
-import mrjake.aunis.renderer.stargate.StargateRenderer;
+import mrjake.aunis.renderer.stargate.StargateRendererSG1;
 import net.minecraft.world.World;
 
 /**
  * Holds instance of activation request(fox ex. Stargate's chevron or DHD's button).
  * 
- * Previously done by a bunch of variables in {@link StargateRenderer} or {@link DHDRenderer} like "activation", "activationStateChange"
+ * Previously done by a bunch of variables in {@link StargateRendererSG1} or {@link DHDRenderer} like "activation", "activationStateChange"
  * 
  * @author MrJake222
  */

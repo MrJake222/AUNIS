@@ -121,11 +121,14 @@ public enum EnumSymbol {
 	}
 	
 	// Convert ID list to list of EnumSymbols
-	public static List<EnumSymbol> toSymbolList(List<Integer> list) {
+	public static List<EnumSymbol> toSymbolList(List<Integer> list, EnumSymbol... toBeAddded) {
 		List<EnumSymbol> out = new ArrayList<EnumSymbol>();
 		
 		for (int id : list)
 			out.add(EnumSymbol.valueOf(id));
+		
+		for (EnumSymbol add : toBeAddded)
+			out.add(add);
 		
 		return out;
 	}

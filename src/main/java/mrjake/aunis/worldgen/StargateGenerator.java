@@ -12,7 +12,7 @@ import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
@@ -221,7 +221,7 @@ public class StargateGenerator {
 			}
 			
 			if (gatePos != null && dhdPos != null) {				
-				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(gatePos);
+				StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(gatePos);
 				DHDTile dhdTile = (DHDTile) world.getTileEntity(dhdPos);
 				
 				if (gateTile != null) {

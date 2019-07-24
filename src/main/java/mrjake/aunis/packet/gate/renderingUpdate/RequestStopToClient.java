@@ -3,8 +3,9 @@ package mrjake.aunis.packet.gate.renderingUpdate;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
+import mrjake.aunis.renderer.stargate.StargateRendererSG1;
 import mrjake.aunis.renderer.state.SpinState;
-import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -56,12 +57,12 @@ public class RequestStopToClient extends PositionedPacket {
 			World world = player.world;
 			
 			Aunis.proxy.addScheduledTaskClientSide(() -> {
-				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.pos);
+				StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(message.pos);
 				
 				message.worldTicks-=1;
 //				Aunis.info("worldTicks delta: " + (world.getTotalWorldTime()-message.worldTicks));
 				
-				gateTile.getStargateRenderer().requestStopByComputer(message.worldTicks, message.moveOnly);
+				((StargateRendererSG1) gateTile.getRenderer()).requestStopByComputer(message.worldTicks, message.moveOnly);
 			});
 			
 			return null;

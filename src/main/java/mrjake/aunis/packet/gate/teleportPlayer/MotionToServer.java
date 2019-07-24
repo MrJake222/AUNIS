@@ -4,10 +4,9 @@ import javax.vecmath.Vector2f;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.block.StargateBaseBlock;
 import mrjake.aunis.packet.PositionedPacket;
-import mrjake.aunis.stargate.TeleportHelper;
-import mrjake.aunis.tileentity.StargateBaseTile;
+import mrjake.aunis.stargate.teleportation.TeleportHelper;
+import mrjake.aunis.tileentity.stargate.StargateBaseTile;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -58,28 +57,24 @@ public class MotionToServer extends PositionedPacket {
 		public IMessage onMessage(MotionToServer message, MessageContext ctx) {
 			WorldServer world = ctx.getServerHandler().player.getServerWorld();
 			
-			if ( world.getBlockState(message.pos).getBlock() instanceof StargateBaseBlock ) {
-				world.addScheduledTask(() -> {
-					
-					EnumFacing sourceFacing = world.getBlockState(message.pos).getValue(AunisProps.FACING_HORIZONTAL);
-					
-					StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.pos);
-					
-					Vector2f motionVector = new Vector2f(message.motionX, message.motionZ);
-					
-					if (TeleportHelper.frontSide(sourceFacing, motionVector)) {
-						gateTile.scheduledTeleportMap.put(message.entityId, gateTile.scheduledTeleportMap.get(message.entityId).setMotion(motionVector));
-						
-						gateTile.teleportEntity(message.entityId);
-					}
-					
-					else {
-//						((EntityPlayerMP)world.getEntityByID(message.entityId)).onKillCommand();
-						gateTile.removeEntityFromTeleportList(message.entityId);
-					}
-					
-				});
-			}
+			world.addScheduledTask(() -> {
+				
+				EnumFacing sourceFacing = world.getBlockState(message.pos).getValue(AunisProps.FACING_HORIZONTAL);
+				
+				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.pos);
+				
+				Vector2f motionVector = new Vector2f(message.motionX, message.motionZ);
+				
+				if (TeleportHelper.frontSide(sourceFacing, motionVector)) {					
+					gateTile.setMotionOfPassingEntity(message.entityId, motionVector);
+					gateTile.teleportEntity(message.entityId);
+				}
+				
+				else {
+					gateTile.removeEntity(message.entityId);
+				}
+				
+			});
 			
 			return null;
 		}

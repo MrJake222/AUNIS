@@ -11,8 +11,8 @@ import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.state.EnumStateType;
-import mrjake.aunis.tileentity.StargateBaseTile;
-import mrjake.aunis.tileentity.StargateMemberTile;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateMemberTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
@@ -59,11 +59,11 @@ public class MergeHelper {
 		return null;
 	}
 	
-	public static StargateBaseTile findBaseTile(IBlockAccess blockAccess, BlockPos currentPos, IBlockState state) {
+	public static StargateBaseTileSG1 findBaseTile(IBlockAccess blockAccess, BlockPos currentPos, IBlockState state) {
 		BlockPos gatePos = findBasePos(blockAccess, currentPos, state);
 		
 		if (gatePos != null)
-			return (StargateBaseTile) blockAccess.getTileEntity(gatePos);
+			return (StargateBaseTileSG1) blockAccess.getTileEntity(gatePos);
 		
 		else
 			return null;

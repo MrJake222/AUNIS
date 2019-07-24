@@ -26,6 +26,9 @@ public class AunisConfig {
 	@Name("Mysterious Page options")
 	public static MysteriousConfig mysteriousConfig = new MysteriousConfig();
 	
+	@Name("AutoClose options")
+	public static AutoCloseConfig autoCloseConfig = new AutoCloseConfig();
+	
 	
 	public static class PowerConfig {
 		@Name("Stargate's internal buffer size")
@@ -107,6 +110,9 @@ public class AunisConfig {
 		
 		@Name("Allow charging the crystal by hand")
 		public boolean allowHandCrystalCharging = false;
+		
+		@Name("Render horizon bounding box")
+		public boolean renderHorizonBoundingBox = false;
 	}
 	
 	public static class MysteriousConfig {
@@ -125,5 +131,14 @@ public class AunisConfig {
 		@Name("Chance of despawning DHD")
 		@RangeDouble(min=0, max=1)
 		public double despawnDhdChance = 0.05;
+	}
+	
+	public static class AutoCloseConfig {
+		@Name("autoclose enabled")
+		public boolean autocloseEnabled = false;
+		
+		@Name("Seconds to autoclose with no players nearby")
+		@RangeInt(min=1, max=300)
+		public int secondsToAutoclose = 10;
 	}
 }
