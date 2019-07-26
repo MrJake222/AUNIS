@@ -51,7 +51,16 @@ public class PageMysteriousItem extends Item {
 				ItemStack stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
 				stack.setTagCompound(compound);
 				
-				player.setHeldItem(hand, stack);
+				ItemStack held = player.getHeldItem(hand);
+				held.shrink(1);
+				
+				if (held.isEmpty())				
+					player.setHeldItem(hand, stack);
+				
+				else {
+					player.setHeldItem(hand, held);
+					player.addItemStackToInventory(stack);
+				}
 			}
 		}
 		

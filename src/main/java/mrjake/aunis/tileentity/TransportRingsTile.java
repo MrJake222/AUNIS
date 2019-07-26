@@ -27,6 +27,8 @@ import mrjake.aunis.state.ITileEntityStateProvider;
 import mrjake.aunis.state.State;
 import mrjake.aunis.transportrings.TransportRings;
 import mrjake.aunis.util.ILinkable;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -233,13 +235,18 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	);
 	
 	private boolean checkIfObstructed() {
+		if (AunisConfig.ringsConfig.ignoreObstructionCheck)
+			return false;
+		
 		for(int y=0; y<4; y++) {
 			for (Rotation rotation : Rotation.values()) {
 				for (BlockPos invPos : invisibleBlocksTemplate) {
 					
 					BlockPos newPos = new BlockPos(this.pos).add(invPos.rotate(rotation)).add(0, y, 0);
 					
-					if (world.getBlockState(newPos).getBlock() != Blocks.AIR) {
+					Block block = world.getBlockState(newPos).getBlock();
+					
+					if (block != Blocks.AIR && !block.isReplaceable(world, newPos)) {
 						return true;
 					}
 				}
@@ -260,7 +267,12 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 					for (BlockPos invPos : invisibleBlocksTemplate) {
 						
 						BlockPos newPos = new BlockPos(this.pos).add(invPos.rotate(rotation)).add(0, y, 0);
-												
+						IBlockState state = world.getBlockState(newPos);
+						
+						if (state.getBlock() != Blocks.AIR) {
+							state.getBlock().dropBlockAsItem(world, newPos, state, 0);
+						}
+						
 						world.setBlockState(newPos, AunisBlocks.invisibleBlock.getDefaultState(), 3);
 						
 						invisibleBlocks.add(newPos);
@@ -362,9 +374,12 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 
 		int radius = AunisConfig.ringsConfig.rangeFlat;
 		
+		int y = pos.getY();
+		int vertical = AunisConfig.ringsConfig.rangeVertical;
+		
 		List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
 		
-		for (BlockPos newRingsPos : BlockPos.getAllInBoxMutable(new BlockPos(x-radius, 0, z-radius), new BlockPos(x+radius, 255, z+radius))) {
+		for (BlockPos newRingsPos : BlockPos.getAllInBoxMutable(new BlockPos(x-radius, y-vertical, z-radius), new BlockPos(x+radius, y+vertical, z+radius))) {
 			if (world.getBlockState(newRingsPos).getBlock() == AunisBlocks.transportRingsBlock && !pos.equals(newRingsPos)) {
 				
 				TransportRingsTile newRingsTile = (TransportRingsTile) world.getTileEntity(newRingsPos);	

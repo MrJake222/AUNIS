@@ -170,6 +170,12 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 				Timer timer = (Timer) FieldUtils.readField(Minecraft.getMinecraft(), "timer", true);
 				partialTicks = timer.renderPartialTicks;
 			}
+			
+			catch (IncompatibleClassChangeError e) {
+				e.printStackTrace();
+				
+				partialTicks = 0;
+			}
 		}
 		
 		catch (IllegalAccessException e) {
