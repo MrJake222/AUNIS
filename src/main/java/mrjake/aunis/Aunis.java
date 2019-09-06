@@ -25,7 +25,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class Aunis {	
     public static final String ModID = "aunis";
     public static final String Name = "AUNIS";
-    public static final String Version = "1.5.0-beta-hotfix3";
+    public static final String Version = "1.5.0-beta-hotfix3.1";
     public static final String MCVersion = "[1.12.2]";
  
     public static final boolean DEBUG = false;
