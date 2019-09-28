@@ -27,7 +27,8 @@ public class StargateRendererState extends RendererState {
 			for (BlockPos chevPos : MergeHelper.getWithoutLastChevronBlock()) {
 				StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
 				
-				memberTile.setLitUp(activeChevrons > index);
+				if (memberTile != null)
+					memberTile.setLitUp(activeChevrons > index);
 				
 				index++;
 			}	
@@ -47,7 +48,8 @@ public class StargateRendererState extends RendererState {
 			BlockPos chevPos = MergeHelper.getLastChevronBlock();
 			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
 				
-			memberTile.setLitUp(isFinalActive);
+			if (memberTile != null)
+				memberTile.setLitUp(isFinalActive);
 		}
 	}
 	
