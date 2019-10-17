@@ -21,6 +21,10 @@ public class DHDVertex {
 	private float yGlobal;
 	private float zGlobal;
 	
+	public float getGlobalX() { return xGlobal; }
+	public float getGlobalY() { return yGlobal; }
+	public float getGlobalZ() { return zGlobal; }
+	
 	public float xDiffrence;
 	public float yDiffrence;
 	public float zDiffrence;

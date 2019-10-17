@@ -18,12 +18,6 @@ public class ParticleWhiteSmoke extends ParticleExplosion {
 		
 		this.particleScale = (float) (0.8f + (Math.random() * 1));
 	}
-
-//	public ParticleWhiteSmoke(World world, ParticleBlender particle) {
-//		super(world, particle.x, particle.y, particle.z, 0, 0, 0);
-//		
-//		this.motionX = particle.m
-//	}
 	
 	@Override
 	public void onUpdate() {

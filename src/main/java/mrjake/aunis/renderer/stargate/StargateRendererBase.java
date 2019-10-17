@@ -43,6 +43,7 @@ public abstract class StargateRendererBase {
 		return horizontalRotation;
 	}
 	
+	
 	// ---------------------------------------------------------------------------------------
 	// Render
 	

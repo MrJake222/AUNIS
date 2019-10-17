@@ -22,7 +22,8 @@ public enum EnumStateType {
 	SPIN_STATE(6),
 	FLASH_STATE(7),
 	DHD_ACTIVATE_BUTTON(8),
-	RENDERER_UPDATE(9);
+	RENDERER_UPDATE(9),
+	SPARK_STATE(10);
 	
 	public int id;
 	

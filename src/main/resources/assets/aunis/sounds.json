@@ -154,6 +154,14 @@
       "aunis:gate/chevron/chevron_locking_1",
       "aunis:gate/chevron/chevron_locking_2"
     ]
+  },
+  
+  "gate_orlin_dial": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.chevron_open",
+    "sounds": [
+      "aunis:gate/orlin/gate_orlin_dial"
+    ]
   }
 }
 

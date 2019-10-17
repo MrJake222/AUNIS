@@ -308,7 +308,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			((EnergyStorageUncapped) getEnergyStorage(openCost)).extractEnergyUncapped(openCost);
 		}
 		
-		stargateState = EnumStargateState.ENGAGED;
+//		stargateState = EnumStargateState.ENGAGED;
 		sendSignal(null, "stargate_open", new Object[] { isInitiating });
 		
 		markDirty();
@@ -357,7 +357,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	// ------------------------------------------------------------------------
 	// Ticking and loading
 	
-	private TargetPoint targetPoint;
+	protected TargetPoint targetPoint;
 	
 	@Override
 	public void onLoad() {		

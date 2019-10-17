@@ -1,51 +1,38 @@
 package mrjake.aunis.tileentity.stargate;
 
-import java.util.Arrays;
-import java.util.List;
-
+import li.cil.oc.api.internal.Case;
 import li.cil.oc.api.network.SimpleComponent;
 import mrjake.aunis.Aunis;
+import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.particle.ParticleBlender;
+import mrjake.aunis.packet.state.StateUpdatePacketToClient;
+import mrjake.aunis.particle.ParticleSparks;
+import mrjake.aunis.particle.blender.ParticleBlenderSparks;
 import mrjake.aunis.renderer.stargate.StargateRendererBase;
 import mrjake.aunis.renderer.stargate.orlin.StargateRendererOrlin;
+import mrjake.aunis.renderer.state.RendererGateActionState;
+import mrjake.aunis.renderer.state.SparkState;
 import mrjake.aunis.renderer.state.stargate.StargateRendererStateBase;
+import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.teleportation.EventHorizon;
+import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.state.FlashState;
+import mrjake.aunis.state.State;
 import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.ScheduledTask;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
-public class StargateBaseTileOrlin extends StargateBaseTile implements SimpleComponent {
+//@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
+public class StargateBaseTileOrlin extends StargateBaseTile { //implements SimpleComponent {
 	
-	// ------------------------------------------------------------------------
-	// Particles
-	
-	private static final List<ParticleBlender> GATE_OPEN_PARTICLES = Arrays.asList(
-			new ParticleBlender(-2.71127f,  0.188794f, 5.76731f, 1, -0.1f, 0, false, (motion) -> { motion.motionZ = -0.03f + Math.random()*0.06f; }),
-			new ParticleBlender(2.698340f,  0.210467f, 1.65171f, 1, 0.1f, 0, false, (motion) -> { motion.motionZ = -0.03f + Math.random()*0.06f; }),
-			new ParticleBlender(-2.81152f,  0.007747f, 4.34894f, 1, true,  (motion) -> { motion.motionZ = 0.03f + Math.random()*0.05f; }),
-			new ParticleBlender(0.880709f, -0.045567f, 6.63663f, 2, true,  (motion) -> { motion.motionX = -0.03f + Math.random()*0.06f; motion.motionZ = 0.03f + Math.random()*0.01f; }),
-			new ParticleBlender(-1.27690f, -0.025613f, 1.15695f, 5, false, (motion) -> { motion.motionX = -0.03f + Math.random()*0.06f; motion.motionZ = 0.03f + Math.random()*0.01f; }),
-			new ParticleBlender(1.276900f, -0.025613f, 1.15695f, 5, false, (motion) -> { motion.motionX = -0.03f + Math.random()*0.06f; motion.motionZ = 0.03f + Math.random()*0.01f; }),
-			new ParticleBlender(2.279630f,  0.453827f, 5.72200f, 5, 0, -0.01f, true, (motion) -> { motion.motionX = -0.03f + Math.random()*0.06f; motion.motionZ = -0.03f + Math.random()*-0.01f; }),
-			new ParticleBlender(-2.36438f,  0.644607f, 5.53441f, 5, 0, -0.01f, true, (motion) -> { motion.motionX = -0.03f + Math.random()*0.06f; motion.motionZ = -0.03f + Math.random()*-0.01f; }),
-			new ParticleBlender(-1.26211f,  0.45161f, 1.12577f, 5, 0, -0.01f, true, (motion) -> { motion.motionX = -0.03f + Math.random()*0.06f; motion.motionZ = -0.03f + Math.random()*-0.01f; })
-		);
-	
-	private void spawnParticles() {
-		for (ParticleBlender particle : GATE_OPEN_PARTICLES) {
-			particle.spawn(world, pos);
-		}
-		
-//		for (ParticleBlender particle : Arrays.asList(
-//		
-//		)) {
-//			particle.spawn(world, pos);
-//		}
-	}
 	
 	// ------------------------------------------------------------------------
 	// Ticking
@@ -57,12 +44,14 @@ public class StargateBaseTileOrlin extends StargateBaseTile implements SimpleCom
 		renderer = new StargateRendererOrlin(this);
 	}
 	
+	public long animStart;
+	
 	@Override
 	public void update() {
 		super.update();
 		
 		if (world.isRemote) {
-//			spawnParticles();
+			renderer.spawnParticles();
 		}
 	}
 	
@@ -78,8 +67,16 @@ public class StargateBaseTileOrlin extends StargateBaseTile implements SimpleCom
 			
 			if (isPowered) {
 				if (stargateState == EnumStargateState.IDLE) {
-					GateRenderingUpdatePacketToServer.attemptLightUp(world, this);
-					GateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
+					if (GateRenderingUpdatePacketToServer.checkDialedAddress(world, this)) {
+						startSparks();
+						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_ORLIN_DIAL, 1.0f);
+						
+						addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ORLIN_OPEN));
+					}
+					
+					else {
+						Aunis.info("wrong dialed address");
+					}
 				}
 			}
 			
@@ -115,6 +112,10 @@ public class StargateBaseTileOrlin extends StargateBaseTile implements SimpleCom
 		return renderer;
 	}
 	
+	public StargateRendererOrlin getRendererOrlin() {
+		return renderer;
+	}
+	
 	@Override
 	protected StargateRendererStateBase getRendererState() {
 		return rendererState;
@@ -131,14 +132,100 @@ public class StargateBaseTileOrlin extends StargateBaseTile implements SimpleCom
 		super.render(x, y, z, partialTicks);
 	}
 	
+	
+	// ------------------------------------------------------------------------
+	// States
+	
+	@Override
+	public State getState(EnumStateType stateType) {
+		switch (stateType) {
+			case SPARK_STATE:
+				return null;
+				// Shouldn't be done this way
+				
+			default:
+				return super.getState(stateType);
+		}
+	}
+
+	@Override
+	public State createState(EnumStateType stateType) {
+		switch (stateType) {
+			case SPARK_STATE:
+				return new SparkState();
+				
+			default:
+				return super.createState(stateType);
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void setState(EnumStateType stateType, State state) {
+		switch (stateType) {
+			case SPARK_STATE:
+				SparkState sparkState = (SparkState) state;
+				getRendererOrlin().sparkFrom(sparkState.sparkIndex, sparkState.spartStart);
+				
+				break;
+				
+			default:
+				super.setState(stateType, state);
+				break;
+		}
+	}
+	
+	
+	// ------------------------------------------------------------------------
+	// Sparks
+	
+	
+	private int sparkIndex;
+	
+	public void startSparks() {
+		sparkIndex = 0;
+		
+		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ORLIN_SPARK, 5));
+	}
+	
+	// ------------------------------------------------------------------------
+	// Scheduled tasks
+	
+	@Override
+	public void executeTask(EnumScheduledTask scheduledTask) {
+		switch (scheduledTask) {
+			case STARGATE_ORLIN_OPEN:
+				GateRenderingUpdatePacketToServer.attemptLightUp(world, this);
+				GateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
+				
+				break;
+				
+			case STARGATE_ORLIN_SPARK:
+				Aunis.info("sparkIndex: " + sparkIndex);
+				
+				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.SPARK_STATE, new SparkState(sparkIndex, world.getTotalWorldTime())), targetPoint);
+				
+				if (sparkIndex < 5 && sparkIndex != -1)
+					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ORLIN_SPARK, 24));
+				
+				sparkIndex++;
+				
+				break;
+				
+			default:
+				super.executeTask(scheduledTask);
+				break;
+		}
+	}
+	
 
 	// ------------------------------------------------------------------------
 	// OpenComputers
 	
-	@Override
-	public String getComponentName() {
-		return "stargate_orlin";
-	}
+//	@Override
+//	public String getComponentName() {
+//		return "stargate_orlin";
+//	}
 
 	
 	// ------------------------------------------------------------------------

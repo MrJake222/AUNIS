@@ -2,7 +2,9 @@ package mrjake.aunis.block;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.orlin.MergeHelperOrlin;
+import mrjake.aunis.tileentity.ScheduledTask;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -10,10 +12,12 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -67,6 +71,20 @@ public class StargateOrlinBlock extends Block {
 	
 	// ------------------------------------------------------------------------
 	// Block behavior
+	
+	@Override
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		Aunis.info("activated");
+		
+		if (!world.isRemote) {
+			StargateBaseTileOrlin gateTile = (StargateBaseTileOrlin) world.getTileEntity(pos);
+		
+			if (hand == EnumHand.MAIN_HAND)
+				gateTile.startSparks();
+		}
+				
+		return false;
+	}
 	
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {

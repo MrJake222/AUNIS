@@ -87,8 +87,19 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 		targetTile.closeGate(false, true);
 	}
 	
+	/**
+	 * Checks for Stargate at given address and if it's not pointing to itself.
+	 * 
+	 * @param world Target gate world
+	 * @param gateTile Source gate tile
+	 * @return True if address vaild
+	 */
+	public static boolean checkDialedAddress(World world, StargateBaseTile gateTile) {
+		return (StargateNetwork.get(world).stargateInWorld(world, gateTile.dialedAddress) && !gateTile.dialedAddress.subList(0, 6).equals(gateTile.gateAddress.subList(0, 6)));
+	}
+	
 	public static void attemptLightUp(World world, StargateBaseTile gateTile) {
-		if (StargateNetwork.get(world).stargateInWorld(world, gateTile.dialedAddress) && !gateTile.dialedAddress.subList(0, 6).equals(gateTile.gateAddress.subList(0, 6))) {
+		if (checkDialedAddress(world, gateTile)) {
 			StargatePos targetGate = StargateNetwork.get(world).getStargate(gateTile.dialedAddress);
 			World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 			
@@ -110,7 +121,7 @@ public class GateRenderingUpdatePacketToServer extends PositionedPacket {
 		BlockPos sourcePos = gateTile.getPos();
 		
 		// Check if symbols entered match the range, last is ORIGIN, target gate exists, and if not dialing self
-		if (StargateNetwork.get(world).stargateInWorld(world, gateTile.dialedAddress) && !gateTile.dialedAddress.subList(0, 6).equals(gateTile.gateAddress.subList(0, 6))) {
+		if (checkDialedAddress(world, gateTile)) {
 			
 			StargatePos targetGate = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
 			BlockPos targetPos = targetGate.getPos();

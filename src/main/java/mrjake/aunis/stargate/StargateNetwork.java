@@ -96,6 +96,9 @@ public class StargateNetwork extends WorldSavedData {
 	}
 	
 	public boolean stargateInWorld(World currentWorld, List<EnumSymbol> address) {
+		if (address == null)
+			return false;
+		
 		if (address.size() < 7)
 			return false;
 		

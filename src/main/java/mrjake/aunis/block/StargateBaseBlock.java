@@ -175,6 +175,7 @@ public class StargateBaseBlock extends Block {
 			return  heldItem.getItem() == AunisItems.analyzerAncient ||
 					heldItem.getItem() == AunisItems.dialerFast || 
 					heldItem.getItem() == AunisItems.crystalGlyphStargate || 
+					heldItem.getItem() == AunisItems.pageNotebookItem || 
 					heldItem.getItem() == Items.AIR;
 		}
 	}

@@ -1,5 +1,6 @@
 package mrjake.aunis.packet;
 
+import mrjake.aunis.packet.PlayerSwingHandToClient.PlayerSwingHandClientHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer.GateRenderingUpdatePacketToServerHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.RequestStopToClient.RequestStopClientHandler;
@@ -60,5 +61,6 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(StateUpdateClientHandler.class, StateUpdatePacketToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(PlayPositionedSoundClientHandler.class, PlayPositionedSoundToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(RequestStopClientHandler.class, RequestStopToClient.class, id, Side.CLIENT); id++;
+		INSTANCE.registerMessage(PlayerSwingHandClientHandler.class, PlayerSwingHandToClient.class, id, Side.CLIENT); id++;
 	}
 }

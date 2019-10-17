@@ -73,6 +73,8 @@ public class AunisSoundHelper {
 		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_SHUT, new SoundEvent(new ResourceLocation("aunis", "chevron_shut")));
 		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_OPEN, new SoundEvent(new ResourceLocation("aunis", "chevron_open")));
 		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_LOCKING, new SoundEvent(new ResourceLocation("aunis", "chevron_locking")));
+		
+		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_ORLIN_DIAL, new SoundEvent(new ResourceLocation("aunis", "gate_orlin_dial")));
 	}
 	
 	public static void playSoundEventClientSide(World world, BlockPos pos, EnumAunisSoundEvent soundEvent, float volume) {		
