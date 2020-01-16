@@ -17,7 +17,7 @@ public class ParticleBlenderSparks extends ParticleBlender {
 
 	@Override
 	protected Particle createParticle(World world, double x, float y, double z, double motionX, double motionZ, boolean falling) {
-		return new ParticleSparks(world, x, y, z, Minecraft.getMinecraft().effectRenderer);
+		return new ParticleSparks(world, x, y, z, motionX, motionZ, falling, Minecraft.getMinecraft().effectRenderer);
 	}
 
 }

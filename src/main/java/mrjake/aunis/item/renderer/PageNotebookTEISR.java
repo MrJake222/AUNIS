@@ -3,7 +3,6 @@ package mrjake.aunis.item.renderer;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.lwjgl.opengl.GL11;
 
 import mrjake.aunis.item.PageNotebookBakedModel;
@@ -21,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Timer;
 import net.minecraft.util.math.MathHelper;
 
 public class PageNotebookTEISR extends TileEntityItemStackRenderer {

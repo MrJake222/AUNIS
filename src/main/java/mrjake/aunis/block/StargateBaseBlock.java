@@ -188,7 +188,7 @@ public class StargateBaseBlock extends Block {
 	
 	@Override
 	public StargateBaseTileSG1 createTileEntity(World world, IBlockState state) {
-		return Aunis.getOCWrapper().createStargateBaseTile();
+		return new StargateBaseTileSG1();
 	}
 	
 	@Override

@@ -8,6 +8,7 @@ import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.tileentity.stargate.StargateMemberTile;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -64,7 +65,7 @@ public class AunisBlocks {
 		registry.registerAll(blocks);
 		registry.register(stargateMemberBlock);
 		
-		Aunis.getOCWrapper().registerStargateBaseTile();
+		GameRegistry.registerTileEntity(StargateBaseTileSG1.class, AunisBlocks.stargateBaseBlock.getRegistryName());
 		GameRegistry.registerTileEntity(StargateBaseTileOrlin.class, AunisBlocks.stargateOrlinBlock.getRegistryName());
 		
 		GameRegistry.registerTileEntity(StargateMemberTile.class, AunisBlocks.stargateMemberBlock.getRegistryName());

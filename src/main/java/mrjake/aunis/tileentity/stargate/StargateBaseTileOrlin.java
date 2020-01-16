@@ -1,16 +1,11 @@
 package mrjake.aunis.tileentity.stargate;
 
-import li.cil.oc.api.internal.Case;
-import li.cil.oc.api.network.SimpleComponent;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
-import mrjake.aunis.particle.ParticleSparks;
-import mrjake.aunis.particle.blender.ParticleBlenderSparks;
 import mrjake.aunis.renderer.stargate.StargateRendererBase;
 import mrjake.aunis.renderer.stargate.orlin.StargateRendererOrlin;
-import mrjake.aunis.renderer.state.RendererGateActionState;
 import mrjake.aunis.renderer.state.SparkState;
 import mrjake.aunis.renderer.state.stargate.StargateRendererStateBase;
 import mrjake.aunis.sound.AunisSoundHelper;
@@ -19,14 +14,11 @@ import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.teleportation.EventHorizon;
 import mrjake.aunis.state.EnumStateType;
-import mrjake.aunis.state.FlashState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.ScheduledTask;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -205,7 +197,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 				
 				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.SPARK_STATE, new SparkState(sparkIndex, world.getTotalWorldTime())), targetPoint);
 				
-				if (sparkIndex < 5 && sparkIndex != -1)
+				if (sparkIndex < 6 && sparkIndex != -1)
 					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ORLIN_SPARK, 24));
 				
 				sparkIndex++;

@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.StargateGUI;
@@ -21,6 +24,7 @@ import mrjake.aunis.renderer.state.stargate.StargateRendererStateSG1;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.stargate.EnumGateState;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
@@ -34,6 +38,7 @@ import mrjake.aunis.state.StargateGuiState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.ScheduledTask;
 import mrjake.aunis.upgrade.StargateUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
 import mrjake.aunis.util.ILinkable;
@@ -347,6 +352,10 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 		return rendererState;
 	}
 	
+	private StargateRendererStateSG1 getRendererStateSG1() {
+		return (StargateRendererStateSG1) rendererState;
+	}
+	
 	@Override
 	public StargateRendererBase getRenderer() {
 		return renderer;
@@ -509,8 +518,108 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	}
 	
 	// -----------------------------------------------------------------
-	// OpenComputers
-	public void sendSignal(Object context, String name, Object... params) {}
+	// OpenComputers methods
+	
+	@Callback(doc = "function(symbolName:string) -- Spins the ring to the given symbol and engages/locks it")
+	public Object[] engageSymbol(Context context, Arguments args) {
+		if (!stargateState.idle()) {
+			return new Object[] {null, "stargate_busy", stargateState.toString()};
+		}
+		
+		if (gateAddress.size() == 8) {
+			return new Object[] {null, "stargate_failure_full", "Already dialed 8 chevrons"};
+		}
+		
+		String name = args.checkString(0);
+		
+		EnumSymbol symbol = EnumSymbol.forName(name);
+		
+		if (symbol == null)
+			throw new IllegalArgumentException("bad argument #1 (symbol name invalid)");
+		
+		boolean moveOnly = symbol == targetSymbol;
+		
+		if (dialedAddress.contains(symbol)) {
+			return new Object[] {null, "stargate_failure_contains", "Dialed address contains this symbol already"};
+		}
+		
+		this.targetSymbol = symbol;	
+		this.targetSymbolDialing = true;
+		
+		spinDirection = spinDirection.opposite();
+		
+		double distance = spinDirection.getDistance(getRendererStateSG1().ringCurrentSymbol.angle, symbol.angle);
+//			Aunis.info("position: " + getStargateRendererState().ringCurrentSymbol.angle + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance + ", moveOnly: " + moveOnly);
+		
+		if (distance < (StargateRingSpinHelper.getStopAngleTraveled() + 5))
+			spinDirection = spinDirection.opposite();
+		
+		int symbolCount = getEnteredSymbolsCount() + 1;
+		boolean lock = symbolCount == 8 || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN);
+		
+		if (moveOnly) {
+			if (lock) {
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_SHUT, 1f);
+				
+				addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_SHUT_SOUND));
+				addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_OPEN_SOUND));
+			}
+			
+			else
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_LOCKING, 0.2f);
+		}
+		
+		stargateState = EnumStargateState.COMPUTER_DIALING;
+		getServerRingSpinHelper().requestStart(getRendererStateSG1().ringCurrentSymbol.angle, spinDirection, symbol, lock, context, moveOnly);
+		ringRollLoopPlayed = false || moveOnly;
+		
+		sendSignal(context, "stargate_spin_start", new Object[] { symbolCount, lock, targetSymbol.name });
+		
+		markDirty();
+		
+		return new Object[] {"stargate_spin"};
+	}
+
+	@Callback(doc = "function() -- Tries to open the gate")
+	public Object[] engageGate(Context context, Arguments args) {
+		EnumGateState gateState = GateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
+
+		if (gateState == EnumGateState.OK) {
+			
+			if (isLinked()) {
+				getLinkedDHD(world).activateSymbol(EnumSymbol.BRB.id);
+			}
+		}
+		
+		else {
+			targetSymbol = null;
+			targetSymbolDialing = false;
+			
+			markStargateIdle();
+			markDirty();
+			
+			sendSignal(null, "stargate_failed", new Object[] {});
+		}
+		
+		return new Object[] {gateState.toString()};
+	}
+	
+	@Callback(doc = "function() -- Tries to close the gate")
+	public Object[] disengageGate(Context context, Arguments args) {
+		if (stargateState == EnumStargateState.ENGAGED) {
+			if (getStargateState().initiating()) {
+				GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+				return new Object[] {};
+			}
+			
+			else
+				return new Object[] {null, "stargate_failure_wrong_end", "Unable to close the gate on this end"};
+		}
+		
+		else {
+			return new Object[] {null, "stargate_failure_not_open", "The gate is closed"};
+		}
+	}
 	
 	// -----------------------------------------------------------------
 	// Upgrade

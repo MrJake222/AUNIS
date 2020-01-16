@@ -2,9 +2,7 @@ package mrjake.aunis.block;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.orlin.MergeHelperOrlin;
-import mrjake.aunis.tileentity.ScheduledTask;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;

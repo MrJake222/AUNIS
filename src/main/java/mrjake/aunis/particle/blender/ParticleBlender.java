@@ -59,7 +59,6 @@ public abstract class ParticleBlender {
 		motion = motion.rotate((int) horizontalRotation);
 				
 		Minecraft.getMinecraft().effectRenderer.addEffect(createParticle(world, position.x + pos.getX() + 0.5f, y + pos.getY(), position.z + pos.getZ() + 0.5f, motion.x, motion.z, falling));
-		// new ParticleWhiteSmoke(world, position.x + pos.getX() + 0.5f, y + pos.getY(), position.z + pos.getZ() + 0.5f, motion.x, motion.z, falling)
 	}
 	
 	/**
@@ -91,7 +90,7 @@ public abstract class ParticleBlender {
 		            return new SimpleVector(z, -x);
 		            
 		        case 180:
-		            return new SimpleVector(-x, z);
+		            return new SimpleVector(-x, -z);
 		            
 		        case 270:
 		            return new SimpleVector(-z, x);

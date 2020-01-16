@@ -8,10 +8,19 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
 
+import li.cil.oc.api.Network;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.Visibility;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.capability.EnergyStorageUncapped;
+import mrjake.aunis.integration.opencomputers.OCHelper;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.state.StateUpdatePacketToClient;
@@ -57,7 +66,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public abstract class StargateBaseTile extends TileEntity implements SpecialRendererProviderInterface, ITileEntityStateProvider, ITickable, ICapabilityProvider, IScheduledTaskExecutor {
+//@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
+public abstract class StargateBaseTile extends TileEntity implements SpecialRendererProviderInterface, ITileEntityStateProvider, ITickable, ICapabilityProvider, IScheduledTaskExecutor, Environment {
 	
 	// ------------------------------------------------------------------------
 	// Stargate state
@@ -365,6 +375,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 			
 			generateAddress();
+			Network.joinOrCreateNetwork(this);
 		}
 		
 		else {
@@ -841,6 +852,13 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		for (int i=0; i<scheduledTasks.size(); i++)
 			compound.setTag("scheduledTask"+i, scheduledTasks.get(i).serializeNBT());
 		
+		if (node != null) {
+			NBTTagCompound nodeCompound = new NBTTagCompound();
+			node.save(nodeCompound);
+			
+			compound.setTag("node", nodeCompound);
+		}
+		
 		return super.writeToNBT(compound);
 	}
 	
@@ -888,11 +906,64 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		for (int i=0; i<scheduledTasks.size(); i++)
 			scheduledTasks.add(new ScheduledTask(this, (NBTTagCompound) compound.getTag("scheduledTask"+i)));
 		
+		if (node != null && compound.hasKey("node"))
+			node.load((NBTTagCompound) compound.getTag("node"));
+		
 		super.readFromNBT(compound);
 	}
 	
 	
 	// ------------------------------------------------------------------------
 	// OpenComputers
-	public void sendSignal(Object context, String name, Object... params) {}
+	
+	// ------------------------------------------------------------
+	// Node-related work
+	private Node node = Network.newNode(this, Visibility.Network).withComponent("stargate", Visibility.Network).create();
+	
+	@Override
+	public Node node() {
+		return node;
+	}
+
+	@Override
+	public void onConnect(Node node) {}
+
+	@Override
+	public void onDisconnect(Node node) {}
+
+	@Override
+	public void onMessage(Message message) {}
+	
+	@Override
+	public void onChunkUnload() {
+		if (node != null)
+			node.remove();
+		
+		super.onChunkUnload();
+	}
+
+	@Override
+	public void invalidate() {
+		if (node != null)
+			node.remove();
+		
+		super.invalidate();
+	}
+	
+	public void sendSignal(Object context, String name, Object... params) {
+		OCHelper.sendSignalToReachable(node, (Context) context, name, params);
+	}
+	
+	// ------------------------------------------------------------
+	// Methods
+	// function(arg:type[, optionArg:type]):resultType; Description.
+	@Callback(getter = true)
+	public Object[] stargateAddress(Context context, Arguments args) {
+		return new Object[] {gateAddress};
+	}
+
+	@Callback(getter = true)
+	public Object[] dialedAddress(Context context, Arguments args) {
+		return new Object[] {dialedAddress};
+	}
 }

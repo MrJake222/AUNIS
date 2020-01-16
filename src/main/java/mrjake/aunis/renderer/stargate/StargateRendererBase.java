@@ -37,6 +37,8 @@ public abstract class StargateRendererBase {
 			horizontalRotation = (int) facing.getOpposite().getHorizontalAngle();
 		else
 			horizontalRotation = (int) facing.getHorizontalAngle();
+		
+		Aunis.info("horizontalRotation: " + horizontalRotation);
 	}
 	
 	public int getHorizontalRotation() {

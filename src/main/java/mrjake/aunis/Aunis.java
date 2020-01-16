@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import mrjake.aunis.command.CommandQueryStargate;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.integration.ThermalIntegration;
-import mrjake.aunis.integration.opencomputers.OCWrapperInterface;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
 import mrjake.aunis.worldgen.AunisWorldGen;
@@ -39,26 +38,6 @@ public class Aunis {
     @SidedProxy(clientSide = Aunis.CLIENT, serverSide = Aunis.SERVER)
     public static IProxy proxy;
     public static Logger logger;
-    
-	// ------------------------------------------------------------------------
-    // OpenComputers
-//    private static final String OC_WRAPPER_LOADED = "mrjake.aunis.integration.opencomputers.OCWrapperLoaded";
-    private static final String OC_WRAPPER_NOT_LOADED = "mrjake.aunis.integration.opencomputers.OCWrapperNotLoaded";
-    
-    private static OCWrapperInterface ocWrapper;
-    public static OCWrapperInterface getOCWrapper() {
-    	if (ocWrapper == null) {
-    		try {
-				ocWrapper = (OCWrapperInterface) Class.forName(OC_WRAPPER_NOT_LOADED).newInstance();
-			}
-    		
-    		catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-    	}
-    	
-    	return ocWrapper;
-    }
     
 	// ------------------------------------------------------------------------
     static {

@@ -11,6 +11,8 @@ import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.particle.blender.ParticleBlender;
 import mrjake.aunis.particle.blender.ParticleBlenderSmoke;
 import mrjake.aunis.particle.blender.ParticleBlenderSparks;
+import mrjake.aunis.particle.blender.ParticleBlender.RandomizeInterface;
+import mrjake.aunis.particle.blender.ParticleBlender.SimpleVector;
 import mrjake.aunis.renderer.stargate.StargateRendererBase;
 import mrjake.aunis.renderer.state.stargate.StargateRendererStateBase;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
@@ -101,14 +103,23 @@ public class StargateRendererOrlin extends StargateRendererBase {
 			new ParticleBlenderSmoke(-1.26211f,  0.451610f, 1.12577f, 5, 50, 0, -0.01f, true, (motion) -> { motion.x = -0.03f + Math.random()*0.06f; motion.z = -0.03f + Math.random()*-0.01f; })
 	);
 	
+	private static final RandomizeInterface sparkRandomizer = new RandomizeInterface() {
+		
+		@Override
+		public void randomize(SimpleVector motion) {
+			motion.x = 0.02 - Math.random()/25;
+			motion.z = 0.2 + Math.random()/10;
+		}
+	};
+	
 	private static final List<ParticleBlender> SPARK_PARTICLES = Arrays.asList(
-			new ParticleBlenderSparks(2.3029000f, -0.025317f, 5.64195f, 1, 1, false, (motion) -> {}),
-			new ParticleBlenderSparks(2.8649800f, -0.020389f, 3.16358f, 1, 1, false, (motion) -> {}),
-			new ParticleBlenderSparks(1.2703200f, -0.020800f, 1.17375f, 1, 1, false, (motion) -> {}),
-			new ParticleBlenderSparks(-1.279090f, -0.026023f, 1.15467f, 1, 1, false, (motion) -> {}),
-			new ParticleBlenderSparks(-2.861490f, -0.022729f, 3.15241f, 1, 1, false, (motion) -> {}),
-			new ParticleBlenderSparks(-2.327020f, -0.014086f, 5.54528f, 1, 1, false, (motion) -> {}),
-			new ParticleBlenderSparks(-0.000057f, -0.024829f, 6.74985f, 1, 1, false, (motion) -> {})
+			new ParticleBlenderSparks(2.3029000f, -0.025317f, 5.64195f, 1, 1, false, sparkRandomizer),
+			new ParticleBlenderSparks(2.8649800f, -0.020389f, 3.16358f, 1, 1, false, sparkRandomizer),
+			new ParticleBlenderSparks(1.2703200f, -0.020800f, 1.17375f, 1, 1, false, sparkRandomizer),
+			new ParticleBlenderSparks(-1.279090f, -0.026023f, 1.15467f, 1, 1, false, sparkRandomizer),
+			new ParticleBlenderSparks(-2.861490f, -0.022729f, 3.15241f, 1, 1, false, sparkRandomizer),
+			new ParticleBlenderSparks(-2.327020f, -0.014086f, 5.54528f, 1, 1, false, sparkRandomizer),
+			new ParticleBlenderSparks(-0.000057f, -0.024829f, 6.74985f, 1, 1, false, sparkRandomizer)
 	);
 	
 	private long sparkStart;
@@ -129,10 +140,13 @@ public class StargateRendererOrlin extends StargateRendererBase {
 		
 		// ---------------------------------------------------------------------------------------
 		// Sparks
-		
+				
+		// 6 here increases amount of sparks shot at one time
 		long animTime = (world.getTotalWorldTime() - sparkStart) / 6 + 1;
 		
 		if (animTime < 4) {
+			
+			// Easing method, greater the animTime, lower the frequency of the sparks
 			if (world.getTotalWorldTime() % (animTime) == 0) {
 				SPARK_PARTICLES.get(sparkIndex).spawn(world, pos, horizontalRotation, false);
 			}
