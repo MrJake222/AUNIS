@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.StargateGUI;
@@ -281,8 +282,14 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 		ringRollLoopPlayed = true;
 	}
 	
-	public boolean getRollPlayed() {
-		return ringRollLoopPlayed;
+	/**
+	 * Set by {@link StargateRingSpinHelper#stopRequestedAction(effectiveTick)} to stop all ring sounds
+	 */
+	protected boolean ringRollStopFlag = false;
+	
+	public void setRingRollStopFlag(boolean ringRollStopFlag) {
+		this.ringRollLoopPlayed = true;
+		this.ringRollStopFlag = ringRollStopFlag;
 	}
 		
 	private boolean clearingButtons;
@@ -322,7 +329,18 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 			if (!ringRollLoopPlayed && (world.getTotalWorldTime() - rendererState.spinState.tickStart) > 98) {
 				ringRollLoopPlayed = true;
 				
-				AunisSoundHelper.playPositionedSound(world,  pos, EnumAunisPositionedSound.RING_ROLL_LOOP, true);
+				if (!ringRollStopFlag) {
+					AunisSoundHelper.playPositionedSound(world,  pos, EnumAunisPositionedSound.RING_ROLL_LOOP, true);
+				}
+			}
+			
+			if (ringRollStopFlag) {
+				ringRollStopFlag = false;
+				
+				if (ringRollLoopPlayed)
+					AunisSoundHelper.playPositionedSound(world, pos, EnumAunisPositionedSound.RING_ROLL_LOOP, false);
+				else
+					AunisSoundHelper.playPositionedSound(world, pos, EnumAunisPositionedSound.RING_ROLL_START, false);
 			}
 		
 			if (rendererState.spinState.isSpinning) {
@@ -606,7 +624,7 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	
 	@Callback(doc = "function() -- Tries to close the gate")
 	public Object[] disengageGate(Context context, Arguments args) {
-		if (stargateState == EnumStargateState.ENGAGED) {
+		if (stargateState.engaged()) {
 			if (getStargateState().initiating()) {
 				GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 				return new Object[] {};
@@ -617,7 +635,7 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 		}
 		
 		else {
-			return new Object[] {null, "stargate_failure_not_open", "The gate is closed"};
+			return new Object[] {null, "stargate_failure_not_open", "The gate is closed", stargateState.toString()};
 		}
 	}
 	

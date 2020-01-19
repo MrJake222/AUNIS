@@ -8,7 +8,6 @@ import mrjake.aunis.packet.state.StateUpdatePacketToClient;
 import mrjake.aunis.renderer.SpinHelper;
 import mrjake.aunis.renderer.state.stargate.StargateSpinState;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
@@ -159,10 +158,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 				if (!getStargateSpinState().lockSoundPlayed && (effectiveTick >= (state.tickStopRequested + speedUpTimeTick - 5))) {
 					getStargateSpinState().lockSoundPlayed = true;
 					
-					if (gateTile.getRollPlayed())
-						AunisSoundHelper.playPositionedSound(world, pos, EnumAunisPositionedSound.RING_ROLL_LOOP, false);
-					else
-						AunisSoundHelper.playPositionedSound(world, pos, EnumAunisPositionedSound.RING_ROLL_START, false);
+					gateTile.setRingRollStopFlag(true);
 										
 					if (getStargateSpinState().finalChevron) {
 						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_SHUT, 1f);

@@ -246,12 +246,16 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		if (dialedAddress.size() == maxChevrons || (dialedAddress.size() == 7 && symbol == EnumSymbol.ORIGIN)) {
 			getRendererState().setFinalActive(world, pos, true);
 			
-			sendRenderingUpdate(EnumGateAction.ACTIVATE_FINAL, computer, 0);
+			if (!computer)
+				sendRenderingUpdate(EnumGateAction.ACTIVATE_FINAL, computer, 0);
+			
 			lastGlyphDialed(computer);
 		}
 		
 		else {			
-			sendRenderingUpdate(EnumGateAction.ACTIVATE_NEXT, computer, 0);
+			if (!computer) {
+				sendRenderingUpdate(EnumGateAction.ACTIVATE_NEXT, computer, 0);
+			}
 		}
 		
 		getRendererState().setActiveChevrons(world, pos, getRendererState().getActiveChevrons() + 1);

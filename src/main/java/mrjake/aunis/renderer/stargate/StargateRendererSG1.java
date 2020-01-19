@@ -167,7 +167,7 @@ public class StargateRendererSG1 extends StargateRendererBase {
 		state.spinState.finalChevron = finalChevron;
 	}
 	
-	public void addComputerActivation(long finalMoveStart, boolean finalChevron) {
+	public void addComputerActivation(long finalMoveStart, boolean finalChevron) {		
 		long start = finalMoveStart + (finalChevron ? 20 : 15);		
 		Activation dimActivation = new StargateActivation(8, start + 19 + 3, true).inactive();
 		
@@ -303,10 +303,6 @@ public class StargateRendererSG1 extends StargateRendererBase {
 		
 		if (activeChevrons < 8)
 			activeChevrons++;
-	}
-	
-	public void activateNextChevron() {
-		activateNextChevron(true);
 	}
 	
 	@Override
