@@ -4,7 +4,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.raycaster.DHDActivation;
+import mrjake.aunis.raycaster.RaycasterDHD;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -87,7 +87,7 @@ public class AunisEventHandler {
 					Block block = world.getBlockState(activatedBlock).getBlock();
 
 					if (block == AunisBlocks.dhdBlock) {
-						DHDActivation.INSTANCE.onActivated(world, activatedBlock, player);
+						RaycasterDHD.INSTANCE.onActivated(world, activatedBlock, player);
 					}
 				}
 			}

@@ -20,15 +20,12 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.capability.EnergyStorageUncapped;
-import mrjake.aunis.integration.opencomputers.OCHelper;
+import mrjake.aunis.integration.OCHelper;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.state.StateUpdatePacketToClient;
-import mrjake.aunis.packet.state.StateUpdateRequestToServer;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.packet.StateUpdateRequestToServer;
+import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.renderer.stargate.StargateRendererBase;
-import mrjake.aunis.renderer.state.RendererGateActionState;
-import mrjake.aunis.renderer.state.RendererGateActionState.EnumGateAction;
-import mrjake.aunis.renderer.state.stargate.StargateRendererStateBase;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.AutoCloseManager;
@@ -38,15 +35,18 @@ import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.teleportation.EventHorizon;
-import mrjake.aunis.state.EnumStateType;
-import mrjake.aunis.state.FlashState;
-import mrjake.aunis.state.ITileEntityStateProvider;
+import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.state.StargateFlashState;
+import mrjake.aunis.state.StateProviderInterface;
+import mrjake.aunis.state.StargateRendererActionState;
+import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.State;
-import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.tesr.SpecialRendererProviderInterface;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.ScheduledTask;
-import mrjake.aunis.tileentity.tasks.IScheduledTaskExecutor;
+import mrjake.aunis.tileentity.util.IScheduledTaskExecutor;
+import mrjake.aunis.tileentity.util.ScheduledTask;
+import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -67,7 +67,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 //@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
-public abstract class StargateBaseTile extends TileEntity implements SpecialRendererProviderInterface, ITileEntityStateProvider, ITickable, ICapabilityProvider, IScheduledTaskExecutor, Environment {
+public abstract class StargateBaseTile extends TileEntity implements SpecialRendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, IScheduledTaskExecutor, Environment {
 	
 	// ------------------------------------------------------------------------
 	// Stargate state
@@ -131,7 +131,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	
 	private void sendRenderingUpdate(EnumGateAction gateAction, boolean computer, int chevronCount) {
 		if (isActionSupported(gateAction)) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.RENDERER_UPDATE, new RendererGateActionState(gateAction, computer, chevronCount)), targetPoint);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(gateAction, computer, chevronCount)), targetPoint);
 		}
 	}
 	
@@ -383,7 +383,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		}
 		
 		else {
-			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), EnumStateType.RENDERER_STATE));
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
 		}
 	}
 	
@@ -464,11 +464,11 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 						}
 						
 						else
-							GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+							StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 					}
 					
 					else {
-						GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+						StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 					}
 				}
 				
@@ -580,8 +580,8 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		StargatePos targetPos = StargateNetwork.get(world).getStargate(dialedAddress);
 		BlockPos tPos = targetPos.getPos();
 				
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.FLASH_STATE, new FlashState(isCurrentlyUnstable)), targetPoint);
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(tPos, EnumStateType.FLASH_STATE, new FlashState(isCurrentlyUnstable)), new TargetPoint(targetPos.getDimension(), tPos.getX(), tPos.getY(), tPos.getZ(), 512));
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.FLASH_STATE, new StargateFlashState(isCurrentlyUnstable)), targetPoint);
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(tPos, StateTypeEnum.FLASH_STATE, new StargateFlashState(isCurrentlyUnstable)), new TargetPoint(targetPos.getDimension(), tPos.getX(), tPos.getY(), tPos.getZ(), 512));
 	}
 	
 	
@@ -589,7 +589,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	// States
 
 	@Override
-	public State getState(EnumStateType stateType) {
+	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case RENDERER_STATE:
 				return getRendererState();
@@ -600,16 +600,16 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	}
 
 	@Override
-	public State createState(EnumStateType stateType) {
+	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case RENDERER_STATE:
 				return getRendererState();
 		
 			case RENDERER_UPDATE:
-				return new RendererGateActionState();
+				return new StargateRendererActionState();
 				
 			case FLASH_STATE:
-				return new FlashState();
+				return new StargateFlashState();
 				
 			default:
 				return null;
@@ -618,14 +618,14 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void setState(EnumStateType stateType, State state) {
+	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
 			case RENDERER_STATE:
 				getRenderer().setRendererState((StargateRendererStateBase) state);
 				break;
 				
 			case RENDERER_UPDATE:
-				switch (((RendererGateActionState) state).action) {
+				switch (((StargateRendererActionState) state).action) {
 					case OPEN_GATE:
 						getRenderer().openGate();
 						break;
@@ -641,7 +641,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 				break;
 		
 			case FLASH_STATE:
-				getRenderer().setHorizonUnstable(((FlashState) state).flash);
+				getRenderer().setHorizonUnstable(((StargateFlashState) state).flash);
 				break;
 				
 			default:
@@ -884,20 +884,20 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			dialedAddress.add( EnumSymbol.valueOf(compound.getInteger("dialedSymbol"+i)) );
 		}
 				
-		getAutoCloseManager().deserializeNBT((NBTTagCompound) compound.getTag("autoCloseManager"));
+		getAutoCloseManager().deserializeNBT(compound.getCompoundTag("autoCloseManager"));
 		
 		try {
-			getRendererState().deserializeNBT((NBTTagCompound) compound.getTag("rendererState"));		
+			getRendererState().deserializeNBT(compound.getCompoundTag("rendererState"));		
 		}
 		
-		catch (NullPointerException | IndexOutOfBoundsException e) {
+		catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
 			Aunis.info("Exception at reading RendererState");
 			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
 
 			e.printStackTrace();
 		}
 		
-		energyStorage.deserializeNBT((NBTTagCompound) compound.getTag("energyStorage"));
+		energyStorage.deserializeNBT(compound.getCompoundTag("energyStorage"));
 		
 		this.openCost = compound.getInteger("openCost");
 		this.keepAliveCostPerTick = compound.getInteger("keepAliveCostPerTick");
@@ -908,10 +908,10 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		stargateState = EnumStargateState.valueOf(compound.getInteger("stargateState"));
 		
 		for (int i=0; i<scheduledTasks.size(); i++)
-			scheduledTasks.add(new ScheduledTask(this, (NBTTagCompound) compound.getTag("scheduledTask"+i)));
+			scheduledTasks.add(new ScheduledTask(this, compound.getCompoundTag("scheduledTask"+i)));
 		
 		if (node != null && compound.hasKey("node"))
-			node.load((NBTTagCompound) compound.getTag("node"));
+			node.load(compound.getCompoundTag("node"));
 		
 		super.readFromNBT(compound);
 	}

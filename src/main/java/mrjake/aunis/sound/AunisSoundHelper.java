@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.sound.PlayPositionedSoundToClient;
+import mrjake.aunis.packet.SoundPositionedPlayToClient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -48,7 +48,7 @@ public class AunisSoundHelper {
 	}
 	
 	public static void playPositionedSound(World world, BlockPos pos, EnumAunisPositionedSound soundEnum, boolean play) {
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new PlayPositionedSoundToClient(pos, soundEnum, play), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new SoundPositionedPlayToClient(pos, soundEnum, play), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
 	}
 	
 	// ----------------------------------------------------------------------------------------------------------------

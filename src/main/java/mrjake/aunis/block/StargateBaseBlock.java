@@ -4,14 +4,14 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.state.StateUpdatePacketToClient;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.stargate.StargateNetwork;
-import mrjake.aunis.state.EnumStateType;
-import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.UpgradeHelper;
 import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.Block;
@@ -139,7 +139,7 @@ public class StargateBaseBlock extends Block {
 		// Server side
 		if (!world.isRemote) {			
 			if (heldItem.getItem() == AunisItems.analyzerAncient) {
-				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(gateTile.getPos(), EnumStateType.GUI_STATE, gateTile.getState(EnumStateType.GUI_STATE)), (EntityPlayerMP) player);
+				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(gateTile.getPos(), StateTypeEnum.GUI_STATE, gateTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
 								
 				return true;
 			}

@@ -4,8 +4,8 @@ import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.PositionedPlayerPacket;
-import mrjake.aunis.packet.state.StateUpdatePacketToClient;
-import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -58,7 +58,7 @@ public class SaveRingsParametersToServer extends PositionedPlayerPacket {
 				TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(message.pos);
 				ringsTile.setRingsParams(player, message.address, message.name);
 			
-				message.respond(world, new StateUpdatePacketToClient(message.pos, EnumStateType.GUI_STATE, ringsTile.getState(EnumStateType.GUI_STATE)));
+				message.respond(world, new StateUpdatePacketToClient(message.pos, StateTypeEnum.GUI_STATE, ringsTile.getState(StateTypeEnum.GUI_STATE)));
 			});
 			
 			return null;

@@ -11,10 +11,7 @@ import mrjake.aunis.item.color.CrystalControlDHDItemColor;
 import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
 import mrjake.aunis.item.renderer.PageNotebookTEISR;
-import mrjake.aunis.tesr.CrystalInfuserTESR;
-import mrjake.aunis.tesr.SpecialRenderer;
-import mrjake.aunis.tesr.TRControllerTESR;
-import mrjake.aunis.tesr.TransportRingsTESR;
+import mrjake.aunis.renderer.SpecialRenderer;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
@@ -66,9 +63,9 @@ public class ProxyClient implements IProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateBaseTileOrlin.class, specialRenderer);
 		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, specialRenderer);
 		
-		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, new CrystalInfuserTESR());
-		ClientRegistry.bindTileEntitySpecialRenderer(TransportRingsTile.class, new TransportRingsTESR());
-		ClientRegistry.bindTileEntitySpecialRenderer(TRControllerTile.class, new TRControllerTESR());
+		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, specialRenderer);
+		ClientRegistry.bindTileEntitySpecialRenderer(TransportRingsTile.class, specialRenderer);
+		ClientRegistry.bindTileEntitySpecialRenderer(TRControllerTile.class, specialRenderer);
 	}
 	
 

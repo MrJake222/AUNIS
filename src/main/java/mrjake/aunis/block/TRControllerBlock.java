@@ -6,9 +6,9 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.state.StateUpdatePacketToClient;
-import mrjake.aunis.raycaster.ControllerActivation;
-import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.raycaster.RaycasterRingsController;
+import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.util.LinkingHelper;
@@ -128,7 +128,7 @@ public class TRControllerBlock extends Block {
 				TransportRingsTile ringsTile = controllerTile.getLinkedRingsTile(world);
 				
 				if (ringsTile != null) {
-					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(ringsTile.getPos(), EnumStateType.GUI_STATE, ringsTile.getState(EnumStateType.GUI_STATE)), (EntityPlayerMP) player);
+					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(ringsTile.getPos(), StateTypeEnum.GUI_STATE, ringsTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
 				}				
 			}
 		}
@@ -136,7 +136,7 @@ public class TRControllerBlock extends Block {
 		else {
 			if (world.isRemote) {
 				if (hand == EnumHand.MAIN_HAND)
-					ControllerActivation.INSTANCE.onActivated(world, pos, player);
+					RaycasterRingsController.INSTANCE.onActivated(world, pos, player);
 			}
 		}
 		

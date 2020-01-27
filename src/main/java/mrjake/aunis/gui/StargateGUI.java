@@ -1,8 +1,8 @@
 package mrjake.aunis.gui;
 
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.state.StateUpdateRequestToServer;
-import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.packet.StateUpdateRequestToServer;
+import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.StargateGuiState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -115,6 +115,6 @@ public class StargateGUI extends GuiBase {
 	
 	@Override
 	public void updateScreen() {
-		AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Minecraft.getMinecraft().player, EnumStateType.ENERGY_STATE));
+		AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Minecraft.getMinecraft().player, StateTypeEnum.ENERGY_STATE));
 	}
 }

@@ -9,11 +9,10 @@ import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.ItemRenderer;
 import mrjake.aunis.renderer.SpinHelper;
-import mrjake.aunis.renderer.state.CrystalInfuserRendererState;
-import mrjake.aunis.renderer.state.SpinState;
+import mrjake.aunis.state.CrystalInfuserRendererState;
+import mrjake.aunis.state.SpinState;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
@@ -21,7 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 
-public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRendererState>{
+public class CrystalInfuserRenderer {
 
 	private World world;
 	private BlockPos pos;
@@ -29,9 +28,7 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 	private ItemRenderer itemRenderer;
 	private ItemStack renderedItemStack;
 
-	
 	private long creationTime;
-
 	
 	public CrystalInfuserRenderer(CrystalInfuserTile te) {
 		this.world = te.getWorld();
@@ -42,7 +39,6 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 		itemRenderer = new ItemRenderer(renderedItemStack);
 	}
 	
-	@Override
 	public void render(double x, double y, double z, double partialTicks) {
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
@@ -50,15 +46,12 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 //		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 		
 		long tick = world.getTotalWorldTime() - creationTime;
-//		double tickPartial = tick + partialTicks;
 		
 		GlStateManager.color(0.4f, 0.4f, 0.4f, 1.0f);
-		
-//		Aunis.info("render crystal");
-		
+				
 		renderBaseModel();
 		
-		if (doCrystalRender) {
+		if (state.doCrystalRender) {
 			renderCrystal(tick, partialTicks);
 			
 			if (state.renderWaves || !waves.isEmpty())
@@ -68,24 +61,12 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 		GlStateManager.popMatrix();
 	}
 	
-	private void renderBaseModel() {
-//		ModelLoader.loadModel(EnumModel.CrystalInfuserPylon);
-//		ModelLoader.loadModel(EnumModel.CrystalInfuserBase);
-		
+	private void renderBaseModel() {		
 		Model infuserPylon = ModelLoader.getModel( EnumModel.CrystalInfuserPylon );
 		Model infuserBase = ModelLoader.getModel( EnumModel.CrystalInfuserBase );
 				
 		if(infuserPylon != null && infuserBase != null) {
 			EnumModel.CrystalInfuserPylon.bindTexture();
-						
-//			for (int i=0; i<=3; i++) {
-//				GlStateManager.pushMatrix();
-//				
-//				GlStateManager.rotate(90 * i, 0, 1, 0);
-//				infuserBase.render();
-//				
-//				GlStateManager.popMatrix();
-//			}
 			
 			GlStateManager.pushMatrix();
 
@@ -141,29 +122,6 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 	}
 	
 	// ------------------------------------------------------------------------------------------
-	// Maybe, someday...
-	/* private void renderRays(long tick, double partialTicks, double y) {
-		for (int i=0; i<4; i++) {
-			GlStateManager.pushMatrix();
-			
-			GlStateManager.rotate(90 * i, 0, 1, 0);
-
-			GlStateManager.enableBlend();
-			GlStateManager.glLineWidth(4.0f);
-			GlStateManager.color(1, 0, 0, 1);
-			
-			GL11.glBegin(GL11.GL_LINES);
-			GL11.glVertex3f(0, (float) (y * 0.45), 0);
-			GL11.glVertex3f(0.14004f, 0.66842f, -0.13457f);
-			GL11.glEnd();
-			
-			GlStateManager.disableBlend();
-			
-			GlStateManager.popMatrix();
-		}
-	} */
-	
-	// ------------------------------------------------------------------------------------------
 	private List<CrystalInfuserWave> waves = new ArrayList<CrystalInfuserWave>();
 	private long lastCreatedTick = 0;
 	
@@ -201,57 +159,24 @@ public class CrystalInfuserRenderer implements ISpecialRenderer<CrystalInfuserRe
 	// ------------------------------------------------------------------------------------------
 	CrystalInfuserRendererState state = new CrystalInfuserRendererState();
 	
-	private boolean doCrystalRender = false;
-
-	public void setEnergyStored(int energyStored) {	
-		state.energyStored = energyStored;
+	public void setRendererState(CrystalInfuserRendererState state) {
 		
-//		Aunis.info("setting energy: " + state.energyStored);
-		
-		if (state.energyStored == -1) {
-			doCrystalRender = false;
-		}
-		
-		else {
-			EnergyStorageSerializable energyStorage = (EnergyStorageSerializable) this.renderedItemStack.getCapability(CapabilityEnergy.ENERGY, null);
-			energyStorage.setEnergyStored(state.energyStored);
-						
-			if (!doCrystalRender) {
-				crystalRotation = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL).getHorizontalAngle();
-				
-				doCrystalRender = true;
-			}
-		}
-	}
-	
-	public void shouldRenderWaves(boolean renderWaves) {
-		state.renderWaves = renderWaves;
-				
-//		Mouse.setGrabbed(false);
-		
-		if (state.renderWaves) {
-			waves.clear();
+		// Starting spinning
+		if (!this.state.doCrystalRender && state.doCrystalRender) {
+			crystalRotation = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL).getHorizontalAngle();
 			
-//			Aunis.info("requesting start crystalRotation: " + crystalRotation);
+			waves.clear();
 			getSpinHelper().requestStart(crystalRotation);
 		}
 		
-		else {
-//			Aunis.info("requesting stop");
+		// Stopping spinning		
+		if (this.state.doCrystalRender && !state.doCrystalRender) {
 			getSpinHelper().requestStop();
 		}
-	}
-	
-	@Override
-	public void setState(CrystalInfuserRendererState rendererState) {
-		this.state = rendererState;
 		
-		setEnergyStored(state.energyStored);
-		shouldRenderWaves(rendererState.renderWaves);
-	}
+		this.state = state;
 
-	@Override
-	public float getHorizontalRotation() {
-		return 0;
+		EnergyStorageSerializable energyStorage = (EnergyStorageSerializable) this.renderedItemStack.getCapability(CapabilityEnergy.ENERGY, null);
+		energyStorage.setEnergyStored(state.energyStored);
 	}
 }

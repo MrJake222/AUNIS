@@ -11,13 +11,13 @@ import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.StargateActivation;
-import mrjake.aunis.renderer.state.stargate.StargateRendererStateBase;
-import mrjake.aunis.renderer.state.stargate.StargateRendererStateSG1;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.MergeHelper;
-import mrjake.aunis.state.SpinStateRequest;
+import mrjake.aunis.state.StargateRendererStateBase;
+import mrjake.aunis.state.StargateRendererStateSG1;
+import mrjake.aunis.state.StargateSpinStateRequest;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -121,7 +121,7 @@ public class StargateRendererSG1 extends StargateRendererBase {
 		return ringSpinHelper;
 	}
 		
-	public void setRingSpin(boolean spin, boolean dialingComplete, SpinStateRequest stateRequest) {
+	public void setRingSpin(boolean spin, boolean dialingComplete, StargateSpinStateRequest stateRequest) {
 		this.state.dialingComplete = dialingComplete;
 		
 		if (spin) {
@@ -145,7 +145,7 @@ public class StargateRendererSG1 extends StargateRendererBase {
 	}
 	
 	public void setRingSpin(boolean spin, boolean dialingComplete) {
-		setRingSpin(spin, dialingComplete, new SpinStateRequest());
+		setRingSpin(spin, dialingComplete, new StargateSpinStateRequest());
 	}
 	
 	public void requestStopByComputer(long worldTicks, boolean moveOnly) {

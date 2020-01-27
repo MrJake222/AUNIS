@@ -12,7 +12,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.teleportPlayer.RetrieveMotionToClient;
+import mrjake.aunis.packet.stargate.StargateMotionToClient;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
@@ -168,7 +168,7 @@ public class EventHorizon {
 					
 					if (entity instanceof EntityPlayerMP) {
 						scheduledTeleportMap.put(entityId, packet);
-						AunisPacketHandler.INSTANCE.sendTo(new RetrieveMotionToClient(pos), (EntityPlayerMP) entity);
+						AunisPacketHandler.INSTANCE.sendTo(new StargateMotionToClient(pos), (EntityPlayerMP) entity);
 					}
 					
 					else {

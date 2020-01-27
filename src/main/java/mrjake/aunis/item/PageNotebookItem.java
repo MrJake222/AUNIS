@@ -5,7 +5,6 @@ import java.util.List;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.PlayerSwingHandToClient;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.stargate.StargateBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
@@ -130,7 +129,7 @@ public class PageNotebookItem extends Item {
 					address.add(EnumSymbol.ORIGIN);
 					gateTile.dialedAddress = address;
 					
-					AunisPacketHandler.INSTANCE.sendTo(new PlayerSwingHandToClient(hand), (EntityPlayerMP) player);
+//					AunisPacketHandler.INSTANCE.sendTo(new PlayerSwingHandToClient(hand), (EntityPlayerMP) player);
 					player.sendMessage(new TextComponentString("Bound to: " + address));
 					
 					return EnumActionResult.SUCCESS;

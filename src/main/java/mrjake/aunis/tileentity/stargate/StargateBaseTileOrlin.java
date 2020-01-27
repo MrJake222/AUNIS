@@ -2,21 +2,21 @@ package mrjake.aunis.tileentity.stargate;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.state.StateUpdatePacketToClient;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.renderer.stargate.StargateRendererBase;
-import mrjake.aunis.renderer.stargate.orlin.StargateRendererOrlin;
-import mrjake.aunis.renderer.state.SparkState;
-import mrjake.aunis.renderer.state.stargate.StargateRendererStateBase;
+import mrjake.aunis.renderer.stargate.StargateRendererOrlin;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.teleportation.EventHorizon;
-import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.state.StargateOrlinSparkState;
+import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.State;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.ScheduledTask;
+import mrjake.aunis.tileentity.util.ScheduledTask;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -59,7 +59,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 			
 			if (isPowered) {
 				if (stargateState == EnumStargateState.IDLE) {
-					if (GateRenderingUpdatePacketToServer.checkDialedAddress(world, this)) {
+					if (StargateRenderingUpdatePacketToServer.checkDialedAddress(world, this)) {
 						startSparks();
 						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_ORLIN_DIAL, 1.0f);
 						
@@ -74,7 +74,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 			
 			else {
 				if (stargateState == EnumStargateState.ENGAGED_INITIATING)
-					GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+					StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 			}
 			
 			markDirty();
@@ -129,7 +129,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 	// States
 	
 	@Override
-	public State getState(EnumStateType stateType) {
+	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case SPARK_STATE:
 				return null;
@@ -141,10 +141,10 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 	}
 
 	@Override
-	public State createState(EnumStateType stateType) {
+	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case SPARK_STATE:
-				return new SparkState();
+				return new StargateOrlinSparkState();
 				
 			default:
 				return super.createState(stateType);
@@ -153,10 +153,10 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void setState(EnumStateType stateType, State state) {
+	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
 			case SPARK_STATE:
-				SparkState sparkState = (SparkState) state;
+				StargateOrlinSparkState sparkState = (StargateOrlinSparkState) state;
 				getRendererOrlin().sparkFrom(sparkState.sparkIndex, sparkState.spartStart);
 				
 				break;
@@ -187,15 +187,15 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 	public void executeTask(EnumScheduledTask scheduledTask) {
 		switch (scheduledTask) {
 			case STARGATE_ORLIN_OPEN:
-				GateRenderingUpdatePacketToServer.attemptLightUp(world, this);
-				GateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
+				StargateRenderingUpdatePacketToServer.attemptLightUp(world, this);
+				StargateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
 				
 				break;
 				
 			case STARGATE_ORLIN_SPARK:
 				Aunis.info("sparkIndex: " + sparkIndex);
 				
-				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.SPARK_STATE, new SparkState(sparkIndex, world.getTotalWorldTime())), targetPoint);
+				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPARK_STATE, new StargateOrlinSparkState(sparkIndex, world.getTotalWorldTime())), targetPoint);
 				
 				if (sparkIndex < 6 && sparkIndex != -1)
 					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ORLIN_SPARK, 24));

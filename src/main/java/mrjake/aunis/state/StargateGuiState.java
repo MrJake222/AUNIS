@@ -16,9 +16,9 @@ public class StargateGuiState extends State {
 	public boolean hasUpgrade() { return hasUpgrade; }
 	
 	public int maxEnergy;	
-	public EnergyState energyState;
+	public UniversalEnergyState energyState;
 	
-	public StargateGuiState(List<EnumSymbol> gateAddress, boolean hasUpgrade, int maxEnergy, EnergyState energyState) {
+	public StargateGuiState(List<EnumSymbol> gateAddress, boolean hasUpgrade, int maxEnergy, UniversalEnergyState energyState) {
 		this.gateAddress = gateAddress;
 		this.hasUpgrade = hasUpgrade;
 		
@@ -54,7 +54,7 @@ public class StargateGuiState extends State {
 		
 		maxEnergy = buf.readInt();
 		
-		energyState = new EnergyState();
+		energyState = new UniversalEnergyState();
 		energyState.fromBytes(buf);
 	}
 }

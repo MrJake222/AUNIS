@@ -1,5 +1,6 @@
 package mrjake.aunis.tesr;
 
+import mrjake.aunis.renderer.SpecialRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 

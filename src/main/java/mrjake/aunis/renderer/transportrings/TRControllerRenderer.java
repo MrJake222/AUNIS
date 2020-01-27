@@ -78,41 +78,6 @@ public class TRControllerRenderer {
 		GlStateManager.translate(tr.x, tr.y, tr.z);
 		GlStateManager.rotate(rot, 0, 1, 0);
 		
-//		switch (facing) {
-//			case NORTH:
-//				break;
-//				
-//			case EAST:
-//				GlStateManager.rotate(270, 0, 1, 0);
-//				GlStateManager.translate(0, 0, -1);
-//				break;
-//				
-//			case SOUTH:
-//				GlStateManager.rotate(180, 0, 1, 0);
-//				GlStateManager.translate(-1, 0, -1);
-//				break;
-//				
-//			case WEST:
-//				GlStateManager.rotate(90, 0, 1, 0);
-//				GlStateManager.translate(-1, 0, 0);
-//				break;
-//		
-//			default:
-//				break;
-//		}
-//		
-////		GlStateManager.rotate(90, 0, 1, 0);
-//
-//		GlStateManager.translate(0.03, 0.5, 0.5);
-//		GlStateManager.scale(1.3, 1.3, 1.3);
-		
-//		GlStateManager.translate(1, 0, 0);
-//		GlStateManager.rotate(180, 0, 1, 0);
-		
-		
-//		ModelLoader.loadModel(EnumModel.RingsController_goauld);
-//		ModelLoader.loadModel(EnumModel.RingsController_goauld_buttons);
-		
 		EnumModel.RingsController_goauld.bindTexture();
 		Model model = ModelLoader.getModel(EnumModel.RingsController_goauld);
 		if (model != null)

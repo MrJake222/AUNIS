@@ -1,13 +1,14 @@
 package mrjake.aunis.tileentity;
 
 import mrjake.aunis.renderer.transportrings.TRControllerRenderer;
+import mrjake.aunis.tesr.SpecialRendererProviderInterface;
 import mrjake.aunis.util.ILinkable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class TRControllerTile extends TileEntity implements ILinkable {
+public class TRControllerTile extends TileEntity implements ILinkable, SpecialRendererProviderInterface {
 
 	
 	
@@ -59,10 +60,8 @@ public class TRControllerTile extends TileEntity implements ILinkable {
 	// Renderer
 	private TRControllerRenderer renderer;
 	
-	public TRControllerRenderer getRenderer() {
-		if (renderer == null)
-			renderer = new TRControllerRenderer(this);
-		
-		return renderer;
+	@Override
+	public void render(double x, double y, double z, float partialTicks) {
+		renderer.render(x, y, z, partialTicks);
 	}
 }

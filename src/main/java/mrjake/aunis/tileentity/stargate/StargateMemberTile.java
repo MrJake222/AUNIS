@@ -3,13 +3,13 @@ package mrjake.aunis.tileentity.stargate;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.state.StateUpdatePacketToClient;
-import mrjake.aunis.packet.state.StateUpdateRequestToServer;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.stargate.EnumMemberVariant;
-import mrjake.aunis.state.CamoState;
-import mrjake.aunis.state.EnumStateType;
-import mrjake.aunis.state.ITileEntityStateProvider;
-import mrjake.aunis.state.LightState;
+import mrjake.aunis.state.StargateCamoState;
+import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.state.StateProviderInterface;
+import mrjake.aunis.state.StargateLightState;
 import mrjake.aunis.state.State;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
@@ -34,7 +34,7 @@ import net.minecraftforge.items.ItemStackHandler;
  * 
  * @author MrJake
  */
-public class StargateMemberTile extends TileEntity implements ITickable, ITileEntityStateProvider {
+public class StargateMemberTile extends TileEntity implements ITickable, StateProviderInterface {
 	
 	boolean firstTick = true;
 	private boolean waitForClear = false;
@@ -47,8 +47,8 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 			firstTick = false;
 			
 			if (world.isRemote) {				
-				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), EnumStateType.CAMO_STATE));
-				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), EnumStateType.LIGHT_STATE));
+				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.CAMO_STATE));
+				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.LIGHT_STATE));
 			}
 		}
 		
@@ -73,7 +73,7 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 	
 	public void syncLightUp() {
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.LIGHT_STATE, getState(EnumStateType.LIGHT_STATE)), point);
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.LIGHT_STATE, getState(StateTypeEnum.LIGHT_STATE)), point);
 	}
 	
 	public void setLitUp(boolean isLitUp) {
@@ -209,26 +209,26 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 	// States
 	
 	@Override
-	public State getState(EnumStateType stateType) {
+	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case CAMO_STATE:				
-				return new CamoState(camoBlockState);
+				return new StargateCamoState(camoBlockState);
 				
 			case LIGHT_STATE:
-				return new LightState(isLitUp);
+				return new StargateLightState(isLitUp);
 				
 			default:
 				return null;
 		}		
 	}
 	@Override
-	public State createState(EnumStateType stateType) {
+	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case CAMO_STATE:
-				return new CamoState();
+				return new StargateCamoState();
 				
 			case LIGHT_STATE:
-				return new LightState();
+				return new StargateLightState();
 				
 			default:
 				return null;
@@ -237,17 +237,17 @@ public class StargateMemberTile extends TileEntity implements ITickable, ITileEn
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void setState(EnumStateType stateType, State state) {
+	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
 			case CAMO_STATE:
-				CamoState memberState = (CamoState) state;				
+				StargateCamoState memberState = (StargateCamoState) state;				
 				camoBlockState = memberState.getState();
 				
 				world.markBlockRangeForRenderUpdate(pos, pos);
 				break;
 				
 			case LIGHT_STATE:
-				isLitUp = ((LightState) state).isLitUp();
+				isLitUp = ((StargateLightState) state).isLitUp();
 				world.notifyLightSet(pos);
 				world.checkLightFor(EnumSkyBlock.BLOCK, pos);
 				

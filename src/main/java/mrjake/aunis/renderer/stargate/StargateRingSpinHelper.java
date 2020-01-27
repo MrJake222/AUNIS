@@ -2,20 +2,20 @@ package mrjake.aunis.renderer.stargate;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.gate.renderingUpdate.RequestStopToClient;
-import mrjake.aunis.packet.state.StateUpdatePacketToClient;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.stargate.StargateRequestStopToClient;
 import mrjake.aunis.renderer.SpinHelper;
-import mrjake.aunis.renderer.state.stargate.StargateSpinState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.state.EnumStateType;
-import mrjake.aunis.state.SpinStateRequest;
-import mrjake.aunis.tileentity.ScheduledTask;
+import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.state.StargateSpinState;
+import mrjake.aunis.state.StargateSpinStateRequest;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.util.ScheduledTask;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
@@ -78,7 +78,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 			this.requestStart(startingRotation, direction);
 		
 		if (!world.isRemote)
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.SPIN_STATE, new SpinStateRequest(direction, targetSymbol, lock, moveOnly)), this.targetPoint);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPIN_STATE, new StargateSpinStateRequest(direction, targetSymbol, lock, moveOnly)), this.targetPoint);
 	}
 	
 	public void requestStart(double startingRotation, EnumSpinDirection direction, EnumSymbol targetSymbol, boolean lock, Object context, boolean moveOnly) {
@@ -102,7 +102,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 		getStargateSpinState().computerInitializedStop = true;
 		
 		if (!world.isRemote) {			
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new RequestStopToClient(pos, worldTicks, moveOnly), this.targetPoint);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StargateRequestStopToClient(pos, worldTicks, moveOnly), this.targetPoint);
 		}
 		
 		else {
@@ -205,7 +205,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 					Aunis.info("symbolCount: " + symbolCount + ", target: " + getStargateSpinState().targetSymbol + ", lock: " + lock);
 					
 					if (lock)
-						GateRenderingUpdatePacketToServer.attemptLightUp(world, gateTile);
+						StargateRenderingUpdatePacketToServer.attemptLightUp(world, gateTile);
 					
 					gateTile.sendSignal(context, "stargate_spin_chevron_engaged", new Object[] { symbolCount, lock, getStargateSpinState().targetSymbol.name });
 				}

@@ -3,14 +3,13 @@ package mrjake.aunis.renderer.transportrings;
 import java.util.ArrayList;
 import java.util.List;
 
-import mrjake.aunis.renderer.ISpecialRenderer;
-import mrjake.aunis.renderer.state.TransportRingsRendererState;
+import mrjake.aunis.state.TransportRingsRendererState;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.world.World;
 
-public class TransportRingsRenderer implements ISpecialRenderer<TransportRingsRendererState>{
+public class TransportRingsRenderer {
 
 	public static final int ringCount = 5; 
 	public static final int uprisingInterval = 5; 
@@ -35,10 +34,7 @@ public class TransportRingsRenderer implements ISpecialRenderer<TransportRingsRe
 	private int currentRing;
 	private int lastRingAnimated;	
 	private long lastTick;	
-	
-	public int which = 0;
-	
-	@Override
+		
 	public void render(double x, double y, double z, double partialTicks) {
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 		
@@ -147,14 +143,8 @@ public class TransportRingsRenderer implements ISpecialRenderer<TransportRingsRe
 
 	TransportRingsRendererState state = new TransportRingsRendererState();
 	
-	@Override
 	public void setState(TransportRingsRendererState rendererState) {
 		lastTick = -1;
 		this.state = rendererState;
-	}
-
-	@Override
-	public float getHorizontalRotation() {
-		return 0;
 	}
 }

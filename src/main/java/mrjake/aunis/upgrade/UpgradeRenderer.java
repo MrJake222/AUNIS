@@ -1,13 +1,12 @@
 package mrjake.aunis.upgrade;
 
-import mrjake.aunis.renderer.ISpecialRenderer;
 import mrjake.aunis.renderer.ItemRenderer;
-import mrjake.aunis.renderer.state.UpgradeRendererState;
+import mrjake.aunis.state.UpgradeRendererState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 
-public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendererState> {
+public abstract class UpgradeRenderer {
 	private World world;
 	
 	protected float horizontalRotation;
@@ -65,7 +64,6 @@ public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendere
 	/**
 	 * Applies given state to this Renderer 
 	 */
-	@Override
 	public void setState(UpgradeRendererState rendererState) {
 		this.doInsertAnimation = rendererState.doInsertAnimation;
 		this.doRemovalAnimation = rendererState.doRemovalAnimation;
@@ -73,7 +71,6 @@ public abstract class UpgradeRenderer implements ISpecialRenderer<UpgradeRendere
 		this.insertionTime = rendererState.insertionTime;
 	}
 	
-	@Override
 	public float getHorizontalRotation() {
 		return horizontalRotation;
 	}

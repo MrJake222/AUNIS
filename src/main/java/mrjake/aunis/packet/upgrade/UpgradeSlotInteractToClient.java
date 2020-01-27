@@ -2,7 +2,7 @@ package mrjake.aunis.packet.upgrade;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
-import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.UpgradeRenderer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;

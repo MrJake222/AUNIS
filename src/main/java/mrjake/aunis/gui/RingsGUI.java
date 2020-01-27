@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.gui.state.RingsGuiState;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer;
+import mrjake.aunis.state.TransportRingsGuiState;
 import mrjake.aunis.transportrings.TransportRings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -20,10 +20,10 @@ import net.minecraft.util.text.TextComponentString;
 public class RingsGUI extends GuiBase {
 	
 	private BlockPos pos;
-	public RingsGuiState state;
+	public TransportRingsGuiState state;
 	public boolean isOpen;
 	
-	public RingsGUI(BlockPos pos, RingsGuiState state) {
+	public RingsGUI(BlockPos pos, TransportRingsGuiState state) {
 		super(196, 160, 8, FRAME_COLOR, BG_COLOR, TEXT_COLOR, 4);
 		
 		this.pos = pos;

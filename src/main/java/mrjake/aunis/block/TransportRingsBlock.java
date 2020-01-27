@@ -3,8 +3,8 @@ package mrjake.aunis.block;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.state.StateUpdatePacketToClient;
-import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.util.LinkingHelper;
@@ -47,11 +47,7 @@ private static final String blockName = "transportrings_block";
 		
 		if (!world.isRemote) {			
 			if (player.getHeldItem(hand).getItem() == AunisItems.analyzerAncient)
-				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, EnumStateType.GUI_STATE, ringsTile.getState(EnumStateType.GUI_STATE)), (EntityPlayerMP) player);
-		}
-		
-		else {
-			ringsTile.getTransportRingsRenderer().which++;
+				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_STATE, ringsTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
 		}
 		
 		return true;

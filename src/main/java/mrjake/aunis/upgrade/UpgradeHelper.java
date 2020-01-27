@@ -3,7 +3,6 @@ package mrjake.aunis.upgrade;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.upgrade.EnumUpgradeAction;
 import mrjake.aunis.packet.upgrade.UpgradeSlotInteractToClient;
-import mrjake.aunis.tesr.ITileEntityUpgradeable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -81,6 +80,8 @@ public class UpgradeHelper {
 					return false;
 			}
 		}
+		
+		upgradeable.markDirty();
 		
 		return true;
 	}

@@ -3,11 +3,11 @@ package mrjake.aunis.block;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.state.StateUpdatePacketToClient;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.MergeHelper;
-import mrjake.aunis.state.EnumStateType;
+import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import mrjake.aunis.tileentity.stargate.StargateMemberTile;
 import net.minecraft.block.Block;
@@ -304,7 +304,7 @@ public class StargateMemberBlock extends Block {
 			}
 			
 			TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, EnumStateType.CAMO_STATE, memberTile.getState(EnumStateType.CAMO_STATE)), point);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.CAMO_STATE, memberTile.getState(StateTypeEnum.CAMO_STATE)), point);
 		
 			return true;
 		}

@@ -13,15 +13,12 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.StargateGUI;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.StateUpdateRequestToServer;
+import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.renderer.stargate.StargateRendererBase;
 import mrjake.aunis.renderer.stargate.StargateRendererSG1;
 import mrjake.aunis.renderer.stargate.StargateRingSpinHelper;
-import mrjake.aunis.renderer.state.RendererGateActionState;
-import mrjake.aunis.renderer.state.UpgradeRendererState;
-import mrjake.aunis.renderer.state.RendererGateActionState.EnumGateAction;
-import mrjake.aunis.renderer.state.stargate.StargateRendererStateBase;
-import mrjake.aunis.renderer.state.stargate.StargateRendererStateSG1;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
@@ -32,14 +29,19 @@ import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.stargate.teleportation.EventHorizon;
-import mrjake.aunis.state.EnergyState;
-import mrjake.aunis.state.EnumStateType;
-import mrjake.aunis.state.SpinStateRequest;
 import mrjake.aunis.state.StargateGuiState;
+import mrjake.aunis.state.StargateRendererActionState;
+import mrjake.aunis.state.StargateRendererStateBase;
+import mrjake.aunis.state.StargateRendererStateSG1;
+import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
+import mrjake.aunis.state.StargateSpinStateRequest;
 import mrjake.aunis.state.State;
-import mrjake.aunis.tesr.ITileEntityUpgradeable;
+import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.state.UniversalEnergyState;
+import mrjake.aunis.state.UpgradeRendererState;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.ScheduledTask;
+import mrjake.aunis.tileentity.util.ScheduledTask;
+import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.StargateUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
 import mrjake.aunis.util.ILinkable;
@@ -165,7 +167,7 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 			}
 			
 			if (stargateState.engaged()) {
-				GateRenderingUpdatePacketToServer.closeGatePacket(this, true);
+				StargateRenderingUpdatePacketToServer.closeGatePacket(this, true);
 			}
 		}
 		
@@ -238,7 +240,7 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 		compound.setLong("waitForClear", waitForClear);
 		compound.setBoolean("ringRollLoopPlayed", ringRollLoopPlayed);
 		
-		getUpgradeRendererState().toNBT(compound);
+		compound.setTag("upgradeRendererState", getUpgradeRendererState().serializeNBT());
 		
 		compound.setBoolean("targetSymbolDialing", targetSymbolDialing);
 		if (targetSymbol != null)
@@ -261,8 +263,17 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 		clearingButtons = compound.getBoolean("clearingButtons");
 		waitForClear = compound.getLong("waitForClear");
 		ringRollLoopPlayed = compound.getBoolean("ringRollLoopPlayed");
-				
-		getUpgradeRendererState().fromNBT(compound);
+			
+		try {
+			getUpgradeRendererState().deserializeNBT(compound.getCompoundTag("upgradeRendererState"));
+		}
+		
+		catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
+			Aunis.info("Exception at reading RendererState");
+			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
+
+			e.printStackTrace();
+		}
 		
 		targetSymbolDialing = compound.getBoolean("targetSymbolDialing");
 
@@ -300,15 +311,11 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	public void onLoad() {		
 		super.onLoad();
 		
-		renderer = new StargateRendererSG1(this);
-		
-//		if (world.isRemote) {
-//			AunisPacketHandler.INSTANCE.sendToServer( new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide()) );
-//		}
-//		
-//		else {
-//			
-//		}
+		if (world.isRemote) {
+			renderer = new StargateRendererSG1(this);
+			
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.UPGRADE_RENDERER_STATE));
+		}
 	}
 	
 	@Override
@@ -395,13 +402,16 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	// -----------------------------------------------------------------
 	// States
 	@Override
-	public State getState(EnumStateType stateType) {
+	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
+			case UPGRADE_RENDERER_STATE:
+				return getUpgradeRendererState();
+				
 			case GUI_STATE:
-				return new StargateGuiState(gateAddress, hasUpgrade, energyStorage.getMaxEnergyStored(), new EnergyState(energyStorage.getEnergyStored()));
+				return new StargateGuiState(gateAddress, hasUpgrade, energyStorage.getMaxEnergyStored(), new UniversalEnergyState(energyStorage.getEnergyStored()));
 				
 			case ENERGY_STATE:
-				return new EnergyState(energyStorage.getEnergyStored());
+				return new UniversalEnergyState(energyStorage.getEnergyStored());
 				
 			case SPIN_STATE:
 				return null;
@@ -413,16 +423,19 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	}
 	
 	@Override
-	public State createState(EnumStateType stateType) {
+	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
+			case UPGRADE_RENDERER_STATE:
+				return new UpgradeRendererState();
+		
 			case GUI_STATE:
 				return new StargateGuiState();
 				
 			case ENERGY_STATE:
-				return new EnergyState();
+				return new UniversalEnergyState();
 				
 			case SPIN_STATE:
-				return new SpinStateRequest();
+				return new StargateSpinStateRequest();
 				
 			default:
 				return super.createState(stateType);
@@ -433,10 +446,15 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void setState(EnumStateType stateType, State state) {		
+	public void setState(StateTypeEnum stateType, State state) {		
 		switch (stateType) {		
+			case UPGRADE_RENDERER_STATE:
+				getUpgradeRenderer().setState((UpgradeRendererState) state);
+				
+				break;
+		
 			case RENDERER_UPDATE:
-				RendererGateActionState gateActionState = (RendererGateActionState) state;
+				StargateRendererActionState gateActionState = (StargateRendererActionState) state;
 				
 				switch (gateActionState.action) {
 					case ACTIVATE_NEXT:
@@ -477,13 +495,13 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 				
 			case ENERGY_STATE:
 				if (openGui != null && openGui.isOpen) {
-					openGui.state.energyState = (EnergyState) state;
+					openGui.state.energyState = (UniversalEnergyState) state;
 				}
 				
 				break;
 				
 			case SPIN_STATE:			
-				SpinStateRequest spinStateRequest = (SpinStateRequest) state;
+				StargateSpinStateRequest spinStateRequest = (StargateSpinStateRequest) state;
 				
 				if (spinStateRequest.moveOnly)
 					renderer.requestFinalMove(world.getTotalWorldTime(), spinStateRequest.lock);
@@ -600,7 +618,7 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 
 	@Callback(doc = "function() -- Tries to open the gate")
 	public Object[] engageGate(Context context, Arguments args) {
-		EnumGateState gateState = GateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
+		EnumGateState gateState = StargateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
 
 		if (gateState == EnumGateState.OK) {
 			
@@ -626,7 +644,7 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	public Object[] disengageGate(Context context, Arguments args) {
 		if (stargateState.engaged()) {
 			if (getStargateState().initiating()) {
-				GateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+				StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 				return new Object[] {};
 			}
 			

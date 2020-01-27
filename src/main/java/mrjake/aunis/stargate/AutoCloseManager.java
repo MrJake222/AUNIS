@@ -1,7 +1,7 @@
 package mrjake.aunis.stargate;
 
 import mrjake.aunis.AunisConfig;
-import mrjake.aunis.packet.gate.renderingUpdate.GateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.tileentity.stargate.StargateBaseTile;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -61,7 +61,7 @@ public class AutoCloseManager implements INBTSerializable<NBTTagCompound> {
 			}
 								
 			if (secondsPassed >= AunisConfig.autoCloseConfig.secondsToAutoclose) {
-				GateRenderingUpdatePacketToServer.closeGatePacket(gateTile, false);
+				StargateRenderingUpdatePacketToServer.closeGatePacket(gateTile, false);
 			}
 		}			
 	}

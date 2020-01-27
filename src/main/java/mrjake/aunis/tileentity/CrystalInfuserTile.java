@@ -1,17 +1,17 @@
 package mrjake.aunis.tileentity;
 
-import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.capability.EnergyStorageSerializable;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.infuser.EnergyStoredToClient;
-import mrjake.aunis.packet.infuser.ShouldRenderWavesToClient;
-import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
-import mrjake.aunis.renderer.ISpecialRenderer;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.renderer.crystalinfuser.CrystalInfuserRenderer;
-import mrjake.aunis.renderer.state.CrystalInfuserRendererState;
-import mrjake.aunis.renderer.state.RendererState;
+import mrjake.aunis.state.CrystalInfuserRendererState;
+import mrjake.aunis.state.State;
+import mrjake.aunis.state.StateProviderInterface;
+import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.tesr.SpecialRendererProviderInterface;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -21,34 +21,21 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class CrystalInfuserTile extends TileEntity implements ITileEntityRendered, ITickable {
-	
-	private boolean firstTick = true;
-	
+public class CrystalInfuserTile extends TileEntity implements ITickable, SpecialRendererProviderInterface, StateProviderInterface {
+		
 	private int ticksBufferEmpty = 0;
 	
 	@Override
-	public void update() {
-		if (firstTick) {
-			firstTick = false;
-			
-			// Client
-			if (world.isRemote) {
-//				Aunis.info("TileUpdateRequestToServer " + pos.toString());
-				
-				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide()));
-			}
-		}
-		
+	public void update() {		
 		ItemStack crystalItemStack = inventory.getStackInSlot(0);
 		
 		if (!crystalItemStack.isEmpty()) {
 			IEnergyStorage crystalEnergyStorage = crystalItemStack.getCapability(CapabilityEnergy.ENERGY, null);
-			
-			TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 			
 			int rx = energyStorage.extractEnergy(AunisConfig.powerConfig.dhdCrystalMaxEnergyTransfer, true);
 			boolean stopWaveRender = false;
@@ -60,13 +47,9 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 				if (rx > 0) {		
 					energyStorage.extractEnergy(rx, false);
 					
-					getInfuserRendererState().energyStored = crystalEnergyStorage.getEnergyStored();
-					AunisPacketHandler.INSTANCE.sendToAllTracking(new EnergyStoredToClient(pos, getInfuserRendererState().energyStored), point);
-					
-					if (!getInfuserRendererState().renderWaves) {
-						getInfuserRendererState().renderWaves = true;
-						AunisPacketHandler.INSTANCE.sendToAllTracking(new ShouldRenderWavesToClient(pos, getInfuserRendererState().renderWaves), point);
-					}
+					rendererState.renderWaves = true;
+					rendererState.energyStored = crystalEnergyStorage.getEnergyStored();
+					AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_STATE, rendererState), targetPoint);
 				}
 				
 				// Cannot insert energy, crystal full
@@ -83,9 +66,9 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 //			Aunis.info("ticksBufferEmpty: " + ticksBufferEmpty);
 			
 			if (stopWaveRender || ticksBufferEmpty >= 20) {
-				if (getInfuserRendererState().renderWaves) {
-					getInfuserRendererState().renderWaves = false;
-					AunisPacketHandler.INSTANCE.sendToAllTracking(new ShouldRenderWavesToClient(pos, getInfuserRendererState().renderWaves), point);
+				if (rendererState.renderWaves) {
+					rendererState.renderWaves = false;
+					AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_STATE, rendererState), targetPoint);
 				}
 			}
 		}
@@ -94,7 +77,7 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		
-		getInfuserRendererState().toNBT(compound);
+		compound.setTag("rendererState", rendererState.serializeNBT());
 		
 		compound.setTag("energy", energyStorage.serializeNBT());
 		compound.setTag("inventory", inventory.serializeNBT());
@@ -105,15 +88,91 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		
-		getRendererState().fromNBT(compound);
+		try {
+			rendererState.deserializeNBT(compound.getCompoundTag("rendererState"));
+		}
+		
+		catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
+			Aunis.info("Exception at reading RendererState");
+			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
+
+			e.printStackTrace();
+		}
 		
 		if (compound.hasKey("energy"))
-			energyStorage.deserializeNBT((NBTTagCompound) compound.getTag("energy"));
+			energyStorage.deserializeNBT(compound.getCompoundTag("energy"));
 		
 		if (compound.hasKey("inventory"))
-			inventory.deserializeNBT((NBTTagCompound) compound.getTag("inventory"));
+			inventory.deserializeNBT(compound.getCompoundTag("inventory"));
 		
 		super.readFromNBT(compound);
+	}
+	
+	private TargetPoint targetPoint;
+	
+	@Override
+	public void onLoad() {		
+		if (!world.isRemote) {
+			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
+		}
+		
+		else {
+			renderer = new CrystalInfuserRenderer(this);
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
+		}
+	}
+	
+	// ------------------------------------------------------------------------
+	// Renderer
+	
+	private CrystalInfuserRenderer renderer;
+	private CrystalInfuserRendererState rendererState = new CrystalInfuserRendererState();
+	
+	@Override
+	public void render(double x, double y, double z, float partialTicks) {
+		x += 0.50;
+		z += 0.50;
+		
+		renderer.render(x, y, z, partialTicks);
+	}
+	
+	
+	// ------------------------------------------------------------------------
+	// Power buffer
+	
+	@Override
+	public State getState(StateTypeEnum stateType) {
+		switch (stateType) {
+			case RENDERER_STATE:
+				return rendererState;
+			
+			default:
+				return null;
+		}
+	}
+	
+	@Override
+	public State createState(StateTypeEnum stateType) {
+		switch (stateType) {
+			case RENDERER_STATE:
+				return new CrystalInfuserRendererState();
+				
+			default:
+				return null;
+		}
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void setState(StateTypeEnum stateType, State state) {
+		switch (stateType) {
+			case RENDERER_STATE:
+				renderer.setRendererState((CrystalInfuserRendererState) state);
+				break;
+		
+			default:
+				break;
+		}
 	}
 	
 	// ------------------------------------------------------------------------
@@ -123,7 +182,6 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 			markDirty();
 		};
 	};
-	
 	
 	// ------------------------------------------------------------------------
 	// Item storage
@@ -135,16 +193,14 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 			ItemStack stack = this.getStackInSlot(slot);
 			
 			if (stack.isEmpty()) {
-				getInfuserRendererState().energyStored = -1;
-				getInfuserRendererState().renderWaves = false;
+				rendererState.doCrystalRender = false;
+			} else {
+				rendererState.doCrystalRender = true;
+				rendererState.renderWaves = false;
+				rendererState.energyStored = stack.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored();
 			}
 			
-			else			
-				getInfuserRendererState().energyStored = stack.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored();
-			
-			TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new EnergyStoredToClient(pos, getInfuserRendererState().energyStored), point);
-//			AunisPacketHandler.INSTANCE.sendToAllAround(new ShouldRenderWavesToClient(pos, getInfuserRendererState().renderWaves), point);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_STATE, rendererState), targetPoint);
 		};
 	};
 	
@@ -166,35 +222,5 @@ public class CrystalInfuserTile extends TileEntity implements ITileEntityRendere
 		
 		else
 			return super.getCapability(capability, facing);	
-	}
-	
-	// ------------------------------------------------------------------------
-	// Renderer
-	
-	CrystalInfuserRenderer renderer;
-	CrystalInfuserRendererState rendererState;
-	
-	@Override
-	public ISpecialRenderer<CrystalInfuserRendererState> getRenderer() {
-		if (renderer == null)
-			renderer = new CrystalInfuserRenderer(this);
-		
-		return renderer;
-	}
-
-	@Override
-	public RendererState getRendererState() {	
-		if (rendererState == null)
-			rendererState = new CrystalInfuserRendererState();
-				
-		return rendererState;
-	}
-	
-	public CrystalInfuserRendererState getInfuserRendererState() {	
-		return (CrystalInfuserRendererState) getRendererState();
-	}
-	
-	public RendererState createRendererState(ByteBuf buf) {
-		return new CrystalInfuserRendererState().fromBytes(buf);
 	}
 }

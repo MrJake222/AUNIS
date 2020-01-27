@@ -6,25 +6,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.RingsGUI;
-import mrjake.aunis.gui.state.RingsGuiState;
 import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient;
-import mrjake.aunis.packet.transportrings.StartRingsAnimationToClient;
-import mrjake.aunis.packet.update.renderer.RendererUpdateRequestToServer;
-import mrjake.aunis.renderer.ISpecialRenderer;
-import mrjake.aunis.renderer.state.RendererState;
-import mrjake.aunis.renderer.state.TransportRingsRendererState;
 import mrjake.aunis.renderer.transportrings.TransportRingsRenderer;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
-import mrjake.aunis.state.EnumStateType;
-import mrjake.aunis.state.ITileEntityStateProvider;
 import mrjake.aunis.state.State;
+import mrjake.aunis.state.StateProviderInterface;
+import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.state.TransportRingsGuiState;
+import mrjake.aunis.state.TransportRingsRendererState;
+import mrjake.aunis.state.TransportRingsStartAnimationRequest;
+import mrjake.aunis.tesr.SpecialRendererProviderInterface;
 import mrjake.aunis.transportrings.TransportRings;
 import mrjake.aunis.util.ILinkable;
 import net.minecraft.client.Minecraft;
@@ -44,48 +43,31 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TransportRingsTile extends TileEntity implements ITileEntityRendered, ITickable, ITileEntityStateProvider, ILinkable {
-
-//	public TransportRingsTile() {
-////		stateMap.put(EnumStateType.GUI_STATE, new RingsGuiState());
-//	}
+public class TransportRingsTile extends TileEntity implements ITickable, SpecialRendererProviderInterface, StateProviderInterface, ILinkable {
 	
 	// ---------------------------------------------------------------------------------
 	// Ticking
-	private boolean firstTick = true;
 	private boolean waitForStart = false;
 	private boolean waitForFadeOut = false;
 	private boolean waitForTeleport = false;
 	private boolean waitForClearout = false;
 	
 	private long buttonPressed;
-	
-//	private boolean doLightUpdate = false;
-	
+		
 	private static final int fadeOutTimeout = (int) (30 + TransportRingsRenderer.uprisingInterval*TransportRingsRenderer.ringCount + TransportRingsRenderer.animationDiv * Math.PI);
 	public static final int fadeOutTotalTime = 2 * 20; // 2s
 	
 	private static final int teleportTimeout = fadeOutTimeout + fadeOutTotalTime/2;
 	private static final int clearoutTimeout = (int) (100 + TransportRingsRenderer.fallingInterval*TransportRingsRenderer.ringCount + TransportRingsRenderer.animationDiv * Math.PI);
 	
-//	private long tickStartFog;
-	
 	private List<Entity> teleportList;
 	
 	@Override
-	public void update() {
-		if (firstTick) {
-			firstTick = false;
-			
-			if (world.isRemote) {
-				AunisPacketHandler.INSTANCE.sendToServer(new RendererUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide()));
-			}
-		}
-		
+	public void update() {		
 		if (!world.isRemote) {
 			long effTick = world.getTotalWorldTime();
 			
-			effTick -= waitForStart ? buttonPressed : getTransportRingsRendererState().animationStart;
+			effTick -= waitForStart ? buttonPressed : rendererState.animationStart;
 			
 			if (waitForStart && effTick >= 20) {
 				waitForStart = false;
@@ -98,10 +80,6 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 			else if (waitForFadeOut && effTick >= fadeOutTimeout) {
 				waitForFadeOut = false;
 				waitForTeleport = true;
-				
-//				doLightUpdate = true;
-				
-//				tickStartFog = world.getTotalWorldTime();
 				
 				teleportList = world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.add(-2, 2, -2), pos.add(3, 6, 3)));
 				
@@ -133,33 +111,14 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 
 				setBarrierBlocks(false);
 			}
-			
-			
-//			// Setting light to blocks
-//			if (doLightUpdate) {
-//				int light = (int) (PlayerFadeOutRenderEvent.calcFog(world, tickStartFog, 0) * 15.0f);
-//				
-//				if (light < 0)
-//					doLightUpdate = false;
-//				
-//				else {
-//					boolean updateShown = false;
-//					
-//					for (BlockPos invPos : invisibleBlocks) {
-//						IBlockState state = world.getBlockState(invPos);
-//						
-//						if (state.getValue(AunisProps.LIGHT_LEVEL) != light) {						
-//							if (!updateShown) {
-//								updateShown = true;
-//								
-//								Aunis.info("update[light="+light+", tick=" + (world.getTotalWorldTime()-tickStartFog) + "]");
-//							}
-//							
-//							world.setBlockState(invPos, state.withProperty(AunisProps.LIGHT_LEVEL, light), 2);
-//						}
-//					}
-//				}
-//			}
+		}
+	}
+	
+	@Override
+	public void onLoad() {
+		if (world.isRemote) {
+			renderer = new TransportRingsRenderer(this);
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
 		}
 	}
 	
@@ -180,12 +139,12 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	}
 	
 	public void animationStart() {
-		getTransportRingsRendererState().animationStart = world.getTotalWorldTime();
-		getTransportRingsRendererState().ringsUprising = true;
-		getTransportRingsRendererState().isAnimationActive = true;
+		rendererState.animationStart = world.getTotalWorldTime();
+		rendererState.ringsUprising = true;
+		rendererState.isAnimationActive = true;
 				
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StartRingsAnimationToClient(pos, getTransportRingsRendererState().animationStart), point);
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RINGS_START_ANIMATION, new TransportRingsStartAnimationRequest(rendererState.animationStart)), point);
 		
 		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
 		AunisSoundHelper.playSoundEvent(world, targetRingsPos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
@@ -398,7 +357,7 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-		getRendererState().toNBT(compound);
+		compound.setTag("rendererState", rendererState.serializeNBT());
 		
 		compound.setTag("ringsData", getRings().serializeNBT());
 		if (linkedController != null)
@@ -423,10 +382,17 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
-		getRendererState().fromNBT(compound);
+		try {
+			rendererState.deserializeNBT(compound.getCompoundTag("rendererState"));
+		} catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
+			Aunis.info("Exception at reading RendererState");
+			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
+
+			e.printStackTrace();
+		}
 		
 		if (compound.hasKey("ringsData"))
-			getRings().deserializeNBT((NBTTagCompound) compound.getTag("ringsData"));
+			getRings().deserializeNBT(compound.getCompoundTag("ringsData"));
 		
 		if (compound.hasKey("linkedController"))
 			linkedController = BlockPos.fromLong(compound.getLong("linkedController"));
@@ -437,7 +403,7 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 			ringsMap.clear();
 			
 			for (int i=0; i<len; i++) {
-				TransportRings rings = new TransportRings(null).deserializeNBT((NBTTagCompound) compound.getTag("ringsMap" + i));
+				TransportRings rings = new TransportRings(null).deserializeNBT(compound.getCompoundTag("ringsMap" + i));
 				
 				ringsMap.put(rings.getAddress(), rings);
 			}
@@ -460,10 +426,13 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 //	private Map<EnumStateType, State> stateMap = new HashMap<>();
 
 	@Override
-	public State getState(EnumStateType stateType) {
+	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
+			case RENDERER_STATE:
+				return rendererState;
+		
 			case GUI_STATE:
-				return new RingsGuiState(getRings(), ringsMap.values());
+				return new TransportRingsGuiState(getRings(), ringsMap.values());
 				
 			default:
 				return null;
@@ -471,10 +440,13 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	}
 	
 	@Override
-	public State createState(EnumStateType stateType) {
+	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
+			case RENDERER_STATE:
+				return new TransportRingsRendererState();
+		
 			case GUI_STATE:
-				return new RingsGuiState();
+				return new TransportRingsGuiState();
 				
 			default:
 				return null;
@@ -486,23 +458,25 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void setState(EnumStateType stateType, State state) {
-//		Mouse.setGrabbed(false);
-		
-//		Aunis.guiProxy.openGui("ringsGui", stateType, state);
-		
-//		RingsGUI.class.newInstance();
-		
+	public void setState(StateTypeEnum stateType, State state) {		
 		switch (stateType) {
+			case RENDERER_STATE:
+				renderer.setState((TransportRingsRendererState) state);
+				break;
+		
+			case RINGS_START_ANIMATION:
+				renderer.animationStart(((TransportRingsStartAnimationRequest) state).animationStart);
+				break;
+		
 			case GUI_STATE:
 				
 				if (openGui == null || !openGui.isOpen) {
-					openGui = new RingsGUI(pos, (RingsGuiState) state);
+					openGui = new RingsGUI(pos, (TransportRingsGuiState) state);
 					Minecraft.getMinecraft().displayGuiScreen(openGui);
 				}
 				
 				else {
-					openGui.state = (RingsGuiState) state;
+					openGui.state = (TransportRingsGuiState) state;
 				}
 				
 				break;
@@ -514,37 +488,16 @@ public class TransportRingsTile extends TileEntity implements ITileEntityRendere
 	
 	// ---------------------------------------------------------------------------------
 	// Renders
-	// TODO: To be removed and replaced by States
 	TransportRingsRenderer renderer;
-	TransportRingsRendererState rendererState;
+	TransportRingsRendererState rendererState = new TransportRingsRendererState();
 	
 	@Override
-	public ISpecialRenderer<TransportRingsRendererState> getRenderer() {
-		if (renderer == null)
-			renderer = new TransportRingsRenderer(this);
+	public void render(double x, double y, double z, float partialTicks) {
+		x += 0.50;
+		y += 0.63271 / 2;
+		z += 0.50;
 		
-		return renderer;
-	}
-	
-	public TransportRingsRenderer getTransportRingsRenderer() {
-		return (TransportRingsRenderer) getRenderer();
-	}
-
-	@Override
-	public RendererState getRendererState() {
-		if (rendererState == null)
-			rendererState = new TransportRingsRendererState();
-		
-		return rendererState;
-	}
-	
-	public TransportRingsRendererState getTransportRingsRendererState() {
-		return (TransportRingsRendererState) getRendererState();
-	}
-
-	@Override
-	public RendererState createRendererState(ByteBuf buf) {
-		return new TransportRingsRendererState().fromBytes(buf);
+		renderer.render(x, y, z, partialTicks);
 	}
 	
 	@Override
