@@ -1,7 +1,9 @@
 package mrjake.aunis.block;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.StargateMemberItemBlock;
+import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
@@ -91,9 +93,11 @@ public class AunisBlocks {
 			ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(block), 0, new ModelResourceLocation(block.getRegistryName(), "inventory"));
 		}
 		
-		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMemberBlock), 0, new ModelResourceLocation("aunis:stargate_member_block_ring"));
-		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMemberBlock), 8, new ModelResourceLocation("aunis:stargate_member_block_chevron"));
-//		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMemberBlock), 8, new ModelResourceLocation(stargateMemberBlock.getRegistryName(), "inventory,member_variant=chevron"));
+		int ringMeta = stargateMemberBlock.getMetaFromState(stargateMemberBlock.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING));
+		int chevronMeta = stargateMemberBlock.getMetaFromState(stargateMemberBlock.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.CHEVRON));
+		
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMemberBlock), ringMeta, new ModelResourceLocation("aunis:stargate_member_block_ring"));
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMemberBlock), chevronMeta, new ModelResourceLocation("aunis:stargate_member_block_chevron"));
 	}
 }
 

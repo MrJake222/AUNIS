@@ -36,6 +36,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.registry.IRegistry;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -89,8 +90,15 @@ public class StargateMemberBlock extends Block {
 	@Override
 	public void getSubBlocks(CreativeTabs creativeTabs, NonNullList<ItemStack> items) {
 		for (EnumMemberVariant variant : EnumMemberVariant.values()) {
-			items.add(new ItemStack(this, 1, variant.id << 3));
+			items.add(new ItemStack(this, 1, getMetaFromState(getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, variant))));
 		}
+	}
+	
+	@Override
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+		EnumMemberVariant variant = state.getValue(AunisProps.MEMBER_VARIANT);
+		
+		return new ItemStack(this, 1, getMetaFromState(getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, variant)));
 	}
 	
 	@Override
