@@ -10,7 +10,12 @@ import net.minecraft.world.World;
 
 public class TRControllerTile extends TileEntity implements ILinkable, SpecialRendererProviderInterface {
 
-	
+	@Override
+	public void onLoad() {
+		if (world.isRemote) {
+			renderer = new TRControllerRenderer(this);
+		}
+	}
 	
 	// ------------------------------------------------------------------------
 	// Rings 

@@ -11,6 +11,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import scala.NotImplementedError;
 
 public class StateUpdatePacketToClient extends PositionedPacket {
 	public StateUpdatePacketToClient() {}
@@ -57,10 +58,17 @@ public class StateUpdatePacketToClient extends PositionedPacket {
 				
 				try {
 					State state = te.createState(message.stateType);
-					state.fromBytes(message.stateBuf);
 					
-					if (te != null && state != null)
-						te.setState(message.stateType, state);
+					if (state != null) {
+						state.fromBytes(message.stateBuf);
+						
+						if (te != null)
+							te.setState(message.stateType, state);
+					}
+					
+					else {
+						throw new NotImplementedError("State not implemented on " + te.toString());
+					}
 				}
 				
 				catch (UnsupportedOperationException e) {

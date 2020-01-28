@@ -26,11 +26,12 @@ import mrjake.aunis.state.TransportRingsStartAnimationRequest;
 import mrjake.aunis.tesr.SpecialRendererProviderInterface;
 import mrjake.aunis.transportrings.TransportRings;
 import mrjake.aunis.util.ILinkable;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
@@ -116,7 +117,12 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 	
 	@Override
 	public void onLoad() {
-		if (world.isRemote) {
+		if (!world.isRemote) {
+			setBarrierBlocks(false);
+			Aunis.info("set false");
+		}
+		
+		else {
 			renderer = new TransportRingsRenderer(this);
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
 		}
@@ -197,8 +203,11 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 				for (BlockPos invPos : invisibleBlocksTemplate) {
 					
 					BlockPos newPos = new BlockPos(this.pos).add(invPos.rotate(rotation)).add(0, y, 0);
+					IBlockState newState = world.getBlockState(newPos);
+					Block newBlock = newState.getBlock();
 					
-					if (world.getBlockState(newPos).getBlock() != Blocks.AIR) {
+					if (!newBlock.isAir(newState, world, newPos) && !newBlock.isReplaceable(world, newPos)) {
+						Aunis.info(newPos + " obstructed with " + world.getBlockState(newPos));
 						return true;
 					}
 				}
@@ -208,29 +217,19 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 		return false;
 	}
 	
-	private List<BlockPos> invisibleBlocks = new ArrayList<BlockPos>();
-	
 	private void setBarrierBlocks(boolean set) {
-		if (set) {
-			invisibleBlocks.clear();
-		
-			for(int y=1; y<4; y++) {
-				for (Rotation rotation : Rotation.values()) {
-					for (BlockPos invPos : invisibleBlocksTemplate) {
-						
-						BlockPos newPos = new BlockPos(this.pos).add(invPos.rotate(rotation)).add(0, y, 0);
-												
+		for(int y=1; y<4; y++) {
+			for (Rotation rotation : Rotation.values()) {
+				for (BlockPos invPos : invisibleBlocksTemplate) {
+					BlockPos newPos = this.pos.add(invPos.rotate(rotation)).add(0, y, 0);
+					
+					if (set)
 						world.setBlockState(newPos, AunisBlocks.invisibleBlock.getDefaultState(), 3);
-						
-						invisibleBlocks.add(newPos);
+					else {
+						if (world.getBlockState(newPos).getBlock() == AunisBlocks.invisibleBlock)
+							world.setBlockToAir(newPos);
 					}
 				}
-			}
-		}
-		
-		else {
-			for (BlockPos invPos : invisibleBlocks) {
-				world.setBlockToAir(invPos);
 			}
 		}
 	}
@@ -445,6 +444,9 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 			case RENDERER_STATE:
 				return new TransportRingsRendererState();
 		
+			case RINGS_START_ANIMATION:
+				return new TransportRingsStartAnimationRequest();
+				
 			case GUI_STATE:
 				return new TransportRingsGuiState();
 				
