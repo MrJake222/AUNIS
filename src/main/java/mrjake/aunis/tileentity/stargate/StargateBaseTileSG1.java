@@ -566,9 +566,12 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 			return new Object[] {null, "stargate_failure_full", "Already dialed 8 chevrons"};
 		}
 		
-		String name = args.checkString(0);
+		EnumSymbol symbol = null;
 		
-		EnumSymbol symbol = EnumSymbol.forName(name);
+		if (args.isInteger(0))
+			symbol = EnumSymbol.valueOf(args.checkInteger(0));
+		else if (args.isString(0))
+			symbol = EnumSymbol.forName(args.checkString(0));
 		
 		if (symbol == null)
 			throw new IllegalArgumentException("bad argument #1 (symbol name invalid)");
