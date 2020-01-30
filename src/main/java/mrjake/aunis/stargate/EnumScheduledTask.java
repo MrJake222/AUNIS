@@ -13,7 +13,10 @@ public enum EnumScheduledTask {
 	STARGATE_CHEVRON_LOCK_DHD_SOUND(6, 15),
 	HORIZON_FLASH(7, -1), 
 	STARGATE_ORLIN_OPEN(8, 144), // 8.93s(duration of dial sound) * 20(tps) − 25(STARGATE_OPEN_SOUND wait time)
-	STARGATE_ORLIN_SPARK(9, 27);
+	STARGATE_ORLIN_SPARK(9, 27),
+//	STARGATE_HORIZON_KILLING_START(10, STARGATE_OPEN_SOUND.waitTicks + 26), // 1.3s of the sound to the kill
+	STARGATE_HORIZON_WIDEN(11, -1),
+	STARGATE_HORIZON_SHRINK(12, -1);
 	
 	public int id;
 	public int waitTicks;

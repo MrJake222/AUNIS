@@ -27,6 +27,10 @@ public enum EnumStargateState {
 		return this == ENGAGED_INITIATING;
 	}
 	
+	public boolean dialingDhd() {
+		return this == DHD_DIALING;
+	}
+	
 	public static EnumStargateState valueOf(int id) {
 		return EnumStargateState.values()[id];
 	}

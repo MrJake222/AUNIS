@@ -9,6 +9,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.StargateActivation;
 import mrjake.aunis.sound.AunisSoundHelper;
@@ -97,6 +98,9 @@ public class StargateRendererSG1 extends StargateRendererBase {
 	@Override
 	protected boolean shouldRender() {
 		IBlockState state = world.getBlockState(pos);
+		
+		if (state.getBlock() != AunisBlocks.stargateBaseBlock)
+			return false;
 		
 		return (!state.getValue(AunisProps.RENDER_BLOCK));
 	}

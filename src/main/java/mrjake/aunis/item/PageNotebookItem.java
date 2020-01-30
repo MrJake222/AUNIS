@@ -4,7 +4,6 @@ import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.tileentity.stargate.StargateBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
@@ -13,7 +12,6 @@ import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;

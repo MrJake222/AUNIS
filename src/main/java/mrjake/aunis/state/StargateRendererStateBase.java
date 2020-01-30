@@ -18,6 +18,8 @@ public class StargateRendererStateBase extends State {
 			setActiveChevrons(world, pos, dialedAddressSize);
 		
 		setFinalActive(world, pos, true);
+		
+		horizonSegments = 0;
 	}
 	
 	public void setStargateClosed(World world, BlockPos pos) {
@@ -37,6 +39,9 @@ public class StargateRendererStateBase extends State {
 	// Chevrons
 	private int activeChevrons = 0;
 	private boolean isFinalActive = false;
+	
+	// Event horizon killing box
+	public int horizonSegments = 0;
 	
 	public void setActiveChevrons(World world, BlockPos gatePos, int activeChevrons) {
 		this.activeChevrons = activeChevrons;
@@ -62,6 +67,7 @@ public class StargateRendererStateBase extends State {
 		buf.writeBoolean(doEventHorizonRender);
 		buf.writeInt(vortexState.index);
 		buf.writeBoolean(dialingComplete);
+		buf.writeInt(horizonSegments);
 	}
 	
 	@Override
@@ -72,5 +78,6 @@ public class StargateRendererStateBase extends State {
 		doEventHorizonRender = buf.readBoolean();
 		vortexState = EnumVortexState.valueOf( buf.readInt() );
 		dialingComplete = buf.readBoolean();
+		horizonSegments = buf.readInt();
 	}
 }

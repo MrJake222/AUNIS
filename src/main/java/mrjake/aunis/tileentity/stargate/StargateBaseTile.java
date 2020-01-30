@@ -18,13 +18,16 @@ import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.Visibility;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
+import mrjake.aunis.AunisDamageSources;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.capability.EnergyStorageUncapped;
 import mrjake.aunis.integration.OCHelper;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
+import mrjake.aunis.particle.ParticleWhiteSmoke;
 import mrjake.aunis.renderer.stargate.StargateRendererBase;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
@@ -35,19 +38,23 @@ import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.teleportation.EventHorizon;
-import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.StargateFlashState;
-import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StargateRendererActionState;
-import mrjake.aunis.state.StargateRendererStateBase;
-import mrjake.aunis.state.State;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
+import mrjake.aunis.state.StargateRendererStateBase;
+import mrjake.aunis.state.StargateVaporizeBlockParticlesRequest;
+import mrjake.aunis.state.State;
+import mrjake.aunis.state.StateProviderInterface;
+import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tesr.SpecialRendererProviderInterface;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.util.IScheduledTaskExecutor;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
+import mrjake.aunis.util.BoundingBoxHelper;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -55,6 +62,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -308,9 +316,10 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		}
 		
 		sendRenderingUpdate(EnumGateAction.OPEN_GATE, false, 0);
-		getRendererState().setStargateOpen(world, pos, dialedAddressSize, isInitiating);		
+		getRendererState().setStargateOpen(world, pos, dialedAddressSize, isInitiating);
 		
 		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_OPEN_SOUND));
+		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_HORIZON_WIDEN, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 23 + TICKS_PER_HORIZON_SEGMENT)); // 1.3s of the sound to the kill
 		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ENGAGE));
 		
 		DHDTile dhdTile = getLinkedDHD(world);
@@ -370,8 +379,11 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	
 	// ------------------------------------------------------------------------
 	// Ticking and loading
+
+	protected abstract BlockPos getLightBlockPos();
 	
 	protected TargetPoint targetPoint;
+	protected EnumFacing facing = EnumFacing.NORTH;
 	
 	@Override
 	public void onLoad() {		
@@ -385,13 +397,33 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		else {
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
 		}
+		
+		this.facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
+		
+		AxisAlignedBB kBox = getHorizonKillingBox();
+		double width = kBox.maxZ - kBox.minZ;
+		width /= getHorizonSegmentCount();
+		
+		localKillingBoxes = new ArrayList<AxisAlignedBB>(getHorizonSegmentCount());
+		for (int i=0; i<getHorizonSegmentCount(); i++) {
+			AxisAlignedBB box = new AxisAlignedBB(kBox.minX, kBox.minY, kBox.minZ + width*i, kBox.maxX, kBox.maxY, kBox.minZ + width*(i+1));
+			box = BoundingBoxHelper.rotate(box, (int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5);
+			
+			localKillingBoxes.add(box);
+		}
+		
+		localInnerBlockBoxes = new ArrayList<AxisAlignedBB>(3);
+		localInnerEntityBoxes = new ArrayList<AxisAlignedBB>(3);
+		for (AxisAlignedBB lBox : getGateVaporizingBoxes()) {
+			localInnerBlockBoxes.add(BoundingBoxHelper.rotate(lBox, (int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5));
+			localInnerEntityBoxes.add(BoundingBoxHelper.rotate(lBox.grow(0, 0, -0.25), (int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5));
+		}
 	}
 	
 	@Override
 	public void update() {
 		
 		if (!world.isRemote) {
-			
 			// Event horizon teleportation			
 			if (stargateState == EnumStargateState.ENGAGED_INITIATING) {
 				getEventHorizon().scheduleTeleportation(StargateNetwork.get(world).getStargate(dialedAddress));
@@ -419,6 +451,51 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			if (horizonFlashTask != null && horizonFlashTask.isActive()) {
 				horizonFlashTask.update(world.getTotalWorldTime());
 			}
+			
+			// Event horizon killing
+			if (horizonKilling) {	
+				List<EntityLivingBase> entities = new ArrayList<EntityLivingBase>();
+				List<BlockPos> blocks = new ArrayList<BlockPos>();
+				
+				// Get all blocks and entities inside the kawoosh
+				for (int i=0; i<getRendererState().horizonSegments; i++) {
+					AxisAlignedBB gBox = localKillingBoxes.get(i).offset(pos);
+					
+					entities.addAll(world.getEntitiesWithinAABB(EntityLivingBase.class, gBox));
+					
+					for (BlockPos bPos : BlockPos.getAllInBox((int)gBox.minX, (int)gBox.minY+1, (int)gBox.minZ, (int)gBox.maxX-1, (int)gBox.maxY-1, (int)gBox.maxZ-1))
+						blocks.add(bPos);					
+				}
+				
+				// Get all entities inside the gate
+				for (AxisAlignedBB lBox : localInnerEntityBoxes)
+					entities.addAll(world.getEntitiesWithinAABB(EntityLivingBase.class, lBox.offset(pos)));
+				
+				// Get all blocks inside the gate
+				for (AxisAlignedBB lBox : localInnerBlockBoxes) {
+					AxisAlignedBB gBox = lBox.offset(pos);
+					
+					for (BlockPos bPos : BlockPos.getAllInBox((int)gBox.minX, (int)gBox.minY, (int)gBox.minZ, (int)gBox.maxX-1, (int)gBox.maxY-1, (int)gBox.maxZ-1))
+						blocks.add(bPos);
+				}
+				
+				// Kill them
+				for (EntityLivingBase entity : entities) {
+					entity.attackEntityFrom(AunisDamageSources.DAMAGE_EVENT_HORIZON, 20);
+					AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.STARGATE_VAPORIZE_BLOCK_PARTICLES, new StargateVaporizeBlockParticlesRequest(entity.getPosition())), targetPoint);
+				}
+				
+				// Vaporize them
+				for (BlockPos dPos : blocks) {
+					if (!dPos.equals(getLightBlockPos())) {
+						if (!world.isAirBlock(dPos)) {
+							world.setBlockToAir(dPos);
+							AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.STARGATE_VAPORIZE_BLOCK_PARTICLES, new StargateVaporizeBlockParticlesRequest(dPos)), targetPoint);
+						}
+					}
+				}
+			}
+			
 			
 			/*
 			 * Draw power (engaged)
@@ -488,16 +565,84 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		}
 	}
 	
+	// ------------------------------------------------------------------------
+	// Killing and block vaporizing
+	
+	/**
+	 * Gets full {@link AxisAlignedBB} of the killing area.
+	 * @return Approximate kawoosh size.
+	 */
+	protected abstract AxisAlignedBB getHorizonKillingBox();
+	
+	/**
+	 * How many segments should the exclusion zone have.
+	 * @return Count of subsegments of the killing box.
+	 */
+	protected abstract int getHorizonSegmentCount();
+	
+	/**
+	 * The event horizon in the gate also should kill
+	 * and vaporize everything
+	 * @return List of {@link AxisAlignedBB} for the inner gate area.
+	 */
+	protected abstract List<AxisAlignedBB> getGateVaporizingBoxes();
+	
+	/**
+	 * How many ticks should the {@link StargateBaseTile} wait to perform
+	 * next update to the size of the killing box.
+	 */
+	private int TICKS_PER_HORIZON_SEGMENT = 12 / getHorizonSegmentCount();
+	
+	/**
+	 * Contains all the subboxes to be activated with the kawoosh.
+	 * On the server needs to be offsetted by the {@link TileEntity#getPos()}
+	 */
+	protected List<AxisAlignedBB> localKillingBoxes;
+	
+	/**
+	 * Contains all boxes of the inner part of the gate.
+	 * Full blocks. Used for destroying blocks.
+	 * On the server needs to be offsetted by the {@link TileEntity#getPos()}
+	 */
+	protected List<AxisAlignedBB> localInnerBlockBoxes;
+	
+	/**
+	 * Contains all boxes of the inner part of the gate.
+	 * Not full blocks. Used for entity killing.
+	 * On the server needs to be offsetted by the {@link TileEntity#getPos()}
+	 */
+	protected List<AxisAlignedBB> localInnerEntityBoxes;
+	
+	private boolean horizonKilling;
 
 	// ------------------------------------------------------------------------
 	// Rendering
 	
-	// TODO Make getRenderer() private
-	public abstract StargateRendererBase getRenderer();
+	protected abstract StargateRendererBase getRenderer();
 	protected abstract StargateRendererStateBase getRendererState();
+	protected abstract Vec3d getRenderTranslaton();
 	
 	@Override
 	public void render(double x, double y, double z, float partialTicks) {
+		getEventHorizon().render(x, y, z);
+		
+		if (AunisConfig.debugConfig.renderKawooshBoundingBox || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
+			int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? getHorizonSegmentCount() : getRendererState().horizonSegments;
+
+			for (int i=0; i<segments; i++) {
+				BoundingBoxHelper.render(x, y, z, localKillingBoxes.get(i));
+			}
+			
+			for (AxisAlignedBB b : localInnerBlockBoxes)
+				BoundingBoxHelper.render(x, y, z, b);
+		}
+		
+		Vec3d vec = getRenderTranslaton();
+		
+		x += vec.x;
+		y += vec.y;
+		z += vec.z;
+		
 		getRenderer().render(x, y, z, partialTicks);
 				
 		if (this instanceof ITileEntityUpgradeable) {
@@ -608,6 +753,9 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			case RENDERER_UPDATE:
 				return new StargateRendererActionState();
 				
+			case STARGATE_VAPORIZE_BLOCK_PARTICLES:
+				return new StargateVaporizeBlockParticlesRequest();
+				
 			case FLASH_STATE:
 				return new StargateFlashState();
 				
@@ -627,11 +775,20 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			case RENDERER_UPDATE:
 				switch (((StargateRendererActionState) state).action) {
 					case OPEN_GATE:
+						getRendererState().horizonSegments = 0;
 						getRenderer().openGate();
 						break;
 						
 					case CLOSE_GATE:
 						getRenderer().closeGate();
+						break;
+						
+					case STARGATE_HORIZON_WIDEN:
+						getRendererState().horizonSegments++;
+						break;
+						
+					case STARGATE_HORIZON_SHRINK:
+						getRendererState().horizonSegments--;
 						break;
 						
 					default:
@@ -640,6 +797,15 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 				
 				break;
 		
+			case STARGATE_VAPORIZE_BLOCK_PARTICLES:
+				BlockPos b = ((StargateVaporizeBlockParticlesRequest) state).block;
+				
+				for (int i=0; i<20; i++) {
+					Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleWhiteSmoke(world, b.getX() + (Math.random()-0.5), b.getY(), b.getZ() + (Math.random()-0.5), 0, 0, false));
+				}
+				
+				break;
+				
 			case FLASH_STATE:
 				getRenderer().setHorizonUnstable(((StargateFlashState) state).flash);
 				break;
@@ -658,10 +824,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	private List<ScheduledTask> scheduledTasks = new ArrayList<>();
 	
 	public void addTask(ScheduledTask scheduledTask) {
-		scheduledTasks.add(scheduledTask);
-		
-		Aunis.info("scheduledTasks add: " + scheduledTasks);
-		
+		scheduledTasks.add(scheduledTask);		
 		markDirty();
 	}	
 	
@@ -672,7 +835,37 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_OPEN, 0.3f);
 				break;
 				
+			case STARGATE_HORIZON_WIDEN:
+				if (!horizonKilling) {
+					horizonKilling = true;
+					world.setBlockState(getLightBlockPos(), AunisBlocks.invisibleBlock.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false));
+				}
+				
+				getRendererState().horizonSegments++;
+				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, StargateRendererActionState.STARGATE_HORIZON_WIDEN_ACTION), targetPoint);
+				
+				if (getRendererState().horizonSegments < getHorizonSegmentCount())
+					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_HORIZON_WIDEN, TICKS_PER_HORIZON_SEGMENT));
+				else
+					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_HORIZON_SHRINK, TICKS_PER_HORIZON_SEGMENT + 12));
+				
+				break;
+				
+			case STARGATE_HORIZON_SHRINK:
+				getRendererState().horizonSegments--;
+				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, StargateRendererActionState.STARGATE_HORIZON_SHRINK_ACTION), targetPoint);
+				
+				if (getRendererState().horizonSegments > 0)
+					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_HORIZON_SHRINK, TICKS_PER_HORIZON_SEGMENT + 1));
+				else
+					horizonKilling = false;
+				
+				markDirty();
+					
+				break;
+				
 			case STARGATE_CLOSE:
+				world.setBlockToAir(getLightBlockPos());
 				disconnectGate();
 				break;
 				
@@ -863,6 +1056,8 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			compound.setTag("node", nodeCompound);
 		}
 		
+		compound.setBoolean("horizonKilling", horizonKilling);
+		
 		return super.writeToNBT(compound);
 	}
 	
@@ -912,6 +1107,8 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		
 		if (node != null && compound.hasKey("node"))
 			node.load(compound.getCompoundTag("node"));
+		
+		horizonKilling = compound.getBoolean("horizonKilling");
 		
 		super.readFromNBT(compound);
 	}
