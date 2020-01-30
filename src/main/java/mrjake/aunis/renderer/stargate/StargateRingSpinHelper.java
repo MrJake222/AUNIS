@@ -4,7 +4,6 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.stargate.StargateRequestStopToClient;
 import mrjake.aunis.renderer.SpinHelper;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
@@ -12,6 +11,7 @@ import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.state.StargateRingStopRequest;
 import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.StargateSpinStateRequest;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
@@ -102,7 +102,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 		getStargateSpinState().computerInitializedStop = true;
 		
 		if (!world.isRemote) {			
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StargateRequestStopToClient(pos, worldTicks, moveOnly), this.targetPoint);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.STARGATE_RING_STOP, new StargateRingStopRequest(worldTicks, moveOnly)), targetPoint);
 		}
 		
 		else {
@@ -115,7 +115,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 			else
 				time = state.tickStart + state.tickStopRequested + speedUpTimeTick - 5;
 			
-			((StargateRendererSG1) gateTile.getRenderer()).addComputerActivation(time, getStargateSpinState().finalChevron);
+			gateTile.addComputerActivation(time, getStargateSpinState().finalChevron);
 		}			
 	}
 	
@@ -214,7 +214,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 		
 		// Client
 		else {
-			((StargateRendererSG1) gateTile.getRenderer()).getRendererStateSG1().ringCurrentSymbol = symbol;
+			gateTile.setRendererCurrentSymbol(symbol);
 		}
 	}
 }

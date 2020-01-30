@@ -9,11 +9,13 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.StargateActivation;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.StargateRendererStateSG1;
@@ -52,6 +54,10 @@ public class StargateRendererSG1 extends StargateRendererBase {
 	
 	protected StargateRendererStateSG1 getRendererStateSG1() {
 		return state;
+	}
+	
+	public void setCurrentSymbol(EnumSymbol symbol) {
+		getRendererStateSG1().ringCurrentSymbol = symbol;
 	}
 	
 	@Override
@@ -97,6 +103,9 @@ public class StargateRendererSG1 extends StargateRendererBase {
 	@Override
 	protected boolean shouldRender() {
 		IBlockState state = world.getBlockState(pos);
+		
+		if (state.getBlock() != AunisBlocks.stargateBaseBlock)
+			return false;
 		
 		return (!state.getValue(AunisProps.RENDER_BLOCK));
 	}

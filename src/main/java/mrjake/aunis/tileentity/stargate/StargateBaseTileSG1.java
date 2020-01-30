@@ -33,6 +33,7 @@ import mrjake.aunis.state.StargateGuiState;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.StargateRendererStateSG1;
+import mrjake.aunis.state.StargateRingStopRequest;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.StargateSpinStateRequest;
 import mrjake.aunis.state.State;
@@ -50,7 +51,10 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -131,6 +135,8 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 		if (stopRing) {
 			getServerRingSpinHelper().requestStop();
 		}
+		
+		ringRollLoopPlayed = true;
 	}
 	
 	protected void clearLinkedDHDButtons(boolean dialingFailed) { // 29 : 65
@@ -287,6 +293,9 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 		super.readFromNBT(compound);
 	}
 	
+	// ------------------------------------------------------------------------
+	// Ticking and loading
+	
 	protected boolean ringRollLoopPlayed = true;
 	
 	public void setRollPlayed() {
@@ -316,6 +325,11 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 			
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.UPGRADE_RENDERER_STATE));
 		}
+	}
+	
+	@Override
+	protected BlockPos getLightBlockPos() {
+		return pos.offset(EnumFacing.UP, 4);
 	}
 	
 	@Override
@@ -366,9 +380,35 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 		}
 	}
 	
+	
+	// ------------------------------------------------------------------------
+	// Killing and block vaporizing                                                                          
+		
+	@Override
+	protected AxisAlignedBB getHorizonKillingBox() {
+		return new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5);
+	}
+	
+	@Override
+	protected int getHorizonSegmentCount() {
+		return 6;
+	}
+	
+	@Override
+	protected  List<AxisAlignedBB> getGateVaporizingBoxes() {
+		return Arrays.asList(
+				new AxisAlignedBB(-2.5, 2.0, -0.5, 2.5, 9, 0.5),
+				new AxisAlignedBB(-3.5, 2.0, -0.5, -2.5, 8, 0.5),
+				new AxisAlignedBB(3.5, 2.0, -0.5, 2.5, 8, 0.5)
+			);
+	}
+	
+	
 	// ------------------------------------------------------------------------
 	// Rendering
 	
+	private static float GATE_DIAMETER = 10.1815f;
+
 	StargateRendererSG1 renderer;
 	StargateRendererStateSG1 rendererState = new StargateRendererStateSG1();
 	
@@ -382,21 +422,21 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	}
 	
 	@Override
-	public StargateRendererBase getRenderer() {
+	protected StargateRendererBase getRenderer() {
 		return renderer;
 	}
 	
-	private static float GATE_DIAMETER = 10.1815f;
-	
 	@Override
-	public void render(double x, double y, double z, float partialTicks) {
-		getEventHorizon().render(x, y, z);
-		
-		x += 0.50;
-		y += GATE_DIAMETER/2;
-		z += 0.50;
-		
-		super.render(x, y, z, partialTicks);
+	protected Vec3d getRenderTranslaton() {
+		return new Vec3d(0.50, GATE_DIAMETER/2, 0.50);
+	}
+	
+	public void addComputerActivation(long time, boolean finalChevron) {
+		renderer.addComputerActivation(time, finalChevron);		
+	}
+	
+	public void setRendererCurrentSymbol(EnumSymbol symbol) {
+		renderer.setCurrentSymbol(symbol);		
 	}
 	
 	// -----------------------------------------------------------------
@@ -436,6 +476,9 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 				
 			case SPIN_STATE:
 				return new StargateSpinStateRequest();
+				
+			case STARGATE_RING_STOP:
+				return new StargateRingStopRequest();
 				
 			default:
 				return super.createState(stateType);
@@ -510,6 +553,10 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 				
 				break;
 				
+			case STARGATE_RING_STOP:
+				StargateRingStopRequest stopRequest = (StargateRingStopRequest) state;
+				renderer.requestStopByComputer(stopRequest.worldTicks, stopRequest.moveOnly);
+				
 			default:
 				super.setState(stateType, state);
 		}
@@ -574,7 +621,7 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 			symbol = EnumSymbol.forName(args.checkString(0));
 		
 		if (symbol == null)
-			throw new IllegalArgumentException("bad argument #1 (symbol name invalid)");
+			throw new IllegalArgumentException("bad argument #1 (symbol name/index invalid)");
 		
 		boolean moveOnly = symbol == targetSymbol;
 		
@@ -621,26 +668,32 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 
 	@Callback(doc = "function() -- Tries to open the gate")
 	public Object[] engageGate(Context context, Arguments args) {
-		EnumGateState gateState = StargateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
-
-		if (gateState == EnumGateState.OK) {
-			
-			if (isLinked()) {
-				getLinkedDHD(world).activateSymbol(EnumSymbol.BRB.id);
+		if (stargateState.idle() || stargateState.dialingDhd()) {
+			EnumGateState gateState = StargateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
+	
+			if (gateState == EnumGateState.OK) {
+				
+				if (isLinked()) {
+					getLinkedDHD(world).activateSymbol(EnumSymbol.BRB.id);
+				}
 			}
+			
+			else {
+				targetSymbol = null;
+				targetSymbolDialing = false;
+				
+				markStargateIdle();
+				markDirty();
+				
+				sendSignal(null, "stargate_failed", new Object[] {});
+			}
+			
+			return new Object[] {gateState.toString()};
 		}
 		
 		else {
-			targetSymbol = null;
-			targetSymbolDialing = false;
-			
-			markStargateIdle();
-			markDirty();
-			
-			sendSignal(null, "stargate_failed", new Object[] {});
+			return new Object[] {EnumGateState.BUSY.toString()};
 		}
-		
-		return new Object[] {gateState.toString()};
 	}
 	
 	@Callback(doc = "function() -- Tries to close the gate")

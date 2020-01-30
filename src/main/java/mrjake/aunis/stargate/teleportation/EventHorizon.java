@@ -6,9 +6,6 @@ import java.util.Map;
 
 import javax.vecmath.Vector2f;
 
-import org.lwjgl.opengl.GL11;
-
-import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -16,7 +13,7 @@ import mrjake.aunis.packet.stargate.StargateMotionToClient;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
-import net.minecraft.client.renderer.GlStateManager;
+import mrjake.aunis.util.BoundingBoxHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumFacing;
@@ -84,59 +81,7 @@ public class EventHorizon {
 	@SideOnly(Side.CLIENT)
 	public void render(double x, double y, double z) {
 		if (AunisConfig.debugConfig.renderHorizonBoundingBox) {		
-			GlStateManager.pushMatrix();
-			GlStateManager.color(1.0f, 0, 0);
-			GlStateManager.disableTexture2D();
-			GlStateManager.disableLighting();
-			
-			GlStateManager.translate(x, y, z);
-			
-			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK,GL11.GL_LINE);
-			GlStateManager.glBegin(GL11.GL_QUADS);
-			
-			GL11.glColor3f(0.0f,1.0f,0.0f);
-		    GL11.glVertex3d(localBB.maxX, localBB.maxY, localBB.minZ);
-		    GL11.glVertex3d(localBB.minX, localBB.maxY, localBB.minZ);
-		    GL11.glVertex3d(localBB.minX, localBB.maxY, localBB.maxZ);
-		    GL11.glVertex3d(localBB.maxX, localBB.maxY, localBB.maxZ);
-		    
-		    GL11.glColor3f(1.0f,0.5f,0.0f);
-		    GL11.glVertex3d(localBB.maxX, localBB.minY, localBB.maxZ);
-		    GL11.glVertex3d(localBB.minX, localBB.minY, localBB.maxZ);
-		    GL11.glVertex3d(localBB.minX, localBB.minY, localBB.minZ);
-		    GL11.glVertex3d(localBB.maxX, localBB.minY, localBB.minZ);
-		    
-		    GL11.glColor3f(1.0f,0.0f,0.0f);
-		    GL11.glVertex3d(localBB.maxX, localBB.maxY, localBB.maxZ);
-		    GL11.glVertex3d(localBB.minX, localBB.maxY, localBB.maxZ);
-		    GL11.glVertex3d(localBB.minX, localBB.minY, localBB.maxZ);
-		    GL11.glVertex3d(localBB.maxX, localBB.minY, localBB.maxZ);
-		    
-		    GL11.glColor3f(1.0f,1.0f,0.0f);
-		    GL11.glVertex3d(localBB.maxX, localBB.minY, localBB.minZ);
-		    GL11.glVertex3d(localBB.minX, localBB.minY, localBB.minZ);
-		    GL11.glVertex3d(localBB.minX, localBB.maxY, localBB.minZ);
-		    GL11.glVertex3d(localBB.maxX, localBB.maxY, localBB.minZ);
-		    
-		    GL11.glColor3f(0.0f,0.0f,1.0f);
-		    GL11.glVertex3d(localBB.minX, localBB.maxY, localBB.maxZ);
-		    GL11.glVertex3d(localBB.minX, localBB.maxY, localBB.minZ);
-		    GL11.glVertex3d(localBB.minX, localBB.minY, localBB.minZ);
-		    GL11.glVertex3d(localBB.minX, localBB.minY, localBB.maxZ);
-		    
-		    GL11.glColor3f(1.0f,0.0f,1.0f);
-		    GL11.glVertex3d(localBB.maxX, localBB.maxY, localBB.minZ);
-		    GL11.glVertex3d(localBB.maxX, localBB.maxY, localBB.maxZ);
-		    GL11.glVertex3d(localBB.maxX, localBB.minY, localBB.maxZ);
-		    GL11.glVertex3d(localBB.maxX, localBB.minY, localBB.minZ);
-			
-			GlStateManager.glEnd();
-			
-			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK,GL11.GL_FILL);
-			GlStateManager.color(1, 1, 1, 1);
-			GlStateManager.enableTexture2D();
-			GlStateManager.enableLighting();
-			GlStateManager.popMatrix();
+			BoundingBoxHelper.render(x, y, z, localBB);
 		}
 	}
 	
@@ -148,7 +93,7 @@ public class EventHorizon {
 	public void scheduleTeleportation(StargatePos targetGate) {
 		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, globalBB);
 
-		Aunis.info(globalBB + ": " + entities + ", map: " + scheduledTeleportMap);
+//		Aunis.info(globalBB + ": " + entities + ", map: " + scheduledTeleportMap);
 		
 		for (Entity entity : entities) {
 			int entityId = entity.getEntityId();

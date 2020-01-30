@@ -2,6 +2,7 @@ package mrjake.aunis;
 
 import java.util.Arrays;
 
+import mrjake.aunis.block.InvisibleBlock;
 import mrjake.aunis.block.StargateMemberBlock;
 import mrjake.aunis.block.StargateMemberBlockOrlin;
 import mrjake.aunis.property.PropertyMemberVariant;
@@ -57,4 +58,9 @@ public class AunisProps {
 	 * Used to generate collision boxes in {@link StargateMemberBlockOrlin}.
 	 */
 	public static final PropertyDirection ORLIN_VARIANT = PropertyDirection.create("orlin_variant");
+	
+	/**
+	 * {@link InvisibleBlock} uses it to determine it's collisions boxes.
+	 */
+	public static final PropertyBool HAS_COLLISIONS = PropertyBool.create("collisions");
 }

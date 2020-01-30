@@ -6,11 +6,9 @@ import mrjake.aunis.packet.StateUpdateRequestToServer.StateUpdateServerHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToClient;
 import mrjake.aunis.packet.stargate.StargateMotionToServer;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
-import mrjake.aunis.packet.stargate.StargateRequestStopToClient;
 import mrjake.aunis.packet.stargate.StargateMotionToClient.RetrieveMotionClientHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToServer.MotionServerHandler;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer.GateRenderingUpdatePacketToServerHandler;
-import mrjake.aunis.packet.stargate.StargateRequestStopToClient.RequestStopClientHandler;
 import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer;
 import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer.SaveRingsParametersServerHandler;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient;
@@ -41,6 +39,5 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(StartPlayerFadeOutToClientHandler.class, StartPlayerFadeOutToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(StateUpdateClientHandler.class, StateUpdatePacketToClient.class, id, Side.CLIENT); id++;
 		INSTANCE.registerMessage(PlayPositionedSoundClientHandler.class, SoundPositionedPlayToClient.class, id, Side.CLIENT); id++;
-		INSTANCE.registerMessage(RequestStopClientHandler.class, StargateRequestStopToClient.class, id, Side.CLIENT); id++;
 	}
 }

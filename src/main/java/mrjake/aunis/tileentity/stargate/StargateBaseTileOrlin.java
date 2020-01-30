@@ -1,5 +1,8 @@
 package mrjake.aunis.tileentity.stargate;
 
+import java.util.Arrays;
+import java.util.List;
+
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -11,13 +14,17 @@ import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.teleportation.EventHorizon;
-import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.StargateOrlinSparkState;
 import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.State;
+import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -29,6 +36,16 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 	// ------------------------------------------------------------------------
 	// Ticking
 	
+	@Override
+	protected BlockPos getLightBlockPos() {
+		return pos.offset(EnumFacing.UP, 1);
+	}
+	
+//	@Override
+//	protected AxisAlignedBB getHorizonKillingBox() {
+//		return new AxisAlignedBB(-1, 3.5, 0, 2, 7, -6);
+//	}
+//	
 	@Override
 	public void onLoad() {
 		super.onLoad();
@@ -83,7 +100,29 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 	}
 	
 	
+	// ------------------------------------------------------------------------
+	// Killing and vaporizing blocks
+//		return new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5);
+		
+//		private static final List<AxisAlignedBB> localKillingBoxes = Arrays.asList(
+//				new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5));
+		                                                                            
+		
+	@Override
+	protected AxisAlignedBB getHorizonKillingBox() {
+		return new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5);
+	}
 	
+	@Override
+	protected int getHorizonSegmentCount() {
+		return 6;
+	}
+	
+	@Override
+	protected List<AxisAlignedBB> getGateVaporizingBoxes() {
+		return Arrays.asList(new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5));
+	}
+		
 	
 	// ------------------------------------------------------------------------
 	// Rendering
@@ -100,7 +139,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 	private StargateRendererStateBase rendererState = new StargateRendererStateBase();
 	
 	@Override
-	public StargateRendererBase getRenderer() {
+	protected StargateRendererBase getRenderer() {
 		return renderer;
 	}
 	
@@ -114,14 +153,8 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 	}
 	
 	@Override
-	public void render(double x, double y, double z, float partialTicks) {
-		getEventHorizon().render(x, y, z);
-		
-		x += 0.5;
-//		y += 1.0;
-		z += 0.5;
-		
-		super.render(x, y, z, partialTicks);
+	protected Vec3d getRenderTranslaton() {
+		return new Vec3d(0.5, 0, 0.5);
 	}
 	
 	

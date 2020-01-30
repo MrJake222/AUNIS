@@ -113,6 +113,12 @@ public class AunisConfig {
 		
 		@Name("Render horizon bounding box")
 		public boolean renderHorizonBoundingBox = false;
+		
+		@Name("Render kawoosh bounding box")
+		public boolean renderKawooshBoundingBox = false;
+		
+		@Name("Render whole kawoosh bounding box")
+		public boolean renderWholeKawooshBoundingBox = false;
 	}
 	
 	public static class MysteriousConfig {
