@@ -6,83 +6,43 @@ import java.util.Map;
 
 import javax.vecmath.Vector2f;
 
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToClient;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
-import mrjake.aunis.util.BoundingBoxHelper;
+import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class EventHorizon {
-	
-	private final float HORIZON_PLACEMENT = 0.6f;
-	private final float HORIZON_THICKNESS = 0.2f;
-	
+public class EventHorizon {	
 	private World world;
 	private BlockPos pos;
+
+	private AunisAxisAlignedBB localBox;
+	private AunisAxisAlignedBB globalBox;
 	
-	private float widthLeft;
-	private float widthRight;
-	private float bottom;
-	private float height;
-	
-	private AxisAlignedBB localBB;
-	private AxisAlignedBB globalBB;
-	
-	public EventHorizon(World world, BlockPos pos, float widthLeft, float widthRight, float bottom, float height) {
+	public EventHorizon(World world, BlockPos pos, EnumFacing facing, AunisAxisAlignedBB localBox) {
 		this.world = world;
 		this.pos = pos;
 		
-		this.widthLeft = widthLeft;
-		this.widthRight = widthRight;
-		this.bottom = bottom;
-		this.height = height;
-		
-		globalize();
+		this.localBox = localBox.rotate(facing).offset(0.5, 0, 0.5);
+		this.globalBox = this.localBox.offset(pos); 
 	}
 	
 	public void reset() {
 		scheduledTeleportMap.clear();
 	}
 	
-	private void globalize() {
-		float offset1 = HORIZON_PLACEMENT - HORIZON_THICKNESS;
-		float offset2 = HORIZON_PLACEMENT + HORIZON_THICKNESS;
-		
-		EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
-		
-		switch (facing.getAxis()) {
-			case X:
-				localBB = new AxisAlignedBB(offset1, bottom, widthLeft,  offset2, height, widthRight);
-				
-				break;
-				
-			case Z:
-				localBB = new AxisAlignedBB(widthLeft, bottom, offset1,  widthRight, height, offset2);
-				break;
-				
-			default:
-				break;
-		}
-		
-		globalBB = localBB.offset(pos);
-	}
-	
 	@SideOnly(Side.CLIENT)
 	public void render(double x, double y, double z) {
-		if (AunisConfig.debugConfig.renderHorizonBoundingBox) {		
-			BoundingBoxHelper.render(x, y, z, localBB);
-		}
+		localBox.render(x, y, z);
 	}
 	
 	// ------------------------------------------------------------------------
@@ -91,9 +51,9 @@ public class EventHorizon {
 	private Map<Integer, TeleportPacket> scheduledTeleportMap = new HashMap<>();
 	
 	public void scheduleTeleportation(StargatePos targetGate) {
-		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, globalBB);
+		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, globalBox);
 
-//		Aunis.info(globalBB + ": " + entities + ", map: " + scheduledTeleportMap);
+//		Aunis.info(globalBox + ": " + entities + ", map: " + scheduledTeleportMap);
 		
 		for (Entity entity : entities) {
 			int entityId = entity.getEntityId();

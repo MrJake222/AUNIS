@@ -64,18 +64,24 @@ public abstract class StargateRendererBase {
 			renderGate();
 			renderChevrons(partialTicks);
 			
-			if (getRendererState().doEventHorizonRender)
+			if (rendererState.doEventHorizonRender)
 				renderKawoosh(partialTicks);
 			
 			GlStateManager.popMatrix();
 		}
 	}
 	
+	protected StargateRendererStateBase rendererState;
+	
+	public void setRendererState(StargateRendererStateBase state) {
+		this.rendererState = state;
+	}
+	
+	public boolean isDialingComplete() {
+		return rendererState.dialingComplete;
+	}
+	
 	protected abstract boolean shouldRender();
-	
-	protected abstract StargateRendererStateBase getRendererState();
-	public abstract void setRendererState(StargateRendererStateBase state);
-	
 	protected abstract void applyLightMap(double partialTicks);
 	
 	protected abstract void renderGate();
@@ -114,10 +120,10 @@ public abstract class StargateRendererBase {
 		backStripClamp = true;
 		whiteOverlayAlpha = 1.0f;
 		
-		getRendererState().vortexState = EnumVortexState.FORMING;
+		rendererState.vortexState = EnumVortexState.FORMING;
 		
 		kawooshStart = world.getTotalWorldTime();
-		getRendererState().doEventHorizonRender = true;
+		rendererState.doEventHorizonRender = true;
 	}
 	
 	public void closeGate() {
@@ -126,11 +132,11 @@ public abstract class StargateRendererBase {
 		AunisSoundHelper.playSoundEventClientSide((WorldClient) world, pos, EnumAunisSoundEvent.GATE_CLOSE, 0.3f);
 		gateWaitClose = world.getTotalWorldTime();
 		
-		getRendererState().vortexState = EnumVortexState.CLOSING;
+		rendererState.vortexState = EnumVortexState.CLOSING;
 	}
 	
 	private void engageGate() {
-		getRendererState().vortexState = EnumVortexState.STILL;
+		rendererState.vortexState = EnumVortexState.STILL;
 		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, pos, true);
 	}
 	
@@ -165,6 +171,7 @@ public abstract class StargateRendererBase {
 	}
 	
 	protected void renderKawoosh(double partialTicks) {
+//		rendererState.vortexState = EnumVortexState.FULL;
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 		
 		float gateWait = world.getTotalWorldTime() - gateWaitStart;
@@ -216,12 +223,12 @@ public abstract class StargateRendererBase {
 				float argState = (tick - vortexStart) / speedFactor;
 								
 				if (argState < 1.342f)
-					getRendererState().vortexState = EnumVortexState.FORMING;
+					rendererState.vortexState = EnumVortexState.FORMING;
 				else if (argState < 4.15f)
-					getRendererState().vortexState = EnumVortexState.FULL;
+					rendererState.vortexState = EnumVortexState.FULL;
 				else if (argState < 5.898f)
-					getRendererState().vortexState = EnumVortexState.DECREASING;
-				else if ( getRendererState().vortexState != EnumVortexState.CLOSING )
+					rendererState.vortexState = EnumVortexState.DECREASING;
+				else if ( rendererState.vortexState != EnumVortexState.CLOSING )
 					engageGate();
 			}
 
@@ -230,25 +237,25 @@ public abstract class StargateRendererBase {
 			
 			boolean first = true;
 			
-			if ( !(getRendererState().vortexState == EnumVortexState.STILL) ) {
+			if ( !(rendererState.vortexState == EnumVortexState.STILL) ) {
 				float arg = (tick - vortexStart) / speedFactor;
 								
-				if ( !(getRendererState().vortexState == EnumVortexState.CLOSING))  {
-					if ( !(getRendererState().vortexState == EnumVortexState.SHRINKING) ) {
-						if ( getRendererState().vortexState == EnumVortexState.FORMING && arg >= 1.342f ) {
-							getRendererState().vortexState = EnumVortexState.FULL;
+				if ( !(rendererState.vortexState == EnumVortexState.CLOSING))  {
+					if ( !(rendererState.vortexState == EnumVortexState.SHRINKING) ) {
+						if ( rendererState.vortexState == EnumVortexState.FORMING && arg >= 1.342f ) {
+							rendererState.vortexState = EnumVortexState.FULL;
 						}
 						
 						// Offset of the end of the function domain used to generate vortex 
 						float end = 0.75f;
 						
-						if ( getRendererState().vortexState == (EnumVortexState.DECREASING) && arg >= 5.398+end ) {
+						if ( rendererState.vortexState == (EnumVortexState.DECREASING) && arg >= 5.398+end ) {
 							engageGate();
 						}
 						
-						if ( getRendererState().vortexState == (EnumVortexState.FULL) ) {				
+						if ( rendererState.vortexState == (EnumVortexState.FULL) ) {				
 							if ( arg >= 3.65f+end ) {
-								getRendererState().vortexState = EnumVortexState.DECREASING;
+								rendererState.vortexState = EnumVortexState.DECREASING;
 							}
 							
 							// Flattening the vortex and keeping it still for a moment
@@ -261,7 +268,7 @@ public abstract class StargateRendererBase {
 						}
 						
 						else {
-							if ( getRendererState().vortexState == (EnumVortexState.FORMING) )
+							if ( rendererState.vortexState == (EnumVortexState.FORMING) )
 								mul = ( arg * (arg-4) ) / -4.0f;
 							
 							else
@@ -280,6 +287,7 @@ public abstract class StargateRendererBase {
 								float zOffset = e.getKey();
 								float rad = e.getValue();
 								
+//								mul = 0.945f;
 								// Aunis.getRendererInit().new QuadStrip(8, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul);
 								new QuadStrip(8, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul, false, 1.0f - whiteOverlayAlpha, 1);
 								
@@ -302,7 +310,7 @@ public abstract class StargateRendererBase {
 							whiteOverlayAlpha = null;							
 							
 							if (world.getTotalWorldTime() - stateChange - 9 > 7) {
-								getRendererState().doEventHorizonRender = false;							
+								rendererState.doEventHorizonRender = false;							
 								clearChevrons(stateChange + 9 + 7);
 							}
 							
@@ -322,7 +330,7 @@ public abstract class StargateRendererBase {
 							if (backStrip == null)
 								backStrip = new QuadStrip(8, arg2, StargateRendererStatic.eventHorizonRadius, tick);
 							
-							getRendererState().vortexState = EnumVortexState.SHRINKING;
+							rendererState.vortexState = EnumVortexState.SHRINKING;
 						}
 					}
 				}
@@ -330,18 +338,18 @@ public abstract class StargateRendererBase {
 		}
 						
 		// Rendering proper event horizon or the <backStrip> for vortex
-		if (getRendererState().vortexState != null) {
-			if ( getRendererState().vortexState == (EnumVortexState.STILL) || getRendererState().vortexState == EnumVortexState.CLOSING ) {
+		if (rendererState.vortexState != null) {
+			if ( rendererState.vortexState == (EnumVortexState.STILL) || rendererState.vortexState == EnumVortexState.CLOSING ) {
 				
 				if (horizonUnstable)
 					ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2_unstable.jpg"));
 
-//				if ( getRendererState().vortexState == (EnumVortexState.CLOSING) || getRendererState().vortexState == EnumVortexState.SHRINKING )
+//				if ( rendererState.vortexState == (EnumVortexState.CLOSING) || rendererState.vortexState == EnumVortexState.SHRINKING )
 //					renderEventHorizon(x, y, z, partialTicks, true, whiteOverlayAlpha, true, 1);
 //				else				
 //					renderEventHorizon(x, y, z, partialTicks, false, 0.0f, false, horizonUnstable ? 2f : 1);
 				
-				if ( getRendererState().vortexState == EnumVortexState.CLOSING )
+				if ( rendererState.vortexState == EnumVortexState.CLOSING )
 					renderEventHorizon(partialTicks, true, whiteOverlayAlpha, false, 1.7f);
 				else
 					renderEventHorizon(partialTicks, false, null, false, horizonUnstable ? 1.2f : 1);

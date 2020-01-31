@@ -51,7 +51,7 @@ import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.util.IScheduledTaskExecutor;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
-import mrjake.aunis.util.BoundingBoxHelper;
+import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
@@ -116,7 +116,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		energyConsumed = 0;
 		
 		stargateState = isInitiating ? EnumStargateState.ENGAGED_INITIATING : EnumStargateState.ENGAGED;
-		getEventHorizon().reset();
+		eventHorizon.reset();
 		getAutoCloseManager().reset();
 		
 		markDirty();
@@ -146,10 +146,18 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	// ------------------------------------------------------------------------
 	// Stargate Network
 	
+	/**
+	 * Instance of the {@link EventHorizon} for teleporting entities.
+	 */
 	protected EventHorizon eventHorizon;
-	private AutoCloseManager autoCloseManager;
 	
-	protected abstract EventHorizon getEventHorizon();
+	/**
+	 * Get the bounding box of the horizon.
+	 * @return Horizon bounding box.
+	 */
+	protected abstract AunisAxisAlignedBB getHorizonTeleportBox();
+
+	private AutoCloseManager autoCloseManager;
 	
 	private AutoCloseManager getAutoCloseManager() {
 		if (autoCloseManager == null)
@@ -166,15 +174,15 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 //	}
 	
 	public void setMotionOfPassingEntity(int entityId, Vector2f motionVector) {
-		getEventHorizon().setMotion(entityId, motionVector);
+		eventHorizon.setMotion(entityId, motionVector);
 	}
 	
 	public void teleportEntity(int entityId) {
-		getEventHorizon().teleportEntity(entityId);
+		eventHorizon.teleportEntity(entityId);
 	}
 	
 	public void removeEntity(int entityId) {
-		getEventHorizon().removeEntity(entityId);
+		eventHorizon.removeEntity(entityId);
 	}
 	
 	public List<EnumSymbol> gateAddress = null;
@@ -400,23 +408,25 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		
 		this.facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 		
-		AxisAlignedBB kBox = getHorizonKillingBox();
+		this.eventHorizon = new EventHorizon(world, pos, facing, getHorizonTeleportBox());
+		
+		AunisAxisAlignedBB kBox = getHorizonKillingBox();
 		double width = kBox.maxZ - kBox.minZ;
 		width /= getHorizonSegmentCount();
 		
-		localKillingBoxes = new ArrayList<AxisAlignedBB>(getHorizonSegmentCount());
+		localKillingBoxes = new ArrayList<AunisAxisAlignedBB>(getHorizonSegmentCount());
 		for (int i=0; i<getHorizonSegmentCount(); i++) {
-			AxisAlignedBB box = new AxisAlignedBB(kBox.minX, kBox.minY, kBox.minZ + width*i, kBox.maxX, kBox.maxY, kBox.minZ + width*(i+1));
-			box = BoundingBoxHelper.rotate(box, (int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5);
+			AunisAxisAlignedBB box = new AunisAxisAlignedBB(kBox.minX, kBox.minY, kBox.minZ + width*i, kBox.maxX, kBox.maxY, kBox.minZ + width*(i+1));
+			box = box.rotate(facing).offset(0.5, 0, 0.5);
 			
 			localKillingBoxes.add(box);
 		}
 		
-		localInnerBlockBoxes = new ArrayList<AxisAlignedBB>(3);
-		localInnerEntityBoxes = new ArrayList<AxisAlignedBB>(3);
-		for (AxisAlignedBB lBox : getGateVaporizingBoxes()) {
-			localInnerBlockBoxes.add(BoundingBoxHelper.rotate(lBox, (int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5));
-			localInnerEntityBoxes.add(BoundingBoxHelper.rotate(lBox.grow(0, 0, -0.25), (int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5));
+		localInnerBlockBoxes = new ArrayList<AunisAxisAlignedBB>(3);
+		localInnerEntityBoxes = new ArrayList<AunisAxisAlignedBB>(3);
+		for (AunisAxisAlignedBB lBox : getGateVaporizingBoxes()) {
+			localInnerBlockBoxes.add(lBox.rotate(facing).offset(0.5, 0, 0.5));
+			localInnerEntityBoxes.add(lBox.grow(0, 0, -0.25).rotate(facing).offset(0.5, 0, 0.5));
 		}
 	}
 	
@@ -426,9 +436,9 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		if (!world.isRemote) {
 			// Event horizon teleportation			
 			if (stargateState == EnumStargateState.ENGAGED_INITIATING) {
-				getEventHorizon().scheduleTeleportation(StargateNetwork.get(world).getStargate(dialedAddress));
+				eventHorizon.scheduleTeleportation(StargateNetwork.get(world).getStargate(dialedAddress));
 			}
-			
+						
 			// Not initiating
 			if (stargateState == EnumStargateState.ENGAGED) {
 				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
@@ -459,21 +469,22 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 				
 				// Get all blocks and entities inside the kawoosh
 				for (int i=0; i<getRendererState().horizonSegments; i++) {
-					AxisAlignedBB gBox = localKillingBoxes.get(i).offset(pos);
+					AunisAxisAlignedBB gBox = localKillingBoxes.get(i).offset(pos);
 					
 					entities.addAll(world.getEntitiesWithinAABB(EntityLivingBase.class, gBox));
 					
-					for (BlockPos bPos : BlockPos.getAllInBox((int)gBox.minX, (int)gBox.minY+1, (int)gBox.minZ, (int)gBox.maxX-1, (int)gBox.maxY-1, (int)gBox.maxZ-1))
+//					Aunis.info(new AxisAlignedBB((int)Math.floor(gBox.minX), (int)Math.floor(gBox.minY+1), (int)Math.floor(gBox.minZ), (int)Math.ceil(gBox.maxX-1), (int)Math.ceil(gBox.maxY-1), (int)Math.ceil(gBox.maxZ-1)).toString());
+					for (BlockPos bPos : BlockPos.getAllInBox((int)Math.floor(gBox.minX), (int)Math.floor(gBox.minY), (int)Math.floor(gBox.minZ), (int)Math.ceil(gBox.maxX)-1, (int)Math.ceil(gBox.maxY)-1, (int)Math.ceil(gBox.maxZ)-1))
 						blocks.add(bPos);					
 				}
 				
 				// Get all entities inside the gate
-				for (AxisAlignedBB lBox : localInnerEntityBoxes)
+				for (AunisAxisAlignedBB lBox : localInnerEntityBoxes)
 					entities.addAll(world.getEntitiesWithinAABB(EntityLivingBase.class, lBox.offset(pos)));
 				
 				// Get all blocks inside the gate
-				for (AxisAlignedBB lBox : localInnerBlockBoxes) {
-					AxisAlignedBB gBox = lBox.offset(pos);
+				for (AunisAxisAlignedBB lBox : localInnerBlockBoxes) {
+					AunisAxisAlignedBB gBox = lBox.offset(pos);
 					
 					for (BlockPos bPos : BlockPos.getAllInBox((int)gBox.minX, (int)gBox.minY, (int)gBox.minZ, (int)gBox.maxX-1, (int)gBox.maxY-1, (int)gBox.maxZ-1))
 						blocks.add(bPos);
@@ -572,7 +583,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	 * Gets full {@link AxisAlignedBB} of the killing area.
 	 * @return Approximate kawoosh size.
 	 */
-	protected abstract AxisAlignedBB getHorizonKillingBox();
+	protected abstract AunisAxisAlignedBB getHorizonKillingBox();
 	
 	/**
 	 * How many segments should the exclusion zone have.
@@ -585,7 +596,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	 * and vaporize everything
 	 * @return List of {@link AxisAlignedBB} for the inner gate area.
 	 */
-	protected abstract List<AxisAlignedBB> getGateVaporizingBoxes();
+	protected abstract List<AunisAxisAlignedBB> getGateVaporizingBoxes();
 	
 	/**
 	 * How many ticks should the {@link StargateBaseTile} wait to perform
@@ -597,21 +608,21 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	 * Contains all the subboxes to be activated with the kawoosh.
 	 * On the server needs to be offsetted by the {@link TileEntity#getPos()}
 	 */
-	protected List<AxisAlignedBB> localKillingBoxes;
+	protected List<AunisAxisAlignedBB> localKillingBoxes;
 	
 	/**
 	 * Contains all boxes of the inner part of the gate.
 	 * Full blocks. Used for destroying blocks.
 	 * On the server needs to be offsetted by the {@link TileEntity#getPos()}
 	 */
-	protected List<AxisAlignedBB> localInnerBlockBoxes;
+	protected List<AunisAxisAlignedBB> localInnerBlockBoxes;
 	
 	/**
 	 * Contains all boxes of the inner part of the gate.
 	 * Not full blocks. Used for entity killing.
 	 * On the server needs to be offsetted by the {@link TileEntity#getPos()}
 	 */
-	protected List<AxisAlignedBB> localInnerEntityBoxes;
+	protected List<AunisAxisAlignedBB> localInnerEntityBoxes;
 	
 	private boolean horizonKilling;
 
@@ -624,19 +635,20 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	
 	@Override
 	public void render(double x, double y, double z, float partialTicks) {
-		getEventHorizon().render(x, y, z);
+		if (AunisConfig.debugConfig.renderHorizonBoundingBox)		
+			eventHorizon.render(x, y, z);
 		
 		if (AunisConfig.debugConfig.renderKawooshBoundingBox || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
 			int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? getHorizonSegmentCount() : getRendererState().horizonSegments;
 
 			for (int i=0; i<segments; i++) {
-				BoundingBoxHelper.render(x, y, z, localKillingBoxes.get(i));
+				localKillingBoxes.get(i).render(x, y, z);
 			}
-			
-			for (AxisAlignedBB b : localInnerBlockBoxes)
-				BoundingBoxHelper.render(x, y, z, b);
+						
+			for (AunisAxisAlignedBB b : localInnerBlockBoxes)
+				b.render(x, y, z);
 		}
-		
+				
 		Vec3d vec = getRenderTranslaton();
 		
 		x += vec.x;

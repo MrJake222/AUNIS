@@ -21,11 +21,11 @@ import net.minecraft.client.renderer.GlStateManager;
 public class StargateRendererOrlin extends StargateRendererBase {
 	
 	public static final float GATE_SCALE = 0.43f;
-	
-	private StargateRendererStateBase state = new StargateRendererStateBase();
-	
+		
 	public StargateRendererOrlin(StargateBaseTileOrlin te) {
 		super(te.getWorld(), te.getPos());
+		
+		this.rendererState = new StargateRendererStateBase(); 
 	}
 
 	@Override
@@ -33,12 +33,7 @@ public class StargateRendererOrlin extends StargateRendererBase {
 		IBlockState state = world.getBlockState(pos);
 		
 		return (!state.getValue(AunisProps.RENDER_BLOCK));
-	}
-	
-	@Override
-	protected StargateRendererStateBase getRendererState() {
-		return state;
-	}
+	}	
 	
 	
 	// ---------------------------------------------------------------------------------------
@@ -79,11 +74,6 @@ public class StargateRendererOrlin extends StargateRendererBase {
 		GlStateManager.scale(0.7f, 0.7f, 0.7f);
 		
 		super.renderKawoosh(partialTicks);
-	}
-
-	@Override
-	public void setRendererState(StargateRendererStateBase state) {
-		// TODO Auto-generated method stub
 	}
 	
 	
@@ -133,7 +123,7 @@ public class StargateRendererOrlin extends StargateRendererBase {
 	
 	public void spawnParticles() {
 		for (ParticleBlender particle : GATE_PARTICLES) {
-			particle.spawn(world, pos, horizontalRotation, !getRendererState().doEventHorizonRender);
+			particle.spawn(world, pos, horizontalRotation, !rendererState.doEventHorizonRender);
 		}
 		
 		

@@ -28,7 +28,6 @@ import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.MergeHelper;
-import mrjake.aunis.stargate.teleportation.EventHorizon;
 import mrjake.aunis.state.StargateGuiState;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererStateBase;
@@ -45,6 +44,7 @@ import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.StargateUpgradeRenderer;
 import mrjake.aunis.upgrade.UpgradeRenderer;
+import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.ILinkable;
 import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.state.IBlockState;
@@ -52,7 +52,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -96,11 +95,8 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	// Stargate Network
 	
 	@Override
-	protected EventHorizon getEventHorizon()  {
-		if (eventHorizon == null)
-			eventHorizon = new EventHorizon(world, pos, -3, 4, 1.5f, 8.7f);
-		
-		return eventHorizon;
+	protected AunisAxisAlignedBB getHorizonTeleportBox() {
+		return new AunisAxisAlignedBB(-3.5, 1.5, -0.1, 3.5, 8.6, 0.2);
 	}
 	
 	@Override
@@ -385,8 +381,8 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	// Killing and block vaporizing                                                                          
 		
 	@Override
-	protected AxisAlignedBB getHorizonKillingBox() {
-		return new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5);
+	protected AunisAxisAlignedBB getHorizonKillingBox() {
+		return new AunisAxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5);
 	}
 	
 	@Override
@@ -395,11 +391,11 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	}
 	
 	@Override
-	protected  List<AxisAlignedBB> getGateVaporizingBoxes() {
+	protected  List<AunisAxisAlignedBB> getGateVaporizingBoxes() {
 		return Arrays.asList(
-				new AxisAlignedBB(-2.5, 2.0, -0.5, 2.5, 9, 0.5),
-				new AxisAlignedBB(-3.5, 2.0, -0.5, -2.5, 8, 0.5),
-				new AxisAlignedBB(3.5, 2.0, -0.5, 2.5, 8, 0.5)
+				new AunisAxisAlignedBB(-2.5, 2.0, -0.5, 2.5, 9, 0.5),
+				new AunisAxisAlignedBB(-3.5, 2.0, -0.5, -2.5, 8, 0.5),
+				new AunisAxisAlignedBB(3.5, 2.0, -0.5, 2.5, 8, 0.5)
 			);
 	}
 	

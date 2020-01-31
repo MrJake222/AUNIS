@@ -13,16 +13,15 @@ import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
-import mrjake.aunis.stargate.teleportation.EventHorizon;
 import mrjake.aunis.state.StargateOrlinSparkState;
 import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.util.ScheduledTask;
+import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -60,7 +59,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 		super.update();
 		
 		if (world.isRemote) {
-			renderer.spawnParticles();
+//			renderer.spawnParticles();
 		}
 	}
 	
@@ -109,18 +108,18 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 		                                                                            
 		
 	@Override
-	protected AxisAlignedBB getHorizonKillingBox() {
-		return new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5);
+	protected AunisAxisAlignedBB getHorizonKillingBox() {
+		return new AunisAxisAlignedBB(-0.5, 1, -0.5, 0.5, 2, 1.5);
 	}
 	
 	@Override
 	protected int getHorizonSegmentCount() {
-		return 6;
+		return 2;
 	}
 	
 	@Override
-	protected List<AxisAlignedBB> getGateVaporizingBoxes() {
-		return Arrays.asList(new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5));
+	protected List<AunisAxisAlignedBB> getGateVaporizingBoxes() {
+		return Arrays.asList(new AunisAxisAlignedBB(-0.5, 1, -0.5, 0.5, 2, 0.5));
 	}
 		
 	
@@ -128,11 +127,8 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 	// Rendering
 	
 	@Override
-	protected EventHorizon getEventHorizon()  {
-		if (eventHorizon == null)
-			eventHorizon = new EventHorizon(world, pos, -0.5f, 1.5f, 0.7f, 2.7f);
-		
-		return eventHorizon;
+	protected AunisAxisAlignedBB getHorizonTeleportBox() {
+		return new AunisAxisAlignedBB(-1.0, 0.6, -0.15, 1.0, 2.7, -0.05);
 	}
 	
 	private StargateRendererOrlin renderer;

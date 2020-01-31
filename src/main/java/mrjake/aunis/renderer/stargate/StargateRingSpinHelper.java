@@ -144,7 +144,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 					getStargateSpinState().lockSoundPlayed = true;
 										
 					// Play final chevron lock sound
-					if (renderer.getRendererState().dialingComplete) {						
+					if (renderer.isDialingComplete()) {						
 						renderer.moveFinalChevron(state.tickStart + state.tickStopRequested + 15);
 					}
 				}

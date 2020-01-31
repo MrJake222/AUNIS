@@ -5,7 +5,6 @@ import java.util.List;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.tileentity.stargate.StargateBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -20,7 +19,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.IRegistry;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -106,32 +104,6 @@ public class PageNotebookItem extends Item {
 					player.setHeldItem(hand, stack);
 								
 				return EnumActionResult.SUCCESS;
-			}
-			
-			else if (block == AunisBlocks.stargateOrlinBlock) {
-				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(pos);
-				
-				NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
-				if (compound != null && compound.hasKey("address")) {
-					
-					EnumSymbol seventh = null;
-					
-					if (compound.hasKey("7th"))
-						seventh = EnumSymbol.valueOf(compound.getInteger("7th"));
-					
-					List<EnumSymbol> address = EnumSymbol.toSymbolList(EnumSymbol.fromLong(compound.getLong("address")));
-					
-					if (seventh != null)
-						address.add(seventh);
-					
-					address.add(EnumSymbol.ORIGIN);
-					gateTile.dialedAddress = address;
-					
-//					AunisPacketHandler.INSTANCE.sendTo(new PlayerSwingHandToClient(hand), (EntityPlayerMP) player);
-					player.sendMessage(new TextComponentString("Bound to: " + address));
-					
-					return EnumActionResult.SUCCESS;
-				}
 			}
 		}
 	

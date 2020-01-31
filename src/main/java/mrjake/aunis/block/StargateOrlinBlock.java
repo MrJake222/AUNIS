@@ -1,7 +1,11 @@
 package mrjake.aunis.block;
 
+import java.util.List;
+
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.orlin.MergeHelperOrlin;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
 import net.minecraft.block.Block;
@@ -12,12 +16,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -72,13 +78,26 @@ public class StargateOrlinBlock extends Block {
 	
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		Aunis.info("activated");
-		
-		if (!world.isRemote) {
-			StargateBaseTileOrlin gateTile = (StargateBaseTileOrlin) world.getTileEntity(pos);
-		
-			if (hand == EnumHand.MAIN_HAND)
-				gateTile.startSparks();
+		if (player.getHeldItem(hand).getItem() == AunisItems.pageNotebookItem) {
+			if (!world.isRemote) {
+				StargateBaseTileOrlin gateTile = (StargateBaseTileOrlin) world.getTileEntity(pos);
+			
+				NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
+				if (compound != null && compound.hasKey("address")) {
+									
+					List<EnumSymbol> address = EnumSymbol.toSymbolList(EnumSymbol.fromLong(compound.getLong("address")));
+					
+					if (compound.hasKey("7th"))
+						address.add(EnumSymbol.valueOf(compound.getInteger("7th")));
+					
+					address.add(EnumSymbol.ORIGIN);
+					gateTile.dialedAddress = address;
+					
+					player.sendMessage(new TextComponentString("Bound to: " + address));
+				}
+			}
+			
+			return true;
 		}
 				
 		return false;
