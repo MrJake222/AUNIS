@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.SoundPositionedPlayToClient;
 import net.minecraft.util.ResourceLocation;
@@ -12,8 +13,12 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
+@EventBusSubscriber
 public class AunisSoundHelper {
 	private static Map<EnumAunisPositionedSound, AunisSound> aunisSounds = new HashMap<>();
 	private static List<AunisPositionedSound> aunisPositionedSounds = new ArrayList<>();
@@ -54,27 +59,32 @@ public class AunisSoundHelper {
 	// ----------------------------------------------------------------------------------------------------------------
 	private static Map<EnumAunisSoundEvent, SoundEvent> aunisSoundEvents = new HashMap<>();
 	
+	private static SoundEvent createSoundEvent(String name) {
+		ResourceLocation resourceLocation = new ResourceLocation(Aunis.ModID, name);
+		return new SoundEvent(resourceLocation).setRegistryName(resourceLocation);
+	}
+	
 	static {
-		aunisSoundEvents.put(EnumAunisSoundEvent.DHD_PRESS, new SoundEvent(new ResourceLocation("aunis", "dhd_press")));
-		aunisSoundEvents.put(EnumAunisSoundEvent.DHD_PRESS_BRB, new SoundEvent(new ResourceLocation("aunis", "dhd_brb")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.DHD_PRESS, createSoundEvent("dhd_press"));
+		aunisSoundEvents.put(EnumAunisSoundEvent.DHD_PRESS_BRB, createSoundEvent("dhd_brb"));
 		
-		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_OPEN, new SoundEvent(new ResourceLocation("aunis", "gate_open")));
-		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_CLOSE, new SoundEvent(new ResourceLocation("aunis", "gate_close")));
-		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_DIAL_FAILED, new SoundEvent(new ResourceLocation("aunis", "gate_dial_fail")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_OPEN, createSoundEvent("gate_open"));
+		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_CLOSE, createSoundEvent("gate_close"));
+		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_DIAL_FAILED, createSoundEvent("gate_dial_fail"));
 		
-		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_LOCK_DHD, new SoundEvent(new ResourceLocation("aunis", "chevron_lock_dhd")));	
-		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_INCOMING, new SoundEvent(new ResourceLocation("aunis", "chevron_incoming")));	
-		aunisSoundEvents.put(EnumAunisSoundEvent.WORMHOLE_GO, new SoundEvent(new ResourceLocation("aunis", "wormhole_go")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_LOCK_DHD, createSoundEvent("chevron_lock_dhd"));	
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_INCOMING, createSoundEvent("chevron_incoming"));	
+		aunisSoundEvents.put(EnumAunisSoundEvent.WORMHOLE_GO, createSoundEvent("wormhole_go"));
 		
-		aunisSoundEvents.put(EnumAunisSoundEvent.WORMHOLE_FLICKER, new SoundEvent(new ResourceLocation("aunis", "wormhole_flicker")));
-		aunisSoundEvents.put(EnumAunisSoundEvent.RINGS_TRANSPORT, new SoundEvent(new ResourceLocation("aunis", "rings_transport")));
-		aunisSoundEvents.put(EnumAunisSoundEvent.RINGS_CONTROLLER_BUTTON, new SoundEvent(new ResourceLocation("aunis", "rings_controller_button")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.WORMHOLE_FLICKER, createSoundEvent("wormhole_flicker"));
+		aunisSoundEvents.put(EnumAunisSoundEvent.RINGS_TRANSPORT, createSoundEvent("rings_transport"));
+		aunisSoundEvents.put(EnumAunisSoundEvent.RINGS_CONTROLLER_BUTTON, createSoundEvent("rings_controller_button"));
 		
-		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_SHUT, new SoundEvent(new ResourceLocation("aunis", "chevron_shut")));
-		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_OPEN, new SoundEvent(new ResourceLocation("aunis", "chevron_open")));
-		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_LOCKING, new SoundEvent(new ResourceLocation("aunis", "chevron_locking")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_SHUT, createSoundEvent("chevron_shut"));
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_OPEN, createSoundEvent("chevron_open"));
+		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_LOCKING, createSoundEvent("chevron_locking"));
 		
-		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_ORLIN_DIAL, new SoundEvent(new ResourceLocation("aunis", "gate_orlin_dial")));
+		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_ORLIN_DIAL, createSoundEvent("gate_orlin_dial"));
 	}
 	
 	public static void playSoundEventClientSide(World world, BlockPos pos, EnumAunisSoundEvent soundEvent, float volume) {		
@@ -83,5 +93,12 @@ public class AunisSoundHelper {
 	
 	public static void playSoundEvent(World world, BlockPos pos, EnumAunisSoundEvent soundEnum, float volume) {		
 		world.playSound(null, pos, aunisSoundEvents.get(soundEnum), SoundCategory.AMBIENT, volume, 1.0f);
+	}
+	
+	@SubscribeEvent
+	public static void registerSounds(RegistryEvent.Register<SoundEvent> event) {
+		for (SoundEvent soundEvent : aunisSoundEvents.values()) {
+			event.getRegistry().register(soundEvent);
+		}
 	}
 }

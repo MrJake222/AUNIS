@@ -63,7 +63,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 	private static final AunisAxisAlignedBB LOCAL_TELEPORT_BOX = new AunisAxisAlignedBB(-1, 2, -1, 2, 4.5, 2);
 	private AunisAxisAlignedBB globalTeleportBox;
 	
-	private List<Entity> teleportList;
+	private List<Entity> teleportList = new ArrayList<>();
 	
 	@Override
 	public void update() {		
@@ -156,8 +156,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 	
 	// ---------------------------------------------------------------------------------
 	// Teleportation
-	private BlockPos targetRingsPos;
-	private List<Entity> excludedEntities;
+	private BlockPos targetRingsPos = new BlockPos(0, 0, 0);
+	private List<Entity> excludedEntities = new ArrayList<>();
 	
 	public List<Entity> startAnimationAndTeleport(BlockPos targetRingsPos, List<Entity> excludedEntities) {
 		this.targetRingsPos = targetRingsPos;
