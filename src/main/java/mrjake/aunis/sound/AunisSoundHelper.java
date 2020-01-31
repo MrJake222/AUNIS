@@ -8,6 +8,8 @@ import java.util.Map;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.SoundPositionedPlayToClient;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -93,6 +95,10 @@ public class AunisSoundHelper {
 	
 	public static void playSoundEvent(World world, BlockPos pos, EnumAunisSoundEvent soundEnum, float volume) {		
 		world.playSound(null, pos, aunisSoundEvents.get(soundEnum), SoundCategory.AMBIENT, volume, 1.0f);
+	}
+	
+	public static void playSoundToPlayer(EntityPlayerMP player, EnumAunisSoundEvent soundEvent, BlockPos pos, float volume) {
+		player.connection.sendPacket(new SPacketSoundEffect(aunisSoundEvents.get(soundEvent), SoundCategory.AMBIENT, pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, volume, 1.0f));
 	}
 	
 	@SubscribeEvent
