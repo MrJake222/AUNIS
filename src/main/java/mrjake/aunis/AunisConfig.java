@@ -111,11 +111,8 @@ public class AunisConfig {
 		@Name("Allow charging the crystal by hand")
 		public boolean allowHandCrystalCharging = false;
 		
-		@Name("Render horizon bounding box")
-		public boolean renderHorizonBoundingBox = false;
-		
-		@Name("Render kawoosh bounding box")
-		public boolean renderKawooshBoundingBox = false;
+		@Name("Render bounding boxes")
+		public boolean renderBoundingBoxes = false;
 		
 		@Name("Render whole kawoosh bounding box")
 		public boolean renderWholeKawooshBoundingBox = false;

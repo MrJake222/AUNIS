@@ -2,6 +2,7 @@ package mrjake.aunis.stargate;
 
 import java.util.HashMap;
 import java.util.Map;
+import mrjake.aunis.tileentity.TransportRingsTile;
 
 public enum EnumScheduledTask {
 	STARGATE_OPEN_SOUND(0, 25),
@@ -16,7 +17,12 @@ public enum EnumScheduledTask {
 	STARGATE_ORLIN_SPARK(9, 27),
 //	STARGATE_HORIZON_KILLING_START(10, STARGATE_OPEN_SOUND.waitTicks + 26), // 1.3s of the sound to the kill
 	STARGATE_HORIZON_WIDEN(11, -1),
-	STARGATE_HORIZON_SHRINK(12, -1);
+	STARGATE_HORIZON_SHRINK(12, -1),
+	RINGS_START_ANIMATION(13, 20),
+	RINGS_FADE_OUT(14, TransportRingsTile.TIMEOUT_FADE_OUT),
+	RINGS_TELEPORT(15, TransportRingsTile.TIMEOUT_TELEPORT),
+	RINGS_CLEAR_OUT(15, TransportRingsTile.RINGS_CLEAR_OUT),
+	RINGS_SOLID_BLOCKS(16, 20);
 	
 	public int id;
 	public int waitTicks;

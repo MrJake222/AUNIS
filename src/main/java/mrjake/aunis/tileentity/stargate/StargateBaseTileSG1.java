@@ -643,8 +643,8 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 			if (lock) {
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_SHUT, 1f);
 				
-				addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_SHUT_SOUND));
-				addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_OPEN_SOUND));
+				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_SHUT_SOUND));
+				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_OPEN_SOUND));
 			}
 			
 			else

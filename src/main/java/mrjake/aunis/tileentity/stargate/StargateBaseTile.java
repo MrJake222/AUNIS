@@ -48,7 +48,7 @@ import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tesr.SpecialRendererProviderInterface;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.util.IScheduledTaskExecutor;
+import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.util.AunisAxisAlignedBB;
@@ -75,7 +75,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 //@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
-public abstract class StargateBaseTile extends TileEntity implements SpecialRendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, IScheduledTaskExecutor, Environment {
+public abstract class StargateBaseTile extends TileEntity implements SpecialRendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment {
 	
 	// ------------------------------------------------------------------------
 	// Stargate state
@@ -326,9 +326,9 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		sendRenderingUpdate(EnumGateAction.OPEN_GATE, false, 0);
 		getRendererState().setStargateOpen(world, pos, dialedAddressSize, isInitiating);
 		
-		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_OPEN_SOUND));
-		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_HORIZON_WIDEN, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 23 + TICKS_PER_HORIZON_SEGMENT)); // 1.3s of the sound to the kill
-		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ENGAGE));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_OPEN_SOUND));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_WIDEN, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 23 + TICKS_PER_HORIZON_SEGMENT)); // 1.3s of the sound to the kill
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ENGAGE));
 		
 		DHDTile dhdTile = getLinkedDHD(world);
 		if (dhdTile != null) {
@@ -355,7 +355,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		if (!dialingFailed) {		
 			stargateState = EnumStargateState.UNSTABLE;
 			
-			addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CLOSE));
+			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE));
 			sendSignal(null, "stargate_close", new Object[] {});
 			
 			sendRenderingUpdate(EnumGateAction.CLOSE_GATE, !stopRing, 0);
@@ -368,7 +368,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			
 			AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
 			
-			addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_FAIL));
+			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL));
 			sendSignal(null, "stargate_failed", new Object[] {});
 			
 			sendRenderingUpdate(EnumGateAction.GATE_DIAL_FAILED, !stopRing, 0);
@@ -445,18 +445,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			}
 						
 			// Scheduled tasks
-			for (int i=0; i<scheduledTasks.size();) {			
-				ScheduledTask scheduledTask = scheduledTasks.get(i);
-				
-				if (scheduledTask.isActive()) {								
-					if (scheduledTask.update(world.getTotalWorldTime()))
-						scheduledTasks.remove(scheduledTask);
-					
-					else i++;
-				}
-				
-				else i++;
-			}
+			ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());
 			
 			if (horizonFlashTask != null && horizonFlashTask.isActive()) {
 				horizonFlashTask.update(world.getTotalWorldTime());
@@ -534,7 +523,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 							if (horizonFlashTask == null && energyStorage.getEnergyStored() < sec*AunisConfig.powerConfig.instabilitySeconds) {
 								resetFlashingSequence();
 								
-								horizonFlashTask = new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.HORIZON_FLASH, (int) (Math.random() * 40) + 5);
+								horizonFlashTask = new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int) (Math.random() * 40) + 5);
 							}
 							
 							// Horizon becomes stable
@@ -634,11 +623,10 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	protected abstract Vec3d getRenderTranslaton();
 	
 	@Override
-	public void render(double x, double y, double z, float partialTicks) {
-		if (AunisConfig.debugConfig.renderHorizonBoundingBox)		
+	public void render(double x, double y, double z, float partialTicks) {		
+		if (AunisConfig.debugConfig.renderBoundingBoxes || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
 			eventHorizon.render(x, y, z);
-		
-		if (AunisConfig.debugConfig.renderKawooshBoundingBox || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
+			
 			int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? getHorizonSegmentCount() : getRendererState().horizonSegments;
 
 			for (int i=0; i<segments; i++) {
@@ -835,7 +823,11 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	 */
 	private List<ScheduledTask> scheduledTasks = new ArrayList<>();
 	
+	@Override
 	public void addTask(ScheduledTask scheduledTask) {
+		scheduledTask.setExecutor(this);
+		scheduledTask.setTaskCreated(world.getTotalWorldTime());
+		
 		scheduledTasks.add(scheduledTask);		
 		markDirty();
 	}	
@@ -857,9 +849,9 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, StargateRendererActionState.STARGATE_HORIZON_WIDEN_ACTION), targetPoint);
 				
 				if (getRendererState().horizonSegments < getHorizonSegmentCount())
-					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_HORIZON_WIDEN, TICKS_PER_HORIZON_SEGMENT));
+					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_WIDEN, TICKS_PER_HORIZON_SEGMENT));
 				else
-					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_HORIZON_SHRINK, TICKS_PER_HORIZON_SEGMENT + 12));
+					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_SHRINK, TICKS_PER_HORIZON_SEGMENT + 12));
 				
 				break;
 				
@@ -868,7 +860,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, StargateRendererActionState.STARGATE_HORIZON_SHRINK_ACTION), targetPoint);
 				
 				if (getRendererState().horizonSegments > 0)
-					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_HORIZON_SHRINK, TICKS_PER_HORIZON_SEGMENT + 1));
+					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_SHRINK, TICKS_PER_HORIZON_SEGMENT + 1));
 				else
 					horizonKilling = false;
 				
@@ -900,17 +892,17 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.WORMHOLE_FLICKER, 0.5f);
 					
 					// Schedule change into stable state
-					horizonFlashTask = new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 3) + 3);
+					horizonFlashTask = new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 3) + 3);
 				}
 				
 				else {
 					if (flashIndex == 1)
 						// Schedule second flash
-						horizonFlashTask = new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 4) + 1);
+						horizonFlashTask = new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 4) + 1);
 					
 					else {
 						// Schedule next flash sequence
-						horizonFlashTask = new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 40) + 5);
+						horizonFlashTask = new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 40) + 5);
 						
 						resetFlashingSequence();
 					}
@@ -1058,8 +1050,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		if (stargateState != null)
 			compound.setInteger("stargateState", stargateState.id);
 		
-		for (int i=0; i<scheduledTasks.size(); i++)
-			compound.setTag("scheduledTask"+i, scheduledTasks.get(i).serializeNBT());
+		compound.setTag("scheduledTasks", ScheduledTask.serializeList(scheduledTasks));
 		
 		if (node != null) {
 			NBTTagCompound nodeCompound = new NBTTagCompound();
@@ -1094,11 +1085,12 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		getAutoCloseManager().deserializeNBT(compound.getCompoundTag("autoCloseManager"));
 		
 		try {
-			getRendererState().deserializeNBT(compound.getCompoundTag("rendererState"));		
+			getRendererState().deserializeNBT(compound.getCompoundTag("rendererState"));
+			ScheduledTask.deserializeList(compound.getCompoundTag("scheduledTasks"), scheduledTasks, this);
 		}
 		
 		catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
-			Aunis.info("Exception at reading RendererState");
+			Aunis.info("Exception at reading NBT");
 			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
 
 			e.printStackTrace();
@@ -1113,10 +1105,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		this.energyConsumed = compound.getInteger("energyConsumed");
 		
 		stargateState = EnumStargateState.valueOf(compound.getInteger("stargateState"));
-		
-		for (int i=0; i<scheduledTasks.size(); i++)
-			scheduledTasks.add(new ScheduledTask(this, compound.getCompoundTag("scheduledTask"+i)));
-		
+				
 		if (node != null && compound.hasKey("node"))
 			node.load(compound.getCompoundTag("node"));
 		

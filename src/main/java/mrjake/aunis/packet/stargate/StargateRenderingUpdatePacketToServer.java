@@ -292,7 +292,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 									// Limit not reached, activating in order
 									//if ( gateTile.getMaxSymbols() > symbolCount ) {
 									if ( (dhdTile.hasUpgrade() && symbolCount == 8) || (!dhdTile.hasUpgrade() && symbolCount == 7) || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN) ) {										
-										gateTile.addTask(new ScheduledTask(gateTile, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_CHEVRON_LOCK_DHD_SOUND));										
+										gateTile.addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_LOCK_DHD_SOUND));										
 										((StargateBaseTileSG1) gateTile).setRollPlayed();
 									}
 															

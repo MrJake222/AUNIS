@@ -1,8 +1,11 @@
 package mrjake.aunis.tileentity.util;
 
+import java.util.List;
+
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -17,9 +20,9 @@ import net.minecraftforge.common.util.INBTSerializable;
 public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 	
 	/**
-	 * {@link TileEntity} to perform {@link IScheduledTaskExecutor#executeTask(EnumScheduledTask)} on.
+	 * {@link TileEntity} to perform {@link ScheduledTaskExecutorInterface#executeTask(EnumScheduledTask)} on.
 	 */
-	private IScheduledTaskExecutor executor;
+	private ScheduledTaskExecutorInterface executor;
 	
 	/**
 	 * When the {@link ScheduledTask} was created.
@@ -37,7 +40,7 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 	private boolean active;
 	
 	/**
-	 * User can use {@link ScheduledTask#ScheduledTask(IScheduledTaskExecutor, long, EnumScheduledTask, int)} to set custom waiting time.
+	 * User can use {@link ScheduledTask#ScheduledTask(ScheduledTaskExecutorInterface, long, EnumScheduledTask, int)} to set custom waiting time.
 	 */
 	private boolean customWaitTime;
 	private int waitTime;
@@ -48,26 +51,44 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 	 * @param taskCreated When the {@link ScheduledTask} was created.
 	 * @param scheduledTask Task to perform.
 	 */
-	public ScheduledTask(IScheduledTaskExecutor executor, long taskCreated, EnumScheduledTask scheduledTask) {
-		this.executor = executor;
-		this.taskCreated = taskCreated;
+	public ScheduledTask(EnumScheduledTask scheduledTask) {
 		this.scheduledTask = scheduledTask;
 		this.active = true;
 		
 		this.customWaitTime = false;
 	}
 	
-	public ScheduledTask(IScheduledTaskExecutor executor, long taskCreated, EnumScheduledTask scheduledTask, int waitTime) {
-		this(executor, taskCreated, scheduledTask);
+	public ScheduledTask(EnumScheduledTask scheduledTask, int waitTime) {
+		this(scheduledTask);
 		
 		this.customWaitTime = true;
 		this.waitTime = waitTime;
 	}
 	
-	public ScheduledTask(IScheduledTaskExecutor executor, NBTTagCompound compound) {
+	public ScheduledTask(NBTTagCompound compound) {		
+		deserializeNBT(compound);
+	}
+	
+	/**
+	 * Sets the executor for this task. Done in {@link ScheduledTaskExecutorInterface#addTask(ScheduledTask)}.
+	 * 
+	 * @param executor The {@link TileEntity}.
+	 * @return 
+	 * @return This instance.
+	 */
+	public ScheduledTask setExecutor(ScheduledTaskExecutorInterface executor) {
 		this.executor = executor;
 		
-		deserializeNBT(compound);
+		return this;
+	}
+	
+	/**
+	 * Sets the time of creation. Done in {@link ScheduledTaskExecutorInterface#addTask(ScheduledTask)}.
+	 * 
+	 * @param taskCreated Usually {@link World#getTotalWorldTime()}.
+	 */
+	public void setTaskCreated(long taskCreated) {
+		this.taskCreated = taskCreated;
 	}
 	
 	/**
@@ -170,5 +191,43 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 		if (taskCreated != other.taskCreated)
 			return false;
 		return true;
-	}	
+	}
+	
+	/**
+	 * Static method to consolidate iterating through
+	 * a set of {@link ScheduledTask}.
+	 * 
+	 * @param scheduledTasks {@link List} of {@link ScheduledTask}.
+	 * @param worldTicks Usually {@link World#getTotalWorldTime()}.
+	 */
+	public static void iterate(List<ScheduledTask> scheduledTasks, long worldTicks) {
+		for (int i=0; i<scheduledTasks.size();) {			
+			ScheduledTask scheduledTask = scheduledTasks.get(i);
+			
+			if (scheduledTask.isActive()) {								
+				if (scheduledTask.update(worldTicks))
+					scheduledTasks.remove(scheduledTask);
+				
+				else i++;
+			}
+			
+			else i++;
+		}
+	}
+	
+	public static NBTTagCompound serializeList(List<ScheduledTask> scheduledTasks) {
+		NBTTagCompound compound = new NBTTagCompound();
+		
+		compound.setInteger("size", scheduledTasks.size());
+		for (int i=0; i<scheduledTasks.size(); i++)
+			compound.setTag("scheduledTask"+i, scheduledTasks.get(i).serializeNBT());
+		
+		return compound;
+	}
+	
+	public static void deserializeList(NBTTagCompound compound, List<ScheduledTask> scheduledTasks, ScheduledTaskExecutorInterface executor) {
+		int size = compound.getInteger("size");
+		for (int i=0; i<size; i++)
+			scheduledTasks.add(new ScheduledTask(compound.getCompoundTag("scheduledTask"+i)).setExecutor(executor));
+	}
 }

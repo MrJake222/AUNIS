@@ -59,7 +59,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 		super.update();
 		
 		if (world.isRemote) {
-//			renderer.spawnParticles();
+			renderer.spawnParticles();
 		}
 	}
 	
@@ -79,7 +79,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 						startSparks();
 						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_ORLIN_DIAL, 1.0f);
 						
-						addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ORLIN_OPEN));
+						addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_OPEN));
 					}
 					
 					else {
@@ -206,7 +206,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 	public void startSparks() {
 		sparkIndex = 0;
 		
-		addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ORLIN_SPARK, 5));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_SPARK, 5));
 	}
 	
 	// ------------------------------------------------------------------------
@@ -227,7 +227,7 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPARK_STATE, new StargateOrlinSparkState(sparkIndex, world.getTotalWorldTime())), targetPoint);
 				
 				if (sparkIndex < 6 && sparkIndex != -1)
-					addTask(new ScheduledTask(this, world.getTotalWorldTime(), EnumScheduledTask.STARGATE_ORLIN_SPARK, 24));
+					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_SPARK, 24));
 				
 				sparkIndex++;
 				

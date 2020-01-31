@@ -13,6 +13,10 @@ public class AunisAxisAlignedBB extends AxisAlignedBB {
 	public AunisAxisAlignedBB(double x1, double y1, double z1, double x2, double y2, double z2) {
         super(x1, y1, z1, x2, y2, z2);
     }
+	
+	public AunisAxisAlignedBB(BlockPos pos1, BlockPos pos2) {
+        this((double)pos1.getX(), (double)pos1.getY(), (double)pos1.getZ(), (double)pos2.getX(), (double)pos2.getY(), (double)pos2.getZ());
+    }
 
 	public AunisAxisAlignedBB rotate(int angle) {
 		switch (angle) {

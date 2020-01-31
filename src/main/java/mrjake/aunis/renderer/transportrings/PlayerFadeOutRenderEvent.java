@@ -21,7 +21,7 @@ public class PlayerFadeOutRenderEvent {
 	public static double calcFog(World world, long tickStart, double partialTicks) {
 		double effTick = world.getTotalWorldTime() - tickStart + partialTicks;
 				
-		return -(effTick * (effTick-TransportRingsTile.fadeOutTotalTime)) / (20*20);
+		return -(effTick * (effTick-TransportRingsTile.FADE_OUT_TOTAL_TIME)) / (20*20);
 	}
 	
 	@SubscribeEvent

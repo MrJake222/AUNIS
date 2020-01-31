@@ -71,5 +71,6 @@ tile.aunis.transportrings_block.non_existing_address=Unable to reach this addres
 tile.aunis.transportrings_block.duplicate_address=Duplicate address
 tile.aunis.transportrings_block.wrong_address=Wrong address, should be 1-6
 tile.aunis.transportrings_block.obstructed=Rings obstructed, clear 7x7 area around rings
+tile.aunis.transportrings_block.obstructed_target=Target rings obstructed, clear 7x7 area around target rings
 
 death.attack.eventHorizon=%s was given a kawoosh cremation

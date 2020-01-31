@@ -7,7 +7,14 @@ import mrjake.aunis.stargate.EnumScheduledTask;
  * 
  * @author MrJake
  */
-public interface IScheduledTaskExecutor {
+public interface ScheduledTaskExecutorInterface {
+	
+	/**
+	 * Adds given {@link ScheduledTask} to the list.
+	 * 
+	 * @param scheduledTask The task to be added.
+	 */
+	public void addTask(ScheduledTask scheduledTask);
 	
 	/**
 	 * Executes given task.

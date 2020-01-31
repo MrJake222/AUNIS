@@ -8,6 +8,7 @@ import java.util.Map;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.RingsGUI;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -17,6 +18,7 @@ import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient;
 import mrjake.aunis.renderer.transportrings.TransportRingsRenderer;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
@@ -24,7 +26,10 @@ import mrjake.aunis.state.TransportRingsGuiState;
 import mrjake.aunis.state.TransportRingsRendererState;
 import mrjake.aunis.state.TransportRingsStartAnimationRequest;
 import mrjake.aunis.tesr.SpecialRendererProviderInterface;
+import mrjake.aunis.tileentity.util.ScheduledTask;
+import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.transportrings.TransportRings;
+import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.ILinkable;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -44,58 +49,87 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TransportRingsTile extends TileEntity implements ITickable, SpecialRendererProviderInterface, StateProviderInterface, ILinkable {
+public class TransportRingsTile extends TileEntity implements ITickable, SpecialRendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable {
 	
 	// ---------------------------------------------------------------------------------
-	// Ticking
-	private boolean waitForStart = false;
-	private boolean waitForFadeOut = false;
-	private boolean waitForTeleport = false;
-	private boolean waitForClearout = false;
+	// Ticking and loading
 	
-	private long buttonPressed;
+	public static final int FADE_OUT_TOTAL_TIME = 2 * 20; // 2s
+	public static final int TIMEOUT_TELEPORT = FADE_OUT_TOTAL_TIME/2;
+
+	public static final int TIMEOUT_FADE_OUT = (int) (30 + TransportRingsRenderer.INTERVAL_UPRISING*TransportRingsRenderer.RING_COUNT + TransportRingsRenderer.ANIMATION_SPEED_DIVISOR * Math.PI);	
+	public static final int RINGS_CLEAR_OUT = (int) (15 + TransportRingsRenderer.INTERVAL_FALLING*TransportRingsRenderer.RING_COUNT + TransportRingsRenderer.ANIMATION_SPEED_DIVISOR * Math.PI);
 		
-	private static final int fadeOutTimeout = (int) (30 + TransportRingsRenderer.uprisingInterval*TransportRingsRenderer.ringCount + TransportRingsRenderer.animationDiv * Math.PI);
-	public static final int fadeOutTotalTime = 2 * 20; // 2s
-	
-	private static final int teleportTimeout = fadeOutTimeout + fadeOutTotalTime/2;
-	private static final int clearoutTimeout = (int) (100 + TransportRingsRenderer.fallingInterval*TransportRingsRenderer.ringCount + TransportRingsRenderer.animationDiv * Math.PI);
+	private static final AunisAxisAlignedBB LOCAL_TELEPORT_BOX = new AunisAxisAlignedBB(-1, 2, -1, 2, 4.5, 2);
+	private AunisAxisAlignedBB globalTeleportBox;
 	
 	private List<Entity> teleportList;
 	
 	@Override
 	public void update() {		
 		if (!world.isRemote) {
-			long effTick = world.getTotalWorldTime();
+			ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());
+		}
+	}
+	
+	@Override
+	public void onLoad() {
+		
+		if (!world.isRemote) {
+			setBarrierBlocks(false, false);
 			
-			effTick -= waitForStart ? buttonPressed : rendererState.animationStart;
-			
-			if (waitForStart && effTick >= 20) {
-				waitForStart = false;
-				waitForFadeOut = true;
-				
+			globalTeleportBox = LOCAL_TELEPORT_BOX.offset(pos);
+		}
+		
+		else {
+			renderer = new TransportRingsRenderer(this);
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
+		}
+	}
+	
+	
+	// ---------------------------------------------------------------------------------
+	// Scheduled task
+	
+	List<ScheduledTask> scheduledTasks = new ArrayList<>();
+	
+	@Override
+	public void addTask(ScheduledTask scheduledTask) {
+		scheduledTask.setExecutor(this);
+		scheduledTask.setTaskCreated(world.getTotalWorldTime());
+		
+		scheduledTasks.add(scheduledTask);
+		markDirty();
+	}
+	
+	@Override
+	public void executeTask(EnumScheduledTask scheduledTask) {
+		switch (scheduledTask) {
+			case RINGS_START_ANIMATION:
 				animationStart();
-				setBarrierBlocks(true);		
-			}
-			
-			else if (waitForFadeOut && effTick >= fadeOutTimeout) {
-				waitForFadeOut = false;
-				waitForTeleport = true;
+				setBarrierBlocks(true, true);
 				
-				teleportList = world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.add(-2, 2, -2), pos.add(3, 6, 3)));
+				addTask(new ScheduledTask(EnumScheduledTask.RINGS_FADE_OUT));
+				addTask(new ScheduledTask(EnumScheduledTask.RINGS_SOLID_BLOCKS, 35));
+				break;
+				
+			case RINGS_SOLID_BLOCKS:
+				setBarrierBlocks(true, false);
+				break;
+				
+			case RINGS_FADE_OUT:
+				teleportList = world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
 				
 				for (Entity entity : teleportList) {
 					if (entity instanceof EntityPlayerMP) {
 						AunisPacketHandler.INSTANCE.sendTo(new StartPlayerFadeOutToClient(), (EntityPlayerMP) entity);
 					}
 				}
-			}
 				
+				addTask(new ScheduledTask(EnumScheduledTask.RINGS_TELEPORT));
+				break;
 				
-			else if (waitForTeleport && effTick >= teleportTimeout) {
-				waitForTeleport = false;
-				waitForClearout = true;
-				
+			case RINGS_TELEPORT:
 				BlockPos teleportVector = targetRingsPos.subtract(pos);
 				
 				for (Entity entity : teleportList) {
@@ -105,26 +139,17 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 						entity.setPositionAndUpdate(ePos.getX(), ePos.getY(), ePos.getZ());
 					}
 				}
-			}
 				
-			else if (waitForClearout && effTick >= clearoutTimeout) {
-				waitForClearout = false;
-
-				setBarrierBlocks(false);
-			}
-		}
-	}
-	
-	@Override
-	public void onLoad() {
-		if (!world.isRemote) {
-			setBarrierBlocks(false);
-			Aunis.info("set false");
-		}
-		
-		else {
-			renderer = new TransportRingsRenderer(this);
-			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
+				addTask(new ScheduledTask(EnumScheduledTask.RINGS_CLEAR_OUT));
+				break;
+				
+			case RINGS_CLEAR_OUT:
+				setBarrierBlocks(false, false);
+				
+				break;
+				
+			default:
+				throw new UnsupportedOperationException("EnumScheduledTask."+scheduledTask.name()+" not implemented on "+this.getClass().getName());
 		}
 	}
 	
@@ -138,10 +163,9 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 		this.targetRingsPos = targetRingsPos;
 		this.excludedEntities = excludedEntities;
 		
-		waitForStart = true;
-		buttonPressed = world.getTotalWorldTime();
+		addTask(new ScheduledTask(EnumScheduledTask.RINGS_START_ANIMATION));
 		
-		return world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.add(-2, 2, -2), pos.add(3, 6, 3)));
+		return world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
 	}
 	
 	public void animationStart() {
@@ -175,11 +199,16 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 		// Binding exists
 		if (rings != null) {
 			BlockPos targetRingsPos = rings.getPos();
-			
-			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.add(-2, 2, -2), pos.add(3, 6, 3)));
-			
 			TransportRingsTile targetRingsTile = (TransportRingsTile) world.getTileEntity(targetRingsPos);
 			
+			if (targetRingsTile.checkIfObstructed()) {
+				player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.obstructed_target")), true);
+				
+				return;
+			}
+			
+			
+			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
 			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite);
 			startAnimationAndTeleport(targetRingsPos, excludedEntities);
 		}
@@ -189,16 +218,14 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 		}
 	}
 	
-	
 	private static final List<BlockPos> invisibleBlocksTemplate = Arrays.asList(
-			new BlockPos(0, 2, 3),
-			new BlockPos(1, 2, 3),
-			new BlockPos(2, 2, 2),
-			new BlockPos(3, 2, 1)
+			new BlockPos(0, 2, 2),
+			new BlockPos(1, 2, 2),
+			new BlockPos(2, 2, 1)
 	);
 	
 	private boolean checkIfObstructed() {
-		for(int y=0; y<4; y++) {
+		for(int y=0; y<3; y++) {
 			for (Rotation rotation : Rotation.values()) {
 				for (BlockPos invPos : invisibleBlocksTemplate) {
 					
@@ -217,14 +244,19 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 		return false;
 	}
 	
-	private void setBarrierBlocks(boolean set) {
-		for(int y=1; y<4; y++) {
+	private void setBarrierBlocks(boolean set, boolean passable) {
+		IBlockState invBlockState = AunisBlocks.invisibleBlock.getDefaultState();
+		
+		if (passable)
+			invBlockState = invBlockState.withProperty(AunisProps.HAS_COLLISIONS, false);
+		
+		for(int y=1; y<3; y++) {
 			for (Rotation rotation : Rotation.values()) {
 				for (BlockPos invPos : invisibleBlocksTemplate) {
 					BlockPos newPos = this.pos.add(invPos.rotate(rotation)).add(0, y, 0);
 					
 					if (set)
-						world.setBlockState(newPos, AunisBlocks.invisibleBlock.getDefaultState(), 3);
+						world.setBlockState(newPos, invBlockState, 3);
 					else {
 						if (world.getBlockState(newPos).getBlock() == AunisBlocks.invisibleBlock)
 							world.setBlockToAir(newPos);
@@ -371,10 +403,17 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 			i++;
 		}
 		
+		compound.setTag("scheduledTasks", ScheduledTask.serializeList(scheduledTasks));
 		
-//		for (EnumStateType stateType : stateMap.keySet()) {
-//			compound.setTag(stateType.getKey(), stateMap.get(stateType).serializeNBT());
-//		}
+		compound.setInteger("teleportListSize", teleportList.size());
+		for (int j=0; j<teleportList.size(); j++)
+			compound.setInteger("teleportList"+j, teleportList.get(j).getEntityId());
+		
+		compound.setInteger("excludedSize", excludedEntities.size());
+		for (int j=0; j<excludedEntities.size(); j++)
+			compound.setInteger("excluded"+j, excludedEntities.get(j).getEntityId());
+		
+		compound.setLong("targetRingsPos", targetRingsPos.toLong());
 		
 		return super.writeToNBT(compound);
 	}
@@ -383,8 +422,22 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 	public void readFromNBT(NBTTagCompound compound) {
 		try {
 			rendererState.deserializeNBT(compound.getCompoundTag("rendererState"));
+			ScheduledTask.deserializeList(compound.getCompoundTag("scheduledTasks"), scheduledTasks, this);
+			
+			teleportList = new ArrayList<>();
+			int size = compound.getInteger("teleportListSize");
+			for (int j=0; j<size; j++)
+				teleportList.add(world.getEntityByID(compound.getInteger("teleportList"+j)));
+				
+			excludedEntities = new ArrayList<>();
+			size = compound.getInteger("excludedSize");
+			for (int j=0; j<size; j++)
+				excludedEntities.add(world.getEntityByID(compound.getInteger("excluded"+j)));
+			
+			targetRingsPos = BlockPos.fromLong(compound.getLong("targetRingsPos"));
+			
 		} catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
-			Aunis.info("Exception at reading RendererState");
+			Aunis.info("Exception at reading NBT");
 			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
 
 			e.printStackTrace();
@@ -408,21 +461,12 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 			}
 		}
 		
-//		for (EnumStateType stateType : stateMap.keySet()) {
-//			State state = stateMap.get(stateType);
-//			
-//			state.deserializeNBT((NBTTagCompound) compound.getTag(stateType.getKey()));
-//			
-//			stateMap.put(stateType, state);
-//		}
-		
 		super.readFromNBT(compound);
 	}
 	
 	
 	// ---------------------------------------------------------------------------------	
 	// States
-//	private Map<EnumStateType, State> stateMap = new HashMap<>();
 
 	@Override
 	public State getState(StateTypeEnum stateType) {
@@ -495,10 +539,13 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 	
 	@Override
 	public void render(double x, double y, double z, float partialTicks) {
+		if (AunisConfig.debugConfig.renderBoundingBoxes)
+			LOCAL_TELEPORT_BOX.render(x, y, z);
+		
 		x += 0.50;
 		y += 0.63271 / 2;
 		z += 0.50;
-		
+				
 		renderer.render(x, y, z, partialTicks);
 	}
 	

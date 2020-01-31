@@ -54,7 +54,7 @@ public class Ring {
 		if (shouldAnimate) {
 			double effTick = world.getTotalWorldTime() - animationStart + partialTicks;
 			
-			effTick /= TransportRingsRenderer.animationDiv; // 2.7 = 1.8 * 1.5
+			effTick /= TransportRingsRenderer.ANIMATION_SPEED_DIVISOR; // 2.7 = 1.8 * 1.5
 //			effTick /= 1.8;
 //			effTick /= 1.5;
 			
