@@ -219,6 +219,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			markDirty();
 							
 			// Add Stargate to the "network" - WorldSavedData
+//			Aunis.info("add stargate " + gateAddress);
 			StargateNetwork.get(world).addStargate(gateAddress, world.provider.getDimension(), pos);
 		}
 		
@@ -327,6 +328,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		getRendererState().setStargateOpen(world, pos, dialedAddressSize, isInitiating);
 		
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_OPEN_SOUND));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_LIGHT_BLOCK, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 19 + TICKS_PER_HORIZON_SEGMENT));
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_WIDEN, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 23 + TICKS_PER_HORIZON_SEGMENT)); // 1.3s of the sound to the kill
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ENGAGE));
 		
@@ -394,7 +396,9 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	protected EnumFacing facing = EnumFacing.NORTH;
 	
 	@Override
-	public void onLoad() {		
+	public void onLoad() {
+		updateFacing(world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL));
+		
 		if (!world.isRemote) {
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 			
@@ -404,29 +408,6 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		
 		else {
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
-		}
-		
-		this.facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
-		
-		this.eventHorizon = new EventHorizon(world, pos, facing, getHorizonTeleportBox());
-		
-		AunisAxisAlignedBB kBox = getHorizonKillingBox();
-		double width = kBox.maxZ - kBox.minZ;
-		width /= getHorizonSegmentCount();
-		
-		localKillingBoxes = new ArrayList<AunisAxisAlignedBB>(getHorizonSegmentCount());
-		for (int i=0; i<getHorizonSegmentCount(); i++) {
-			AunisAxisAlignedBB box = new AunisAxisAlignedBB(kBox.minX, kBox.minY, kBox.minZ + width*i, kBox.maxX, kBox.maxY, kBox.minZ + width*(i+1));
-			box = box.rotate(facing).offset(0.5, 0, 0.5);
-			
-			localKillingBoxes.add(box);
-		}
-		
-		localInnerBlockBoxes = new ArrayList<AunisAxisAlignedBB>(3);
-		localInnerEntityBoxes = new ArrayList<AunisAxisAlignedBB>(3);
-		for (AunisAxisAlignedBB lBox : getGateVaporizingBoxes()) {
-			localInnerBlockBoxes.add(lBox.rotate(facing).offset(0.5, 0, 0.5));
-			localInnerEntityBoxes.add(lBox.grow(0, 0, -0.25).rotate(facing).offset(0.5, 0, 0.5));
 		}
 	}
 	
@@ -441,7 +422,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 						
 			// Not initiating
 			if (stargateState == EnumStargateState.ENGAGED) {
-				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
+//				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
 			}
 						
 			// Scheduled tasks
@@ -650,12 +631,40 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		}
 	}
 	
+	public void updateFacing(EnumFacing facing) {
+		this.facing = facing;
+		
+		if (!world.isRemote) {
+			this.eventHorizon = new EventHorizon(world, pos, facing, getHorizonTeleportBox());
+			
+			AunisAxisAlignedBB kBox = getHorizonKillingBox();
+			double width = kBox.maxZ - kBox.minZ;
+			width /= getHorizonSegmentCount();
+			
+			localKillingBoxes = new ArrayList<AunisAxisAlignedBB>(getHorizonSegmentCount());
+			for (int i=0; i<getHorizonSegmentCount(); i++) {
+				AunisAxisAlignedBB box = new AunisAxisAlignedBB(kBox.minX, kBox.minY, kBox.minZ + width*i, kBox.maxX, kBox.maxY, kBox.minZ + width*(i+1));
+				box = box.rotate(facing).offset(0.5, 0, 0.5);
+				
+				localKillingBoxes.add(box);
+			}
+			
+			localInnerBlockBoxes = new ArrayList<AunisAxisAlignedBB>(3);
+			localInnerEntityBoxes = new ArrayList<AunisAxisAlignedBB>(3);
+			for (AunisAxisAlignedBB lBox : getGateVaporizingBoxes()) {
+				localInnerBlockBoxes.add(lBox.rotate(facing).offset(0.5, 0, 0.5));
+				localInnerEntityBoxes.add(lBox.grow(0, 0, -0.25).rotate(facing).offset(0.5, 0, 0.5));
+			}
+		}
+		
+		else {
+			getRenderer().updateFacing(facing);
+		}
+	}
+	
 	@Override
 	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
-		if (oldState.getBlock() == newSate.getBlock())
-			return oldState.withProperty(AunisProps.RENDER_BLOCK, false) != newSate.withProperty(AunisProps.RENDER_BLOCK, false);
-		
-		return true;
+		return oldState.getBlock() != newSate.getBlock();
 	}
 	
 	@Override
@@ -839,11 +848,12 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_OPEN, 0.3f);
 				break;
 				
+			case STARGATE_HORIZON_LIGHT_BLOCK:
+				world.setBlockState(getLightBlockPos(), AunisBlocks.invisibleBlock.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false));
+				break;
+				
 			case STARGATE_HORIZON_WIDEN:
-				if (!horizonKilling) {
-					horizonKilling = true;
-					world.setBlockState(getLightBlockPos(), AunisBlocks.invisibleBlock.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false));
-				}
+				horizonKilling = true;
 				
 				getRendererState().horizonSegments++;
 				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, StargateRendererActionState.STARGATE_HORIZON_WIDEN_ACTION), targetPoint);

@@ -46,10 +46,10 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 //	}
 //	
 	@Override
-	public void onLoad() {
-		super.onLoad();
-		
+	public void onLoad() {		
 		renderer = new StargateRendererOrlin(this);
+		
+		super.onLoad();
 	}
 	
 	public long animStart;

@@ -6,8 +6,10 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.orlin.MergeHelperOrlin;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
+import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -105,23 +107,31 @@ public class StargateOrlinBlock extends Block {
 	
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+		StargateBaseTileOrlin gateTile = (StargateBaseTileOrlin) world.getTileEntity(pos);
+		EnumFacing facing = placer.getHorizontalFacing().getOpposite();
+		
 		if (!world.isRemote) {
-			state = state.withProperty(AunisProps.RENDER_BLOCK, false)
-					.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite());
+			state = state.withProperty(AunisProps.FACING_HORIZONTAL, facing)
+					.withProperty(AunisProps.RENDER_BLOCK, true);
 		
 			world.setBlockState(pos, state);
+			gateTile.updateFacing(facing);
 			
-			boolean merged = MergeHelperOrlin.checkBlocks(world, pos);
-			Aunis.info("merged: " +merged);
-			
-			MergeHelperOrlin.updateMergeState(world, pos, state, merged);
+			MergeHelperOrlin.updateMergeState(world, pos, state, MergeHelperOrlin.checkBlocks(world, pos));
+		}
+		
+		else {
+			gateTile.updateFacing(facing);
 		}
 	}
 	
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		if (!world.isRemote) {
-			MergeHelperOrlin.updateMergeState(world, pos, state, false);
+			StargateBaseTileOrlin gateTile = (StargateBaseTileOrlin) world.getTileEntity(pos);
+			
+			MergeHelperOrlin.updateMergeState(world, pos, state, false);			
+			StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
 		}
 	}
 	

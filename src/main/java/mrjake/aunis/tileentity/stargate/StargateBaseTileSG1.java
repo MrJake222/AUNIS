@@ -313,14 +313,14 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 	private int clearDelay;
 		
 	@Override
-	public void onLoad() {		
-		super.onLoad();
-		
+	public void onLoad() {				
 		if (world.isRemote) {
 			renderer = new StargateRendererSG1(this);
 			
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.UPGRADE_RENDERER_STATE));
 		}
+		
+		super.onLoad();
 	}
 	
 	@Override

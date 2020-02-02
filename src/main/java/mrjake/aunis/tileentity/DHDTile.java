@@ -71,6 +71,7 @@ public class DHDTile extends TileEntity implements SpecialRendererProviderInterf
 
 	public void setLinkedGate(BlockPos gate) {		
 		this.linkedGate = gate;
+		Aunis.info("setLinkedGate: " + gate);
 		
 		markDirty();
 	}

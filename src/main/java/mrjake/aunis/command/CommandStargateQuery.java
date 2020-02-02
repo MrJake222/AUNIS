@@ -13,16 +13,16 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 
-public class CommandQueryStargate extends CommandBase {
+public class CommandStargateQuery extends CommandBase {
 
 	@Override
 	public String getName() {
-		return "sgpos";
+		return "sgquery";
 	}
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/sgpos";
+		return "/sgquery";
 	}
 
 	@Override

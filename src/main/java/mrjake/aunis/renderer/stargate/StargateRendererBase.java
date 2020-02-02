@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.sound.AunisSoundHelper;
@@ -24,27 +23,23 @@ public abstract class StargateRendererBase {
 	protected World world;
 	protected BlockPos pos;
 	
-	protected EnumFacing facing;	
-	protected int horizontalRotation;
+	protected int horizontalRotation = 0;
 	
 	public StargateRendererBase(World world, BlockPos pos) {
 		this.world = world;
 		this.pos = pos;
-				
-		facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
-		
+	}
+	
+	public void updateFacing(EnumFacing facing) {
 		if ( facing.getAxis().getName() == "x" )
 			horizontalRotation = (int) facing.getOpposite().getHorizontalAngle();
 		else
 			horizontalRotation = (int) facing.getHorizontalAngle();
-		
-		Aunis.info("horizontalRotation: " + horizontalRotation);
 	}
 	
 	public int getHorizontalRotation() {
 		return horizontalRotation;
 	}
-	
 	
 	// ---------------------------------------------------------------------------------------
 	// Render

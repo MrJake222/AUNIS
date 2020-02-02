@@ -2,7 +2,7 @@ package mrjake.aunis;
 
 import org.apache.logging.log4j.Logger;
 
-import mrjake.aunis.command.CommandQueryStargate;
+import mrjake.aunis.command.AunisCommands;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -70,7 +70,7 @@ public class Aunis {
     
     @EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
-    	event.registerServerCommand(new CommandQueryStargate());
+    	AunisCommands.registerCommands(event);
     }
     
 	public static void log(String msg) {

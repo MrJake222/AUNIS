@@ -79,31 +79,21 @@ public class StargateBaseBlock extends Block {
 	// ------------------------------------------------------------------------	
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-		Aunis.info("onBlockPlacedBy");
+		StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
+		EnumFacing facing = placer.getHorizontalFacing().getOpposite();
 		
-		if (!world.isRemote) {
-			state = state.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite())
-					.withProperty(AunisProps.RENDER_BLOCK, true); // 2 - send update to clients
+		if (!world.isRemote) {			
+			state = state.withProperty(AunisProps.FACING_HORIZONTAL, facing)
+					.withProperty(AunisProps.RENDER_BLOCK, true);
 		
 			world.setBlockState(pos, state);
 					
-			StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
-//			MergeHelper.updateChevRingMergeState(world, pos, false);
+			gateTile.updateFacing(facing);
 			gateTile.updateMergeState(MergeHelper.checkBlocks(world, pos), state);
+		}
 		
-			// ------------------------------------------------------------------------
-			state = world.getBlockState(pos);
-			
-			if (!state.getValue(AunisProps.RENDER_BLOCK)) {				
-				BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.dhdBlock);
-				
-				if (closestDhd != null) {
-					DHDTile dhdTile = (DHDTile) world.getTileEntity(closestDhd);
-					
-					dhdTile.setLinkedGate(pos);
-					gateTile.setLinkedDHD(closestDhd);
-				}
-			}
+		else {
+			gateTile.updateFacing(facing);
 		}
 	}
 	
