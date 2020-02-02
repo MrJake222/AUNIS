@@ -38,7 +38,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
@@ -230,6 +229,9 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 	);
 	
 	private boolean checkIfObstructed() {
+		if (AunisConfig.ringsConfig.ignoreObstructionCheck)
+			return false;
+		
 		for(int y=0; y<3; y++) {
 			for (Rotation rotation : Rotation.values()) {
 				for (BlockPos invPos : invisibleBlocksTemplate) {
@@ -357,9 +359,12 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 
 		int radius = AunisConfig.ringsConfig.rangeFlat;
 		
+		int y = pos.getY();
+		int vertical = AunisConfig.ringsConfig.rangeVertical;
+		
 		List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
 		
-		for (BlockPos newRingsPos : BlockPos.getAllInBoxMutable(new BlockPos(x-radius, 0, z-radius), new BlockPos(x+radius, 255, z+radius))) {
+		for (BlockPos newRingsPos : BlockPos.getAllInBoxMutable(new BlockPos(x-radius, y-vertical, z-radius), new BlockPos(x+radius, y+vertical, z+radius))) {
 			if (world.getBlockState(newRingsPos).getBlock() == AunisBlocks.transportRingsBlock && !pos.equals(newRingsPos)) {
 				
 				TransportRingsTile newRingsTile = (TransportRingsTile) world.getTileEntity(newRingsPos);	

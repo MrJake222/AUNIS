@@ -3,7 +3,6 @@ package mrjake.aunis.renderer.transportrings;
 import java.util.ArrayList;
 import java.util.List;
 
-import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.state.TransportRingsRendererState;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.client.renderer.GlStateManager;

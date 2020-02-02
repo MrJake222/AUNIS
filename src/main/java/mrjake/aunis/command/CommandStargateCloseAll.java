@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
-import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.tileentity.stargate.StargateBaseTile;
@@ -17,7 +15,6 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 public class CommandStargateCloseAll extends CommandBase {

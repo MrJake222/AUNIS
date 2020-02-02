@@ -9,7 +9,6 @@ import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.orlin.MergeHelperOrlin;
 import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;

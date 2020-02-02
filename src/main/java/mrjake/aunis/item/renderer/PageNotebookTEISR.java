@@ -154,26 +154,9 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 	@Override
 	public void renderByItem(ItemStack itemStackIn, float partialTicks) {	
 		partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
-//		boolean mainhand = Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() == AunisItems.pageNotebookItem;
 		boolean mainhand = PageNotebookBakedModel.lastTransform == TransformType.FIRST_PERSON_RIGHT_HAND;
 		
 		EnumHandSide handSide = mainhand ? EnumHandSide.RIGHT : EnumHandSide.LEFT;
-				
-//		try {			
-//			try {
-//				Timer timer = (Timer) FieldUtils.readField(Minecraft.getMinecraft(), "field_71428_T", true);
-//				partialTicks = timer.renderPartialTicks;
-//			}
-//			
-//			catch (IllegalArgumentException e) {
-//				Timer timer = (Timer) FieldUtils.readField(Minecraft.getMinecraft(), "timer", true);
-//				partialTicks = timer.renderPartialTicks;
-//			}
-//		}
-//		
-//		catch (IllegalAccessException e) {
-//			e.printStackTrace();
-//		}
 		
 		GlStateManager.pushMatrix();
 		GlStateManager.scale(20,20,20);

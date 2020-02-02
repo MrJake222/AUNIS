@@ -100,10 +100,16 @@ public class PageNotebookItem extends Item {
 				ItemStack stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
 				stack.setTagCompound(compound);
 				
-				if (!player.getHeldItem(hand).equals(stack))
+				ItemStack held = player.getHeldItem(hand);
+				held.shrink(1);
+				
+				if (held.isEmpty())				
 					player.setHeldItem(hand, stack);
-								
-				return EnumActionResult.SUCCESS;
+				
+				else {
+					player.setHeldItem(hand, held);
+					player.addItemStackToInventory(stack);
+				}
 			}
 		}
 	
