@@ -106,14 +106,16 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			BlockPos targetPos = targetGate.getPos();
 			StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
 			DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
-						
-			boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
-			
-			targetTile.incomingWormhole(gateTile.gateAddress, gateTile.dialedAddress.size());
-			
-			// To renderer: light up chevrons and target dhd glyphs																
-			if (targetDhdTile != null)
-				targetDhdTile.activateSymbols(EnumSymbol.toIntegerList(eightChevronDial ? gateTile.gateAddress : gateTile.gateAddress.subList(0, 6), EnumSymbol.ORIGIN));
+				
+			if (targetTile.getStargateState().idle()) {
+				boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
+				
+				targetTile.incomingWormhole(gateTile.gateAddress, gateTile.dialedAddress.size());
+				
+				// To renderer: light up chevrons and target dhd glyphs																
+				if (targetDhdTile != null)
+					targetDhdTile.activateSymbols(EnumSymbol.toIntegerList(eightChevronDial ? gateTile.gateAddress : gateTile.gateAddress.subList(0, 6), EnumSymbol.ORIGIN));
+			}
 		 }
 	}
 	
@@ -127,38 +129,50 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			BlockPos targetPos = targetGate.getPos();
 			World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 						
-			int distance = (int) sourcePos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ());
-			double multiplier = 1;
-			
-			// It the dimensions are the same, no multiplier
-			if (targetWorld.provider.getDimensionType() != world.provider.getDimensionType()) { 
-				if (targetWorld.provider.getDimensionType() == DimensionType.NETHER || world.provider.getDimensionType() == DimensionType.NETHER) {
-					distance /= 8;
+			StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
+
+			if (targetTile.getStargateState().idle()) {			
+				int distance = (int) sourcePos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ());
+				double multiplier = 1;
+				
+				// It the dimensions are the same, no multiplier
+				if (targetWorld.provider.getDimensionType() != world.provider.getDimensionType()) { 
+					if (targetWorld.provider.getDimensionType() == DimensionType.NETHER || world.provider.getDimensionType() == DimensionType.NETHER) {
+						distance /= 8;
+					}
+					
+					multiplier = AunisConfig.powerConfig.crossDimensionMul;
 				}
 				
-				multiplier = AunisConfig.powerConfig.crossDimensionMul;
-			}
+				if (gateTile.hasEnergyToDial(distance, multiplier)) {
+					
+					if (sourceDhdTile != null) 
+						sourceDhdTile.activateSymbol(EnumSymbol.BRB.id);
+									
+					gateTile.openGate(true, 0, null);
+					
+					DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
+					
+					targetTile.openGate(false, gateTile.dialedAddress.size(), gateTile.gateAddress);
+					
+					if (targetDhdTile != null) 
+						targetDhdTile.activateSymbol(EnumSymbol.BRB.id);
+				}
 			
-			if (gateTile.hasEnergyToDial(distance, multiplier)) {
-				StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
-				
-				if (sourceDhdTile != null) 
-					sourceDhdTile.activateSymbol(EnumSymbol.BRB.id);
-								
-				gateTile.openGate(true, 0, null);
-				
-				DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
-				
-				targetTile.openGate(false, gateTile.dialedAddress.size(), gateTile.gateAddress);
-				
-				if (targetDhdTile != null) 
-					targetDhdTile.activateSymbol(EnumSymbol.BRB.id);
+				else {
+					gateTile.closeGate(true, stopRing);
+					
+					return EnumGateState.NOT_ENOUGH_POWER;
+				}
 			}
 			
 			else {
+				// Target gate busy
+				// Return address malformed
+				
 				gateTile.closeGate(true, stopRing);
 				
-				return EnumGateState.NOT_ENOUGH_POWER;
+				return EnumGateState.ADDRESS_MALFORMED;
 			}
 		}
 		
