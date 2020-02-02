@@ -103,14 +103,9 @@ public class StargateMemberBlock extends Block {
 	
 	@Override
 	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
-		int meta = 0;
+		EnumMemberVariant variant = state.getValue(AunisProps.MEMBER_VARIANT);
 		
-		switch (state.getValue(AunisProps.MEMBER_VARIANT)) {
-			case CHEVRON: meta = 8; break;
-			case RING: meta = 0; break;
-		}
-		
-		drops.add(new ItemStack(AunisBlocks.stargateMemberBlock, 1, meta));
+		drops.add(new ItemStack(this, 1, getMetaFromState(getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, variant))));
 	}
 	
 	

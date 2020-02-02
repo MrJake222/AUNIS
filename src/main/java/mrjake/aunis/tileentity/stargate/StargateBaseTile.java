@@ -63,6 +63,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -117,13 +118,13 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 		
 		stargateState = isInitiating ? EnumStargateState.ENGAGED_INITIATING : EnumStargateState.ENGAGED;
 		eventHorizon.reset();
-		getAutoCloseManager().reset();
 		
 		markDirty();
 	}
 	
 	private void disconnectGate() {	
 		stargateState = EnumStargateState.IDLE;
+		getAutoCloseManager().reset();
 				
 		markDirty();
 	}
@@ -422,7 +423,8 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 						
 			// Not initiating
 			if (stargateState == EnumStargateState.ENGAGED) {
-//				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
+				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
+//				Aunis.info(scheduledTasks.toString());
 			}
 						
 			// Scheduled tasks
@@ -708,7 +710,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	// ------------------------------------------------------------------------
 	// AutoClose
 	
-	public final void entityPassing(boolean isPlayer, boolean inbound) {
+	public final void entityPassing(boolean isPlayer, boolean inbound) {		
 		if (isPlayer) {
 			getAutoCloseManager().playerPassing();
 			markDirty();
@@ -833,7 +835,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	private List<ScheduledTask> scheduledTasks = new ArrayList<>();
 	
 	@Override
-	public void addTask(ScheduledTask scheduledTask) {
+	public void addTask(ScheduledTask scheduledTask) {		
 		scheduledTask.setExecutor(this);
 		scheduledTask.setTaskCreated(world.getTotalWorldTime());
 		
@@ -842,7 +844,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	}	
 	
 	@Override
-	public void executeTask(EnumScheduledTask scheduledTask) {
+	public void executeTask(EnumScheduledTask scheduledTask) {		
 		switch (scheduledTask) {
 			case STARGATE_OPEN_SOUND:
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_OPEN, 0.3f);
@@ -853,7 +855,8 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 				break;
 				
 			case STARGATE_HORIZON_WIDEN:
-				horizonKilling = true;
+				if (!horizonKilling)
+					horizonKilling = true;
 				
 				getRendererState().horizonSegments++;
 				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, StargateRendererActionState.STARGATE_HORIZON_WIDEN_ACTION), targetPoint);
@@ -885,6 +888,12 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 				
 			case STARGATE_ENGAGE:
 				engageGate();
+				
+				if (!stargateState.initiating()) {
+					world.notifyLightSet(getLightBlockPos());
+					world.checkLightFor(EnumSkyBlock.BLOCK, getLightBlockPos());
+				}
+				
 				break;
 				
 			case STARGATE_FAIL:

@@ -133,9 +133,15 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 	 */
 	public boolean update(long worldTicks) {
 		int waitTime = customWaitTime ? this.waitTime : scheduledTask.waitTicks;
+		long effTick = worldTicks - taskCreated;
+		boolean call = effTick == waitTime;
 		
-		if (worldTicks-taskCreated >= waitTime) {
+		if (scheduledTask.overtime)
+			call = effTick >= waitTime;
+		
+		if (call) {
 			try {
+//				Aunis.info("execute " + scheduledTask + " time: " + (worldTicks-taskCreated));
 				executor.executeTask(scheduledTask);
 			}
 			
@@ -165,6 +171,11 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 		taskCreated = compound.getLong("taskCreated");
 		scheduledTask = EnumScheduledTask.valueOf(compound.getInteger("scheduledTask"));
 		active = compound.getBoolean("active");
+	}
+	
+	@Override
+	public String toString() {
+		return scheduledTask.toString();
 	}
 
 	// Eclipse generated methods
