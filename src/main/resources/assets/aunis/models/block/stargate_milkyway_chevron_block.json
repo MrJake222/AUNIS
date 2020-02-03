@@ -2,7 +2,7 @@
 	"parent": "block/cube_all",
 	"textures": {
 		"particle": "aunis:blocks/naquadah_block",
-		"north": "aunis:blocks/stargate_base_front",
+		"north": "aunis:blocks/stargate_milkyway_chevron_front",
 		"south": "aunis:blocks/naquadah_block",
 		"west": "aunis:blocks/naquadah_block",
 		"east": "aunis:blocks/naquadah_block",

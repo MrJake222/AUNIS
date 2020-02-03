@@ -5,7 +5,7 @@ import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.MergeHelper;
-import mrjake.aunis.tileentity.stargate.StargateMemberTile;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -23,7 +23,7 @@ public class StargateRendererStateSG1 extends StargateRendererStateBase {
 			IBlockState state = world.getBlockState(gatePos);
 			
 			for (BlockPos chevPos : MergeHelper.getWithoutLastChevronBlock()) {
-				StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
+				StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
 				
 				if (memberTile != null)
 					memberTile.setLitUp(activeChevrons > index);
@@ -41,7 +41,7 @@ public class StargateRendererStateSG1 extends StargateRendererStateBase {
 			IBlockState state = world.getBlockState(gatePos);
 			
 			BlockPos chevPos = MergeHelper.getLastChevronBlock();
-			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
+			StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
 				
 			if (memberTile != null)
 				memberTile.setLitUp(isFinalActive);

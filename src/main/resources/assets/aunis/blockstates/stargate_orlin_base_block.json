@@ -1,7 +1,7 @@
 {
 	"forge_marker": 1,
 	"defaults": {
-		"model": "aunis:stargatebase_block"
+		"model": "aunis:stargate_orlin_base_block"
 	},
 	"variants": {
 		"normal": [{}],

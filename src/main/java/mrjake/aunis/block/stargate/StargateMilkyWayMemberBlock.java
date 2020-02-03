@@ -1,15 +1,17 @@
-package mrjake.aunis.block;
+package mrjake.aunis.block.stargate;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.block.StargateMilkyWayMemberBlockBakedModel;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
-import mrjake.aunis.tileentity.stargate.StargateMemberTile;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.SoundType;
@@ -45,16 +47,16 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
-public class StargateMemberBlock extends Block {	
+public class StargateMilkyWayMemberBlock extends Block {	
 	
 	
-	public static final String blockName = "stargate_member_block";
+	public static final String BLOCK_NAME = "stargate_milkyway_member_block";
 	
-	public StargateMemberBlock() {
+	public StargateMilkyWayMemberBlock() {
 		super(Material.IRON);
 		
-		setRegistryName(Aunis.ModID + ":" + blockName);
-		setTranslationKey(Aunis.ModID + "." + blockName);
+		setRegistryName(Aunis.ModID + ":" + BLOCK_NAME);
+		setTranslationKey(Aunis.ModID + "." + BLOCK_NAME);
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -77,7 +79,7 @@ public class StargateMemberBlock extends Block {
 		if (world.getBlockState(pos).getBlock() != this)
 			return 0;
 		
-		StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
+		StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(pos);
 				
 		if (memberTile != null)
 			return memberTile.isLitUp(state) ? 7 : 0;
@@ -97,6 +99,7 @@ public class StargateMemberBlock extends Block {
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
 		EnumMemberVariant variant = state.getValue(AunisProps.MEMBER_VARIANT);
+		Aunis.info("state: " + state + ", meta:"+getMetaFromState(getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, variant)));
 		
 		return new ItemStack(this, 1, getMetaFromState(getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, variant)));
 	}
@@ -140,7 +143,7 @@ public class StargateMemberBlock extends Block {
 	// ------------------------------------------------------------------------		
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
-		StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
+		StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(pos);
 
 		if (memberTile != null) {
 			IBlockState doubleSlabState = memberTile.getCamoState();
@@ -171,7 +174,7 @@ public class StargateMemberBlock extends Block {
 			ModelResourceLocation modelResourceLocation = new ModelResourceLocation(getRegistryName(), variant);
 			
 			IBakedModel defaultModel = registry.getObject(modelResourceLocation);
-			StargateMemberBlockBakedModel memberBlockBakedModel = new StargateMemberBlockBakedModel(this, defaultModel);
+			StargateMilkyWayMemberBlockBakedModel memberBlockBakedModel = new StargateMilkyWayMemberBlockBakedModel(this, defaultModel);
 			
 			registry.putObject(modelResourceLocation, memberBlockBakedModel);
 		}
@@ -187,14 +190,14 @@ public class StargateMemberBlock extends Block {
 		Item heldItem = heldItemStack.getItem();
 		Block heldBlock = Block.getBlockFromItem(heldItemStack.getItem());
 		
-		StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
+		StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(pos);
 //		StargateBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
 		
 		if (!world.isRemote) {	
 			IBlockState camoBlockState = memberTile.getCamoState();
 			
-			if (heldItem == Item.getItemFromBlock(AunisBlocks.stargateMemberBlock) ||
-				heldItem == Item.getItemFromBlock(AunisBlocks.stargateBaseBlock) ||
+			if (heldItem == Item.getItemFromBlock(AunisBlocks.stargateMilkyWayMemberBlock) ||
+				heldItem == Item.getItemFromBlock(AunisBlocks.stargateMilkyWayBaseBlock) ||
 				!memberTile.isMerged())
 				
 				return false;
@@ -313,8 +316,8 @@ public class StargateMemberBlock extends Block {
 		}
 		
 		else {			
-			return 	heldItem != Item.getItemFromBlock(AunisBlocks.stargateMemberBlock) &&
-					heldItem != Item.getItemFromBlock(AunisBlocks.stargateBaseBlock);// &&
+			return 	heldItem != Item.getItemFromBlock(AunisBlocks.stargateMilkyWayMemberBlock) &&
+					heldItem != Item.getItemFromBlock(AunisBlocks.stargateMilkyWayBaseBlock);// &&
 //					!heldItemStack.isItemEqual(stack);
 		}
 		
@@ -330,7 +333,7 @@ public class StargateMemberBlock extends Block {
 			world.setBlockState(pos, state); 
 			
 //			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
-			StargateBaseTileSG1 gateTile = MergeHelper.findBaseTile(world, pos, state);
+			StargateMilkyWayBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
 							
 			if (gateTile != null && !gateTile.isMerged())
 				gateTile.updateMergeState(MergeHelper.checkBlocks(world, gateTile.getPos()), null);
@@ -340,8 +343,8 @@ public class StargateMemberBlock extends Block {
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		if (!world.isRemote) {
-			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
-			StargateBaseTileSG1 gateTile = memberTile.getBaseTile(world);
+			StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(pos);
+			StargateMilkyWayBaseTile gateTile = memberTile.getBaseTile(world);
 			
 			if (gateTile != null && memberTile.isMerged())
 				gateTile.updateMergeState(false, state);
@@ -361,7 +364,7 @@ public class StargateMemberBlock extends Block {
 	
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state) {
-		return new StargateMemberTile();
+		return new StargateMilkyWayMemberTile();
 	}
 
 	@Override

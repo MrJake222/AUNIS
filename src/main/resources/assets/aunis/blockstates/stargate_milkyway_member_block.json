@@ -15,10 +15,10 @@
 		
 		"member_variant": {
 			"ring": {
-				"model": "aunis:stargate_member_block_ring"
+				"model": "aunis:stargate_milkyway_ring_block"
 			},
 			"chevron": {
-				"model": "aunis:stargate_member_block_chevron"
+				"model": "aunis:stargate_milkyway_chevron_block"
 			}
 		},
 		

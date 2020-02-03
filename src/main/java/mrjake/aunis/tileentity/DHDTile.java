@@ -19,7 +19,7 @@ import mrjake.aunis.state.UpgradeRendererState;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.State;
 import mrjake.aunis.tesr.SpecialRendererProviderInterface;
-import mrjake.aunis.tileentity.stargate.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.upgrade.DHDUpgradeRenderer;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.UpgradeRenderer;
@@ -97,11 +97,11 @@ public class DHDTile extends TileEntity implements SpecialRendererProviderInterf
 		return upgradeRendererState;
 	}
 	
-	public StargateBaseTile getLinkedGate(World world) {
+	public StargateAbstractBaseTile getLinkedGate(World world) {
 		if (linkedGate == null)
 			return null;
 		
-		return (StargateBaseTile) world.getTileEntity(linkedGate);
+		return (StargateAbstractBaseTile) world.getTileEntity(linkedGate);
 	}
 	
 	@Override

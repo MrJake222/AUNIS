@@ -1,19 +1,17 @@
 {
 	"forge_marker": 1,
 	"defaults": {
-		"model": "aunis:stargatemember_orlin_block"
+		"model": "aunis:stargate_milkyway_base_block"
 	},
 	"variants": {
 		"normal": [{}],
 		"inventory": [{}],
 		
-		"orlin_variant": {
+		"facing": {
 			"south": { "y": 180 },
 			"west": { "y": 270 },
 			"north": {},
-			"east": { "y": 90 },
-			"up": {},
-			"down": {}
+			"east": { "y": 90 }
 		},
 		
 		"render_block": {

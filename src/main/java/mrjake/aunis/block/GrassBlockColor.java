@@ -1,4 +1,4 @@
-package mrjake.aunis.block.color;
+package mrjake.aunis.block;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.IBlockColor;

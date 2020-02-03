@@ -14,9 +14,9 @@ item.aunis.naquadah_alloy.name=Naquadah合金锭
 
 tile.aunis.invisible_block.name=你看不到我这个方块
 
-tile.aunis.stargatebase_block.name=星门基础方块
-tile.aunis.stargate_member_block_ring.name=星门环方块
-tile.aunis.stargate_member_block_chevron.name=星门标记方块
+tile.aunis.stargate_milkyway_base_block.name=星门基础方块
+tile.aunis.stargate_milkyway_ring_block.name=星门环方块
+tile.aunis.stargate_milkyway_chevron_block.name=星门标记方块
 tile.aunis.dhd_block.name=拨号回家装置(DHD)
 
 tile.aunis.crystal_infuser_block.name=水晶注入器
@@ -70,4 +70,4 @@ tile.aunis.transportrings_block.name=传送环
 tile.aunis.transportrings_block.non_existing_address=无法到达此地址
 tile.aunis.transportrings_block.duplicate_address=复制地址
 tile.aunis.transportrings_block.wrong_address=错误的地址，应该是一到六个符号
-tile.aunis.transportrings_block.obstructed=传送环受阻，请清除传送环周围的7x7区域
+tile.aunis.transportrings_block.obstructed=传送环受阻，请清除传送环周围的5x5区域

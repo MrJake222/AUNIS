@@ -19,7 +19,7 @@ public class MergeHelperOrlin {
 		int z = currentPos.getZ();
 		
 		for (BlockPos base : BlockPos.getAllInBoxMutable(x-1, y-2, z-1, x+1, y, z+1)) {
-			if (world.getBlockState(base).getBlock() == AunisBlocks.stargateOrlinBlock) {
+			if (world.getBlockState(base).getBlock() == AunisBlocks.stargateOrlinBaseBlock) {
 				return base.toImmutable();
 			}
 		}
@@ -47,7 +47,7 @@ public class MergeHelperOrlin {
 			for (BlockPos checkPos : BLOCK_MAP.keySet()) {			
 				IBlockState state = world.getBlockState(MergeHelper.rotateAndGlobal(checkPos, facing, basePos));
 								
-				if (state.getBlock() != AunisBlocks.stargateMemberBlockOrlin || state.getValue(AunisProps.ORLIN_VARIANT) != facing) {					
+				if (state.getBlock() != AunisBlocks.stargateOrlinMemberBlock || state.getValue(AunisProps.ORLIN_VARIANT) != facing) {					
 					return false;
 				}
 			}
@@ -79,7 +79,7 @@ public class MergeHelperOrlin {
 			
 			checkPos = MergeHelper.rotateAndGlobal(checkPos, facing, basePos);
 			
-			if (world.getBlockState(checkPos).getBlock() == AunisBlocks.stargateMemberBlockOrlin) {
+			if (world.getBlockState(checkPos).getBlock() == AunisBlocks.stargateOrlinMemberBlock) {
 				IBlockState memberState = world.getBlockState(checkPos);
 				boolean renderblock = memberState.getValue(AunisProps.RENDER_BLOCK);
 				
@@ -90,7 +90,7 @@ public class MergeHelperOrlin {
 			}
 		}
 		
-		if (world.getBlockState(basePos).getBlock() == AunisBlocks.stargateOrlinBlock)
+		if (world.getBlockState(basePos).getBlock() == AunisBlocks.stargateOrlinBaseBlock)
 			world.setBlockState(basePos, world.getBlockState(basePos).withProperty(AunisProps.RENDER_BLOCK, !isMerged));
 	}
 }

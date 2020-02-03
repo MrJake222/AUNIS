@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.block.DHDBlock;
-import mrjake.aunis.block.StargateBaseBlock;
+import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.stargate.EnumGateState;
@@ -20,8 +20,8 @@ import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.teleportation.TeleportHelper;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.stargate.StargateBaseTile;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -71,14 +71,14 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 	 * 
 	 * @param sourceTile - Source StargateBaseTile instance
 	 */
-	public static void closeGatePacket(StargateBaseTile sourceTile, boolean targetOnly) {
+	public static void closeGatePacket(StargateAbstractBaseTile sourceTile, boolean targetOnly) {
 		if (sourceTile.dialedAddress.size() < 7)
 			return;
 		
 		StargatePos targetGate = StargateNetwork.get(sourceTile.getWorld()).getStargate( sourceTile.dialedAddress );
 		World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 		BlockPos targetPos = targetGate.getPos();
-		StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
+		StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 		
 		if (!targetOnly) {
 			sourceTile.closeGate(false, true);
@@ -94,17 +94,17 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 	 * @param gateTile Source gate tile
 	 * @return True if address vaild
 	 */
-	public static boolean checkDialedAddress(World world, StargateBaseTile gateTile) {
+	public static boolean checkDialedAddress(World world, StargateAbstractBaseTile gateTile) {
 		return (StargateNetwork.get(world).stargateInWorld(world, gateTile.dialedAddress) && !gateTile.dialedAddress.subList(0, 6).equals(gateTile.gateAddress.subList(0, 6)));
 	}
 	
-	public static void attemptLightUp(World world, StargateBaseTile gateTile) {
+	public static void attemptLightUp(World world, StargateAbstractBaseTile gateTile) {
 		if (checkDialedAddress(world, gateTile)) {
 			StargatePos targetGate = StargateNetwork.get(world).getStargate(gateTile.dialedAddress);
 			World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 			
 			BlockPos targetPos = targetGate.getPos();
-			StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
+			StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 			DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
 				
 			if (targetTile.getStargateState().idle()) {
@@ -119,7 +119,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 		 }
 	}
 	
-	public static EnumGateState attemptOpen(World world, StargateBaseTile gateTile, @Nullable DHDTile sourceDhdTile, boolean stopRing) {
+	public static EnumGateState attemptOpen(World world, StargateAbstractBaseTile gateTile, @Nullable DHDTile sourceDhdTile, boolean stopRing) {
 		BlockPos sourcePos = gateTile.getPos();
 		
 		// Check if symbols entered match the range, last is ORIGIN, target gate exists, and if not dialing self
@@ -129,7 +129,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			BlockPos targetPos = targetGate.getPos();
 			World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
 						
-			StargateBaseTile targetTile = (StargateBaseTile) targetWorld.getTileEntity(targetPos);
+			StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 
 			if (targetTile.getStargateState().idle()) {			
 				int distance = (int) sourcePos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ());
@@ -200,13 +200,13 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 				
 				Block block = world.getBlockState(pos).getBlock();
 				
-				if ( block instanceof StargateBaseBlock || block instanceof DHDBlock ) {					
+				if ( block instanceof StargateMilkyWayBaseBlock || block instanceof DHDBlock ) {					
 					TileEntity te = world.getTileEntity(pos);
-					StargateBaseTile gateTile;
+					StargateAbstractBaseTile gateTile;
 					DHDTile dhdTile;
 					
-					if ( te instanceof StargateBaseTile ) {
-						gateTile = (StargateBaseTile) te;
+					if ( te instanceof StargateAbstractBaseTile ) {
+						gateTile = (StargateAbstractBaseTile) te;
 						dhdTile = gateTile.getLinkedDHD(world);
 					}
 					
@@ -285,7 +285,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 									EnumGateState gateState = attemptOpen(world, gateTile, dhdTile, true);
 									
 									if (gateState != EnumGateState.OK) {
-										((StargateBaseTileSG1) gateTile).setRollPlayed();
+										((StargateMilkyWayBaseTile) gateTile).setRollPlayed();
 										
 										if (gateState == EnumGateState.NOT_ENOUGH_POWER)
 											player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.stargatebase_block.not_enough_power")), true);
@@ -307,7 +307,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 									//if ( gateTile.getMaxSymbols() > symbolCount ) {
 									if ( (dhdTile.hasUpgrade() && symbolCount == 8) || (!dhdTile.hasUpgrade() && symbolCount == 7) || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN) ) {										
 										gateTile.addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_LOCK_DHD_SOUND));										
-										((StargateBaseTileSG1) gateTile).setRollPlayed();
+										((StargateMilkyWayBaseTile) gateTile).setRollPlayed();
 									}
 															
 									boolean lock = symbol == EnumSymbol.ORIGIN;

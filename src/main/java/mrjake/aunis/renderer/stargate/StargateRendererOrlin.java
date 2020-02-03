@@ -14,7 +14,7 @@ import mrjake.aunis.particle.ParticleBlenderSparks;
 import mrjake.aunis.particle.ParticleBlender.RandomizeInterface;
 import mrjake.aunis.particle.ParticleBlender.SimpleVector;
 import mrjake.aunis.state.StargateRendererStateBase;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
+import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 
@@ -22,7 +22,7 @@ public class StargateRendererOrlin extends StargateRendererBase {
 	
 	public static final float GATE_SCALE = 0.43f;
 		
-	public StargateRendererOrlin(StargateBaseTileOrlin te) {
+	public StargateRendererOrlin(StargateOrlinBaseTile te) {
 		super(te.getWorld(), te.getPos());
 		
 		this.rendererState = new StargateRendererStateBase(); 

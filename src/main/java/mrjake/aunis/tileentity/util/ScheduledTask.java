@@ -3,7 +3,7 @@ package mrjake.aunis.tileentity.util;
 import java.util.List;
 
 import mrjake.aunis.stargate.EnumScheduledTask;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
@@ -13,7 +13,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 /**
  * Holds scheduled task to be performed some time in future on {@link ITickable#update()}.
  * 
- * Previously done by a shitload of variables in {@link StargateBaseTileSG1} and other like "waitForShit", "shitStateChange".
+ * Previously done by a shitload of variables in {@link StargateMilkyWayBaseTile} and other like "waitForShit", "shitStateChange".
  * 
  * @author MrJake222
  */

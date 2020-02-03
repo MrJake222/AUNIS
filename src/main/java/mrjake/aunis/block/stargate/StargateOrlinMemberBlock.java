@@ -1,4 +1,4 @@
-package mrjake.aunis.block;
+package mrjake.aunis.block.stargate;
 
 import java.util.List;
 
@@ -20,11 +20,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class StargateMemberBlockOrlin extends Block {
+public class StargateOrlinMemberBlock extends Block {
 
-	private static final String BLOCK_NAME = "stargatemember_orlin_block";
+	private static final String BLOCK_NAME = "stargate_orlin_member_block";
 	
-	public StargateMemberBlockOrlin() {
+	public StargateOrlinMemberBlock() {
 		super(Material.IRON);
 		
 		setRegistryName(Aunis.ModID + ":" + BLOCK_NAME);

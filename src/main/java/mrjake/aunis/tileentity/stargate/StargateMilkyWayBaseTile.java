@@ -58,8 +58,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntityUpgradeable, ILinkable {
-	public StargateBaseTileSG1() {}
+public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implements ITileEntityUpgradeable, ILinkable {
+	public StargateMilkyWayBaseTile() {}
 	
 	private StargateUpgradeRenderer upgradeRenderer;
 	private UpgradeRendererState upgradeRendererState;
@@ -187,7 +187,7 @@ public class StargateBaseTileSG1 extends StargateBaseTile implements ITileEntity
 		IBlockState actualState = world.getBlockState(pos);
 		
 		// When the block is destroyed, there will be air in this place and we cannot set it's block state
-		if (actualState.getBlock() == AunisBlocks.stargateBaseBlock)
+		if (actualState.getBlock() == AunisBlocks.stargateMilkyWayBaseBlock)
 			world.setBlockState(pos, actualState.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 2);
 		
 		MergeHelper.updateChevRingMergeState(world, pos, (state != null) ? state : actualState, isMerged);

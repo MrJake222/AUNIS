@@ -30,7 +30,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 //@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
-public class StargateBaseTileOrlin extends StargateBaseTile { //implements SimpleComponent {
+public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implements SimpleComponent {
 	
 	
 	// ------------------------------------------------------------------------

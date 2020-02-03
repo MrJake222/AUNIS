@@ -14,12 +14,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class StargateMemberBlockBakedModel implements IBakedModel {
+public class StargateMilkyWayMemberBlockBakedModel implements IBakedModel {
 
 	private final Block defaultBlock;
 	private final IBakedModel defaultModel;
 	
-	public StargateMemberBlockBakedModel(Block defaultBlock, IBakedModel defaultModel) {
+	public StargateMilkyWayMemberBlockBakedModel(Block defaultBlock, IBakedModel defaultModel) {
 		this.defaultBlock = defaultBlock;
 		this.defaultModel = defaultModel;
 	}

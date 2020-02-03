@@ -34,7 +34,7 @@ import net.minecraftforge.items.ItemStackHandler;
  * 
  * @author MrJake
  */
-public class StargateMemberTile extends TileEntity implements ITickable, StateProviderInterface {
+public class StargateMilkyWayMemberTile extends TileEntity implements ITickable, StateProviderInterface {
 	
 	boolean firstTick = true;
 	private boolean waitForClear = false;
@@ -158,9 +158,9 @@ public class StargateMemberTile extends TileEntity implements ITickable, StatePr
 		return basePos;
 	}
 	
-	public StargateBaseTileSG1 getBaseTile(World world) {
+	public StargateMilkyWayBaseTile getBaseTile(World world) {
 		if (basePos != null)
-			return (StargateBaseTileSG1) world.getTileEntity(basePos);
+			return (StargateMilkyWayBaseTile) world.getTileEntity(basePos);
 		
 		return null;
 	}

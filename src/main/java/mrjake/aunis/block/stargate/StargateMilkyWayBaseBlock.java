@@ -1,4 +1,4 @@
-package mrjake.aunis.block;
+package mrjake.aunis.block.stargate;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
@@ -9,7 +9,7 @@ import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.UpgradeHelper;
 import net.minecraft.block.Block;
@@ -32,15 +32,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class StargateBaseBlock extends Block {
+public class StargateMilkyWayBaseBlock extends Block {
 
-	private static final String blockName = "stargatebase_block";
+	private static final String BLOCK_NAME = "stargate_milkyway_base_block";
 	
-	public StargateBaseBlock() {		
+	public StargateMilkyWayBaseBlock() {		
 		super(Material.IRON);
 		
-		setRegistryName(Aunis.ModID + ":" + blockName);
-		setTranslationKey(Aunis.ModID + "." + blockName);
+		setRegistryName(Aunis.ModID + ":" + BLOCK_NAME);
+		setTranslationKey(Aunis.ModID + "." + BLOCK_NAME);
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -77,7 +77,7 @@ public class StargateBaseBlock extends Block {
 	// ------------------------------------------------------------------------	
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-		StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
+		StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
 		EnumFacing facing = placer.getHorizontalFacing().getOpposite();
 		
 		if (!world.isRemote) {			
@@ -97,7 +97,7 @@ public class StargateBaseBlock extends Block {
 	
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {		
-		StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
+		StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
 						
 		if (!world.isRemote) {
 			gateTile.updateMergeState(false, state);
@@ -121,7 +121,7 @@ public class StargateBaseBlock extends Block {
 	
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
+		StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
 		ItemStack heldItem = player.getHeldItem(hand);
 		
 		// Server side
@@ -175,8 +175,8 @@ public class StargateBaseBlock extends Block {
 	}
 	
 	@Override
-	public StargateBaseTileSG1 createTileEntity(World world, IBlockState state) {
-		return new StargateBaseTileSG1();
+	public StargateMilkyWayBaseTile createTileEntity(World world, IBlockState state) {
+		return new StargateMilkyWayBaseTile();
 	}
 	
 	@Override

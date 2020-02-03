@@ -6,8 +6,8 @@ import javax.vecmath.Vector2f;
 
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
-import mrjake.aunis.tileentity.stargate.StargateBaseTile;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.vector.Matrix2f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -140,7 +140,7 @@ public class TeleportHelper {
 		World world = entity.getEntityWorld();
 		int sourceDim = world.provider.getDimension();
 		
-		StargateBaseTile sourceTile = (StargateBaseTile) world.getTileEntity(sourceGatePos);
+		StargateAbstractBaseTile sourceTile = (StargateAbstractBaseTile) world.getTileEntity(sourceGatePos);
 		
 		// TODO Cross dimension entity teleport not supported YET
 //		if (sourceDim != targetGatePos.getDimension() && !(entity instanceof EntityPlayerMP))
@@ -157,7 +157,7 @@ public class TeleportHelper {
 			flipAxis |= EnumFlipAxis.Z.mask;
 		
 		float yDiff = 0;
-		if (sourceTile instanceof StargateBaseTileOrlin)
+		if (sourceTile instanceof StargateOrlinBaseTile)
 			yDiff = 1.5f;
 		
 		float yaw = getRotation(entity, rotation, flipAxis);
@@ -190,7 +190,7 @@ public class TeleportHelper {
 		
 		sourceTile.entityPassing(isPlayer, false);
 		
-		StargateBaseTile targetTile = (StargateBaseTile) getWorld(targetGatePos.getDimension()).getTileEntity(targetGatePos.getPos());
+		StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) getWorld(targetGatePos.getDimension()).getTileEntity(targetGatePos.getPos());
 		targetTile.entityPassing(isPlayer, true);
 	}
 	

@@ -5,7 +5,7 @@ import java.util.List;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -76,8 +76,8 @@ public class PageNotebookItem extends Item {
 		if (!world.isRemote) {
 			Block block = world.getBlockState(pos).getBlock();
 			
-			if (block == AunisBlocks.stargateBaseBlock) {
-				StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
+			if (block == AunisBlocks.stargateMilkyWayBaseBlock) {
+				StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
 				NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
 				
 				if (compound == null)

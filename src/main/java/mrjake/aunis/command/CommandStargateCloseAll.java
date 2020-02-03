@@ -7,7 +7,7 @@ import java.util.Map;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
-import mrjake.aunis.tileentity.stargate.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -78,8 +78,8 @@ public class CommandStargateCloseAll extends CommandBase {
 			
 			TileEntity tileEntity = world.getTileEntity(pos);
 			
-			if (tileEntity instanceof StargateBaseTile) {
-				StargateBaseTile gateTile = (StargateBaseTile) tileEntity;
+			if (tileEntity instanceof StargateAbstractBaseTile) {
+				StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) tileEntity;
 				
 				if (gateTile.getStargateState().initiating()) {
 					StargateRenderingUpdatePacketToServer.closeGatePacket(gateTile, false);

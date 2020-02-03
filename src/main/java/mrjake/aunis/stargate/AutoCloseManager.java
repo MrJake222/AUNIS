@@ -3,7 +3,7 @@ package mrjake.aunis.stargate;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
-import mrjake.aunis.tileentity.stargate.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -14,12 +14,12 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 public class AutoCloseManager implements INBTSerializable<NBTTagCompound> {
 	
-	private StargateBaseTile gateTile;
+	private StargateAbstractBaseTile gateTile;
 	
 	private int secondsPassed;
 	private int playersPassed;
 	
-	public AutoCloseManager(StargateBaseTile gateTile) {
+	public AutoCloseManager(StargateAbstractBaseTile gateTile) {
 		this.gateTile = gateTile;
 	}
 	

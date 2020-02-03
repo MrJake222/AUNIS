@@ -11,8 +11,8 @@ import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
-import mrjake.aunis.tileentity.stargate.StargateMemberTile;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
@@ -51,7 +51,7 @@ public class MergeHelper {
 		}
 		
 		for (BlockPos gatePos : blocks) {
-			if (blockAccess.getBlockState(gatePos).getBlock() == AunisBlocks.stargateBaseBlock) {
+			if (blockAccess.getBlockState(gatePos).getBlock() == AunisBlocks.stargateMilkyWayBaseBlock) {
 				return gatePos;
 			}
 		}
@@ -59,11 +59,11 @@ public class MergeHelper {
 		return null;
 	}
 	
-	public static StargateBaseTileSG1 findBaseTile(IBlockAccess blockAccess, BlockPos currentPos, IBlockState state) {
+	public static StargateMilkyWayBaseTile findBaseTile(IBlockAccess blockAccess, BlockPos currentPos, IBlockState state) {
 		BlockPos gatePos = findBasePos(blockAccess, currentPos, state);
 		
 		if (gatePos != null)
-			return (StargateBaseTileSG1) blockAccess.getTileEntity(gatePos);
+			return (StargateMilkyWayBaseTile) blockAccess.getTileEntity(gatePos);
 		
 		else
 			return null;
@@ -152,7 +152,7 @@ public class MergeHelper {
 				for (BlockPos checkPos : blockMap.get(variant)) {	
 					IBlockState state = world.getBlockState(rotateAndGlobal(checkPos, facing, basePos));
 					
-					if (state.getBlock() != AunisBlocks.stargateMemberBlock || state.getValue(AunisProps.MEMBER_VARIANT) != variant) {					
+					if (state.getBlock() != AunisBlocks.stargateMilkyWayMemberBlock || state.getValue(AunisProps.MEMBER_VARIANT) != variant) {					
 						return false;
 					}
 				}
@@ -172,8 +172,8 @@ public class MergeHelper {
 				
 				IBlockState blockState = world.getBlockState(checkPos);
 				
-				if (blockState.getBlock() == AunisBlocks.stargateMemberBlock) {		
-					StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(checkPos);
+				if (blockState.getBlock() == AunisBlocks.stargateMilkyWayMemberBlock) {		
+					StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(checkPos);
 					
 					if ((isMerged && !memberTile.isMerged()) || (memberTile.isMerged() && memberTile.getBasePos().equals(basePos))) {
 						
@@ -216,8 +216,8 @@ public class MergeHelper {
 				
 				TileEntity tileEntity = world.getTileEntity(checkPos);
 				
-				if (tileEntity instanceof StargateMemberTile) {
-					((StargateMemberTile) tileEntity).setBasePos(basePos);
+				if (tileEntity instanceof StargateMilkyWayMemberTile) {
+					((StargateMilkyWayMemberTile) tileEntity).setBasePos(basePos);
 				}
 			}
 		}

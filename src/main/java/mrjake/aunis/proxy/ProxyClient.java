@@ -2,7 +2,7 @@ package mrjake.aunis.proxy;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.color.GrassBlockColor;
+import mrjake.aunis.block.GrassBlockColor;
 import mrjake.aunis.fluid.AunisBlockFluid;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
@@ -16,8 +16,8 @@ import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileOrlin;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.resources.I18n;
@@ -43,7 +43,7 @@ public class ProxyClient implements IProxy {
 		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new CrystalControlDHDItemColor(), AunisItems.crystalControlDhd);
 		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageMysteriousItemColor(), AunisItems.pageMysteriousItem);
     	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageNotebookItemColor(), AunisItems.pageNotebookItem);
-		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.stargateMemberBlock);
+		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.stargateMilkyWayMemberBlock);
     }
  
     public void postInit(FMLPostInitializationEvent event) {
@@ -59,8 +59,8 @@ public class ProxyClient implements IProxy {
 		
 		SpecialRenderer specialRenderer = new SpecialRenderer();
 		
-		ClientRegistry.bindTileEntitySpecialRenderer(StargateBaseTileSG1.class, specialRenderer);
-		ClientRegistry.bindTileEntitySpecialRenderer(StargateBaseTileOrlin.class, specialRenderer);
+		ClientRegistry.bindTileEntitySpecialRenderer(StargateMilkyWayBaseTile.class, specialRenderer);
+		ClientRegistry.bindTileEntitySpecialRenderer(StargateOrlinBaseTile.class, specialRenderer);
 		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, specialRenderer);
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, specialRenderer);

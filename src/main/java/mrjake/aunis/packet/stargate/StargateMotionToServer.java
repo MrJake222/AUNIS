@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.stargate.teleportation.TeleportHelper;
-import mrjake.aunis.tileentity.stargate.StargateBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -61,7 +61,7 @@ public class StargateMotionToServer extends PositionedPacket {
 				
 				EnumFacing sourceFacing = world.getBlockState(message.pos).getValue(AunisProps.FACING_HORIZONTAL);
 				
-				StargateBaseTile gateTile = (StargateBaseTile) world.getTileEntity(message.pos);
+				StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) world.getTileEntity(message.pos);
 				
 				Vector2f motionVector = new Vector2f(message.motionX, message.motionZ);
 				

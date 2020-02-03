@@ -14,10 +14,13 @@ item.aunis.naquadah_alloy.name=Naquadah Alloy Ingot
 
 tile.aunis.invisible_block.name=You can't see me block
 
-tile.aunis.stargatebase_block.name=Stargate Base
-tile.aunis.stargate_member_block_ring.name=Stargate Ring
-tile.aunis.stargate_member_block_chevron.name=Stargate Chevron
+tile.aunis.stargate_milkyway_base_block.name=Stargate Base (Milky Way)
+tile.aunis.stargate_milkyway_ring_block.name=Stargate Ring (Milky Way)
+tile.aunis.stargate_milkyway_chevron_block.name=Stargate Chevron (Milky Way)
 tile.aunis.dhd_block.name=Dial Home Device (DHD)
+
+tile.aunis.stargate_orlin_base_block.name=Stargate Base (Orlin)
+tile.aunis.stargate_orlin_member_block.name=Stargate Ring (Orlin)
 
 tile.aunis.crystal_infuser_block.name=Crystal Infuser
 

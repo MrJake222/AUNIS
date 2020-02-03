@@ -20,7 +20,7 @@ import mrjake.aunis.stargate.MergeHelper;
 import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.StargateRendererStateSG1;
 import mrjake.aunis.state.StargateSpinStateRequest;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
@@ -34,7 +34,7 @@ public class StargateRendererSG1 extends StargateRendererBase {
 	
 	private static final Vec3d RING_LOC = new Vec3d(0.0, -0.122333, -0.000597);
 		
-	public StargateRendererSG1(StargateBaseTileSG1 te) {
+	public StargateRendererSG1(StargateMilkyWayBaseTile te) {
 		super(te.getWorld(), te.getPos());
 		
 		for (int i=0; i<9; i++)
@@ -98,7 +98,7 @@ public class StargateRendererSG1 extends StargateRendererBase {
 	protected boolean shouldRender() {
 		IBlockState state = world.getBlockState(pos);
 		
-		if (state.getBlock() != AunisBlocks.stargateBaseBlock)
+		if (state.getBlock() != AunisBlocks.stargateMilkyWayBaseBlock)
 			return false;
 		
 		return (!state.getValue(AunisProps.RENDER_BLOCK));

@@ -6,7 +6,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.UpgradeHelper;
 import mrjake.aunis.util.LinkingHelper;
@@ -82,10 +82,10 @@ public class DHDBlock extends Block {
 			world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, facing), 3);
 			
 			DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
-			BlockPos closestGate = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.stargateBaseBlock);
+			BlockPos closestGate = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.stargateMilkyWayBaseBlock);
 			
 			if (closestGate != null) {
-				StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(closestGate);
+				StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(closestGate);
 				
 				dhdTile.setLinkedGate(closestGate);
 				gateTile.setLinkedDHD(pos);
@@ -155,7 +155,7 @@ public class DHDBlock extends Block {
 		DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {
-			StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) dhdTile.getLinkedGate(world);
+			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) dhdTile.getLinkedGate(world);
 			
 			if (gateTile != null)
 				gateTile.setLinkedDHD(null);

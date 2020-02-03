@@ -76,7 +76,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 //@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
-public abstract class StargateBaseTile extends TileEntity implements SpecialRendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment {
+public abstract class StargateAbstractBaseTile extends TileEntity implements SpecialRendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment {
 	
 	// ------------------------------------------------------------------------
 	// Stargate state
@@ -377,7 +377,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 			sendRenderingUpdate(EnumGateAction.GATE_DIAL_FAILED, !stopRing, 0);
 		}
 			
-		if (!(this instanceof StargateBaseTileOrlin))
+		if (!(this instanceof StargateOrlinBaseTile))
 			dialedAddress.clear();
 		
 		horizonFlashTask = null;
@@ -538,7 +538,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 						
 						// Only if not loaded
 						if (!sourcePos.getWorld().isBlockLoaded(sourcePos.getPos())) {					
-							StargateBaseTileSG1 sourceTile = (StargateBaseTileSG1) sourcePos.getWorld().getTileEntity(sourcePos.getPos());
+							StargateMilkyWayBaseTile sourceTile = (StargateMilkyWayBaseTile) sourcePos.getWorld().getTileEntity(sourcePos.getPos());
 							
 							sourceTile.updateEnergyStatus();
 						}
@@ -571,7 +571,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	protected abstract List<AunisAxisAlignedBB> getGateVaporizingBoxes();
 	
 	/**
-	 * How many ticks should the {@link StargateBaseTile} wait to perform
+	 * How many ticks should the {@link StargateAbstractBaseTile} wait to perform
 	 * next update to the size of the killing box.
 	 */
 	private int TICKS_PER_HORIZON_SEGMENT = 12 / getHorizonSegmentCount();
@@ -981,7 +981,7 @@ public abstract class StargateBaseTile extends TileEntity implements SpecialRend
 	}
 	
 	/**
-	 * Checks if this {@link StargateBaseTile} can provide enough energy.
+	 * Checks if this {@link StargateAbstractBaseTile} can provide enough energy.
 	 * 
 	 * @param energy Energy required.
 	 * @return Will it suffice?

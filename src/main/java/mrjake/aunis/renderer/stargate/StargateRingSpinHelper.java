@@ -14,7 +14,7 @@ import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.StargateRingStopRequest;
 import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.StargateSpinStateRequest;
-import mrjake.aunis.tileentity.stargate.StargateBaseTileSG1;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -106,7 +106,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 		}
 		
 		else {
-			StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
+			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
 
 			long time;
 			
@@ -152,7 +152,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 		}
 		
 		else {
-			StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
+			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
 			
 			if (getStargateSpinState().computerInitializedStop) {
 				if (!getStargateSpinState().lockSoundPlayed && (effectiveTick >= (state.tickStopRequested + speedUpTimeTick - 5))) {
@@ -180,7 +180,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 	protected void onStopReached(double angle) {
 		getStargateSpinState().lockSoundPlayed = false;
 				
-		StargateBaseTileSG1 gateTile = (StargateBaseTileSG1) world.getTileEntity(pos);
+		StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
 		
 		if (angle < 0)
 			angle += 360;

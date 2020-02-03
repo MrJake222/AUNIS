@@ -21,8 +21,7 @@
 	},
 	
 	"result": {
-		"item": "aunis:stargate_member_block",
-		"count": 1,
-		"data": 0
+		"item": "aunis:stargate_milkyway_member_block",
+		"data": 6
 	}
 }
