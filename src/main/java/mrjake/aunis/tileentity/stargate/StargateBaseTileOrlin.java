@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
@@ -59,7 +60,8 @@ public class StargateBaseTileOrlin extends StargateBaseTile { //implements Simpl
 		super.update();
 		
 		if (world.isRemote) {
-			renderer.spawnParticles();
+			if (!world.getBlockState(pos).getValue(AunisProps.RENDER_BLOCK))
+				renderer.spawnParticles();
 		}
 	}
 	
