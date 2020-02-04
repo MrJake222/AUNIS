@@ -16,6 +16,7 @@ import mrjake.aunis.stargate.EnumGateState;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.teleportation.TeleportHelper;
@@ -87,6 +88,25 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 		targetTile.closeGate(false, true);
 	}
 	
+	public static StargateEnergyRequired getRequiredEnergy(World sourceWorld, BlockPos sourcePos, World targetWorld, BlockPos targetPos) {
+		int distance = (int) sourcePos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ());
+		double multiplier = 1;
+		
+		// It the dimensions are the same, no multiplier
+		if (targetWorld.provider.getDimensionType() != sourceWorld.provider.getDimensionType()) { 
+			if (targetWorld.provider.getDimensionType() == DimensionType.NETHER || sourceWorld.provider.getDimensionType() == DimensionType.NETHER) {
+				distance /= 8;
+			}
+			
+			multiplier = AunisConfig.powerConfig.crossDimensionMul;
+		}
+		
+		int energy = (int) (distance * AunisConfig.powerConfig.openingBlockToEnergyRatio * multiplier);
+		int keepAlive = (int) Math.ceil(distance * AunisConfig.powerConfig.keepAliveBlockToEnergyRatioPerTick * multiplier);
+		
+		return new StargateEnergyRequired(energy, keepAlive);
+	}
+	
 	/**
 	 * Checks for Stargate at given address and if it's not pointing to itself.
 	 * 
@@ -107,7 +127,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 			DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
 				
-			if (targetTile.getStargateState().idle()) {
+			if (targetTile.getStargateState().idle() && gateTile.hasEnergyToDial(getRequiredEnergy(world, gateTile.getPos(), targetWorld, targetPos))) {
 				boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
 				
 				targetTile.incomingWormhole(gateTile.gateAddress, gateTile.dialedAddress.size());
@@ -132,19 +152,8 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 
 			if (targetTile.getStargateState().idle()) {			
-				int distance = (int) sourcePos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ());
-				double multiplier = 1;
 				
-				// It the dimensions are the same, no multiplier
-				if (targetWorld.provider.getDimensionType() != world.provider.getDimensionType()) { 
-					if (targetWorld.provider.getDimensionType() == DimensionType.NETHER || world.provider.getDimensionType() == DimensionType.NETHER) {
-						distance /= 8;
-					}
-					
-					multiplier = AunisConfig.powerConfig.crossDimensionMul;
-				}
-				
-				if (gateTile.hasEnergyToDial(distance, multiplier)) {
+				if (gateTile.hasEnergyToDial(getRequiredEnergy(world, sourcePos, targetWorld, targetPos))) {
 					
 					if (sourceDhdTile != null) 
 						sourceDhdTile.activateSymbol(EnumSymbol.BRB.id);

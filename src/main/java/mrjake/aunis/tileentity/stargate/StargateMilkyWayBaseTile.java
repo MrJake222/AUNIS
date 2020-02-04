@@ -11,7 +11,7 @@ import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.gui.StargateGUI;
+import mrjake.aunis.gui.StargateMilkyWayGui;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
@@ -28,7 +28,7 @@ import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.MergeHelper;
-import mrjake.aunis.state.StargateGuiState;
+import mrjake.aunis.state.StargateMilkyWayGuiState;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.StargateRendererStateSG1;
@@ -445,7 +445,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				return getUpgradeRendererState();
 				
 			case GUI_STATE:
-				return new StargateGuiState(gateAddress, hasUpgrade, energyStorage.getMaxEnergyStored(), new UniversalEnergyState(energyStorage.getEnergyStored()));
+				return new StargateMilkyWayGuiState(gateAddress, hasUpgrade, energyStorage.getMaxEnergyStored(), new UniversalEnergyState(energyStorage.getEnergyStored()));
 				
 			case ENERGY_STATE:
 				return new UniversalEnergyState(energyStorage.getEnergyStored());
@@ -466,7 +466,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				return new UpgradeRendererState();
 		
 			case GUI_STATE:
-				return new StargateGuiState();
+				return new StargateMilkyWayGuiState();
 				
 			case ENERGY_STATE:
 				return new UniversalEnergyState();
@@ -482,7 +482,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		}
 	}
 	
-	private StargateGUI openGui;
+	private StargateMilkyWayGui stargateGui;
 	
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -522,20 +522,20 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				break;
 		
 			case GUI_STATE:
-				if (openGui == null || !openGui.isOpen) {
-					openGui = new StargateGUI(pos, (StargateGuiState) state);
-					Minecraft.getMinecraft().displayGuiScreen(openGui);
+				if (stargateGui == null || !stargateGui.isOpen) {
+					stargateGui = new StargateMilkyWayGui(pos, (StargateMilkyWayGuiState) state);
+					Minecraft.getMinecraft().displayGuiScreen(stargateGui);
 				}
 				
 				else {
-					openGui.state = (StargateGuiState) state;
+					stargateGui.state = (StargateMilkyWayGuiState) state;
 				}
 				
 				break;
 				
 			case ENERGY_STATE:
-				if (openGui != null && openGui.isOpen) {
-					openGui.state.energyState = (UniversalEnergyState) state;
+				if (stargateGui != null && stargateGui.isOpen) {
+					stargateGui.state.energyState = (UniversalEnergyState) state;
 				}
 				
 				break;

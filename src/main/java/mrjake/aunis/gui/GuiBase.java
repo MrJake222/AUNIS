@@ -8,18 +8,19 @@ public class GuiBase extends GuiScreen {
 	
 	public static final int FRAME_COLOR = 0xFF181A1F;
 	public static final int BG_COLOR = 0xF2272B33;
-	public static final int TEXT_COLOR = 0x6B768C;
+	public static final int TEXT_COLOR = 0x6B768C;	
 	
+	public boolean isOpen = false;
 	
-	public static int color(int red, int green, int blue, int alpha) {
-		alpha = (alpha & 0xFF) << 24;
-		red = (red & 0xFF) << 16;
-		green = (green & 0xFF) << 8;
-		blue = (blue & 0xFF);
-		
-		return alpha | red | green | blue;
+	@Override
+	public void initGui() {
+		isOpen = true;
 	}
 	
+	@Override
+	public void onGuiClosed() {
+		isOpen = false;
+	}
 	
 	/**
 	 * Rendered image width
@@ -116,13 +117,11 @@ public class GuiBase extends GuiScreen {
 	 * Draws frame and background in it
 	 */
 	protected void drawBackground() {
-		frame(imageWidth, imageHeight, frameThickness, frameColor);
-		
-		drawRect(frameThickness, frameThickness, imageWidth-frameThickness, imageHeight-frameThickness, bgColor);
+		frame(imageWidth, imageHeight, frameThickness, frameColor, true);
 	}
 	
 	
-	protected void frame(int w, int h, int thickness, int color) {
+	protected void frame(int w, int h, int thickness, int color, boolean background) {
 		// Up
 		drawRect(0, 0, w, thickness, color);
 		
@@ -134,6 +133,9 @@ public class GuiBase extends GuiScreen {
 		
 		// Right
 		drawRect(w-thickness, thickness, w, h-thickness, color);
+		
+		if (background)
+			drawRect(thickness, thickness, w-thickness, h-thickness, bgColor);
 	}
 	
 	

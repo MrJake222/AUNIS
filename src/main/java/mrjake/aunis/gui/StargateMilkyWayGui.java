@@ -3,17 +3,16 @@ package mrjake.aunis.gui;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.state.StargateGuiState;
+import mrjake.aunis.state.StargateMilkyWayGuiState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
-public class StargateGUI extends GuiBase {
+public class StargateMilkyWayGui extends GuiBase {
 		
 	private BlockPos pos;
-	public StargateGuiState state;
-	public boolean isOpen = false;
+	public StargateMilkyWayGuiState state;
 	
 	private final static int sectionSize = 90;
 	private final static int frameThickness = 8;
@@ -29,7 +28,7 @@ public class StargateGUI extends GuiBase {
 		return bgWidth + 2*frameThickness;
 	}
 	
-	public StargateGUI(BlockPos pos, StargateGuiState state) {
+	public StargateMilkyWayGui(BlockPos pos, StargateMilkyWayGuiState state) {
 		super(0, imageHeight, frameThickness, FRAME_COLOR, BG_COLOR, TEXT_COLOR, 0);
 		
 		sections = state.hasUpgrade() ? 7 : 6;
@@ -38,16 +37,6 @@ public class StargateGUI extends GuiBase {
 		this.state = state;
 		this.pos = pos;
 	}	
-	
-	@Override
-	public void initGui() {
-		isOpen = true;
-	}
-	
-	@Override
-	public void onGuiClosed() {
-		isOpen = false;
-	}
 	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
@@ -88,7 +77,7 @@ public class StargateGUI extends GuiBase {
 		// width: width minus double x-axis translate
 		// height: 20
 		// frame: 4
-		frame(imageWidth-20, 20, 4, frameColor);
+		frame(imageWidth-20, 20, 4, frameColor, true);
 		
 		// x: frame
 		// y: frame

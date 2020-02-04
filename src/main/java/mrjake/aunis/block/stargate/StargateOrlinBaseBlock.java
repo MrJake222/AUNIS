@@ -5,9 +5,12 @@ import java.util.List;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.orlin.MergeHelperOrlin;
+import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -16,6 +19,8 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -79,10 +84,13 @@ public class StargateOrlinBaseBlock extends Block {
 	
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		if (player.getHeldItem(hand).getItem() == AunisItems.pageNotebookItem) {
-			if (!world.isRemote) {
-				StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
-			
+		ItemStack heldItemStack = player.getHeldItem(hand);
+		Item heldItem = heldItemStack.getItem();
+		
+		if (!world.isRemote) {
+			StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
+		
+			if (heldItem == AunisItems.pageNotebookItem) {
 				NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
 				if (compound != null && compound.hasKey("address")) {
 									
@@ -95,13 +103,20 @@ public class StargateOrlinBaseBlock extends Block {
 					gateTile.dialedAddress = address;
 					
 					player.sendMessage(new TextComponentString("Bound to: " + address));
+					
+					return true;
 				}
 			}
 			
-			return true;
+			else if (heldItem == AunisItems.analyzerAncient) {
+				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_STATE, gateTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
+				
+				return true;
+			}
 		}
 				
-		return false;
+		return  heldItem == AunisItems.pageNotebookItem ||
+				heldItem == AunisItems.analyzerAncient;
 	}
 	
 	@Override

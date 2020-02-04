@@ -32,6 +32,7 @@ import mrjake.aunis.stargate.AutoCloseManager;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.teleportation.EventHorizon;
@@ -1009,25 +1010,12 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Spe
 	 * @param distance - distance in blocks to target gate
 	 * @param targetWorld - target world, used for multiplier
 	 */
-	public boolean hasEnergyToDial(int distance, double multiplier) {		
-		/* double mul;
-		
-		switch (targetWorld.provider.getDimensionType()) {
-			case NETHER: mul = AunisConfig.netherMultiplier; break;
-			case THE_END: mul = AunisConfig.theEndMultiplier; break;
-		
-			// No multiplier
-			default: mul = 1; break;
-		}*/
-		
-		int energy = (int) (distance * AunisConfig.powerConfig.openingBlockToEnergyRatio * multiplier);
-		int keepAlive = (int) Math.ceil(distance * AunisConfig.powerConfig.keepAliveBlockToEnergyRatioPerTick * multiplier);
-		
-		Aunis.info("Energy required to dial [distance="+distance+", mul="+multiplier+"] = " + energy + " / keepAlive: "+(keepAlive*20)+"/s, stored: " + (getEnergyStorage(1) != null ? getEnergyStorage(1).getEnergyStored() : 0));
+	public boolean hasEnergyToDial(StargateEnergyRequired energyRequired) {		
+//		Aunis.info("Energy required to dial [distance="+distance+", mul="+multiplier+"] = " + energy + " / keepAlive: "+(keepAlive*20)+"/s, stored: " + (getEnergyStorage(1) != null ? getEnergyStorage(1).getEnergyStored() : 0));
 				
-		if (getEnergyStorage(energy) != null) {
-			this.openCost = energy;
-			this.keepAliveCostPerTick = keepAlive;
+		if (getEnergyStorage(energyRequired.energyToOpen) != null) {
+			this.openCost = energyRequired.energyToOpen;
+			this.keepAliveCostPerTick = energyRequired.keepAlive;
 		
 			markDirty();
 			return true;

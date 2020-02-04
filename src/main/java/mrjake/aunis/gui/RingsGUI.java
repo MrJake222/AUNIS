@@ -21,7 +21,6 @@ public class RingsGUI extends GuiBase {
 	
 	private BlockPos pos;
 	public TransportRingsGuiState state;
-	public boolean isOpen;
 	
 	public RingsGUI(BlockPos pos, TransportRingsGuiState state) {
 		super(196, 160, 8, FRAME_COLOR, BG_COLOR, TEXT_COLOR, 4);
@@ -38,7 +37,9 @@ public class RingsGUI extends GuiBase {
 	private AunisGuiButton saveButton;
 	
 	@Override
-	public void initGui() {			
+	public void initGui() {	
+		super.initGui();
+		
 		addressTextField = createTextField(50, 20, 1, state.isInGrid() ? "" + state.getAddress() : "");
 		textFields.add(addressTextField);
 		
@@ -47,13 +48,6 @@ public class RingsGUI extends GuiBase {
 		
 		saveButton = new AunisGuiButton(id++, getBottomRightInside(false)-90, getBottomRightInside(true)-20, 90, 20, "Save");
 		buttonList.add(saveButton);
-		
-		isOpen = true;
-	}
-	
-	@Override
-	public void onGuiClosed() {
-		isOpen = false;
 	}
 	
 	@Override

@@ -5,6 +5,7 @@ import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.gui.StargateOrlinGui;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
@@ -14,6 +15,7 @@ import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
+import mrjake.aunis.state.StargateOrlinGuiState;
 import mrjake.aunis.state.StargateOrlinSparkState;
 import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.State;
@@ -21,6 +23,7 @@ import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -162,6 +165,9 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 	@Override
 	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
+			case GUI_STATE:
+				return new StargateOrlinGuiState(energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored());
+		
 			case SPARK_STATE:
 				return null;
 				// Shouldn't be done this way
@@ -174,6 +180,9 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 	@Override
 	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
+			case GUI_STATE:
+				return new StargateOrlinGuiState();
+		
 			case SPARK_STATE:
 				return new StargateOrlinSparkState();
 				
@@ -182,10 +191,24 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 		}
 	}
 
+	private StargateOrlinGui stargateGui;
+	
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
+			case GUI_STATE:
+				if (stargateGui == null || !stargateGui.isOpen) {
+					stargateGui = new StargateOrlinGui(pos, (StargateOrlinGuiState) state);
+					Minecraft.getMinecraft().displayGuiScreen(stargateGui);
+				}
+				
+				else {
+					stargateGui.state = (StargateOrlinGuiState) state;
+				}
+				
+				break;
+		
 			case SPARK_STATE:
 				StargateOrlinSparkState sparkState = (StargateOrlinSparkState) state;
 				getRendererOrlin().sparkFrom(sparkState.sparkIndex, sparkState.spartStart);

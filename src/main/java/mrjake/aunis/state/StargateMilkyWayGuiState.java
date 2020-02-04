@@ -6,8 +6,8 @@ import java.util.List;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.stargate.EnumSymbol;
 
-public class StargateGuiState extends State {
-	public StargateGuiState() {}
+public class StargateMilkyWayGuiState extends State {
+	public StargateMilkyWayGuiState() {}
 	
 	private List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> getGateAddress() { return gateAddress; }
@@ -18,7 +18,7 @@ public class StargateGuiState extends State {
 	public int maxEnergy;	
 	public UniversalEnergyState energyState;
 	
-	public StargateGuiState(List<EnumSymbol> gateAddress, boolean hasUpgrade, int maxEnergy, UniversalEnergyState energyState) {
+	public StargateMilkyWayGuiState(List<EnumSymbol> gateAddress, boolean hasUpgrade, int maxEnergy, UniversalEnergyState energyState) {
 		this.gateAddress = gateAddress;
 		this.hasUpgrade = hasUpgrade;
 		
