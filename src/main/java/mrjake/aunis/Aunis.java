@@ -4,11 +4,13 @@ import org.apache.logging.log4j.Logger;
 
 import mrjake.aunis.command.AunisCommands;
 import mrjake.aunis.fluid.AunisFluids;
+import mrjake.aunis.integration.OCWrapperInterface;
 import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
 import mrjake.aunis.worldgen.AunisWorldGen;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -40,6 +42,14 @@ public class Aunis {
     public static IProxy proxy;
     public static Logger logger;
     
+    // ------------------------------------------------------------------------
+    // OpenComputers
+    
+    private static final String OC_WRAPPER_LOADED = "mrjake.aunis.integration.OCWrapperLoaded";
+    private static final String OC_WRAPPER_NOT_LOADED = "mrjake.aunis.integration.OCWrapperNotLoaded";
+    
+    public static OCWrapperInterface ocWrapper;
+    
 	// ------------------------------------------------------------------------
     static {
     	FluidRegistry.enableUniversalBucket();
@@ -58,8 +68,19 @@ public class Aunis {
     @EventHandler
     public void init(FMLInitializationEvent event) {
     	GameRegistry.registerWorldGenerator(new AunisWorldGen(), 0);
-    	
     	ThermalIntegration.registerRecipes();
+    	
+    	try {
+	    	if (Loader.isModLoaded("opencomputers"))
+	    		ocWrapper = (OCWrapperInterface) Class.forName(OC_WRAPPER_LOADED).newInstance();
+	    	else
+	    		ocWrapper = (OCWrapperInterface) Class.forName(OC_WRAPPER_NOT_LOADED).newInstance();
+    	}
+    	
+    	catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+    		info("Exception loading OpenComputers wrapper");
+    		e.printStackTrace();
+    	}
     	
     	proxy.init(event);
     }

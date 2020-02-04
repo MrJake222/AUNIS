@@ -55,6 +55,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -599,6 +600,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	// -----------------------------------------------------------------
 	// OpenComputers methods
 	
+	@Optional.Method(modid = "opencomputers")
 	@Callback(doc = "function(symbolName:string) -- Spins the ring to the given symbol and engages/locks it")
 	public Object[] engageSymbol(Context context, Arguments args) {
 		if (!stargateState.idle()) {
@@ -662,6 +664,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		return new Object[] {"stargate_spin"};
 	}
 
+	@Optional.Method(modid = "opencomputers")
 	@Callback(doc = "function() -- Tries to open the gate")
 	public Object[] engageGate(Context context, Arguments args) {
 		if (stargateState.idle() || stargateState.dialingDhd()) {
@@ -692,6 +695,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		}
 	}
 	
+	@Optional.Method(modid = "opencomputers")
 	@Callback(doc = "function() -- Tries to close the gate")
 	public Object[] disengageGate(Context context, Arguments args) {
 		if (stargateState.engaged()) {
@@ -708,6 +712,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 			return new Object[] {null, "stargate_failure_not_open", "The gate is closed", stargateState.toString()};
 		}
 	}
+	
 	
 	// -----------------------------------------------------------------
 	// Upgrade

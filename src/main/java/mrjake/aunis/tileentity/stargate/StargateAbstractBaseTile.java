@@ -8,21 +8,18 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
 
-import li.cil.oc.api.Network;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
-import li.cil.oc.api.network.Visibility;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisDamageSources;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.capability.EnergyStorageUncapped;
-import mrjake.aunis.integration.OCHelper;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
@@ -48,8 +45,8 @@ import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tesr.SpecialRendererProviderInterface;
 import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.tileentity.util.ScheduledTask;
+import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.block.state.IBlockState;
@@ -69,13 +66,14 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-//@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
+@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
 public abstract class StargateAbstractBaseTile extends TileEntity implements SpecialRendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment {
 	
 	// ------------------------------------------------------------------------
@@ -404,7 +402,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Spe
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 			
 			generateAddress();
-			Network.joinOrCreateNetwork(this);
+			Aunis.ocWrapper.joinOrCreateNetwork(this);
 		}
 		
 		else {
@@ -548,6 +546,22 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Spe
 		}
 	}
 	
+	@Override
+	public void onChunkUnload() {
+		if (node != null)
+			node.remove();
+		
+		super.onChunkUnload();
+	}
+
+	@Override
+	public void invalidate() {
+		if (node != null)
+			node.remove();
+		
+		super.invalidate();
+	}
+	
 	// ------------------------------------------------------------------------
 	// Killing and block vaporizing
 	
@@ -636,30 +650,28 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Spe
 	public void updateFacing(EnumFacing facing) {
 		this.facing = facing;
 		
-		if (!world.isRemote) {
-			this.eventHorizon = new EventHorizon(world, pos, facing, getHorizonTeleportBox());
+		this.eventHorizon = new EventHorizon(world, pos, facing, getHorizonTeleportBox());
+		
+		AunisAxisAlignedBB kBox = getHorizonKillingBox();
+		double width = kBox.maxZ - kBox.minZ;
+		width /= getHorizonSegmentCount();
+		
+		localKillingBoxes = new ArrayList<AunisAxisAlignedBB>(getHorizonSegmentCount());
+		for (int i=0; i<getHorizonSegmentCount(); i++) {
+			AunisAxisAlignedBB box = new AunisAxisAlignedBB(kBox.minX, kBox.minY, kBox.minZ + width*i, kBox.maxX, kBox.maxY, kBox.minZ + width*(i+1));
+			box = box.rotate(facing).offset(0.5, 0, 0.5);
 			
-			AunisAxisAlignedBB kBox = getHorizonKillingBox();
-			double width = kBox.maxZ - kBox.minZ;
-			width /= getHorizonSegmentCount();
-			
-			localKillingBoxes = new ArrayList<AunisAxisAlignedBB>(getHorizonSegmentCount());
-			for (int i=0; i<getHorizonSegmentCount(); i++) {
-				AunisAxisAlignedBB box = new AunisAxisAlignedBB(kBox.minX, kBox.minY, kBox.minZ + width*i, kBox.maxX, kBox.maxY, kBox.minZ + width*(i+1));
-				box = box.rotate(facing).offset(0.5, 0, 0.5);
-				
-				localKillingBoxes.add(box);
-			}
-			
-			localInnerBlockBoxes = new ArrayList<AunisAxisAlignedBB>(3);
-			localInnerEntityBoxes = new ArrayList<AunisAxisAlignedBB>(3);
-			for (AunisAxisAlignedBB lBox : getGateVaporizingBoxes()) {
-				localInnerBlockBoxes.add(lBox.rotate(facing).offset(0.5, 0, 0.5));
-				localInnerEntityBoxes.add(lBox.grow(0, 0, -0.25).rotate(facing).offset(0.5, 0, 0.5));
-			}
+			localKillingBoxes.add(box);
 		}
 		
-		else {
+		localInnerBlockBoxes = new ArrayList<AunisAxisAlignedBB>(3);
+		localInnerEntityBoxes = new ArrayList<AunisAxisAlignedBB>(3);
+		for (AunisAxisAlignedBB lBox : getGateVaporizingBoxes()) {
+			localInnerBlockBoxes.add(lBox.rotate(facing).offset(0.5, 0, 0.5));
+			localInnerEntityBoxes.add(lBox.grow(0, 0, -0.25).rotate(facing).offset(0.5, 0, 0.5));
+		}
+		
+		if (world.isRemote) {
 			getRenderer().updateFacing(facing);
 		}
 	}
@@ -1139,50 +1151,40 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Spe
 	
 	// ------------------------------------------------------------
 	// Node-related work
-	private Node node = Network.newNode(this, Visibility.Network).withComponent("stargate", Visibility.Network).create();
+	private Node node = Aunis.ocWrapper.createNode(this, "stargate");
 	
 	@Override
+	@Optional.Method(modid = "opencomputers")
 	public Node node() {
 		return node;
 	}
 
 	@Override
+	@Optional.Method(modid = "opencomputers")
 	public void onConnect(Node node) {}
 
 	@Override
+	@Optional.Method(modid = "opencomputers")
 	public void onDisconnect(Node node) {}
 
 	@Override
+	@Optional.Method(modid = "opencomputers")
 	public void onMessage(Message message) {}
 	
-	@Override
-	public void onChunkUnload() {
-		if (node != null)
-			node.remove();
-		
-		super.onChunkUnload();
-	}
-
-	@Override
-	public void invalidate() {
-		if (node != null)
-			node.remove();
-		
-		super.invalidate();
-	}
-	
 	public void sendSignal(Object context, String name, Object... params) {
-		OCHelper.sendSignalToReachable(node, (Context) context, name, params);
+		Aunis.ocWrapper.sendSignalToReachable(node, (Context) context, name, params);
 	}
 	
 	// ------------------------------------------------------------
 	// Methods
 	// function(arg:type[, optionArg:type]):resultType; Description.
+	@Optional.Method(modid = "opencomputers")
 	@Callback(getter = true)
 	public Object[] stargateAddress(Context context, Arguments args) {
 		return new Object[] {gateAddress};
 	}
 
+	@Optional.Method(modid = "opencomputers")
 	@Callback(getter = true)
 	public Object[] dialedAddress(Context context, Arguments args) {
 		return new Object[] {dialedAddress};

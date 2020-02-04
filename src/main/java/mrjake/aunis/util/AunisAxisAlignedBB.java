@@ -3,6 +3,7 @@ package mrjake.aunis.util;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -68,6 +69,7 @@ public class AunisAxisAlignedBB extends AxisAlignedBB {
 		GlStateManager.color(1.0f, 0, 0);
 		GlStateManager.disableTexture2D();
 		GlStateManager.disableLighting();
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 		
 		GlStateManager.translate(x, y, z);
 		
