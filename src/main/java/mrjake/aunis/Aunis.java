@@ -3,13 +3,18 @@ package mrjake.aunis;
 import org.apache.logging.log4j.Logger;
 
 import mrjake.aunis.command.AunisCommands;
+import mrjake.aunis.datafixer.TileNamesFixer;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.integration.OCWrapperInterface;
 import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
 import mrjake.aunis.worldgen.AunisWorldGen;
+import net.minecraft.util.datafix.FixTypes;
+import net.minecraftforge.common.util.CompoundDataFixer;
+import net.minecraftforge.common.util.ModFixs;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -25,7 +30,8 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class Aunis {	
     public static final String ModID = "aunis";
     public static final String Name = "AUNIS";
-    public static final String Version = "1.6.0-beta";
+    public static final String Version = "1.6.1-beta";
+    public static final int DATA_VERSION = 6;
 
     public static final String MCVersion = "[1.12.2]";
  
@@ -82,6 +88,10 @@ public class Aunis {
     		e.printStackTrace();
     	}
     	
+    	// Data fixers
+		ModFixs modFixs = ((CompoundDataFixer) FMLCommonHandler.instance().getDataFixer()).init(ModID, DATA_VERSION);
+		modFixs.registerFix(FixTypes.BLOCK_ENTITY, new TileNamesFixer());
+		
     	proxy.init(event);
     }
  

@@ -1,5 +1,7 @@
 package mrjake.aunis.block;
 
+import javax.annotation.Nullable;
+
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
@@ -106,26 +108,33 @@ public class AunisBlocks {
 		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMilkyWayMemberBlock), chevronMeta, new ModelResourceLocation("aunis:stargate_milkyway_chevron_block"));
 	}
 	
+	@Nullable
+	public static Block remapBlock(String oldBlockName) {
+		switch (oldBlockName) {
+			case "aunis:stargatebase_block":
+				return stargateMilkyWayBaseBlock;
+				
+			case "aunis:stargate_member_block":
+				return stargateMilkyWayMemberBlock;
+				
+			case "aunis:stargatebase_orlin_block":
+				return stargateOrlinBaseBlock;
+				
+			case "aunis:stargatemember_orlin_block":
+				return stargateOrlinMemberBlock;
+				
+			default:
+				return null;
+		}
+	}
+	
 	@SubscribeEvent
 	public static void onMissingBlockMappings(RegistryEvent.MissingMappings<Block> event) {
 		for (Mapping<Block> mapping : event.getMappings()) {
-			switch (mapping.key.toString()) {
-				case "aunis:stargatebase_block":
-					mapping.remap(stargateMilkyWayBaseBlock);
-					break;
-				
-				case "aunis:stargate_member_block":
-					mapping.remap(stargateMilkyWayMemberBlock);
-					break;
-					
-				case "aunis:stargatebase_orlin_block":
-					mapping.remap(stargateOrlinBaseBlock);
-					break;
-					
-				case "aunis:stargatemember_orlin_block":
-					mapping.remap(stargateOrlinMemberBlock);
-					break;
-			}
+			Block newBlock = remapBlock(mapping.key.toString());
+			
+			if (newBlock != null)
+				mapping.remap(newBlock);
 		}
 	}
 	
