@@ -6,7 +6,7 @@ import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
-import mrjake.aunis.stargate.MergeHelper;
+import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
@@ -87,7 +87,7 @@ public class StargateMilkyWayBaseBlock extends Block {
 			world.setBlockState(pos, state);
 					
 			gateTile.updateFacing(facing);
-			gateTile.updateMergeState(MergeHelper.checkBlocks(world, pos), state);
+			gateTile.updateMergeState(StargateMilkyWayMergeHelper.checkBlocks(world, pos, facing), state);
 		}
 		
 		else {
@@ -101,10 +101,6 @@ public class StargateMilkyWayBaseBlock extends Block {
 						
 		if (!world.isRemote) {
 			gateTile.updateMergeState(false, state);
-			
-//			DHDTile linkedDhdTile = gateTile.getLinkedDHD(world);
-//			if (linkedDhdTile != null)
-//				linkedDhdTile.setLinkedGate(null);
 			
 			StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
 			

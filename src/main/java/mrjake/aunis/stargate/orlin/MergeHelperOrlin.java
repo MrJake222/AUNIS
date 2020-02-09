@@ -6,7 +6,7 @@ import java.util.Map;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.stargate.MergeHelper;
+import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -45,7 +45,7 @@ public class MergeHelperOrlin {
 			EnumFacing facing = world.getBlockState(basePos).getValue(AunisProps.FACING_HORIZONTAL);
 			
 			for (BlockPos checkPos : BLOCK_MAP.keySet()) {			
-				IBlockState state = world.getBlockState(MergeHelper.rotateAndGlobal(checkPos, facing, basePos));
+				IBlockState state = world.getBlockState(checkPos.rotate(FacingToRotation.get(facing)).add(basePos));
 								
 				if (state.getBlock() != AunisBlocks.stargateOrlinMemberBlock || state.getValue(AunisProps.ORLIN_VARIANT) != facing) {					
 					return false;
@@ -77,8 +77,8 @@ public class MergeHelperOrlin {
 				else if (variant == EnumFacing.EAST) variant = EnumFacing.NORTH;
 			}
 			
-			checkPos = MergeHelper.rotateAndGlobal(checkPos, facing, basePos);
-			
+			checkPos = checkPos.rotate(FacingToRotation.get(facing)).add(basePos);
+
 			if (world.getBlockState(checkPos).getBlock() == AunisBlocks.stargateOrlinMemberBlock) {
 				IBlockState memberState = world.getBlockState(checkPos);
 				boolean renderblock = memberState.getValue(AunisProps.RENDER_BLOCK);

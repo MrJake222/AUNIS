@@ -71,6 +71,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 	 * Calls closeGate()
 	 * 
 	 * @param sourceTile - Source StargateBaseTile instance
+	 * @param targetOnly When the source gate is broken, don't try to close it.
 	 */
 	public static void closeGatePacket(StargateAbstractBaseTile sourceTile, boolean targetOnly) {
 		if (sourceTile.dialedAddress.size() < 7)

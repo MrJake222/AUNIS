@@ -10,6 +10,7 @@ import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.state.StargateRendererStateBase;
+import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -23,6 +24,7 @@ public abstract class StargateRendererBase {
 	protected World world;
 	protected BlockPos pos;
 	
+	protected EnumFacing facing = EnumFacing.NORTH;
 	protected int horizontalRotation = 0;
 	
 	public StargateRendererBase(World world, BlockPos pos) {
@@ -31,10 +33,11 @@ public abstract class StargateRendererBase {
 	}
 	
 	public void updateFacing(EnumFacing facing) {
-		if ( facing.getAxis().getName() == "x" )
-			horizontalRotation = (int) facing.getOpposite().getHorizontalAngle();
-		else
-			horizontalRotation = (int) facing.getHorizontalAngle();
+		if (facing.getAxis() == EnumFacing.Axis.X)
+			facing = facing.getOpposite();
+		
+		this.facing = facing;
+		this.horizontalRotation = (int) this.facing.getHorizontalAngle();
 	}
 	
 	public int getHorizontalRotation() {
@@ -48,10 +51,12 @@ public abstract class StargateRendererBase {
 		
 		if (shouldRender()) {			
 			applyLightMap(partialTicks);
+//			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 			
 			GlStateManager.pushMatrix();
 			
 			GlStateManager.translate(x, y, z);
+			GlStateManager.scale(getRenderScale(), getRenderScale(), getRenderScale());
 			renderRing(partialTicks);
 			
 			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
@@ -78,6 +83,7 @@ public abstract class StargateRendererBase {
 	
 	protected abstract boolean shouldRender();
 	protected abstract void applyLightMap(double partialTicks);
+	protected abstract double getRenderScale();
 	
 	protected abstract void renderGate();
 	protected abstract void renderRing(double partialTicks);

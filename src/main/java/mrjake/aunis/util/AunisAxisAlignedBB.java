@@ -63,6 +63,14 @@ public class AunisAxisAlignedBB extends AxisAlignedBB {
         return new AunisAxisAlignedBB(d0, d1, d2, d3, d4, d5);
     }
 	
+	public BlockPos getMinBlockPos() {
+		return new BlockPos(minX, minY, minZ);
+	}
+	
+	public BlockPos getMaxBlockPos() {
+		return new BlockPos(maxX, maxY, maxZ);
+	}
+	
 	@SideOnly(Side.CLIENT)
 	public void render(double x, double y, double z) {
 		GlStateManager.pushMatrix();

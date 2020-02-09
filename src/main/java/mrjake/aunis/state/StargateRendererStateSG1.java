@@ -4,8 +4,9 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.MergeHelper;
+import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
+import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -22,8 +23,8 @@ public class StargateRendererStateSG1 extends StargateRendererStateBase {
 			int index = 0;
 			IBlockState state = world.getBlockState(gatePos);
 			
-			for (BlockPos chevPos : MergeHelper.getWithoutLastChevronBlock()) {
-				StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
+			for (BlockPos chevPos : StargateMilkyWayMergeHelper.CHEVRON_BLOCKS) {
+				StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(chevPos.rotate(FacingToRotation.get(state.getValue(AunisProps.FACING_HORIZONTAL))).add(gatePos));
 				
 				if (memberTile != null)
 					memberTile.setLitUp(activeChevrons > index);
@@ -40,8 +41,8 @@ public class StargateRendererStateSG1 extends StargateRendererStateBase {
 		if (AunisConfig.debugConfig.checkGateMerge) {
 			IBlockState state = world.getBlockState(gatePos);
 			
-			BlockPos chevPos = MergeHelper.getLastChevronBlock();
-			StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(MergeHelper.rotateAndGlobal(chevPos, state.getValue(AunisProps.FACING_HORIZONTAL), gatePos));
+			BlockPos chevPos = StargateMilkyWayMergeHelper.CHEVRON_BLOCKS.get(8);
+			StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(chevPos.rotate(FacingToRotation.get(state.getValue(AunisProps.FACING_HORIZONTAL))).add(gatePos));
 				
 			if (memberTile != null)
 				memberTile.setLitUp(isFinalActive);

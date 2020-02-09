@@ -10,7 +10,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.capability.EnergyStorageUncapped;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.MergeHelper;
+import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import net.minecraft.block.state.IBlockState;
@@ -181,8 +181,9 @@ public class StargateGenerator {
 					gatePos = dataPos.add(0, -3, 0);
 					
 					world.setBlockState(gatePos, world.getBlockState(gatePos).withProperty(AunisProps.FACING_HORIZONTAL, facing));
-					MergeHelper.updateChevRingRotation(world, gatePos, facing);
-					MergeHelper.updateChevRingBasePos(world, gatePos, facing);
+//					MergeHelper.updateChevRingRotation(world, gatePos, facing);
+					// TODO Check updateChevRingRotation for Mysterious Page
+					StargateMilkyWayMergeHelper.updateMembersBasePos(world, gatePos, facing);
 					
 					world.setBlockToAir(dataPos);
 					world.setBlockToAir(dataPos.down()); // save block

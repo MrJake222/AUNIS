@@ -27,7 +27,7 @@ import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.MergeHelper;
+import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StargateMilkyWayGuiState;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererStateBase;
@@ -61,6 +61,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implements ITileEntityUpgradeable, ILinkable {
 	public StargateMilkyWayBaseTile() {}
+	
+	private static final int PATTERN_VERSION = 6;
+	private int currentPatternVersion = PATTERN_VERSION;
 	
 	private StargateUpgradeRenderer upgradeRenderer;
 	private UpgradeRendererState upgradeRendererState;
@@ -97,7 +100,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	
 	@Override
 	protected AunisAxisAlignedBB getHorizonTeleportBox() {
-		return new AunisAxisAlignedBB(-3.5, 1.5, -0.1, 3.5, 8.6, 0.2);
+		return new AunisAxisAlignedBB(-2.5, 1.5, -0.1, 2.5, 6.6, 0.2);
 	}
 	
 	@Override
@@ -156,17 +159,16 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	/**
 	 * Checks gate's merge state
 	 * 
-	 * @param isMerged - True if gate's multiblock structure is valid
-	 * @param state State of base block(when destroyed we can't get it from world). If null, get it from the world
+	 * @param shouldBeMerged - True if gate's multiblock structure is valid
+	 * @param state State of the base block.
 	 */
-	public void updateMergeState(boolean isMerged, @Nullable IBlockState state) {		
-		this.isMerged = isMerged;
+	public void updateMergeState(boolean shouldBeMerged, @Nullable IBlockState state) {		
+		this.isMerged = shouldBeMerged;
 		
-		if (!isMerged) {
+		if (!shouldBeMerged) {
 			if (isLinked()) {
 				getLinkedDHD(world).setLinkedGate(null);
-				
-				linkedDHD = null;
+				setLinkedDHD(null);
 			}
 			
 			if (stargateState.engaged()) {
@@ -186,12 +188,18 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		}
 		
 		IBlockState actualState = world.getBlockState(pos);
+		EnumFacing baseFacing;
 		
 		// When the block is destroyed, there will be air in this place and we cannot set it's block state
-		if (actualState.getBlock() == AunisBlocks.stargateMilkyWayBaseBlock)
-			world.setBlockState(pos, actualState.withProperty(AunisProps.RENDER_BLOCK, !isMerged), 2);
+		if (StargateMilkyWayMergeHelper.BASE_MATCHER.apply(actualState)) {
+			baseFacing = actualState.getValue(AunisProps.FACING_HORIZONTAL);
+			world.setBlockState(pos, actualState.withProperty(AunisProps.RENDER_BLOCK, !shouldBeMerged), 2);
+		}
 		
-		MergeHelper.updateChevRingMergeState(world, pos, (state != null) ? state : actualState, isMerged);
+		else
+			baseFacing = state.getValue(AunisProps.FACING_HORIZONTAL);
+		
+		StargateMilkyWayMergeHelper.updateMembersMergeStatus(world, pos, baseFacing, shouldBeMerged);
 		
 		markDirty();
 	}
@@ -230,7 +238,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		
 		markDirty();
 	}
-	
+		
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {		
 		if (isLinked())
@@ -251,6 +259,8 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		
 		if (spinDirection != null)
 			compound.setInteger("lastSpinDirection", spinDirection.id);
+		
+		compound.setInteger("patternVersion", PATTERN_VERSION);
 		
 		return super.writeToNBT(compound);
 	}
@@ -286,6 +296,11 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 			targetSymbol = null;
 		
 		spinDirection = EnumSpinDirection.valueOf(compound.getInteger("lastSpinDirection"));
+		
+		if (compound.hasKey("patternVersion"))
+			currentPatternVersion = compound.getInteger("patternVersion");
+		else
+			currentPatternVersion = 0;
 		
 		super.readFromNBT(compound);
 	}
@@ -329,11 +344,23 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		return pos.offset(EnumFacing.UP, 4);
 	}
 	
+	private boolean firstTick = true;
+	
 	@Override
 	public void update() {
 		super.update();
 		
 		if (!world.isRemote) {
+			if (firstTick) {
+				firstTick = false;
+				
+				// Doing this in onLoad causes ConcurrentModificationException
+				if (currentPatternVersion != PATTERN_VERSION && isMerged) {
+					StargateMilkyWayMergeHelper.convertPattern(world, pos, facing);
+					updateMergeState(StargateMilkyWayMergeHelper.checkBlocks(world, pos, facing), null);
+				}
+			}
+			
 			if (clearingButtons) {
 				if (world.getTotalWorldTime()-waitForClear >= clearDelay) { 				
 					if (isLinked())
@@ -383,20 +410,20 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		
 	@Override
 	protected AunisAxisAlignedBB getHorizonKillingBox() {
-		return new AunisAxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5);
+		return new AunisAxisAlignedBB(-1, 3, 0, 1, 5.5, 5);
 	}
 	
 	@Override
 	protected int getHorizonSegmentCount() {
-		return 6;
+		return 5;
 	}
 	
 	@Override
 	protected  List<AunisAxisAlignedBB> getGateVaporizingBoxes() {
 		return Arrays.asList(
-				new AunisAxisAlignedBB(-2.5, 2.0, -0.5, 2.5, 9, 0.5),
-				new AunisAxisAlignedBB(-3.5, 2.0, -0.5, -2.5, 8, 0.5),
-				new AunisAxisAlignedBB(3.5, 2.0, -0.5, 2.5, 8, 0.5)
+				new AunisAxisAlignedBB(-1.5, 2.0, -0.5, 1.5, 7, 0.5),
+				new AunisAxisAlignedBB(-2.5, 2.0, -0.5, -1.5, 6, 0.5),
+				new AunisAxisAlignedBB(2.5, 2.0, -0.5, 1.5, 6, 0.5)
 			);
 	}
 	
@@ -425,7 +452,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	
 	@Override
 	protected Vec3d getRenderTranslaton() {
-		return new Vec3d(0.50, GATE_DIAMETER/2, 0.50);
+		return new Vec3d(0.50, GATE_DIAMETER/2-0.95, 0.50);
 	}
 	
 	public void addComputerActivation(long time, boolean finalChevron) {

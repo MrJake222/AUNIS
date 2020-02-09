@@ -43,19 +43,19 @@ public class StargateRendererOrlin extends StargateRendererBase {
 	protected void renderGate() {
 		Model orlinModel = ModelLoader.getModel(EnumModel.ORLIN_GATE);
 				
-		if (orlinModel != null) {
-			GlStateManager.pushMatrix();
-			GlStateManager.scale(GATE_SCALE, GATE_SCALE, GATE_SCALE);
-			
+		if (orlinModel != null) {			
 			EnumModel.ORLIN_GATE.bindTexture();
 			orlinModel.render();
-			
-			GlStateManager.popMatrix();
 		}
 	}
 
 	@Override
 	protected void applyLightMap(double partialTicks) {}
+	
+	@Override
+	protected double getRenderScale() {
+		return GATE_SCALE;
+	}
 	
 	@Override
 	protected void renderRing(double partialTicks) {}
@@ -67,9 +67,7 @@ public class StargateRendererOrlin extends StargateRendererBase {
 	public void clearChevrons(Long stateChange) {}
 	
 	@Override
-	protected void renderKawoosh(double partialTicks) {		
-		GlStateManager.scale(GATE_SCALE, GATE_SCALE, GATE_SCALE);
-		
+	protected void renderKawoosh(double partialTicks) {				
 		GlStateManager.translate(0, 3.80873f, -0.204347f);
 		GlStateManager.scale(0.7f, 0.7f, 0.7f);
 		

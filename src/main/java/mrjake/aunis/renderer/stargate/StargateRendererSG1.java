@@ -16,11 +16,12 @@ import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.MergeHelper;
+import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.StargateRendererStateSG1;
 import mrjake.aunis.state.StargateSpinStateRequest;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
+import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
@@ -77,21 +78,28 @@ public class StargateRendererSG1 extends StargateRendererBase {
 	
 	@Override
 	protected void applyLightMap(double partialTicks) {
+		final int chevronCount = 6;
 		int skyLight = 0;
 		int blockLight = 0;
 		
-		for (int i=0; i<chevronBlocks.size(); i++) {
-			BlockPos blockPos = MergeHelper.rotateAndGlobal(chevronBlocks.get(i), world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL), pos); //((int) world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL).getHorizontalAngle(), pos);
+		for (int i=0; i<chevronCount; i++) {
+			BlockPos blockPos = StargateMilkyWayMergeHelper.CHEVRON_BLOCKS.get(i).rotate(FacingToRotation.get(facing)).add(pos);
 			
-			skyLight += world.getLightFor(EnumSkyBlock.SKY, blockPos);// - subt;
+			skyLight += world.getLightFor(EnumSkyBlock.SKY, blockPos);
 			blockLight += world.getLightFor(EnumSkyBlock.BLOCK, blockPos);
 		}
 		
-		skyLight /= 4;
-		blockLight /= 4;
+		skyLight /= chevronCount;
+		blockLight /= chevronCount;
 		
-		int clamped = MathHelper.clamp(skyLight+blockLight, 0, 15);
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, blockLight * 16, clamped * 16);
+//		int clamped = MathHelper.clamp(skyLight+blockLight, 0, 15);
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, blockLight * 16, skyLight * 16);
+//		Aunis.info("bl: " + blockLight + " sky: " + skyLight);
+	}
+	
+	@Override
+	protected double getRenderScale() {
+		return 0.75;
 	}
 	
 	@Override

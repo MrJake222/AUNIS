@@ -8,10 +8,11 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
-import mrjake.aunis.stargate.MergeHelper;
+import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
+import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.SoundType;
@@ -191,9 +192,12 @@ public class StargateMilkyWayMemberBlock extends Block {
 		Block heldBlock = Block.getBlockFromItem(heldItemStack.getItem());
 		
 		StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(pos);
-//		StargateBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
+		StargateMilkyWayBaseTile gateTile = StargateMilkyWayMergeHelper.findBaseTile(world, pos, state.getValue(AunisProps.FACING_HORIZONTAL));
 		
 		if (!world.isRemote) {	
+			BlockPos vec = pos.subtract(gateTile.getPos());
+			Aunis.info("new BlockPos(" + vec.getX() + ", " + vec.getY() + ", " + vec.getZ() + "),");
+
 			IBlockState camoBlockState = memberTile.getCamoState();
 			
 			if (heldItem == Item.getItemFromBlock(AunisBlocks.stargateMilkyWayMemberBlock) ||
@@ -326,17 +330,18 @@ public class StargateMilkyWayMemberBlock extends Block {
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		if (!world.isRemote) {
+			EnumFacing facing = placer.getHorizontalFacing().getOpposite();
+			
 			state = state.withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.byId((stack.getMetadata() >> 3) & 0x01))
 					.withProperty(AunisProps.RENDER_BLOCK, true)
-					.withProperty(AunisProps.FACING_HORIZONTAL, placer.getHorizontalFacing().getOpposite());
+					.withProperty(AunisProps.FACING_HORIZONTAL, facing);
 		
 			world.setBlockState(pos, state); 
 			
-//			StargateMemberTile memberTile = (StargateMemberTile) world.getTileEntity(pos);
-			StargateMilkyWayBaseTile gateTile = MergeHelper.findBaseTile(world, pos, state);
+			StargateMilkyWayBaseTile gateTile = StargateMilkyWayMergeHelper.findBaseTile(world, pos, facing);
 							
 			if (gateTile != null && !gateTile.isMerged())
-				gateTile.updateMergeState(MergeHelper.checkBlocks(world, gateTile.getPos()), null);
+				gateTile.updateMergeState(StargateMilkyWayMergeHelper.checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), null);
 		}
 	}
 	
