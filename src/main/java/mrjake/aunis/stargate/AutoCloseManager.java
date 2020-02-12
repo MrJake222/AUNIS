@@ -1,6 +1,6 @@
 package mrjake.aunis.stargate;
 
-import mrjake.aunis.AunisConfig;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;

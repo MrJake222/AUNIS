@@ -73,14 +73,11 @@ public class AunisAxisAlignedBB extends AxisAlignedBB {
 	
 	@SideOnly(Side.CLIENT)
 	public void render(double x, double y, double z) {
-		GlStateManager.pushMatrix();
 		GlStateManager.color(1.0f, 0, 0);
 		GlStateManager.disableTexture2D();
 		GlStateManager.disableLighting();
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
-		
-		GlStateManager.translate(x, y, z);
-		
+				
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK,GL11.GL_LINE);
 		GlStateManager.glBegin(GL11.GL_QUADS);
 		
@@ -126,6 +123,5 @@ public class AunisAxisAlignedBB extends AxisAlignedBB {
 		GlStateManager.color(1, 1, 1, 1);
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableLighting();
-		GlStateManager.popMatrix();
 	}
 }

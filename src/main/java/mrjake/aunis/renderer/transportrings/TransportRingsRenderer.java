@@ -3,13 +3,15 @@ package mrjake.aunis.renderer.transportrings;
 import java.util.ArrayList;
 import java.util.List;
 
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.state.TransportRingsRendererState;
-import mrjake.aunis.tileentity.TransportRingsTile;
+import mrjake.aunis.tesr.RendererInterface;
+import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.world.World;
 
-public class TransportRingsRenderer {
+public class TransportRingsRenderer implements RendererInterface {
 
 	public static final int RING_COUNT = 5; 
 	public static final int INTERVAL_UPRISING = 5; 
@@ -18,10 +20,12 @@ public class TransportRingsRenderer {
 	public static final double ANIMATION_SPEED_DIVISOR = 2.7; 
 	
 	private World world;
+	private AunisAxisAlignedBB localTeleportBox;
 	private List<Ring> rings;
 		
-	public TransportRingsRenderer(TransportRingsTile te) {
-		this.world = te.getWorld();
+	public TransportRingsRenderer(World world, AunisAxisAlignedBB localTeleportBox) {
+		this.world = world;
+		this.localTeleportBox = localTeleportBox;
 		
 		rings = new ArrayList<>();
 		for (int i=0; i<RING_COUNT; i++) {
@@ -35,13 +39,16 @@ public class TransportRingsRenderer {
 	private int lastRingAnimated;	
 	private long lastTick;	
 		
-	public void render(double x, double y, double z, double partialTicks) {
+	@Override
+	public void render(double x, double y, double z, float partialTicks) {		
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
-		
 		GlStateManager.pushMatrix();
-		GlStateManager.translate(x, y+1.35, z);
-//		GlStateManager.translate(x+0.50, y+2.2, z);
-
+		GlStateManager.translate(x, y, z);
+		
+		if (AunisConfig.debugConfig.renderBoundingBoxes)
+			localTeleportBox.render(x, y, z);
+		
+		GlStateManager.translate(0.50, 0.63271/2 + 1.35, 0.50);
 		GlStateManager.scale(0.5, 0.5, 0.5);
 		
 		for (Ring ring : rings)

@@ -1,6 +1,6 @@
 package mrjake.aunis.capability;
 
-import mrjake.aunis.AunisConfig;
+import mrjake.aunis.config.AunisConfig;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;

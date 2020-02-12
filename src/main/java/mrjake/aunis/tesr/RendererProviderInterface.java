@@ -9,16 +9,13 @@ import net.minecraft.tileentity.TileEntity;
  * 
  * @author MrJake222
  */
-public interface SpecialRendererProviderInterface {
+public interface RendererProviderInterface {
 
 	/**
-	 * Main render function.
+	 * Get the renderer class for this {@link RendererProviderInterface}.
 	 * 
-	 * @param x X-coord.
-	 * @param y Y-coord.
-	 * @param z Z-coord.
-	 * @param partialTicks Partial ticks.
+	 * @return {@link RendererInterface} instance.
 	 */
-	void render(double x, double y, double z, float partialTicks);
+	abstract RendererInterface getRenderer();
 
 }

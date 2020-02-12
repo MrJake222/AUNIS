@@ -1,7 +1,8 @@
 package mrjake.aunis.renderer;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.tesr.SpecialRendererProviderInterface;
+import mrjake.aunis.tesr.RendererProviderInterface;
+import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 
@@ -10,11 +11,15 @@ public class SpecialRenderer extends TileEntitySpecialRenderer<TileEntity> {
 	@Override
 	public void render(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		try {
-			((SpecialRendererProviderInterface) te).render(x, y, z, partialTicks);
+			((RendererProviderInterface) te).getRenderer().render(x, y, z, partialTicks);
+			
+			if (te instanceof ITileEntityUpgradeable) {
+				((ITileEntityUpgradeable) te).getUpgradeRenderer().render(x, y, z, partialTicks);
+			}
 		}
 		
 		catch (ClassCastException e) {
-			Aunis.info("SpecialRendererProviderInterface is not implemented on " + te.getClass().getName());
+			Aunis.info("RendererProviderInterface is not implemented on " + te.getClass().getName());
 		}
 	}
 }

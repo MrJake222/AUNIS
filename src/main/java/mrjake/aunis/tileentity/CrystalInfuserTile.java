@@ -1,8 +1,8 @@
 package mrjake.aunis.tileentity;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.capability.EnergyStorageSerializable;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
@@ -11,7 +11,8 @@ import mrjake.aunis.state.CrystalInfuserRendererState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.tesr.SpecialRendererProviderInterface;
+import mrjake.aunis.tesr.RendererInterface;
+import mrjake.aunis.tesr.RendererProviderInterface;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -26,7 +27,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class CrystalInfuserTile extends TileEntity implements ITickable, SpecialRendererProviderInterface, StateProviderInterface {
+public class CrystalInfuserTile extends TileEntity implements ITickable, RendererProviderInterface, StateProviderInterface {
 		
 	private int ticksBufferEmpty = 0;
 	
@@ -129,13 +130,9 @@ public class CrystalInfuserTile extends TileEntity implements ITickable, Special
 	private CrystalInfuserRendererState rendererState = new CrystalInfuserRendererState();
 	
 	@Override
-	public void render(double x, double y, double z, float partialTicks) {
-		x += 0.50;
-		z += 0.50;
-		
-		renderer.render(x, y, z, partialTicks);
-	}
-	
+	public RendererInterface getRenderer() {
+		return renderer;
+	}	
 	
 	// ------------------------------------------------------------------------
 	// Power buffer

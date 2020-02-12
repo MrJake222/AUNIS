@@ -17,10 +17,9 @@ import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
+import mrjake.aunis.state.StargateMilkyWayRendererState;
 import mrjake.aunis.state.StargateRendererStateBase;
-import mrjake.aunis.state.StargateRendererStateSG1;
 import mrjake.aunis.state.StargateSpinStateRequest;
-import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -30,44 +29,44 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.World;
 
-public class StargateRendererSG1 extends StargateRendererBase {
+public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 	
 	private static final Vec3d RING_LOC = new Vec3d(0.0, -0.122333, -0.000597);
 		
-	public StargateRendererSG1(StargateMilkyWayBaseTile te) {
-		super(te.getWorld(), te.getPos());
+	public StargateMilkyWayRenderer(World world, BlockPos pos) {
+		super(world, pos);
 		
 		for (int i=0; i<9; i++)
 			chevronTextureList.add(CHEVRON_TEXTURE_BASE + "0.png");
 		
-		this.rendererState = new StargateRendererStateSG1();
 		// Load chevron textures
 //		for (int i=0; i<=10; i++)
 //			ModelLoader.getTexture("stargate/chevron/chevron" + i + ".png");
 	}
 	
-	private StargateRendererStateSG1 getRendererStateSG1() {
-		return (StargateRendererStateSG1) rendererState;
+	private StargateMilkyWayRendererState getRendererStateMilkyWay() {
+		return (StargateMilkyWayRendererState) rendererState;
 	}
 	
 	public void setCurrentSymbol(EnumSymbol symbol) {
-		getRendererStateSG1().ringCurrentSymbol = symbol;
+		getRendererStateMilkyWay().ringCurrentSymbol = symbol;
 	}
 	
 	@Override
 	public void setRendererState(StargateRendererStateBase state) {		
 		super.setRendererState(state);
 		
-		ringAngularRotation = getRendererStateSG1().ringCurrentSymbol.angle;
+		ringAngularRotation = getRendererStateMilkyWay().ringCurrentSymbol.angle;
 		
 		setActiveChevrons(state.getActiveChevrons(), state.isFinalActive());
 		
-		ringSpinHelper = new StargateRingSpinHelper(world, pos, this, getRendererStateSG1().spinState);
+		ringSpinHelper = new StargateRingSpinHelper(world, pos, this, getRendererStateMilkyWay().spinState);
 		
 		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, pos, state.doEventHorizonRender);
 		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.RING_ROLL_START, pos, false);
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.RING_ROLL_LOOP, pos, getRendererStateSG1().spinState.isSpinning);
+		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.RING_ROLL_LOOP, pos, getRendererStateMilkyWay().spinState.isSpinning);
 	}
 	
 	public static List<BlockPos> chevronBlocks = Arrays.asList(
@@ -83,7 +82,7 @@ public class StargateRendererSG1 extends StargateRendererBase {
 		int blockLight = 0;
 		
 		for (int i=0; i<chevronCount; i++) {
-			BlockPos blockPos = StargateMilkyWayMergeHelper.CHEVRON_BLOCKS.get(i).rotate(FacingToRotation.get(facing)).add(pos);
+			BlockPos blockPos = StargateMilkyWayMergeHelper.getChevronBlocks().get(i).rotate(FacingToRotation.get(facing)).add(pos);
 			
 			skyLight += world.getLightFor(EnumSkyBlock.SKY, blockPos);
 			blockLight += world.getLightFor(EnumSkyBlock.BLOCK, blockPos);
@@ -97,9 +96,16 @@ public class StargateRendererSG1 extends StargateRendererBase {
 //		Aunis.info("bl: " + blockLight + " sky: " + skyLight);
 	}
 	
+	private static final float GATE_DIAMETER = 10.1815f;
+	
 	@Override
 	protected double getRenderScale() {
-		return 0.75;
+		return getRendererStateMilkyWay().stargateSize.renderScale;
+	}
+	
+	@Override
+	protected Vec3d getRenderTranslation() {
+		return new Vec3d(0.50, GATE_DIAMETER/2 + getRendererStateMilkyWay().stargateSize.renderTranslationY, 0.50);
 	}
 	
 	@Override
@@ -109,7 +115,7 @@ public class StargateRendererSG1 extends StargateRendererBase {
 		if (state.getBlock() != AunisBlocks.stargateMilkyWayBaseBlock)
 			return false;
 		
-		return (!state.getValue(AunisProps.RENDER_BLOCK));
+		return (!state.getValue(AunisProps.RENDER_BLOCK)) && rendererState != null;
 	}
 	
 	@Override
@@ -127,7 +133,7 @@ public class StargateRendererSG1 extends StargateRendererBase {
 	
 	private StargateRingSpinHelper getRingSpinHelper() {
 		if (ringSpinHelper == null)
-			ringSpinHelper = new StargateRingSpinHelper(world, pos, this, getRendererStateSG1().spinState);
+			ringSpinHelper = new StargateRingSpinHelper(world, pos, this, getRendererStateMilkyWay().spinState);
 		
 		return ringSpinHelper;
 	}
@@ -138,14 +144,14 @@ public class StargateRendererSG1 extends StargateRendererBase {
 		if (spin) {
 			AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.RING_ROLL_START, pos, true);
 			
-			if (getRendererStateSG1().spinState.isSpinning)
+			if (getRendererStateMilkyWay().spinState.isSpinning)
 				ringAngularRotation = getRingSpinHelper().spin(0);
 			
-			getRendererStateSG1().spinState.direction = stateRequest.direction;
-			getRendererStateSG1().spinState.targetSymbol = stateRequest.targetSymbol;
-			getRendererStateSG1().spinState.finalChevron = stateRequest.lock;
+			getRendererStateMilkyWay().spinState.direction = stateRequest.direction;
+			getRendererStateMilkyWay().spinState.targetSymbol = stateRequest.targetSymbol;
+			getRendererStateMilkyWay().spinState.finalChevron = stateRequest.lock;
 			
-			getRingSpinHelper().requestStart(ringAngularRotation, getRendererStateSG1().spinState.direction, stateRequest.targetSymbol, stateRequest.lock, false);		
+			getRingSpinHelper().requestStart(ringAngularRotation, getRendererStateMilkyWay().spinState.direction, stateRequest.targetSymbol, stateRequest.lock, false);		
 		}
 		
 		else {
@@ -175,7 +181,7 @@ public class StargateRendererSG1 extends StargateRendererBase {
 		waitForFinalMoveStart = finalMoveStart;
 		
 		waitForFinalMove = true;
-		getRendererStateSG1().spinState.finalChevron = finalChevron;
+		getRendererStateMilkyWay().spinState.finalChevron = finalChevron;
 	}
 	
 	public void addComputerActivation(long finalMoveStart, boolean finalChevron) {		
@@ -210,14 +216,14 @@ public class StargateRendererSG1 extends StargateRendererBase {
 				
 		if (ringModel != null) {
 			
-			if (getRendererStateSG1().spinState.isSpinning) {				
+			if (getRendererStateMilkyWay().spinState.isSpinning) {				
 				ringAngularRotation = (float) (getRingSpinHelper().spin(partialTicks) % 360);
 			}
 			
-			if (waitForFinalMove && (world.getTotalWorldTime() - waitForFinalMoveStart) >= (getRendererStateSG1().spinState.finalChevron ? 20 : 15)) {
+			if (waitForFinalMove && (world.getTotalWorldTime() - waitForFinalMoveStart) >= (getRendererStateMilkyWay().spinState.finalChevron ? 20 : 15)) {
 				waitForFinalMove = false;
 								
-				long start = waitForFinalMoveStart + (getRendererStateSG1().spinState.finalChevron ? 20 : 15);
+				long start = waitForFinalMoveStart + (getRendererStateMilkyWay().spinState.finalChevron ? 20 : 15);
 				moveFinalChevron(start, true);
 			}
 			

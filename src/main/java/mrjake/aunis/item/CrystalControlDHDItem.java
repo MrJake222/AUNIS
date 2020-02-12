@@ -4,9 +4,9 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.capability.CrystalControlDHDCapabilityProvider;
 import mrjake.aunis.capability.EnergyStorageUncapped;
+import mrjake.aunis.config.AunisConfig;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;

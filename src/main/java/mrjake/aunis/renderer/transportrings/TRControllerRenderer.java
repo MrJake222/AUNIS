@@ -6,6 +6,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
+import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.tileentity.TRControllerTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
@@ -13,7 +14,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class TRControllerRenderer {
+public class TRControllerRenderer implements RendererInterface {
 
 	private EnumFacing facing;
 	
@@ -68,6 +69,7 @@ public class TRControllerRenderer {
 		}
 	}
 	
+	@Override
 	public void render(double x, double y, double z, float partialTicks) {
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);

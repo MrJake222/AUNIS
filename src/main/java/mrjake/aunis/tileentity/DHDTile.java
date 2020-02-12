@@ -14,11 +14,12 @@ import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.state.DHDActivateButtonState;
 import mrjake.aunis.state.DHDRendererState;
+import mrjake.aunis.state.State;
+import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.UpgradeRendererState;
-import mrjake.aunis.state.StateProviderInterface;
-import mrjake.aunis.state.State;
-import mrjake.aunis.tesr.SpecialRendererProviderInterface;
+import mrjake.aunis.tesr.RendererInterface;
+import mrjake.aunis.tesr.RendererProviderInterface;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.upgrade.DHDUpgradeRenderer;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
@@ -33,12 +34,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class DHDTile extends TileEntity implements SpecialRendererProviderInterface, ITileEntityUpgradeable, ILinkable, StateProviderInterface {
+public class DHDTile extends TileEntity implements RendererProviderInterface, ITileEntityUpgradeable, ILinkable, StateProviderInterface {
 	
 	private DHDRenderer renderer;
 	private DHDRendererState rendererState;
@@ -48,18 +47,16 @@ public class DHDTile extends TileEntity implements SpecialRendererProviderInterf
 	
 	private BlockPos linkedGate = null;
 	
-	@SideOnly(Side.CLIENT)
 	@Override
-	public void render(double x, double y, double z, float partialTicks) {
-		getDHDRenderer().render(x, y, z, partialTicks);
-		getUpgradeRenderer().render(x, y, z, partialTicks);
-	}
-	
-	public DHDRenderer getDHDRenderer() {
+	public RendererInterface getRenderer() {
 		if (renderer == null)
 			renderer = new DHDRenderer(this);
 		
 		return renderer;
+	}
+	
+	public DHDRenderer getDHDRenderer() {
+		return (DHDRenderer) getRenderer();
 	}
 	
 	public DHDRendererState getDHDRendererState() {

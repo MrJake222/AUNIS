@@ -13,6 +13,7 @@ import mrjake.aunis.renderer.ItemRenderer;
 import mrjake.aunis.renderer.SpinHelper;
 import mrjake.aunis.state.CrystalInfuserRendererState;
 import mrjake.aunis.state.SpinState;
+import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
@@ -20,7 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 
-public class CrystalInfuserRenderer {
+public class CrystalInfuserRenderer implements RendererInterface {
 
 	private World world;
 	private BlockPos pos;
@@ -39,7 +40,11 @@ public class CrystalInfuserRenderer {
 		itemRenderer = new ItemRenderer(renderedItemStack);
 	}
 	
-	public void render(double x, double y, double z, double partialTicks) {
+	@Override
+	public void render(double x, double y, double z, float partialTicks) {
+		x += 0.50;
+		z += 0.50;
+		
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
 		

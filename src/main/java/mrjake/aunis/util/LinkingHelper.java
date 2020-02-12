@@ -3,7 +3,7 @@ package mrjake.aunis.util;
 import javax.annotation.Nullable;
 
 import li.cil.oc.api.event.RackMountableRenderEvent.TileEntity;
-import mrjake.aunis.AunisConfig;
+import mrjake.aunis.config.AunisConfig;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

@@ -1,15 +1,18 @@
 package mrjake.aunis.renderer.stargate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.OBJLoader.ModelLoader;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.state.StargateRendererStateBase;
+import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
@@ -17,27 +20,35 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public abstract class StargateRendererBase {
+public abstract class StargateAbstractRenderer implements RendererInterface {
 	
 	protected World world;
-	protected BlockPos pos;
-	
+	protected BlockPos pos;	
 	protected EnumFacing facing = EnumFacing.NORTH;
 	protected int horizontalRotation = 0;
 	
-	public StargateRendererBase(World world, BlockPos pos) {
+	private AunisAxisAlignedBB eventHorizonBox;
+	private List<AunisAxisAlignedBB> localKillingBoxes;
+	private List<AunisAxisAlignedBB> localInnerBlockBoxes;
+	
+	public StargateAbstractRenderer(World world, BlockPos pos) {
 		this.world = world;
 		this.pos = pos;
 	}
 	
-	public void updateFacing(EnumFacing facing) {
+	public void update(EnumFacing facing, AunisAxisAlignedBB eventHorizonBox, List<AunisAxisAlignedBB> localKillingBoxes, List<AunisAxisAlignedBB> localInnerBlockBoxes) {
 		if (facing.getAxis() == EnumFacing.Axis.X)
 			facing = facing.getOpposite();
 		
 		this.facing = facing;
 		this.horizontalRotation = (int) this.facing.getHorizontalAngle();
+		
+		this.eventHorizonBox = eventHorizonBox;
+		this.localKillingBoxes = localKillingBoxes;
+		this.localInnerBlockBoxes = localInnerBlockBoxes;
 	}
 	
 	public int getHorizontalRotation() {
@@ -47,16 +58,33 @@ public abstract class StargateRendererBase {
 	// ---------------------------------------------------------------------------------------
 	// Render
 	
-	public final void render(double x, double y, double z, double partialTicks) {
+	@Override
+	public void render(double x, double y, double z, float partialTicks) {
 		
-		if (shouldRender()) {			
+		if (shouldRender()) {	
 			applyLightMap(partialTicks);
 //			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 			
 			GlStateManager.pushMatrix();
-			
 			GlStateManager.translate(x, y, z);
+			
+			if (AunisConfig.debugConfig.renderBoundingBoxes || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
+				eventHorizonBox.render(x, y, z);
+				
+				int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? localKillingBoxes.size() : rendererState.horizonSegments;
+
+				for (int i=0; i<segments; i++) {
+					localKillingBoxes.get(i).render(x, y, z);
+				}
+							
+				for (AunisAxisAlignedBB b : localInnerBlockBoxes)
+					b.render(x, y, z);
+			}
+					
+			Vec3d vec = getRenderTranslation();
+			GlStateManager.translate(vec.x, vec.y, vec.z);			
 			GlStateManager.scale(getRenderScale(), getRenderScale(), getRenderScale());
+			
 			renderRing(partialTicks);
 			
 			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
@@ -84,6 +112,7 @@ public abstract class StargateRendererBase {
 	protected abstract boolean shouldRender();
 	protected abstract void applyLightMap(double partialTicks);
 	protected abstract double getRenderScale();
+	protected abstract Vec3d getRenderTranslation();
 	
 	protected abstract void renderGate();
 	protected abstract void renderRing(double partialTicks);

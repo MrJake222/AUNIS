@@ -17,12 +17,13 @@ import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.math.Vec3d;
 
-public class StargateRendererOrlin extends StargateRendererBase {
+public class StargateOrlinRenderer extends StargateAbstractRenderer {
 	
 	public static final float GATE_SCALE = 0.43f;
 		
-	public StargateRendererOrlin(StargateOrlinBaseTile te) {
+	public StargateOrlinRenderer(StargateOrlinBaseTile te) {
 		super(te.getWorld(), te.getPos());
 		
 		this.rendererState = new StargateRendererStateBase(); 
@@ -55,6 +56,11 @@ public class StargateRendererOrlin extends StargateRendererBase {
 	@Override
 	protected double getRenderScale() {
 		return GATE_SCALE;
+	}
+	
+	@Override
+	protected Vec3d getRenderTranslation() {
+		return new Vec3d(0.5, 0, 0.5);
 	}
 	
 	@Override

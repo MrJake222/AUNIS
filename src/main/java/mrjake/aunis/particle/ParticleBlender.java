@@ -1,6 +1,6 @@
 package mrjake.aunis.particle;
 
-import mrjake.aunis.renderer.stargate.StargateRendererOrlin;
+import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.util.math.BlockPos;
@@ -25,8 +25,8 @@ public abstract class ParticleBlender {
 	private RandomizeInterface randomize;
 	
 	public ParticleBlender(float x, float y, float z, int moduloTicks, int moduloTicksSlower, float motionX, float motionZ, boolean falling, RandomizeInterface randomize) {
-		this.pos = new SimpleVector(x * StargateRendererOrlin.GATE_SCALE, -y * StargateRendererOrlin.GATE_SCALE);
-		this.y = z * StargateRendererOrlin.GATE_SCALE;
+		this.pos = new SimpleVector(x * StargateOrlinRenderer.GATE_SCALE, -y * StargateOrlinRenderer.GATE_SCALE);
+		this.y = z * StargateOrlinRenderer.GATE_SCALE;
 		
 		this.moduloTicks = moduloTicks;
 		this.moduloTicksSlower = moduloTicksSlower;

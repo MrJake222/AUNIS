@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.gui.RingsGUI;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -25,7 +25,8 @@ import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.TransportRingsGuiState;
 import mrjake.aunis.state.TransportRingsRendererState;
 import mrjake.aunis.state.TransportRingsStartAnimationRequest;
-import mrjake.aunis.tesr.SpecialRendererProviderInterface;
+import mrjake.aunis.tesr.RendererInterface;
+import mrjake.aunis.tesr.RendererProviderInterface;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.transportrings.TransportRings;
@@ -49,7 +50,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TransportRingsTile extends TileEntity implements ITickable, SpecialRendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable {
+public class TransportRingsTile extends TileEntity implements ITickable, RendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable {
 	
 	// ---------------------------------------------------------------------------------
 	// Ticking and loading
@@ -82,7 +83,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 		}
 		
 		else {
-			renderer = new TransportRingsRenderer(this);
+			renderer = new TransportRingsRenderer(world, LOCAL_TELEPORT_BOX);
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
 		}
 	}
@@ -548,15 +549,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Special
 	TransportRingsRendererState rendererState = new TransportRingsRendererState();
 	
 	@Override
-	public void render(double x, double y, double z, float partialTicks) {
-		if (AunisConfig.debugConfig.renderBoundingBoxes)
-			LOCAL_TELEPORT_BOX.render(x, y, z);
-		
-		x += 0.50;
-		y += 0.63271 / 2;
-		z += 0.50;
-				
-		renderer.render(x, y, z, partialTicks);
+	public RendererInterface getRenderer() {
+		return renderer;
 	}
 	
 	@Override

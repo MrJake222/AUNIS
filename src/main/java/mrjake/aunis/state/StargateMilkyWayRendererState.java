@@ -1,8 +1,9 @@
 package mrjake.aunis.state;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
@@ -11,8 +12,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class StargateRendererStateSG1 extends StargateRendererStateBase {
-	
+public class StargateMilkyWayRendererState extends StargateRendererStateBase {
+
 	// Chevrons
 	
 	@Override
@@ -23,7 +24,7 @@ public class StargateRendererStateSG1 extends StargateRendererStateBase {
 			int index = 0;
 			IBlockState state = world.getBlockState(gatePos);
 			
-			for (BlockPos chevPos : StargateMilkyWayMergeHelper.CHEVRON_BLOCKS) {
+			for (BlockPos chevPos : StargateMilkyWayMergeHelper.getChevronBlocks()) {
 				StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(chevPos.rotate(FacingToRotation.get(state.getValue(AunisProps.FACING_HORIZONTAL))).add(gatePos));
 				
 				if (memberTile != null)
@@ -41,7 +42,7 @@ public class StargateRendererStateSG1 extends StargateRendererStateBase {
 		if (AunisConfig.debugConfig.checkGateMerge) {
 			IBlockState state = world.getBlockState(gatePos);
 			
-			BlockPos chevPos = StargateMilkyWayMergeHelper.CHEVRON_BLOCKS.get(8);
+			BlockPos chevPos = StargateMilkyWayMergeHelper.getChevronBlocks().get(8);
 			StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(chevPos.rotate(FacingToRotation.get(state.getValue(AunisProps.FACING_HORIZONTAL))).add(gatePos));
 				
 			if (memberTile != null)
@@ -53,6 +54,9 @@ public class StargateRendererStateSG1 extends StargateRendererStateBase {
 	public EnumSymbol ringCurrentSymbol = EnumSymbol.ORIGIN;
 	public StargateSpinState spinState = new StargateSpinState();
 	
+	// Stargate size
+	public StargateSizeEnum stargateSize = AunisConfig.stargateSize;
+	
 //	@Override
 //	public String toString() {
 //		return String.format(pos+": activeChevrons: %d, isFinalActive: %b, doEventHorizonRender: %b, vortexState: %s, openingSoundPlayed: %b", activeChevrons, isFinalActive,
@@ -63,6 +67,7 @@ public class StargateRendererStateSG1 extends StargateRendererStateBase {
 	public void toBytes(ByteBuf buf) {		
 		buf.writeInt(ringCurrentSymbol != null ? ringCurrentSymbol.id : EnumSymbol.ORIGIN.id);
 		spinState.toBytes(buf);
+		buf.writeInt(stargateSize.id);
 		
 		super.toBytes(buf);
 	}
@@ -76,6 +81,7 @@ public class StargateRendererStateSG1 extends StargateRendererStateBase {
 			spinState = new StargateSpinState();
 		
 		spinState.fromBytes(buf);
+		stargateSize = StargateSizeEnum.fromId(buf.readInt());
 				
 		super.fromBytes(buf);
 	}

@@ -1,16 +1,19 @@
-package mrjake.aunis;
+package mrjake.aunis.config;
 
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
 import net.minecraftforge.common.config.Config.RangeDouble;
 import net.minecraftforge.common.config.Config.RangeInt;
+import net.minecraftforge.common.config.Config.RequiresWorldRestart;
 
 @Config(modid="aunis", name="aunis")
 public class AunisConfig {
 	
-//	public static BlockPos dhdRange = new BlockPos(10,3,10);
-
+	@Name("Stargate size")
+	@RequiresWorldRestart
+	public static StargateSizeEnum stargateSize = StargateSizeEnum.SMALL; 
+	
 	@Name("DHD config options")
 	public static DHDConfig dhdConfig = new DHDConfig();
 	
@@ -28,7 +31,6 @@ public class AunisConfig {
 	
 	@Name("AutoClose options")
 	public static AutoCloseConfig autoCloseConfig = new AutoCloseConfig();
-	
 	
 	public static class PowerConfig {
 		@Name("Stargate's internal buffer size")

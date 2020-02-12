@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Random;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.capability.EnergyStorageUncapped;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;

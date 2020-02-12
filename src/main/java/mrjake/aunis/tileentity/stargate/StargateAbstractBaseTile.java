@@ -15,17 +15,17 @@ import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisDamageSources;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.capability.EnergyStorageUncapped;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.particle.ParticleWhiteSmoke;
-import mrjake.aunis.renderer.stargate.StargateRendererBase;
+import mrjake.aunis.renderer.stargate.StargateAbstractRenderer;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.AutoCloseManager;
@@ -44,11 +44,10 @@ import mrjake.aunis.state.StargateVaporizeBlockParticlesRequest;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.tesr.SpecialRendererProviderInterface;
+import mrjake.aunis.tesr.RendererProviderInterface;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
-import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -60,7 +59,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -75,7 +73,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
-public abstract class StargateAbstractBaseTile extends TileEntity implements SpecialRendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment {
+public abstract class StargateAbstractBaseTile extends TileEntity implements RendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment {
 	
 	// ------------------------------------------------------------------------
 	// Stargate state
@@ -616,41 +614,14 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Spe
 	// ------------------------------------------------------------------------
 	// Rendering
 	
-	protected abstract StargateRendererBase getRenderer();
-	protected abstract StargateRendererStateBase getRendererState();
-	protected abstract Vec3d getRenderTranslaton();
-	
-	@Override
-	public void render(double x, double y, double z, float partialTicks) {		
-		if (AunisConfig.debugConfig.renderBoundingBoxes || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
-			eventHorizon.render(x, y, z);
-			
-			int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? getHorizonSegmentCount() : getRendererState().horizonSegments;
-
-			for (int i=0; i<segments; i++) {
-				localKillingBoxes.get(i).render(x, y, z);
-			}
-						
-			for (AunisAxisAlignedBB b : localInnerBlockBoxes)
-				b.render(x, y, z);
-		}
-				
-		Vec3d vec = getRenderTranslaton();
-		
-		x += vec.x;
-		y += vec.y;
-		z += vec.z;
-		
-		getRenderer().render(x, y, z, partialTicks);
-				
-		if (this instanceof ITileEntityUpgradeable) {
-			((ITileEntityUpgradeable) this).getUpgradeRenderer().render(x, y, z, partialTicks);
-		}
+	public StargateAbstractRenderer getRendererStargate() {
+		return (StargateAbstractRenderer) getRenderer();
 	}
 	
+	protected abstract StargateRendererStateBase getRendererState();
+
 	public void updateFacing(EnumFacing facing) {
 		this.facing = facing;
-		
 		this.eventHorizon = new EventHorizon(world, pos, facing, getHorizonTeleportBox());
 		
 		AunisAxisAlignedBB kBox = getHorizonKillingBox();
@@ -673,7 +644,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Spe
 		}
 		
 		if (world.isRemote) {
-			getRenderer().updateFacing(facing);
+			getRendererStargate().update(facing, eventHorizon.getLocalBox(), localKillingBoxes, localInnerBlockBoxes);
 		}
 	}
 	
@@ -793,18 +764,18 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Spe
 	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
 			case RENDERER_STATE:
-				getRenderer().setRendererState((StargateRendererStateBase) state);
+				getRendererStargate().setRendererState((StargateRendererStateBase) state);
 				break;
 				
 			case RENDERER_UPDATE:
 				switch (((StargateRendererActionState) state).action) {
 					case OPEN_GATE:
 						getRendererState().horizonSegments = 0;
-						getRenderer().openGate();
+						getRendererStargate().openGate();
 						break;
 						
 					case CLOSE_GATE:
-						getRenderer().closeGate();
+						getRendererStargate().closeGate();
 						break;
 						
 					case STARGATE_HORIZON_WIDEN:
@@ -831,7 +802,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Spe
 				break;
 				
 			case FLASH_STATE:
-				getRenderer().setHorizonUnstable(((StargateFlashState) state).flash);
+				getRendererStargate().setHorizonUnstable(((StargateFlashState) state).flash);
 				break;
 				
 			default:

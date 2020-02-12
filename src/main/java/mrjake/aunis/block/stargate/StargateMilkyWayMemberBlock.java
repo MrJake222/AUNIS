@@ -12,7 +12,6 @@ import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
-import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.SoundType;
@@ -192,11 +191,11 @@ public class StargateMilkyWayMemberBlock extends Block {
 		Block heldBlock = Block.getBlockFromItem(heldItemStack.getItem());
 		
 		StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(pos);
-		StargateMilkyWayBaseTile gateTile = StargateMilkyWayMergeHelper.findBaseTile(world, pos, state.getValue(AunisProps.FACING_HORIZONTAL));
+//		StargateMilkyWayBaseTile gateTile = StargateMilkyWayMergeHelper.findBaseTile(world, pos, state.getValue(AunisProps.FACING_HORIZONTAL));
 		
 		if (!world.isRemote) {	
-			BlockPos vec = pos.subtract(gateTile.getPos());
-			Aunis.info("new BlockPos(" + vec.getX() + ", " + vec.getY() + ", " + vec.getZ() + "),");
+//			BlockPos vec = pos.subtract(gateTile.getPos());
+//			Aunis.info("new BlockPos(" + vec.getX() + ", " + vec.getY() + ", " + vec.getZ() + "),");
 
 			IBlockState camoBlockState = memberTile.getCamoState();
 			
@@ -324,7 +323,6 @@ public class StargateMilkyWayMemberBlock extends Block {
 					heldItem != Item.getItemFromBlock(AunisBlocks.stargateMilkyWayBaseBlock);// &&
 //					!heldItemStack.isItemEqual(stack);
 		}
-		
 	}
 	
 	@Override

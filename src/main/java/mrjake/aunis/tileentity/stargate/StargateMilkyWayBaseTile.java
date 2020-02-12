@@ -11,13 +11,15 @@ import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.gui.StargateMilkyWayGui;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
-import mrjake.aunis.renderer.stargate.StargateRendererBase;
-import mrjake.aunis.renderer.stargate.StargateRendererSG1;
+import mrjake.aunis.renderer.stargate.StargateAbstractRenderer;
+import mrjake.aunis.renderer.stargate.StargateMilkyWayRenderer;
 import mrjake.aunis.renderer.stargate.StargateRingSpinHelper;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
@@ -29,11 +31,11 @@ import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StargateMilkyWayGuiState;
+import mrjake.aunis.state.StargateMilkyWayRendererState;
 import mrjake.aunis.state.StargateRendererActionState;
-import mrjake.aunis.state.StargateRendererStateBase;
-import mrjake.aunis.state.StargateRendererStateSG1;
-import mrjake.aunis.state.StargateRingStopRequest;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
+import mrjake.aunis.state.StargateRendererStateBase;
+import mrjake.aunis.state.StargateRingStopRequest;
 import mrjake.aunis.state.StargateSpinStateRequest;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
@@ -53,18 +55,13 @@ import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implements ITileEntityUpgradeable, ILinkable {
-	public StargateMilkyWayBaseTile() {}
-	
-	private static final int PATTERN_VERSION = 6;
-	private int currentPatternVersion = PATTERN_VERSION;
-	
+		
 	private StargateUpgradeRenderer upgradeRenderer;
 	private UpgradeRendererState upgradeRendererState;
 	
@@ -260,7 +257,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		if (spinDirection != null)
 			compound.setInteger("lastSpinDirection", spinDirection.id);
 		
-		compound.setInteger("patternVersion", PATTERN_VERSION);
+		compound.setInteger("stargateSize", stargateSize.id);
 		
 		return super.writeToNBT(compound);
 	}
@@ -298,9 +295,13 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		spinDirection = EnumSpinDirection.valueOf(compound.getInteger("lastSpinDirection"));
 		
 		if (compound.hasKey("patternVersion"))
-			currentPatternVersion = compound.getInteger("patternVersion");
-		else
-			currentPatternVersion = 0;
+			stargateSize = StargateSizeEnum.SMALL;
+		else {
+			if (compound.hasKey("stargateSize"))
+				stargateSize = StargateSizeEnum.fromId(compound.getInteger("stargateSize"));
+			else
+				stargateSize = StargateSizeEnum.LARGE;
+		}
 		
 		super.readFromNBT(compound);
 	}
@@ -330,9 +331,12 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		
 	@Override
 	public void onLoad() {				
-		if (world.isRemote) {
-			renderer = new StargateRendererSG1(this);
-			
+		if (!world.isRemote) {
+			rendererState.stargateSize = AunisConfig.stargateSize;
+		}
+		
+		else {
+			renderer = new StargateMilkyWayRenderer(world, pos);	
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.UPGRADE_RENDERER_STATE));
 		}
 		
@@ -355,9 +359,12 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				firstTick = false;
 				
 				// Doing this in onLoad causes ConcurrentModificationException
-				if (currentPatternVersion != PATTERN_VERSION && isMerged) {
-					StargateMilkyWayMergeHelper.convertPattern(world, pos, facing);
+				if (stargateSize != AunisConfig.stargateSize && isMerged) {
+					StargateMilkyWayMergeHelper.convertToPattern(world, pos, facing, stargateSize, AunisConfig.stargateSize);
 					updateMergeState(StargateMilkyWayMergeHelper.checkBlocks(world, pos, facing), null);
+					
+					stargateSize = AunisConfig.stargateSize;
+					markDirty();
 				}
 			}
 			
@@ -431,28 +438,23 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	// ------------------------------------------------------------------------
 	// Rendering
 	
-	private static float GATE_DIAMETER = 10.1815f;
-
-	StargateRendererSG1 renderer;
-	StargateRendererStateSG1 rendererState = new StargateRendererStateSG1();
+	StargateSizeEnum stargateSize = AunisConfig.stargateSize;
+	
+	StargateMilkyWayRenderer renderer;
+	StargateMilkyWayRendererState rendererState = new StargateMilkyWayRendererState();
 	
 	@Override
 	protected StargateRendererStateBase getRendererState() {
 		return rendererState;
 	}
 	
-	private StargateRendererStateSG1 getRendererStateSG1() {
-		return (StargateRendererStateSG1) rendererState;
+	private StargateMilkyWayRendererState getRendererStateSG1() {
+		return (StargateMilkyWayRendererState) rendererState;
 	}
 	
 	@Override
-	protected StargateRendererBase getRenderer() {
+	public StargateAbstractRenderer getRenderer() {
 		return renderer;
-	}
-	
-	@Override
-	protected Vec3d getRenderTranslaton() {
-		return new Vec3d(0.50, GATE_DIAMETER/2-0.95, 0.50);
 	}
 	
 	public void addComputerActivation(long time, boolean finalChevron) {

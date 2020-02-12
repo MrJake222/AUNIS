@@ -1,7 +1,7 @@
 package mrjake.aunis.state;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.renderer.stargate.StargateRendererBase.EnumVortexState;
+import mrjake.aunis.renderer.stargate.StargateAbstractRenderer.EnumVortexState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 

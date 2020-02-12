@@ -1,16 +1,18 @@
 package mrjake.aunis.stargate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
+import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.state.StateTypeEnum;
@@ -40,7 +42,7 @@ public class StargateMilkyWayMergeHelper {
 	public static final BlockMatcher BASE_MATCHER = BlockMatcher.forBlock(AunisBlocks.stargateMilkyWayBaseBlock);
 	public static final BlockMatcher MEMBER_MATCHER = BlockMatcher.forBlock(AunisBlocks.stargateMilkyWayMemberBlock);
 		
-	public static final List<BlockPos> RING_BLOCKS = Arrays.asList(
+	private static final List<BlockPos> RING_BLOCKS_SMALL = Arrays.asList(
 			new BlockPos(1, 7, 0),
 			new BlockPos(3, 5, 0),
 			new BlockPos(3, 3, 0),
@@ -50,7 +52,7 @@ public class StargateMilkyWayMergeHelper {
 			new BlockPos(-3, 5, 0),
 			new BlockPos(-1, 7, 0));
 	
-	public static final List<BlockPos> CHEVRON_BLOCKS = Arrays.asList(
+	private static final List<BlockPos> CHEVRON_BLOCKS_SMALL = Arrays.asList(
 			new BlockPos(2, 6, 0),
 			new BlockPos(3, 4, 0),
 			new BlockPos(3, 2, 0),
@@ -61,8 +63,7 @@ public class StargateMilkyWayMergeHelper {
 			new BlockPos(-1, 0, 0),
 			new BlockPos(0, 7, 0));
 	
-	private static final List<BlockPos> OLD_PATTERN_BLOCKS = Arrays.asList(
-			// Ring blocks
+	private static final List<BlockPos> RING_BLOCKS_LARGE = Arrays.asList(
 			new BlockPos(-1, 0, 0), 
 			new BlockPos(-3, 1, 0),
 			new BlockPos(-4, 3, 0), 
@@ -78,9 +79,9 @@ public class StargateMilkyWayMergeHelper {
 			new BlockPos(5, 4, 0), 
 			new BlockPos(4, 3, 0), 
 			new BlockPos(3, 1, 0), 
-			new BlockPos(1, 0, 0),
+			new BlockPos(1, 0, 0));
 	
-			// Chevron blocks
+	private static final List<BlockPos> CHEVRON_BLOCKS_LARGE = Arrays.asList(
 			new BlockPos(3, 8, 0), 
 			new BlockPos(5, 5, 0), 
 			new BlockPos(4, 2, 0), 
@@ -90,6 +91,34 @@ public class StargateMilkyWayMergeHelper {
 			new BlockPos(2, 0, 0),
 			new BlockPos(-2, 0, 0), 
 			new BlockPos(0, 9, 0));
+	
+	public static List<BlockPos> getRingBlocks() {
+		switch (AunisConfig.stargateSize) {
+		case SMALL:
+		case MEDIUM:
+			return RING_BLOCKS_SMALL;
+			
+		case LARGE:
+			return RING_BLOCKS_LARGE;
+			
+		default:
+			return null;
+		}
+	}
+	
+	public static List<BlockPos> getChevronBlocks() {
+		switch (AunisConfig.stargateSize) {
+			case SMALL:
+			case MEDIUM:
+				return CHEVRON_BLOCKS_SMALL;
+				
+			case LARGE:
+				return CHEVRON_BLOCKS_LARGE;
+				
+			default:
+				return null;
+		}
+	}
 	
 	/**
 	 * Method searches for a {@link StargateMilkyWayBaseBlock} within {@link this#BASE_SEARCH_BOX}
@@ -142,12 +171,12 @@ public class StargateMilkyWayMergeHelper {
 	 */
 	public static boolean checkBlocks(IBlockAccess blockAccess, BlockPos basePos, EnumFacing baseFacing) {		
 		if (AunisConfig.debugConfig.checkGateMerge) {	
-			for (BlockPos pos : RING_BLOCKS) {
+			for (BlockPos pos : getRingBlocks()) {
 				if (!checkMemberBlock(blockAccess, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), baseFacing, EnumMemberVariant.RING))
 					return false;
 			}
 			
-			for (BlockPos pos : CHEVRON_BLOCKS) {
+			for (BlockPos pos : getChevronBlocks()) {
 				if (!checkMemberBlock(blockAccess, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), baseFacing, EnumMemberVariant.CHEVRON))
 					return false;
 			}
@@ -198,10 +227,10 @@ public class StargateMilkyWayMergeHelper {
 	 * @param shouldBeMerged {@code true} if the structure is merging, false otherwise.
 	 */
 	public static void updateMembersMergeStatus(World world, BlockPos basePos, EnumFacing baseFacing, boolean shouldBeMerged) {
-		for (BlockPos pos : RING_BLOCKS)
+		for (BlockPos pos : getRingBlocks())
 			updateMemberMergeStatus(world, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), basePos, shouldBeMerged);
 		
-		for (BlockPos pos : CHEVRON_BLOCKS)
+		for (BlockPos pos : getChevronBlocks())
 			updateMemberMergeStatus(world, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), basePos, shouldBeMerged);
 	}
 	
@@ -233,10 +262,10 @@ public class StargateMilkyWayMergeHelper {
 	 * @param baseFacing Facing of {@link StargateMilkyWayBaseBlock}.
 	 */
 	public static void updateMembersBasePos(IBlockAccess blockAccess, BlockPos basePos, EnumFacing baseFacing) {
-		for (BlockPos pos : RING_BLOCKS)
+		for (BlockPos pos : getRingBlocks())
 			updateMemberBasePos(blockAccess, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), basePos, baseFacing);
 		
-		for (BlockPos pos : CHEVRON_BLOCKS)
+		for (BlockPos pos : getChevronBlocks())
 			updateMemberBasePos(blockAccess, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), basePos, baseFacing);
 	}
 	
@@ -247,21 +276,37 @@ public class StargateMilkyWayMergeHelper {
 	 * @param world {@link World} instance.
 	 * @param basePos Position of {@link StargateMilkyWayBaseBlock} the tiles should be linked to.
 	 * @param baseFacing Facing of {@link StargateMilkyWayBaseBlock}.
+	 * @param currentStargateSize Current Stargate size as read from NBT.
+	 * @param targetStargateSize Target Stargate size as defined in config.
 	 */
-	public static void convertPattern(World world, BlockPos basePos, EnumFacing baseFacing) {
-		Aunis.info("Converting Stargate at " + basePos);
+	public static void convertToPattern(World world, BlockPos basePos, EnumFacing baseFacing, StargateSizeEnum currentStargateSize, StargateSizeEnum targetStargateSize) {
+		Aunis.info(basePos + ": Converting Stargate from " + currentStargateSize + " to " + targetStargateSize);
+		List<BlockPos> oldPatternBlocks = new ArrayList<BlockPos>();
 		
-		for (BlockPos pos : OLD_PATTERN_BLOCKS)
+		switch (currentStargateSize) {
+			case SMALL:
+			case MEDIUM:
+				oldPatternBlocks.addAll(RING_BLOCKS_SMALL);
+				oldPatternBlocks.addAll(CHEVRON_BLOCKS_SMALL);
+				break;
+				
+			case LARGE:
+				oldPatternBlocks.addAll(RING_BLOCKS_LARGE);
+				oldPatternBlocks.addAll(CHEVRON_BLOCKS_LARGE);
+				break;
+		}
+		
+		for (BlockPos pos : oldPatternBlocks)
 			world.setBlockToAir(pos.rotate(FacingToRotation.get(baseFacing)).add(basePos));
 		
 		IBlockState memberState = AunisBlocks.stargateMilkyWayMemberBlock.getDefaultState()
 				.withProperty(AunisProps.FACING_HORIZONTAL, baseFacing)
 				.withProperty(AunisProps.RENDER_BLOCK, false);
 		
-		for (BlockPos pos : RING_BLOCKS)
+		for (BlockPos pos : getRingBlocks())
 			world.setBlockState(pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), memberState.withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING));
 		
-		for (BlockPos pos : CHEVRON_BLOCKS)
+		for (BlockPos pos : getChevronBlocks())
 			world.setBlockState(pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), memberState.withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.CHEVRON));
 	}
 }

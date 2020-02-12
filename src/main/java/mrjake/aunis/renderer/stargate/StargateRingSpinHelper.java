@@ -31,7 +31,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 	public static final int STOP_TIME_TICK = 35;
 
 	private BlockPos pos;
-	private StargateRendererSG1 renderer;
+	private StargateMilkyWayRenderer renderer;
 	private TargetPoint targetPoint;
 	
 	/**
@@ -39,7 +39,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 	 */
 	private Object context;
 	
-	public StargateRingSpinHelper(World world, BlockPos pos, StargateRendererSG1 renderer, StargateSpinState state) {
+	public StargateRingSpinHelper(World world, BlockPos pos, StargateMilkyWayRenderer renderer, StargateSpinState state) {
 		super(world, state);
 		
 		this.pos = pos;

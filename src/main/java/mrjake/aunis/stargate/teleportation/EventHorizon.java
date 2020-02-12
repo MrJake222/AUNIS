@@ -18,8 +18,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EventHorizon {	
 	private World world;
@@ -40,9 +38,8 @@ public class EventHorizon {
 		scheduledTeleportMap.clear();
 	}
 	
-	@SideOnly(Side.CLIENT)
-	public void render(double x, double y, double z) {
-		localBox.render(x, y, z);
+	public AunisAxisAlignedBB getLocalBox() {
+		return localBox;
 	}
 	
 	// ------------------------------------------------------------------------

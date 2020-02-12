@@ -10,11 +10,12 @@ import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.DHDActivation;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.world.World;
 
-public class DHDRenderer {
+public class DHDRenderer implements RendererInterface {
 	private World world;
 	
 	private float horizontalRotation;
@@ -71,7 +72,8 @@ public class DHDRenderer {
 		changeSymbols(getActiveSymbols(), true);
 	}
 	
-	public void render(double x, double y, double z, double partialTicks) {
+	@Override	
+	public void render(double x, double y, double z, float partialTicks) {
 		Model dhdModel = ModelLoader.getModel(EnumModel.DHD_MODEL);
 		Model brbModel = ModelLoader.getModel(EnumModel.BRB);
 		

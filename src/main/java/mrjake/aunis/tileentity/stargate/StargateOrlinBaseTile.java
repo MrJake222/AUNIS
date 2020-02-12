@@ -9,8 +9,8 @@ import mrjake.aunis.gui.StargateOrlinGui;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
-import mrjake.aunis.renderer.stargate.StargateRendererBase;
-import mrjake.aunis.renderer.stargate.StargateRendererOrlin;
+import mrjake.aunis.renderer.stargate.StargateAbstractRenderer;
+import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
@@ -27,7 +27,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -51,7 +50,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 //	
 	@Override
 	public void onLoad() {		
-		renderer = new StargateRendererOrlin(this);
+		renderer = new StargateOrlinRenderer(this);
 		
 		super.onLoad();
 	}
@@ -136,26 +135,21 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 		return new AunisAxisAlignedBB(-1.0, 0.6, -0.15, 1.0, 2.7, -0.05);
 	}
 	
-	private StargateRendererOrlin renderer;
+	private StargateOrlinRenderer renderer;
 	private StargateRendererStateBase rendererState = new StargateRendererStateBase();
 	
 	@Override
-	protected StargateRendererBase getRenderer() {
+	public StargateAbstractRenderer getRenderer() {
 		return renderer;
 	}
 	
-	public StargateRendererOrlin getRendererOrlin() {
+	public StargateOrlinRenderer getRendererOrlin() {
 		return renderer;
 	}
 	
 	@Override
 	protected StargateRendererStateBase getRendererState() {
 		return rendererState;
-	}
-	
-	@Override
-	protected Vec3d getRenderTranslaton() {
-		return new Vec3d(0.5, 0, 0.5);
 	}
 	
 	

@@ -3,9 +3,9 @@ package mrjake.aunis.stargate.orlin;
 import java.util.HashMap;
 import java.util.Map;
 
-import mrjake.aunis.AunisConfig;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
