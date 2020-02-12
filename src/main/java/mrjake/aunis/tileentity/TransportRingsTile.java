@@ -146,6 +146,11 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				
 			case RINGS_CLEAR_OUT:
 				setBarrierBlocks(false, false);
+				setBusy(false);
+				
+				TransportRingsTile targetRingsTile = (TransportRingsTile) world.getTileEntity(targetRingsPos);
+				if (targetRingsTile != null)
+					targetRingsTile.setBusy(false);
 				
 				break;
 				
@@ -159,6 +164,19 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	// Teleportation
 	private BlockPos targetRingsPos = new BlockPos(0, 0, 0);
 	private List<Entity> excludedEntities = new ArrayList<>();
+	
+	/**
+	 * True if there is an active transport.
+	 */
+	private boolean busy = false;
+	
+	public boolean isBusy() {
+		return busy;
+	}
+
+	public void setBusy(boolean busy) {
+		this.busy = busy;
+	}
 	
 	public List<Entity> startAnimationAndTeleport(BlockPos targetRingsPos, List<Entity> excludedEntities) {
 		this.targetRingsPos = targetRingsPos;
@@ -195,7 +213,11 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	public void attemptTransportTo(EntityPlayerMP player, int address) {
 		if (checkIfObstructed()) {
 			player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.obstructed")), true);
-			
+			return;
+		}
+		
+		if (isBusy()) {
+			player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.busy")), true);
 			return;
 		}
 		
@@ -207,11 +229,17 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			TransportRingsTile targetRingsTile = (TransportRingsTile) world.getTileEntity(targetRingsPos);
 			
 			if (targetRingsTile.checkIfObstructed()) {
-				player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.obstructed_target")), true);
-				
+				player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.obstructed_target")), true);	
 				return;
 			}
 			
+			if (targetRingsTile.isBusy()) {
+				player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.busy_target")), true);
+				return;
+			}
+			
+			this.setBusy(true);
+			targetRingsTile.setBusy(true);
 			
 			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
 			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite);
@@ -425,6 +453,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			compound.setInteger("excluded"+j, excludedEntities.get(j).getEntityId());
 		
 		compound.setLong("targetRingsPos", targetRingsPos.toLong());
+		compound.setBoolean("busy", isBusy());
 		
 		return super.writeToNBT(compound);
 	}
@@ -471,6 +500,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				ringsMap.put(rings.getAddress(), rings);
 			}
 		}
+		
+		setBusy(compound.getBoolean("busy"));
 		
 		super.readFromNBT(compound);
 	}

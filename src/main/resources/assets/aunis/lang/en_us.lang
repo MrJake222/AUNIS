@@ -75,6 +75,8 @@ tile.aunis.transportrings_block.duplicate_address=Duplicate address
 tile.aunis.transportrings_block.wrong_address=Wrong address, should be 1-6
 tile.aunis.transportrings_block.obstructed=Rings obstructed, clear 5x5 area around rings
 tile.aunis.transportrings_block.obstructed_target=Target rings obstructed, clear 5x5 area around target rings
+tile.aunis.transportrings_block.busy=Rings busy
+tile.aunis.transportrings_block.busy_target=Target rings busy
 
 commands.sgcloseall.usage=/sgcloseall ["world", dimensionID or empty]
 
