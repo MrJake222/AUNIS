@@ -5,49 +5,53 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mrjake.aunis.Aunis;
+
 public enum EnumSymbol {
-	SCULPTOR(0, "Sculptor", 19),
-	SCORPIUS(1, "Scorpius", 8),
-	CENTAURUS(2, "Centaurus", 4),
-	MONOCEROS(3, "Monoceros", 31),
-	ORIGIN(4, "Point of Origin", 0),
-	PEGASUS(5, "Pegasus", 18),
-	ANDROMEDA(6, "Andromeda", 21),
-	SERPENSCAPUT(7, "Serpens Caput", 6),
-	ARIES(8, "Aries", 23),
-	LIBRA(9, "Libra", 5),
-	ERIDANUS(10, "Eridanus", 28),
-	LEOMINOR(11, "Leo Minor", 37),
-	HYDRA(12, "Hydra", 33),
-	SAGITTARIUS(13, "Sagittarius", 11),
-	SEXTANS(14, "Sextans", 36),
-	SCUTUM(15, "Scutum", 10),
-	PISCES(16, "Pisces", 20),
-	VIRGO(17, "Virgo", 2),
-	BOOTES(18, "Boötes", 3),
-	AURIGA(19, "Auriga", 27),
-	CORONAAUSTRALIS(20, "Corona Australis", 9),
-	GEMINI(21, "Gemini", 32),
-	LEO(22, "Leo", 38),
-	CETUS(23, "Cetus", 25),
-	TRIANGULUM(24, "Triangulum", 22),
-	AQUARIUS(25, "Aquarius", 17),
-	MICROSCOPIUM(26, "Microscopium", 13),
-	EQUULEUS(27, "Equuleus", 16),
-	CRATER(28, "Crater", 1),
-	PERSEUS(29, "Perseus", 24),
-	CANCER(30, "Cancer", 35),
-	NORMA(31, "Norma", 7),
-	TAURUS(32, "Taurus", 26),
-	CANISMINOR(33, "Canis Minor", 30),
-	CAPRICORNUS(34, "Capricornus", 14),
-	LYNX(35, "Lynx", 34),
-	ORION(36, "Orion", 29),
-	PISCISAUSTRINUS(37, "Piscis Austrinus", 15),
-	BRB(38, "Bright Red Button", -1);
+	SCULPTOR(0, "Sculptor", "glyph.aunis.sculptor", "sculptor.png", 19),
+	SCORPIUS(1, "Scorpius", "glyph.aunis.scorpius", "scorpius.png", 8),
+	CENTAURUS(2, "Centaurus", "glyph.aunis.centaurus", "centaurus.png", 4),
+	MONOCEROS(3, "Monoceros", "glyph.aunis.monoceros", "monoceros.png", 31),
+	ORIGIN(4, "Point of Origin", "glyph.aunis.point_of_origin", "point of origin.png", 0),
+	PEGASUS(5, "Pegasus", "glyph.aunis.pegasus", "pegasus.png", 18),
+	ANDROMEDA(6, "Andromeda", "glyph.aunis.andromeda", "andromeda.png", 21),
+	SERPENSCAPUT(7, "Serpens Caput", "glyph.aunis.serpens_caput", "serpens caput.png", 6),
+	ARIES(8, "Aries", "glyph.aunis.aries", "aries.png", 23),
+	LIBRA(9, "Libra", "glyph.aunis.libra", "libra.png", 5),
+	ERIDANUS(10, "Eridanus", "glyph.aunis.eridanus", "eridanus.png", 28),
+	LEOMINOR(11, "Leo Minor", "glyph.aunis.leo_minor", "leo minor.png", 37),
+	HYDRA(12, "Hydra", "glyph.aunis.hydra", "hydra.png", 33),
+	SAGITTARIUS(13, "Sagittarius", "glyph.aunis.sagittarius", "sagittarius.png", 11),
+	SEXTANS(14, "Sextans", "glyph.aunis.sextans", "sextans.png", 36),
+	SCUTUM(15, "Scutum", "glyph.aunis.scutum", "scutum.png", 10),
+	PISCES(16, "Pisces", "glyph.aunis.pisces", "pisces.png", 20),
+	VIRGO(17, "Virgo", "glyph.aunis.virgo", "virgo.png", 2),
+	BOOTES(18, "Bootes", "glyph.aunis.boötes", "boötes.png", 3),
+	AURIGA(19, "Auriga", "glyph.aunis.auriga", "auriga.png", 27),
+	CORONAAUSTRALIS(20, "Corona Australis", "glyph.aunis.corona_australis", "corona australis.png", 9),
+	GEMINI(21, "Gemini", "glyph.aunis.gemini", "gemini.png", 32),
+	LEO(22, "Leo", "glyph.aunis.leo", "leo.png", 38),
+	CETUS(23, "Cetus", "glyph.aunis.cetus", "cetus.png", 25),
+	TRIANGULUM(24, "Triangulum", "glyph.aunis.triangulum", "triangulum.png", 22),
+	AQUARIUS(25, "Aquarius", "glyph.aunis.aquarius", "aquarius.png", 17),
+	MICROSCOPIUM(26, "Microscopium", "glyph.aunis.microscopium", "microscopium.png", 13),
+	EQUULEUS(27, "Equuleus", "glyph.aunis.equuleus", "equuleus.png", 16),
+	CRATER(28, "Crater", "glyph.aunis.crater", "crater.png", 1),
+	PERSEUS(29, "Perseus", "glyph.aunis.perseus", "perseus.png", 24),
+	CANCER(30, "Cancer", "glyph.aunis.cancer", "cancer.png", 35),
+	NORMA(31, "Norma", "glyph.aunis.norma", "norma.png", 7),
+	TAURUS(32, "Taurus", "glyph.aunis.taurus", "taurus.png", 26),
+	CANISMINOR(33, "Canis Minor", "glyph.aunis.canis_minor", "canis minor.png", 30),
+	CAPRICORNUS(34, "Capricornus", "glyph.aunis.capricornus", "capricornus.png", 14),
+	LYNX(35, "Lynx", "glyph.aunis.lynx", "lynx.png", 34),
+	ORION(36, "Orion", "glyph.aunis.orion", "orion.png", 29),
+	PISCISAUSTRINUS(37, "Piscis Austrinus", "glyph.aunis.piscis_austrinus", "piscis austrinus.png", 15),
+	BRB(38, "Bright Red Button", "glyph.aunis.bright_red_button", "bright red button.png", -1);
 	
 	public int id;
-	public String name;
+	public String translationKey;
+	public String englishName;
+	public String iconFile;
 	public int angleIndex;
 	public float angle;
 	private static Map<Integer, EnumSymbol> idSymbolMap = new HashMap<Integer, EnumSymbol>();
@@ -56,9 +60,11 @@ public enum EnumSymbol {
 	
 	public static final float ANGLE_PER_GLYPH = 9.2307692f;
 	
-	EnumSymbol(int id, String name, int angleIndex) {
+	EnumSymbol(int id, String englishName, String translationKey, String iconFile, int angleIndex) {
 		this.id = id;
-		this.name = name;
+		this.englishName = englishName;
+		this.translationKey = translationKey;
+		this.iconFile = iconFile;
 		this.angleIndex = angleIndex;
 		
 		// BRB angle = -1
@@ -73,7 +79,7 @@ public enum EnumSymbol {
 	static {
 		for (EnumSymbol symbol : EnumSymbol.values()) {
 			idSymbolMap.put(symbol.id, symbol);
-			nameSymbolMap.put(symbol.name, symbol);
+			nameSymbolMap.put(symbol.englishName, symbol);
 			angleIndexSymbolMap.put(symbol.angleIndex, symbol);
 		}
 	}
@@ -82,11 +88,8 @@ public enum EnumSymbol {
 		return idSymbolMap.get(id);
 	}
 	
-	public static EnumSymbol forName(String name) {
-		if (name.equals("Bootes"))
-			return EnumSymbol.BOOTES;
-		
-		return nameSymbolMap.get(name);
+	public static EnumSymbol forEnglishName(String translationKey) {
+		return nameSymbolMap.get(translationKey);
 	}
 	
 	public static EnumSymbol fromAngleIndex(int index) {
@@ -132,21 +135,21 @@ public enum EnumSymbol {
 		
 		return out;
 	}
-	
-	/**
-	 * Convert {@link List} of {@link EnumSymbol} to {@link List<String>} of symbol's names
-	 * 
-	 * @param list
-	 * @return
-	 */
-	public static List<String> toStringList(List<EnumSymbol> list) {
-		List<String> out = new ArrayList<String>();
-		
-		for (EnumSymbol symbol : list)
-			out.add(symbol.name);
-		
-		return out;
-	}
+//	
+//	/**
+//	 * Convert {@link List} of {@link EnumSymbol} to {@link List<String>} of symbol's names
+//	 * 
+//	 * @param list
+//	 * @return
+//	 */
+//	public static List<String> toStringList(List<EnumSymbol> list) {
+//		List<String> out = new ArrayList<String>();
+//		
+//		for (EnumSymbol symbol : list)
+//			out.add(symbol.name);
+//		
+//		return out;
+//	}
 	
 	// Serialize address to long
 	public static long toLong(List<EnumSymbol> address) {
@@ -190,12 +193,13 @@ public enum EnumSymbol {
 		return out;
 	}
 	
-	public boolean equals(EnumSymbol symbol) {
-		return symbol.id == this.id;
+	public String localize() {
+		return Aunis.proxy.localize(translationKey);
 	}
 	
+	@Override
 	public String toString() {
-		return name;
+		return englishName;
 	}
 }
 

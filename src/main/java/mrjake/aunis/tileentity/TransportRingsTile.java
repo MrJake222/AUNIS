@@ -44,7 +44,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
@@ -212,12 +212,12 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	 */
 	public void attemptTransportTo(EntityPlayerMP player, int address) {
 		if (checkIfObstructed()) {
-			player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.obstructed")), true);
+			player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.obstructed"), true);
 			return;
 		}
 		
 		if (isBusy()) {
-			player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.busy")), true);
+			player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.busy"), true);
 			return;
 		}
 		
@@ -229,12 +229,12 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			TransportRingsTile targetRingsTile = (TransportRingsTile) world.getTileEntity(targetRingsPos);
 			
 			if (targetRingsTile.checkIfObstructed()) {
-				player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.obstructed_target")), true);	
+				player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.obstructed_target"), true);	
 				return;
 			}
 			
 			if (targetRingsTile.isBusy()) {
-				player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.busy_target")), true);
+				player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.busy_target"), true);
 				return;
 			}
 			
@@ -247,7 +247,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		}
 		
 		else {
-			player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.non_existing_address")), true);
+			player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.non_existing_address"), true);
 		}
 	}
 	
@@ -401,7 +401,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 
 				int newRingsAddress = newRingsTile.getClonedRings(pos).getAddress();
 				if (newRingsAddress == address && newRingsAddress != -1) {
-					player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.duplicate_address")), true);
+					player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.duplicate_address"), true);
 					
 					return;
 				}

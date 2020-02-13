@@ -2,6 +2,7 @@ package mrjake.aunis.gui;
 
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
+import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.StargateMilkyWayGuiState;
 import net.minecraft.client.Minecraft;
@@ -56,8 +57,8 @@ public class StargateMilkyWayGui extends GuiBase {
 		drawBackground();
 				
 		for (int i=0; i<sections; i++) {
-			String name = state.getGateAddress().get(i).name;
-			Minecraft.getMinecraft().getTextureManager().bindTexture( new ResourceLocation("aunis:textures/gui/symbol/" + name.toLowerCase() + ".png") );
+			EnumSymbol symbol = state.getGateAddress().get(i);
+			Minecraft.getMinecraft().getTextureManager().bindTexture( new ResourceLocation("aunis:textures/gui/symbol/" + symbol.iconFile) );
 			
 			int firstPos = frameThickness*2;
 			int x = firstPos + (sectionSize+frameThickness)*i;
@@ -65,7 +66,7 @@ public class StargateMilkyWayGui extends GuiBase {
 			GlStateManager.enableBlend();
 			
 			drawModalRectWithCustomSizedTexture(x, firstPos, 0, 0, sectionSize, sectionSize, sectionSize, sectionSize);
-			fontRenderer.drawStringWithShadow(name, x + (sectionSize - fontRenderer.getStringWidth(name))/2, firstPos + sectionSize - frameThickness, textColor);		
+			fontRenderer.drawStringWithShadow(symbol.localize(), x + (sectionSize - fontRenderer.getStringWidth(symbol.localize()))/2, firstPos + sectionSize - frameThickness, textColor);		
 			
 			GlStateManager.disableBlend();
 		}

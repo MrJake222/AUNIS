@@ -43,6 +43,7 @@ item.aunis.holder_crystal.name=Crystal Holder
 
 item.aunis.page_notebook.name=Notebook Page
 item.aunis.page_mysterious.name=Mysterious Page
+item.aunis.page_mysterious.empty=Empty
 item.aunis.mysterious_page.tooltip=Who knows where it leads
 
 fluid.silicon_molten_black=Molten Silicon
@@ -77,7 +78,54 @@ tile.aunis.transportrings_block.obstructed=Rings obstructed, clear 5x5 area arou
 tile.aunis.transportrings_block.obstructed_target=Target rings obstructed, clear 5x5 area around target rings
 tile.aunis.transportrings_block.busy=Rings busy
 tile.aunis.transportrings_block.busy_target=Target rings busy
+tile.aunis.transportrings_block.rings_no=Rings No. %s
+tile.aunis.transportrings_block.rings_not_in_grid=Rings not in grid
+tile.aunis.transportrings_block.rings_address=Address
+tile.aunis.transportrings_block.rings_name=Name
+tile.aunis.transportrings_block.rings_save=Save
 
 commands.sgcloseall.usage=/sgcloseall ["world", dimensionID or empty]
 
 death.attack.eventHorizon=%s was given a kawoosh cremation
+
+
+
+glyph.aunis.sculptor=Sculptor
+glyph.aunis.scorpius=Scorpius
+glyph.aunis.centaurus=Centaurus
+glyph.aunis.monoceros=Monoceros
+glyph.aunis.point_of_origin=Point of Origin
+glyph.aunis.pegasus=Pegasus
+glyph.aunis.andromeda=Andromeda
+glyph.aunis.serpens_caput=Serpens Caput
+glyph.aunis.aries=Aries
+glyph.aunis.libra=Libra
+glyph.aunis.eridanus=Eridanus
+glyph.aunis.leo_minor=Leo Minor
+glyph.aunis.hydra=Hydra
+glyph.aunis.sagittarius=Sagittarius
+glyph.aunis.sextans=Sextans
+glyph.aunis.scutum=Scutum
+glyph.aunis.pisces=Pisces
+glyph.aunis.virgo=Virgo
+glyph.aunis.boötes=Boötes
+glyph.aunis.auriga=Auriga
+glyph.aunis.corona_australis=Corona Australis
+glyph.aunis.gemini=Gemini
+glyph.aunis.leo=Leo
+glyph.aunis.cetus=Cetus
+glyph.aunis.triangulum=Triangulum
+glyph.aunis.aquarius=Aquarius
+glyph.aunis.microscopium=Microscopium
+glyph.aunis.equuleus=Equuleus
+glyph.aunis.crater=Crater
+glyph.aunis.perseus=Perseus
+glyph.aunis.cancer=Cancer
+glyph.aunis.norma=Norma
+glyph.aunis.taurus=Taurus
+glyph.aunis.canis_minor=Canis Minor
+glyph.aunis.capricornus=Capricornus
+glyph.aunis.lynx=Lynx
+glyph.aunis.orion=Orion
+glyph.aunis.piscis_austrinus=Piscis Austrinus
+glyph.aunis.bright_red_button=Bright Red Button

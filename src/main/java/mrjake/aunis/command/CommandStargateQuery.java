@@ -38,7 +38,7 @@ public class CommandStargateQuery extends CommandBase {
 			String addr = address.toString().replace("[", "").replace("]", "");
 			String posStr = "[" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + "]";
 			
-			notifyCommandListener(sender, this, posStr + ": " + TextFormatting.AQUA + addr + ", " + TextFormatting.DARK_PURPLE + stargatePos.get7thSymbol().name + "\n");
+			notifyCommandListener(sender, this, posStr + ": " + TextFormatting.AQUA + addr + ", " + TextFormatting.DARK_PURPLE + stargatePos.get7thSymbol().localize() + "\n");
 		}
 	}
 

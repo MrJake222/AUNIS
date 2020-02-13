@@ -15,7 +15,7 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class RingsGUI extends GuiBase {
 	
@@ -46,7 +46,7 @@ public class RingsGUI extends GuiBase {
 		nameTextField = createTextField(50, 35, 16, state.getName());
 		textFields.add(nameTextField);
 		
-		saveButton = new AunisGuiButton(id++, getBottomRightInside(false)-90, getBottomRightInside(true)-20, 90, 20, "Save");
+		saveButton = new AunisGuiButton(id++, getBottomRightInside(false)-90, getBottomRightInside(true)-20, 90, 20, Aunis.proxy.localize("tile.aunis.transportrings_block.rings_save"));
 		buttonList.add(saveButton);
 	}
 	
@@ -62,16 +62,16 @@ public class RingsGUI extends GuiBase {
 		drawBackground();
 
 		if (state.isInGrid()) {
-			drawVerticallCenteredString("Rings No. " + state.getAddress(), 0, 0, 0xAA5500);
+			drawVerticallCenteredString(new TextComponentTranslation("tile.aunis.transportrings_block.rings_no", state.getAddress()).getFormattedText(), 0, 0, 0xAA5500);
 //			drawText("Connected to:", 0, 13, color(88, 97, 115, 255));
 		}
 		
 		else {
-			drawVerticallCenteredString("Rings not in grid", 0, 0, 0xB36262);
+			drawVerticallCenteredString(Aunis.proxy.localize("tile.aunis.transportrings_block.rings_not_in_grid"), 0, 0, 0xB36262);
 		}	
 		
-		drawString("Address: ", 0, 20, 0x00AA00);
-		drawString("Name: ", 0, 35, 0x00AAAA);
+		drawString(Aunis.proxy.localize("tile.aunis.transportrings_block.rings_address") + ": ", 0, 20, 0x00AA00);
+		drawString(Aunis.proxy.localize("tile.aunis.transportrings_block.rings_name") + ": ", 0, 35, 0x00AAAA);
 //		this.addressTextField.drawTextBox();
 		
 		for (GuiTextField tf : textFields)
@@ -114,12 +114,12 @@ public class RingsGUI extends GuiBase {
 				}
 				
 				else {
-					player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.wrong_address")), true);
+					player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.wrong_address"), true);
 				}
 			}
 			
 			catch (NumberFormatException e) {
-				player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_block.wrong_address")), true);
+				player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.wrong_address"), true);
 			}
 		}
 	}

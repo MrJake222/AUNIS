@@ -1,0 +1,131 @@
+itemGroup.aunis=Aunis
+
+item.aunis.analyzer_ancient.name=Анализатор Древних
+item.aunis.crystal_control_dhd.name=Контрольный Кристалл Наборного Устройства
+item.aunis.dialer_fast.name=Быстрый Набор (Отладка)
+
+item.aunis.crystal_glyph_dhd.name=Символьный Кристалл Наборного Устройства
+item.aunis.crystal_glyph_stargate.name=Символьный Кристалл Звёздных Врат
+
+tile.aunis.naquadah_ore.name=Руда Наквадаха
+tile.aunis.naquadah_block.name=Блок Наквадаха
+item.aunis.naquadah_shard.name=Осколок Наквадаха
+item.aunis.naquadah_alloy.name=Слиток Сплава Наквадаха
+
+tile.aunis.invisible_block.name=Ты не можешь увидеть меня блок
+
+tile.aunis.stargate_milkyway_base_block.name=Основа Звёздных Врат (Млечный Путь)
+tile.aunis.stargate_milkyway_ring_block.name=Кольцо Звёздных Врат (Млечный Путь)
+tile.aunis.stargate_milkyway_chevron_block.name=Шеврон Звёздных Врат (Млечный Путь)
+tile.aunis.dhd_block.name=Наборное Устройство
+
+tile.aunis.stargate_orlin_base_block.name=Основа Звёздных Врат (Орлин)
+tile.aunis.stargate_orlin_member_block.name=Кольцо Звёздных Врат (Орлин)
+
+tile.aunis.crystal_infuser_block.name=Заряжатель Кристаллов
+
+item.aunis.crystal_fragment.name=Семя Кристалла
+item.aunis.crystal_blank.name=Пустой Кристалл
+item.aunis.crystal_blue.name=Кристалл Телепортации
+item.aunis.crystal_red.name=Кристалл Энергии
+item.aunis.crystal_ender.name=Кристалл Эндера
+item.aunis.crystal_yellow.name=Кристалл Света
+item.aunis.crystal_white.name=Белый Кристалл
+
+item.aunis.circuit_control_base.name=Главная Часть Управляющей Микросхемы 
+item.aunis.circuit_control_naquadah.name=Управляющая Микросхема Из Наквадаха
+item.aunis.circuit_control_crystal.name=Кристальная Управляющая Микросхема
+
+item.aunis.dhd_brb.name=Большая Красная Кнопка
+
+item.aunis.stargate_ring_fragment.name=Часть Кольца Звёздных Врат
+item.aunis.holder_crystal.name=Держатель Кристалла
+
+item.aunis.page_notebook.name=Страница Блокнота
+item.aunis.page_mysterious.name=Загадочная Страница
+item.aunis.page_mysterious.empty=пустой
+item.aunis.mysterious_page.tooltip=Кто знает куда она ведёт
+
+fluid.silicon_molten_black=Расплавленный Кремний
+fluid.silicon_molten_white=Очищенный Кремний
+fluid.silicon_molten_red=Энергетическая Смесь
+fluid.silicon_molten_blue=Смесь Телепортации
+fluid.silicon_molten_ender=Смесь Эндера
+fluid.silicon_molten_yellow=Смесь Света
+fluid.naquadah_molten_raw=Расплавленный Наквадах
+fluid.naquadah_molten_refined=Очищенный Наквадах
+fluid.naquadah_molten_alloy=Жидкий Сплав Наквадаха
+
+
+
+tile.aunis.dhd_block.incoming_wormhole_warn=Невозможно закрыть врата с этого конца
+tile.aunis.dhd_block.not_linked_warn=Наборное устройство не подключено к вратам
+tile.aunis.dhd_block.no_crystal_warn=У наборного устройства нет контрольного кристалла
+tile.aunis.dhd_block.no_enough_power=Наборному устройству нужно минимум 10,000uI что-бы работать
+tile.aunis.dhd_block.computer_dial=Уже идёт набор с помощью OpenComputers
+
+tile.aunis.stargatebase_block.not_enough_power=Недостаточно энергии
+
+item.aunis.transportrings_ring_fragment.name=Часть Транспортных Колец
+tile.aunis.transportrings_controller_block.name=Контроллер Транспортных Колец
+tile.aunis.transportrings_controller_block.not_linked=Контроллер не подключён
+
+tile.aunis.transportrings_block.name=Транспортные Кольца
+tile.aunis.transportrings_block.non_existing_address=Невозможно связаться с этим адресом
+tile.aunis.transportrings_block.duplicate_address=Повторяющийся адрес
+tile.aunis.transportrings_block.wrong_address=Неправильный адрес, должен быть от 1 до 6
+tile.aunis.transportrings_block.obstructed=Кольца заблокированы, очистите зону 5x5 вокруг колец
+tile.aunis.transportrings_block.obstructed_target=Выбранные кольца заблокированы, очистите зону 5x5 вокруг заданных колец
+tile.aunis.transportrings_block.busy=Кольца заняты
+tile.aunis.transportrings_block.busy_target=Заданные кольца заняты
+tile.aunis.transportrings_block.rings_no=Кольца No. %s
+tile.aunis.transportrings_block.rings_not_in_grid=Кольца не в сетке
+tile.aunis.transportrings_block.rings_address=Адрес
+tile.aunis.transportrings_block.rings_name=Имя
+tile.aunis.transportrings_block.rings_save=Сохранить
+
+commands.sgcloseall.usage=/sgcloseall ["Мир", ID Измерения или ничего]
+
+death.attack.eventHorizon=%s Был кремирован нестабильным всплеском
+
+
+
+glyph.aunis.point_of_origin=Точка Отсчёта
+glyph.aunis.crater=Кратер
+glyph.aunis.virgo=Виргио
+glyph.aunis.boötes=Бутес
+glyph.aunis.centaurus=Центаврус
+glyph.aunis.libra=Либра
+glyph.aunis.serpens_caput=Серпенс капут
+glyph.aunis.norma=Норма
+glyph.aunis.scorpius=Скорпиус
+glyph.aunis.corona_australis=Корона Австралис
+glyph.aunis.scutum=Скутум
+glyph.aunis.sagittarius=Сагиттариус
+glyph.aunis.aquila=Аквуила
+glyph.aunis.microscopium=Микроскопиум
+glyph.aunis.capricornus=Каприкорнус
+glyph.aunis.piscis_austrinus=Пискис Аустринус
+glyph.aunis.equuleus=Екуулеус
+glyph.aunis.aquarius=Аквуариус
+glyph.aunis.pegasus=Пегасус
+glyph.aunis.sculptor=Скульптор
+glyph.aunis.pisces=Пискес
+glyph.aunis.andromeda=Андромеда
+glyph.aunis.triangulum=Триангулум
+glyph.aunis.aries=Ариес
+glyph.aunis.perseus=Персеус
+glyph.aunis.cetus=Цетус
+glyph.aunis.taurus=Таурис
+glyph.aunis.auriga=Аурига
+glyph.aunis.eridanus=Эриданус
+glyph.aunis.orion=Орион
+glyph.aunis.canis_minor=Канис Минор
+glyph.aunis.monoceros=Монокерос
+glyph.aunis.gemini=Гемини
+glyph.aunis.hydra=Гидра
+glyph.aunis.lynx=Люнкс
+glyph.aunis.cancer=Кансер
+glyph.aunis.sextans=Сектанс
+glyph.aunis.leo_minor=Лео Минор
+glyph.aunis.leo=Лео

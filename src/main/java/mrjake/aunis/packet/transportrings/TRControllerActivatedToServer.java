@@ -1,7 +1,6 @@
 package mrjake.aunis.packet.transportrings;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
@@ -9,7 +8,7 @@ import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -60,7 +59,7 @@ public class TRControllerActivatedToServer extends PositionedPacket {
 				}
 				
 				else
-					player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.transportrings_controller_block.not_linked")), true);
+					player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_controller_block.not_linked"), true);
 			});
 			
 			return null;

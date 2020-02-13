@@ -326,8 +326,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 		getRendererState().setStargateOpen(world, pos, dialedAddressSize, isInitiating);
 		
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_OPEN_SOUND));
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_LIGHT_BLOCK, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 19 + TICKS_PER_HORIZON_SEGMENT));
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_WIDEN, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 23 + TICKS_PER_HORIZON_SEGMENT)); // 1.3s of the sound to the kill
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_LIGHT_BLOCK, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 19 + getTicksPerHorizonSegment()));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_WIDEN, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 23 + getTicksPerHorizonSegment())); // 1.3s of the sound to the kill
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ENGAGE));
 		
 		DHDTile dhdTile = getLinkedDHD(world);
@@ -587,7 +587,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 	 * How many ticks should the {@link StargateAbstractBaseTile} wait to perform
 	 * next update to the size of the killing box.
 	 */
-	private int TICKS_PER_HORIZON_SEGMENT = 12 / getHorizonSegmentCount();
+	protected int getTicksPerHorizonSegment() {
+		return 12 / getHorizonSegmentCount();
+	}
 	
 	/**
 	 * Contains all the subboxes to be activated with the kawoosh.
@@ -846,9 +848,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, StargateRendererActionState.STARGATE_HORIZON_WIDEN_ACTION), targetPoint);
 				
 				if (getRendererState().horizonSegments < getHorizonSegmentCount())
-					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_WIDEN, TICKS_PER_HORIZON_SEGMENT));
+					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_WIDEN, getTicksPerHorizonSegment()));
 				else
-					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_SHRINK, TICKS_PER_HORIZON_SEGMENT + 12));
+					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_SHRINK, getTicksPerHorizonSegment() + 12));
 				
 				break;
 				
@@ -857,7 +859,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, StargateRendererActionState.STARGATE_HORIZON_SHRINK_ACTION), targetPoint);
 				
 				if (getRendererState().horizonSegments > 0)
-					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_SHRINK, TICKS_PER_HORIZON_SEGMENT + 1));
+					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_SHRINK, getTicksPerHorizonSegment() + 1));
 				else
 					horizonKilling = false;
 				

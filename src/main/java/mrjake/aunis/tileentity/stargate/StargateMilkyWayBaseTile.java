@@ -97,7 +97,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	
 	@Override
 	protected AunisAxisAlignedBB getHorizonTeleportBox() {
-		return new AunisAxisAlignedBB(-2.5, 1.5, -0.1, 2.5, 6.6, 0.2);
+		return getRendererStateSG1().stargateSize.teleportBox;
 	}
 	
 	@Override
@@ -364,6 +364,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 					updateMergeState(StargateMilkyWayMergeHelper.checkBlocks(world, pos, facing), null);
 					
 					stargateSize = AunisConfig.stargateSize;
+					getRendererStateSG1().stargateSize = stargateSize;
 					markDirty();
 				}
 			}
@@ -417,21 +418,17 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		
 	@Override
 	protected AunisAxisAlignedBB getHorizonKillingBox() {
-		return new AunisAxisAlignedBB(-1, 3, 0, 1, 5.5, 5);
+		return getRendererStateSG1().stargateSize.killingBox;
 	}
 	
 	@Override
 	protected int getHorizonSegmentCount() {
-		return 5;
+		return getRendererStateSG1().stargateSize.horizonSegmentCount;
 	}
 	
 	@Override
 	protected  List<AunisAxisAlignedBB> getGateVaporizingBoxes() {
-		return Arrays.asList(
-				new AunisAxisAlignedBB(-1.5, 2.0, -0.5, 1.5, 7, 0.5),
-				new AunisAxisAlignedBB(-2.5, 2.0, -0.5, -1.5, 6, 0.5),
-				new AunisAxisAlignedBB(2.5, 2.0, -0.5, 1.5, 6, 0.5)
-			);
+		return getRendererStateSG1().stargateSize.gateVaporizingBoxes;
 	}
 	
 	
@@ -645,7 +642,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		if (args.isInteger(0))
 			symbol = EnumSymbol.valueOf(args.checkInteger(0));
 		else if (args.isString(0))
-			symbol = EnumSymbol.forName(args.checkString(0));
+			symbol = EnumSymbol.forEnglishName(args.checkString(0));
 		
 		if (symbol == null)
 			throw new IllegalArgumentException("bad argument #1 (symbol name/index invalid)");
@@ -686,7 +683,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		getServerRingSpinHelper().requestStart(getRendererStateSG1().ringCurrentSymbol.angle, spinDirection, symbol, lock, context, moveOnly);
 		ringRollLoopPlayed = false || moveOnly;
 		
-		sendSignal(context, "stargate_spin_start", new Object[] { symbolCount, lock, targetSymbol.name });
+		sendSignal(context, "stargate_spin_start", new Object[] { symbolCount, lock, targetSymbol.englishName });
 		
 		markDirty();
 		

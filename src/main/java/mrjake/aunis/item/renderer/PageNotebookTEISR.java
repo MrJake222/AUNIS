@@ -116,7 +116,7 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableBlend();
 		
-		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("aunis:textures/gui/symbol/" + symbol.name.toLowerCase() + ".png"));		
+		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("aunis:textures/gui/symbol/" + symbol.iconFile));		
 		GL11.glBegin(GL11.GL_QUADS);
 		
 		float offx = 0.21f*col;
@@ -168,7 +168,7 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(mainhand ? 0.5f : -0.25f, 0.2f, 0);
 		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("aunis:textures/gui/notebook_background.png"));		
-
+        GlStateManager.disableLighting();
 	    GL11.glBegin(GL11.GL_QUADS);
 		
 	    GL11.glTexCoord2f(0, 0); GL11.glVertex3f(0.0f, 0.0f, 0.0f);
@@ -190,6 +190,7 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 	    	renderAddress(address);
 	    }
 	    
+        GlStateManager.enableLighting();
 	    GlStateManager.popMatrix();
 	}
 }

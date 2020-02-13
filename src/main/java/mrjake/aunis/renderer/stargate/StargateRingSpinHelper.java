@@ -207,7 +207,7 @@ public class StargateRingSpinHelper extends SpinHelper {
 					if (lock)
 						StargateRenderingUpdatePacketToServer.attemptLightUp(world, gateTile);
 					
-					gateTile.sendSignal(context, "stargate_spin_chevron_engaged", new Object[] { symbolCount, lock, getStargateSpinState().targetSymbol.name });
+					gateTile.sendSignal(context, "stargate_spin_chevron_engaged", new Object[] { symbolCount, lock, getStargateSpinState().targetSymbol.englishName });
 				}
 			}
 		}

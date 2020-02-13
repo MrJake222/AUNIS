@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.config.AunisConfig;
@@ -31,7 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -246,14 +245,14 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 							
 							if (powerCrystal.isEmpty()) {
 								// No control crystal, display message
-								player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.no_crystal_warn")), true);
+								player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.no_crystal_warn"), true);
 								
 								return;
 							}
 							
 							else {							
 								if (!gateTile.hasEnergy(AunisConfig.powerConfig.dhdMinimalEnergy)) {
-									player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.no_enough_power")), true);
+									player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.no_enough_power"), true);
 									
 									return;
 								}
@@ -266,7 +265,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 									}
 									
 									else {
-										player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.incoming_wormhole_warn")), true);
+										player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.incoming_wormhole_warn"), true);
 									}
 								}
 								
@@ -298,7 +297,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 										((StargateMilkyWayBaseTile) gateTile).setRollPlayed();
 										
 										if (gateState == EnumGateState.NOT_ENOUGH_POWER)
-											player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.stargatebase_block.not_enough_power")), true);
+											player.sendStatusMessage(new TextComponentTranslation("tile.aunis.stargatebase_block.not_enough_power"), true);
 									}
 								}	
 								
@@ -322,7 +321,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 															
 									boolean lock = symbol == EnumSymbol.ORIGIN;
 									
-									gateTile.sendSignal(null, "stargate_dhd_chevron_engaged", new Object[] { symbolCount, lock, symbol.name });
+									gateTile.sendSignal(null, "stargate_dhd_chevron_engaged", new Object[] { symbolCount, lock, symbol.englishName });
 									
 									// Light up target gate, if exists
 									if (lock) {	
@@ -335,7 +334,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 						else { 
 							switch (gateTile.getStargateState()) {
 								case COMPUTER_DIALING:
-									player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.computer_dial")), true);
+									player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.computer_dial"), true);
 									break;
 									
 //								case FAILING:
@@ -350,7 +349,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 					
 					else {
 						// DHD is not linked
-						player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.not_linked_warn")), true);
+						player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.not_linked_warn"), true);
 					}
 					
 				} // block loaded if

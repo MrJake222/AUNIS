@@ -62,9 +62,6 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 	public void render(double x, double y, double z, float partialTicks) {
 		
 		if (shouldRender()) {	
-			applyLightMap(partialTicks);
-//			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
-			
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(x, y, z);
 			
@@ -84,6 +81,9 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 			Vec3d vec = getRenderTranslation();
 			GlStateManager.translate(vec.x, vec.y, vec.z);			
 			GlStateManager.scale(getRenderScale(), getRenderScale(), getRenderScale());
+			
+			applyLightMap(partialTicks);
+//			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 			
 			renderRing(partialTicks);
 			

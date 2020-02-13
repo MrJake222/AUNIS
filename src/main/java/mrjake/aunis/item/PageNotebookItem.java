@@ -49,7 +49,7 @@ public class PageNotebookItem extends Item {
 	@Override
 	public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag flag) {
 		if (stack.getItemDamage() == 0) {			
-			tooltip.add("Empty");
+			tooltip.add(Aunis.proxy.localize("item.aunis.page_mysterious.empty"));
 		}
 		
 		else {			
@@ -59,13 +59,13 @@ public class PageNotebookItem extends Item {
 				List<Integer> address = EnumSymbol.fromLong(serialized);
 								
 				for (int id : address) {
-					tooltip.add(TextFormatting.ITALIC + "" + TextFormatting.AQUA + EnumSymbol.valueOf(id).name);
+					tooltip.add(TextFormatting.ITALIC + "" + TextFormatting.AQUA + EnumSymbol.valueOf(id).localize());
 				}
 				
 				if (compound.hasKey("7th")) {
 		    		EnumSymbol seventh = EnumSymbol.valueOf(compound.getInteger("7th"));
 		    		
-					tooltip.add(TextFormatting.ITALIC + "" + TextFormatting.DARK_PURPLE + seventh.name);
+					tooltip.add(TextFormatting.ITALIC + "" + TextFormatting.DARK_PURPLE + seventh.localize());
 				}
 			}
 		}
