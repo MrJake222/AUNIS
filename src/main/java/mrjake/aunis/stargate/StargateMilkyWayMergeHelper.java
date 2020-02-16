@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
@@ -24,15 +22,16 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
-public class StargateMilkyWayMergeHelper {
+public class StargateMilkyWayMergeHelper extends StargateAbstractMergeHelper {
+	
+	public static final StargateMilkyWayMergeHelper INSTANCE = new StargateMilkyWayMergeHelper();
+	
 	/**
 	 * Bounding box used for {@link StargateMilkyWayBaseTile} search.
 	 * Searches 3 blocks to the left/right and 7 blocks down.
@@ -93,7 +92,8 @@ public class StargateMilkyWayMergeHelper {
 			new BlockPos(-2, 0, 0), 
 			new BlockPos(0, 9, 0));
 	
-	public static List<BlockPos> getRingBlocks() {
+	@Override
+	public List<BlockPos> getRingBlocks() {
 		switch (AunisConfig.stargateSize) {
 		case SMALL:
 		case MEDIUM:
@@ -107,7 +107,8 @@ public class StargateMilkyWayMergeHelper {
 		}
 	}
 	
-	public static List<BlockPos> getChevronBlocks() {
+	@Override
+	public List<BlockPos> getChevronBlocks() {
 		switch (AunisConfig.stargateSize) {
 			case SMALL:
 			case MEDIUM:
@@ -121,7 +122,8 @@ public class StargateMilkyWayMergeHelper {
 		}
 	}
 	
-	public static AunisAxisAlignedBB getBaseSearchBox() {
+	@Override
+	public AunisAxisAlignedBB getBaseSearchBox() {
 		switch (AunisConfig.stargateSize) {
 			case SMALL:
 			case MEDIUM:
@@ -135,39 +137,12 @@ public class StargateMilkyWayMergeHelper {
 		}
 	}
 	
-	/**
-	 * Method searches for a {@link StargateMilkyWayBaseBlock} within {@link this#BASE_SEARCH_BOX}
-	 * and returns it's {@link TileEntity}.
-	 * 
-	 * @param blockAccess Usually {@link World}.
-	 * @param memberPos Starting position.
-	 * @param facing Facing of the member blocks.
-	 * @return {@link StargateMilkyWayBaseTile} if found, {@code null} otherwise.
-	 */
-	@Nullable
-	public static StargateMilkyWayBaseTile findBaseTile(IBlockAccess blockAccess, BlockPos memberPos, EnumFacing facing) {
-		AunisAxisAlignedBB globalBox = getBaseSearchBox().rotate(facing).offset(memberPos);
-		
-		for (MutableBlockPos pos : BlockPos.getAllInBoxMutable(globalBox.getMinBlockPos(), globalBox.getMaxBlockPos())) {
-			if (BASE_MATCHER.apply(blockAccess.getBlockState(pos))) {
-				return (StargateMilkyWayBaseTile) blockAccess.getTileEntity(pos.toImmutable());
-			}
-		}
-		
-		return null;
+	@Override
+	public BlockMatcher getBaseMatcher() {
+		return BASE_MATCHER;
 	}
 	
-	/**
-	 * Check the given {@link BlockPos} for the {@link StargateMilkyWayMemberBlock},
-	 * it's correct variant and facing.
-	 * 
-	 * @param blockAccess Usually {@link World}.
-	 * @param pos {@link BlockPos} to be checked.
-	 * @param facing Expected {@link EnumFacing}.
-	 * @param variant Expected {@link EnumMemberVariant}.
-	 * @return {@code true} if the block matches given parameters, {@code false} otherwise.
-	 */
-	private static boolean checkMemberBlock(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing, EnumMemberVariant variant) {
+	protected boolean checkMemberBlock(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing, EnumMemberVariant variant) {
 		IBlockState state = blockAccess.getBlockState(pos);
 		
 		return MEMBER_MATCHER.apply(state) &&
@@ -175,41 +150,8 @@ public class StargateMilkyWayMergeHelper {
 				state.getValue(AunisProps.MEMBER_VARIANT) == variant;
 	}
 	
-	/**
-	 * Called on block placement. Checks the found base block
-	 * for other Stargate blocks and returns the result.
-	 * 
-	 * @param blockAccess Usually {@link World}.
-	 * @param basePos Found {@link StargateMilkyWayBaseBlock}.
-	 * @param baseFacing Current base facing.
-	 * @return {@code true} if the structure matches, {@code false} otherwise.
-	 */
-	public static boolean checkBlocks(IBlockAccess blockAccess, BlockPos basePos, EnumFacing baseFacing) {		
-		if (AunisConfig.debugConfig.checkGateMerge) {	
-			for (BlockPos pos : getRingBlocks()) {
-				if (!checkMemberBlock(blockAccess, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), baseFacing, EnumMemberVariant.RING))
-					return false;
-			}
-			
-			for (BlockPos pos : getChevronBlocks()) {
-				if (!checkMemberBlock(blockAccess, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), baseFacing, EnumMemberVariant.CHEVRON))
-					return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Updates merge status of the given block. Block is internally
-	 * checked by {@link this#MEMBER_MATCHER}.
-	 * 
-	 * @param world {@link World} instance.
-	 * @param checkPos Position of the currently checked {@link StargateMilkyWayMemberBlock}.
-	 * @param basePos Position of {@link StargateMilkyWayBaseBlock} the tiles should be linked to.
-	 * @param shouldBeMerged {@code true} if the structure is merging, false otherwise.
-	 */
-	private static void updateMemberMergeStatus(World world, BlockPos checkPos, BlockPos basePos, boolean shouldBeMerged) {
+	protected void updateMemberMergeStatus(World world, BlockPos checkPos, BlockPos basePos, EnumFacing baseFacing, boolean shouldBeMerged) {
+		checkPos = checkPos.rotate(FacingToRotation.get(baseFacing)).add(basePos);
 		IBlockState state = world.getBlockState(checkPos);
 		
 		if (MEMBER_MATCHER.apply(state)) {		
@@ -231,22 +173,6 @@ public class StargateMilkyWayMergeHelper {
 				world.setBlockState(checkPos, state.withProperty(AunisProps.RENDER_BLOCK, !shouldBeMerged), 3);
 			}
 		}
-	}
-	
-	/**
-	 * Updates merge status of the Stargate.
-	 * 
-	 * @param world {@link World} instance.
-	 * @param basePos Position of {@link StargateMilkyWayBaseBlock} the tiles should be linked to.
-	 * @param baseFacing Facing of {@link StargateMilkyWayBaseBlock}.
-	 * @param shouldBeMerged {@code true} if the structure is merging, false otherwise.
-	 */
-	public static void updateMembersMergeStatus(World world, BlockPos basePos, EnumFacing baseFacing, boolean shouldBeMerged) {
-		for (BlockPos pos : getRingBlocks())
-			updateMemberMergeStatus(world, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), basePos, shouldBeMerged);
-		
-		for (BlockPos pos : getChevronBlocks())
-			updateMemberMergeStatus(world, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), basePos, shouldBeMerged);
 	}
 	
 	/**
@@ -276,7 +202,7 @@ public class StargateMilkyWayMergeHelper {
 	 * @param basePos Position of {@link StargateMilkyWayBaseBlock} the tiles should be linked to.
 	 * @param baseFacing Facing of {@link StargateMilkyWayBaseBlock}.
 	 */
-	public static void updateMembersBasePos(IBlockAccess blockAccess, BlockPos basePos, EnumFacing baseFacing) {
+	public void updateMembersBasePos(IBlockAccess blockAccess, BlockPos basePos, EnumFacing baseFacing) {
 		for (BlockPos pos : getRingBlocks())
 			updateMemberBasePos(blockAccess, pos.rotate(FacingToRotation.get(baseFacing)).add(basePos), basePos, baseFacing);
 		
@@ -294,7 +220,7 @@ public class StargateMilkyWayMergeHelper {
 	 * @param currentStargateSize Current Stargate size as read from NBT.
 	 * @param targetStargateSize Target Stargate size as defined in config.
 	 */
-	public static void convertToPattern(World world, BlockPos basePos, EnumFacing baseFacing, StargateSizeEnum currentStargateSize, StargateSizeEnum targetStargateSize) {
+	public void convertToPattern(World world, BlockPos basePos, EnumFacing baseFacing, StargateSizeEnum currentStargateSize, StargateSizeEnum targetStargateSize) {
 		Aunis.info(basePos + ": Converting Stargate from " + currentStargateSize + " to " + targetStargateSize);
 		List<BlockPos> oldPatternBlocks = new ArrayList<BlockPos>();
 		

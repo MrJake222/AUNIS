@@ -15,6 +15,8 @@ import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
+import mrjake.aunis.stargate.StargateAbstractMergeHelper;
+import mrjake.aunis.stargate.StargateOrlinMergeHelper;
 import mrjake.aunis.state.StargateOrlinGuiState;
 import mrjake.aunis.state.StargateOrlinSparkState;
 import mrjake.aunis.state.StargateRendererStateBase;
@@ -104,13 +106,23 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 	
 	
 	// ------------------------------------------------------------------------
-	// Killing and vaporizing blocks
-//		return new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5);
+	// Merging
+	
+	@Override
+	protected void unmergeGate() {}
+	
+	@Override
+	protected void mergeGate() {}
+	
+	@Override
+	protected StargateAbstractMergeHelper getMergeHelper() {
+		return StargateOrlinMergeHelper.INSTANCE;
+	}
 		
-//		private static final List<AxisAlignedBB> localKillingBoxes = Arrays.asList(
-//				new AxisAlignedBB(-1.5, 3.5, 0.5, 1.5, 7, 6.5));
-		                                                                            
-		
+	
+	// ------------------------------------------------------------------------
+	// Killing
+	
 	@Override
 	protected AunisAxisAlignedBB getHorizonKillingBox() {
 		return new AunisAxisAlignedBB(-0.5, 1, -0.5, 0.5, 2, 1.5);

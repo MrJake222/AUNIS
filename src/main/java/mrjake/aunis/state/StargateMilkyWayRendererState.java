@@ -24,7 +24,7 @@ public class StargateMilkyWayRendererState extends StargateRendererStateBase {
 			int index = 0;
 			IBlockState state = world.getBlockState(gatePos);
 			
-			for (BlockPos chevPos : StargateMilkyWayMergeHelper.getChevronBlocks()) {
+			for (BlockPos chevPos : StargateMilkyWayMergeHelper.INSTANCE.getChevronBlocks()) {
 				StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(chevPos.rotate(FacingToRotation.get(state.getValue(AunisProps.FACING_HORIZONTAL))).add(gatePos));
 				
 				if (memberTile != null)
@@ -42,7 +42,7 @@ public class StargateMilkyWayRendererState extends StargateRendererStateBase {
 		if (AunisConfig.debugConfig.checkGateMerge) {
 			IBlockState state = world.getBlockState(gatePos);
 			
-			BlockPos chevPos = StargateMilkyWayMergeHelper.getChevronBlocks().get(8);
+			BlockPos chevPos = StargateMilkyWayMergeHelper.INSTANCE.getChevronBlocks().get(8);
 			StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(chevPos.rotate(FacingToRotation.get(state.getValue(AunisProps.FACING_HORIZONTAL))).add(gatePos));
 				
 			if (memberTile != null)

@@ -10,6 +10,7 @@ import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
 import net.minecraft.block.Block;
@@ -336,10 +337,10 @@ public class StargateMilkyWayMemberBlock extends Block {
 		
 			world.setBlockState(pos, state); 
 			
-			StargateMilkyWayBaseTile gateTile = StargateMilkyWayMergeHelper.findBaseTile(world, pos, facing);
+			StargateAbstractBaseTile gateTile = StargateMilkyWayMergeHelper.INSTANCE.findBaseTile(world, pos, facing);
 							
 			if (gateTile != null && !gateTile.isMerged())
-				gateTile.updateMergeState(StargateMilkyWayMergeHelper.checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), null);
+				gateTile.updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), null);
 		}
 	}
 	

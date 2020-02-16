@@ -4,7 +4,8 @@ import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.stargate.orlin.MergeHelperOrlin;
+import mrjake.aunis.stargate.StargateOrlinMergeHelper;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -71,24 +72,26 @@ public class StargateOrlinMemberBlock extends Block {
 	
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+		EnumFacing facing = placer.getHorizontalFacing().getOpposite();
+		
 		if (!world.isRemote) {
 			state = state.withProperty(AunisProps.RENDER_BLOCK, true)
-					.withProperty(AunisProps.ORLIN_VARIANT, placer.getHorizontalFacing().getOpposite());
+					.withProperty(AunisProps.ORLIN_VARIANT, facing);
 		
 			world.setBlockState(pos, state, 0);
 			
-			BlockPos base = MergeHelperOrlin.findBase(world, pos);
-			if (base != null) {
-				MergeHelperOrlin.updateMergeState(world, base, world.getBlockState(base), MergeHelperOrlin.checkBlocks(world, base));
+			StargateAbstractBaseTile gateTile = StargateOrlinMergeHelper.INSTANCE.findBaseTile(world, pos, facing);
+			if (gateTile != null) {
+				gateTile.updateMergeState(StargateOrlinMergeHelper.INSTANCE.checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), null);
 			}				
 		}
 	}
 	
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-		BlockPos base = MergeHelperOrlin.findBase(world, pos);
-		if (base != null) {
-			MergeHelperOrlin.updateMergeState(world, base, world.getBlockState(base), false);
+		StargateAbstractBaseTile gateTile = StargateOrlinMergeHelper.INSTANCE.findBaseTile(world, pos, EnumFacing.NORTH);
+		if (gateTile != null) {
+			gateTile.updateMergeState(false, null);
 		}	
 	}
 	

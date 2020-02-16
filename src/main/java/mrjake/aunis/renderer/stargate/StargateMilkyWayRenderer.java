@@ -82,7 +82,7 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 		int blockLight = 0;
 		
 		for (int i=0; i<chevronCount; i++) {
-			BlockPos blockPos = StargateMilkyWayMergeHelper.getChevronBlocks().get(i).rotate(FacingToRotation.get(facing)).add(pos);
+			BlockPos blockPos = StargateMilkyWayMergeHelper.INSTANCE.getChevronBlocks().get(i).rotate(FacingToRotation.get(facing)).add(pos);
 			
 			skyLight += world.getLightFor(EnumSkyBlock.SKY, blockPos);
 			blockLight += world.getLightFor(EnumSkyBlock.BLOCK, blockPos);

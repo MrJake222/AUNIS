@@ -188,7 +188,7 @@ public class StargateGenerator {
 					world.setBlockState(gatePos, world.getBlockState(gatePos).withProperty(AunisProps.FACING_HORIZONTAL, facing));
 //					MergeHelper.updateChevRingRotation(world, gatePos, facing);
 					// TODO Check updateChevRingRotation for Mysterious Page
-					StargateMilkyWayMergeHelper.updateMembersBasePos(world, gatePos, facing);
+					StargateMilkyWayMergeHelper.INSTANCE.updateMembersBasePos(world, gatePos, facing);
 					
 					world.setBlockToAir(dataPos);
 					world.setBlockToAir(dataPos.down()); // save block

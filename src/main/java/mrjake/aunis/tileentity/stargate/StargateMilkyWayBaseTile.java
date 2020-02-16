@@ -9,7 +9,6 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
@@ -29,6 +28,7 @@ import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StargateMilkyWayGuiState;
 import mrjake.aunis.state.StargateMilkyWayRendererState;
@@ -49,7 +49,6 @@ import mrjake.aunis.upgrade.UpgradeRenderer;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.ILinkable;
 import mrjake.aunis.util.LinkingHelper;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
@@ -147,58 +146,33 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		}		
 	}
 	
-	private boolean isMerged;
 	
-	public boolean isMerged() {
-		return isMerged;
+	// ------------------------------------------------------------------------
+	// Merging
+	
+	@Override
+	protected void unmergeGate() {
+		if (isLinked()) {
+			getLinkedDHD(world).setLinkedGate(null);
+			setLinkedDHD(null);
+		}
 	}
 	
-	/**
-	 * Checks gate's merge state
-	 * 
-	 * @param shouldBeMerged - True if gate's multiblock structure is valid
-	 * @param state State of the base block.
-	 */
-	public void updateMergeState(boolean shouldBeMerged, @Nullable IBlockState state) {		
-		this.isMerged = shouldBeMerged;
+	@Override
+	protected void mergeGate() {
+		BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.dhdBlock);
 		
-		if (!shouldBeMerged) {
-			if (isLinked()) {
-				getLinkedDHD(world).setLinkedGate(null);
-				setLinkedDHD(null);
-			}
+		if (closestDhd != null) {
+			DHDTile dhdTile = (DHDTile) world.getTileEntity(closestDhd);
 			
-			if (stargateState.engaged()) {
-				StargateRenderingUpdatePacketToServer.closeGatePacket(this, true);
-			}
+			dhdTile.setLinkedGate(pos);
+			setLinkedDHD(closestDhd);
 		}
-		
-		else {
-			BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.dhdBlock);
-			
-			if (closestDhd != null) {
-				DHDTile dhdTile = (DHDTile) world.getTileEntity(closestDhd);
-				
-				dhdTile.setLinkedGate(pos);
-				setLinkedDHD(closestDhd);
-			}
-		}
-		
-		IBlockState actualState = world.getBlockState(pos);
-		EnumFacing baseFacing;
-		
-		// When the block is destroyed, there will be air in this place and we cannot set it's block state
-		if (StargateMilkyWayMergeHelper.BASE_MATCHER.apply(actualState)) {
-			baseFacing = actualState.getValue(AunisProps.FACING_HORIZONTAL);
-			world.setBlockState(pos, actualState.withProperty(AunisProps.RENDER_BLOCK, !shouldBeMerged), 2);
-		}
-		
-		else
-			baseFacing = state.getValue(AunisProps.FACING_HORIZONTAL);
-		
-		StargateMilkyWayMergeHelper.updateMembersMergeStatus(world, pos, baseFacing, shouldBeMerged);
-		
-		markDirty();
+	}
+	
+	@Override
+	protected StargateAbstractMergeHelper getMergeHelper() {
+		return StargateMilkyWayMergeHelper.INSTANCE;
 	}
 	
 	@Override
@@ -241,7 +215,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		if (isLinked())
 			compound.setLong("linkedDHD", linkedDHD.toLong());
 		
-		compound.setBoolean("isMerged", isMerged);
 		compound.setBoolean("hasUpgrade", hasUpgrade);
 		
 		compound.setBoolean("clearingButtons", clearingButtons);
@@ -267,7 +240,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		if (compound.hasKey("linkedDHD"))
 			this.linkedDHD = BlockPos.fromLong( compound.getLong("linkedDHD") );
 		
-		isMerged = compound.getBoolean("isMerged");
 		hasUpgrade = compound.getBoolean("hasUpgrade");
 		
 		clearingButtons = compound.getBoolean("clearingButtons");
@@ -365,9 +337,9 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				firstTick = false;
 				
 				// Doing this in onLoad causes ConcurrentModificationException
-				if (stargateSize != AunisConfig.stargateSize && isMerged) {
-					StargateMilkyWayMergeHelper.convertToPattern(world, pos, facing, stargateSize, AunisConfig.stargateSize);
-					updateMergeState(StargateMilkyWayMergeHelper.checkBlocks(world, pos, facing), null);
+				if (stargateSize != AunisConfig.stargateSize && isMerged()) {
+					StargateMilkyWayMergeHelper.INSTANCE.convertToPattern(world, pos, facing, stargateSize, AunisConfig.stargateSize);
+					updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, pos, facing), null);
 					
 					stargateSize = AunisConfig.stargateSize;
 					getRendererStateSG1().stargateSize = stargateSize;

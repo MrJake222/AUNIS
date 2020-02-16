@@ -32,6 +32,7 @@ import mrjake.aunis.stargate.AutoCloseManager;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
@@ -663,26 +664,70 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 	public abstract DHDTile getLinkedDHD(World world);
 	protected abstract void clearLinkedDHDButtons(boolean dialingFailed);
 	
-//	private BlockPos linkedDHD;
-//	
-//	@Nullable
-//	public DHDTile getLinkedDHD(World world) {
-//		if (linkedDHD == null)
-//			return null;
-//		
-//		return (DHDTile) world.getTileEntity(linkedDHD);
-//	}
-//	
-//	public void setLinkedDHD(BlockPos dhdPos) {		
-//		this.linkedDHD = dhdPos;
-//		
-//		markDirty();
-//	}
-//	
-//	@Override
-//	public boolean isLinked() {
-//		return linkedDHD != null;
-//	}
+	
+	// ------------------------------------------------------------------------
+	// Merging
+	
+	private boolean isMerged;
+	
+	public final boolean isMerged() {
+		return isMerged;
+	}
+	
+	/**
+	 * Function called when {@link this#updateMergeState(boolean, IBlockState)} is
+	 * called with {@code true} parameter(multiblock valid).
+	 */
+	protected abstract void mergeGate();
+	
+	/**
+	 * Function called when {@link this#updateMergeState(boolean, IBlockState)} is
+	 * called with {@code false} parameter(multiblock not valid).
+	 */
+	protected abstract void unmergeGate();
+	
+	/**
+	 * @return Appropriate merge helper
+	 */
+	protected abstract StargateAbstractMergeHelper getMergeHelper();
+	
+	/**
+	 * Checks gate's merge state
+	 * 
+	 * @param shouldBeMerged - True if gate's multiblock structure is valid
+	 * @param state State of the base block.
+	 */
+	public final void updateMergeState(boolean shouldBeMerged, @Nullable IBlockState state) {		
+		this.isMerged = shouldBeMerged;
+		
+		if (!shouldBeMerged) {
+			unmergeGate();
+			
+			if (stargateState.engaged()) {
+				StargateRenderingUpdatePacketToServer.closeGatePacket(this, true);
+			}
+		}
+		
+		else {
+			mergeGate();
+		}
+		
+		IBlockState actualState = world.getBlockState(pos);
+		EnumFacing baseFacing;
+		
+		// When the block is destroyed, there will be air in this place and we cannot set it's block state
+		if (getMergeHelper().getBaseMatcher().apply(actualState)) {
+			baseFacing = actualState.getValue(AunisProps.FACING_HORIZONTAL);
+			world.setBlockState(pos, actualState.withProperty(AunisProps.RENDER_BLOCK, !shouldBeMerged), 2);
+		}
+		
+		else
+			baseFacing = state.getValue(AunisProps.FACING_HORIZONTAL);
+		
+		getMergeHelper().updateMembersMergeStatus(world, pos, baseFacing, shouldBeMerged);
+		
+		markDirty();
+	}
 	
 	
 	// ------------------------------------------------------------------------
@@ -1020,7 +1065,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 		for (int i=0; i<dialedAddress.size(); i++) {
 			compound.setInteger("dialedSymbol"+i, dialedAddress.get(i).id);
 		}
-				
+			
+		compound.setBoolean("isMerged", isMerged);
 		compound.setTag("autoCloseManager", getAutoCloseManager().serializeNBT());
 		compound.setTag("rendererState", getRendererState().serializeNBT());
 		compound.setTag("energyStorage", energyStorage.serializeNBT());
@@ -1066,6 +1112,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 			dialedAddress.add( EnumSymbol.valueOf(compound.getInteger("dialedSymbol"+i)) );
 		}
 				
+		isMerged = compound.getBoolean("isMerged");
 		getAutoCloseManager().deserializeNBT(compound.getCompoundTag("autoCloseManager"));
 		
 		try {

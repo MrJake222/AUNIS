@@ -9,7 +9,7 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateNetwork;
-import mrjake.aunis.stargate.orlin.MergeHelperOrlin;
+import mrjake.aunis.stargate.StargateOrlinMergeHelper;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import net.minecraft.block.Block;
@@ -130,8 +130,7 @@ public class StargateOrlinBaseBlock extends Block {
 		
 			world.setBlockState(pos, state);
 			gateTile.updateFacing(facing);
-			
-			MergeHelperOrlin.updateMergeState(world, pos, state, MergeHelperOrlin.checkBlocks(world, pos));
+			gateTile.updateMergeState(StargateOrlinMergeHelper.INSTANCE.checkBlocks(world, pos, facing), state);
 		}
 		
 		else {
@@ -144,7 +143,7 @@ public class StargateOrlinBaseBlock extends Block {
 		if (!world.isRemote) {
 			StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
 			
-			MergeHelperOrlin.updateMergeState(world, pos, state, false);			
+			gateTile.updateMergeState(false, state);			
 			StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
 		}
 	}
