@@ -37,7 +37,8 @@ public class StargateMilkyWayMergeHelper {
 	 * Bounding box used for {@link StargateMilkyWayBaseTile} search.
 	 * Searches 3 blocks to the left/right and 7 blocks down.
 	 */
-	private static final AunisAxisAlignedBB BASE_SEARCH_BOX = new AunisAxisAlignedBB(-3, -7, 0, 3, 0, 0);
+	private static final AunisAxisAlignedBB BASE_SEARCH_BOX_SMALL = new AunisAxisAlignedBB(-3, -7, 0, 3, 0, 0);
+	private static final AunisAxisAlignedBB BASE_SEARCH_BOX_LARGE = new AunisAxisAlignedBB(-5, -9, 0, 5, 0, 0);
 	
 	public static final BlockMatcher BASE_MATCHER = BlockMatcher.forBlock(AunisBlocks.stargateMilkyWayBaseBlock);
 	public static final BlockMatcher MEMBER_MATCHER = BlockMatcher.forBlock(AunisBlocks.stargateMilkyWayMemberBlock);
@@ -120,6 +121,20 @@ public class StargateMilkyWayMergeHelper {
 		}
 	}
 	
+	public static AunisAxisAlignedBB getBaseSearchBox() {
+		switch (AunisConfig.stargateSize) {
+			case SMALL:
+			case MEDIUM:
+				return BASE_SEARCH_BOX_SMALL;
+				
+			case LARGE:
+				return BASE_SEARCH_BOX_LARGE;
+				
+			default:
+				return null;
+		}
+	}
+	
 	/**
 	 * Method searches for a {@link StargateMilkyWayBaseBlock} within {@link this#BASE_SEARCH_BOX}
 	 * and returns it's {@link TileEntity}.
@@ -131,7 +146,7 @@ public class StargateMilkyWayMergeHelper {
 	 */
 	@Nullable
 	public static StargateMilkyWayBaseTile findBaseTile(IBlockAccess blockAccess, BlockPos memberPos, EnumFacing facing) {
-		AunisAxisAlignedBB globalBox = BASE_SEARCH_BOX.rotate(facing).offset(memberPos);
+		AunisAxisAlignedBB globalBox = getBaseSearchBox().rotate(facing).offset(memberPos);
 		
 		for (MutableBlockPos pos : BlockPos.getAllInBoxMutable(globalBox.getMinBlockPos(), globalBox.getMaxBlockPos())) {
 			if (BASE_MATCHER.apply(blockAccess.getBlockState(pos))) {
