@@ -93,7 +93,7 @@ public class CommandStargateCloseAll extends CommandBase {
 		}
 		
 		for (long remove : toBeRemoved)
-			StargateNetwork.get(sender.getEntityWorld()).queryStargates().remove(remove);
+			StargateNetwork.get(sender.getEntityWorld()).removeStargate(remove);
 		
 		notifyCommandListener(sender, this, "Closed " + closed + " gates.");
 	}

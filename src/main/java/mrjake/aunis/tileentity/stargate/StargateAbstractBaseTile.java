@@ -46,6 +46,7 @@ import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tesr.RendererProviderInterface;
 import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.util.PreparableInterface;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
@@ -73,7 +74,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
-public abstract class StargateAbstractBaseTile extends TileEntity implements RendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment {
+public abstract class StargateAbstractBaseTile extends TileEntity implements RendererProviderInterface, StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment, PreparableInterface {
 	
 	// ------------------------------------------------------------------------
 	// Stargate state
@@ -190,38 +191,19 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 		return dialedAddress.size();
 	}
 	
-	public List<EnumSymbol> generateAddress() {			
-		if ( gateAddress == null ) {
-			Random rand = new Random(pos.hashCode() * 31 + world.provider.getDimension());
-			List<EnumSymbol> address = new ArrayList<EnumSymbol>(); 
-				
-			while (true) {
-				address.clear();
-				
-				while (address.size() < 7) {
-					EnumSymbol symbol = EnumSymbol.valueOf( rand.nextInt(38) );
+	private List<EnumSymbol> generateAddress() {			
+		Random rand = new Random(pos.hashCode() * 31 + world.provider.getDimension());
+		List<EnumSymbol> address = new ArrayList<EnumSymbol>(7); 
 						
-					if ( !address.contains(symbol) && symbol != EnumSymbol.ORIGIN ) {
-						address.add(symbol);
-					}
-				}
-				
-				// Check if SOMEHOW Stargate with the same address doesn't exists
-				if ( StargateNetwork.get(world).checkForStargate(address) )
-					rand = new Random();
-				else
-					break;
+		while (address.size() < 7) {
+			EnumSymbol symbol = EnumSymbol.valueOf( rand.nextInt(38) );
+					
+			if (!address.contains(symbol) && symbol != EnumSymbol.ORIGIN) {
+				address.add(symbol);
 			}
-						
-			gateAddress = address;
-			markDirty();
-							
-			// Add Stargate to the "network" - WorldSavedData
-//			Aunis.info("add stargate " + gateAddress);
-			StargateNetwork.get(world).addStargate(gateAddress, world.provider.getDimension(), pos);
 		}
 		
-		return gateAddress;
+		return address;
 	}
 	
 	protected abstract int getMaxChevrons(boolean computer, DHDTile dhdTile);
@@ -399,9 +381,19 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 		
 		if (!world.isRemote) {
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-			
-			generateAddress();
 			Aunis.ocWrapper.joinOrCreateNetwork(this);
+			
+			if (gateAddress == null) {
+				gateAddress = generateAddress();
+				
+//				if (StargateNetwork.get(world).checkForStargate(gateAddress))
+//					Aunis.info(pos+"double address");
+				if (StargateNetwork.get(world).checkForStargate(gateAddress))
+					throw new IllegalStateException("Stargate with given address already exists");
+				
+				StargateNetwork.get(world).addStargate(gateAddress, world.provider.getDimension(), pos);
+				markDirty();
+			}
 		}
 		
 		else {
@@ -1106,6 +1098,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 		super.readFromNBT(compound);
 	}
 	
+	@Override
+	public void prepare() {
+		gateAddress = null;
+	}
 	
 	// ------------------------------------------------------------------------
 	// OpenComputers

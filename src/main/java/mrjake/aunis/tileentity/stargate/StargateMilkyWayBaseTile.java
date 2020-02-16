@@ -306,6 +306,12 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		super.readFromNBT(compound);
 	}
 	
+	@Override
+	public void prepare() {
+		super.prepare();
+		setLinkedDHD(null);
+	}
+	
 	// ------------------------------------------------------------------------
 	// Ticking and loading
 	

@@ -71,8 +71,12 @@ public class StargateNetwork extends WorldSavedData {
 	}
 	
 	public void removeStargate(List<EnumSymbol> address) {
-		if ( checkForStargate(address) ) {
-			stargateMap.remove(EnumSymbol.toLong(address));
+		removeStargate(EnumSymbol.toLong(address));
+	}
+	
+	public void removeStargate(long address) {
+		if (checkForStargate(address)) {
+			stargateMap.remove(address);
 			
 			markDirty();
 		}
@@ -91,8 +95,12 @@ public class StargateNetwork extends WorldSavedData {
 		return stargateMap.get( EnumSymbol.toLong(address) );
 	}
 	
+	public boolean checkForStargate(long address) {
+		return stargateMap.containsKey(address);
+	}
+	
 	public boolean checkForStargate(List<EnumSymbol> address) {
-		return stargateMap.containsKey(EnumSymbol.toLong(address));
+		return checkForStargate(EnumSymbol.toLong(address));
 	}
 	
 	public boolean stargateInWorld(World currentWorld, List<EnumSymbol> address) {

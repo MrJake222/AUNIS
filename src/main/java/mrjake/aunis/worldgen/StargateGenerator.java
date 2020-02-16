@@ -8,6 +8,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.capability.EnergyStorageUncapped;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
@@ -161,8 +162,12 @@ public class StargateGenerator {
 		Biome biome = world.getBiome(pos);
 		boolean desert = biome.getRegistryName().getPath().contains("desert");		
 		
+		String templateName = "sg_";
+		templateName += desert ? "desert" : "plains";
+		templateName += AunisConfig.stargateSize == StargateSizeEnum.LARGE ? "_large" : "_small";
+		
 		TemplateManager templateManager = worldServer.getStructureTemplateManager();
-		Template template = templateManager.getTemplate(server, new ResourceLocation(Aunis.ModID, desert ? "sg_desert" : "sg_plains"));
+		Template template = templateManager.getTemplate(server, new ResourceLocation(Aunis.ModID, templateName));
 		
 		if (template != null) {			
 			Random rand = new Random();
@@ -221,22 +226,15 @@ public class StargateGenerator {
 				}
 			}
 			
-			if (gatePos != null && dhdPos != null) {				
-				StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(gatePos);
-				DHDTile dhdTile = (DHDTile) world.getTileEntity(dhdPos);
-				
-				if (gateTile != null) {
-					gateTile.gateAddress = null;
-					List<EnumSymbol> address = gateTile.generateAddress();
-					
-					if (dhdTile != null) {
-						dhdTile.setLinkedGate(gateTile.getPos());
-						gateTile.setLinkedDHD(dhdTile.getPos());
-					}
-					
-					return new GeneratedStargate(address, biome.getRegistryName().getPath());
-				}
+			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(gatePos);
+			DHDTile dhdTile = (DHDTile) world.getTileEntity(dhdPos);
+			
+			if (dhdTile != null) {
+				dhdTile.setLinkedGate(gatePos);
+				gateTile.setLinkedDHD(dhdPos);
 			}
+			
+			return new GeneratedStargate(gateTile.gateAddress, biome.getRegistryName().getPath());
 		}
 		
 		else {
