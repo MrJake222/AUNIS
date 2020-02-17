@@ -281,6 +281,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 			dhdTile.getDHDRendererState().activeButtons = EnumSymbol.toIntegerList(incomingAddress.subList(0, dialedAddressSize - 1), EnumSymbol.ORIGIN);
 		}
 		
+		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_INCOMING, 0.5f);
+		
 		sendSignal(null, "stargate_incoming_wormhole", new Object[] { dialedAddressSize });
 		sendRenderingUpdate(EnumGateAction.LIGHT_UP_CHEVRONS, false, dialedAddressSize);
 	}
@@ -341,6 +343,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE));
 			sendSignal(null, "stargate_close", new Object[] {});
 			
+			AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_CLOSE, 0.3f);
 			sendRenderingUpdate(EnumGateAction.CLOSE_GATE, !stopRing, 0);
 		}
 		

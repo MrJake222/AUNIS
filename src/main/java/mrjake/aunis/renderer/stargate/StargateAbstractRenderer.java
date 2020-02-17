@@ -10,11 +10,9 @@ import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.EnumFacing;
@@ -159,7 +157,6 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 	public void closeGate() {
 		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, pos, false);
 		
-		AunisSoundHelper.playSoundEventClientSide((WorldClient) world, pos, EnumAunisSoundEvent.GATE_CLOSE, 0.3f);
 		gateWaitClose = world.getTotalWorldTime();
 		
 		rendererState.vortexState = EnumVortexState.CLOSING;

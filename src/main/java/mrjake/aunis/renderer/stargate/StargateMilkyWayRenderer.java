@@ -14,7 +14,6 @@ import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.StargateActivation;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisPositionedSound;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StargateMilkyWayRendererState;
@@ -22,7 +21,6 @@ import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.StargateSpinStateRequest;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.math.BlockPos;
@@ -332,8 +330,6 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 	}
 	
 	public void lightUpChevrons(int chevronsToLightUp) {
-		AunisSoundHelper.playSoundEventClientSide((WorldClient) world, pos, EnumAunisSoundEvent.CHEVRON_INCOMING, 0.5f);
-		
 		Aunis.info("lightUpChevrons: " + chevronsToLightUp);
 		this.rendererState.dialingComplete = true;
 		

@@ -52,7 +52,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 //	
 	@Override
 	public void onLoad() {		
-		renderer = new StargateOrlinRenderer(this);
+		renderer = new StargateOrlinRenderer(world, pos);
 		
 		super.onLoad();
 	}

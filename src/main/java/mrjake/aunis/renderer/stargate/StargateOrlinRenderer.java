@@ -9,22 +9,23 @@ import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.particle.ParticleBlender;
-import mrjake.aunis.particle.ParticleBlenderSmoke;
-import mrjake.aunis.particle.ParticleBlenderSparks;
 import mrjake.aunis.particle.ParticleBlender.RandomizeInterface;
 import mrjake.aunis.particle.ParticleBlender.SimpleVector;
+import mrjake.aunis.particle.ParticleBlenderSmoke;
+import mrjake.aunis.particle.ParticleBlenderSparks;
 import mrjake.aunis.state.StargateRendererStateBase;
-import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 
 public class StargateOrlinRenderer extends StargateAbstractRenderer {
 	
 	public static final float GATE_SCALE = 0.43f;
 		
-	public StargateOrlinRenderer(StargateOrlinBaseTile te) {
-		super(te.getWorld(), te.getPos());
+	public StargateOrlinRenderer(World world, BlockPos pos) {
+		super(world, pos);
 		
 		this.rendererState = new StargateRendererStateBase(); 
 	}
