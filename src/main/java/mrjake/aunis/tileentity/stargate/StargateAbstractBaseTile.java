@@ -1185,12 +1185,12 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 	@Optional.Method(modid = "opencomputers")
 	@Callback(getter = true)
 	public Object[] stargateAddress(Context context, Arguments args) {
-		return new Object[] {gateAddress};
+		return new Object[] {isMerged ? gateAddress : null};
 	}
 
 	@Optional.Method(modid = "opencomputers")
 	@Callback(getter = true)
 	public Object[] dialedAddress(Context context, Arguments args) {
-		return new Object[] {dialedAddress};
+		return new Object[] {isMerged ? dialedAddress : null};
 	}
 }

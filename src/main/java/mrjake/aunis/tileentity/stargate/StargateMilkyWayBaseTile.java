@@ -607,8 +607,11 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	@Optional.Method(modid = "opencomputers")
 	@Callback(doc = "function(symbolName:string) -- Spins the ring to the given symbol and engages/locks it")
 	public Object[] engageSymbol(Context context, Arguments args) {
+		if (!isMerged())
+			return new Object[] { null, "stargate_failure_not_merged", "Stargate is not merged" };
+		
 		if (!stargateState.idle()) {
-			return new Object[] {null, "stargate_busy", stargateState.toString()};
+			return new Object[] {null, "stargate_failure_busy", "Stargate is busy, state: " + stargateState.toString()};
 		}
 		
 		if (gateAddress.size() == 8) {
@@ -671,14 +674,18 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	@Optional.Method(modid = "opencomputers")
 	@Callback(doc = "function() -- Tries to open the gate")
 	public Object[] engageGate(Context context, Arguments args) {
+		if (!isMerged())
+			return new Object[] { null, "stargate_failure_not_merged", "Stargate is not merged" };
+		
 		if (stargateState.idle() || stargateState.dialingDhd()) {
 			EnumGateState gateState = StargateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
 	
 			if (gateState == EnumGateState.OK) {
-				
 				if (isLinked()) {
 					getLinkedDHD(world).activateSymbol(EnumSymbol.BRB.id);
 				}
+				
+				return new Object[] {"stargate_engage"};
 			}
 			
 			else {
@@ -689,23 +696,25 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				markDirty();
 				
 				sendSignal(null, "stargate_failed", new Object[] {});
+				return new Object[] {null, "stargate_failure_opening", "Stargate failed to open", gateState.toString()};
 			}
-			
-			return new Object[] {gateState.toString()};
 		}
 		
 		else {
-			return new Object[] {EnumGateState.BUSY.toString()};
+			return new Object[] {null, "stargate_failure_busy", "Stargate is busy", "BUSY"};
 		}
 	}
 	
 	@Optional.Method(modid = "opencomputers")
 	@Callback(doc = "function() -- Tries to close the gate")
 	public Object[] disengageGate(Context context, Arguments args) {
+		if (!isMerged())
+			return new Object[] { null, "stargate_failure_not_merged", "Stargate is not merged" };
+		
 		if (stargateState.engaged()) {
 			if (getStargateState().initiating()) {
 				StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
-				return new Object[] {};
+				return new Object[] { "stargate_disengage" };
 			}
 			
 			else
@@ -713,7 +722,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		}
 		
 		else {
-			return new Object[] {null, "stargate_failure_not_open", "The gate is closed", stargateState.toString()};
+			return new Object[] {null, "stargate_failure_not_open", "The gate is closed"};
 		}
 	}
 	
