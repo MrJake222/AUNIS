@@ -19,6 +19,9 @@ tile.aunis.stargate_milkyway_ring_block.name=星门环方块
 tile.aunis.stargate_milkyway_chevron_block.name=星门标记方块
 tile.aunis.dhd_block.name=拨号回家装置(DHD)
 
+tile.aunis.stargate_orlin_base_block.name=人造迷你星门基础方块
+tile.aunis.stargate_orlin_member_block.name=人造迷你星门环方块
+
 tile.aunis.crystal_infuser_block.name=水晶注入器
 
 item.aunis.crystal_fragment.name=水晶种子
@@ -40,6 +43,7 @@ item.aunis.holder_crystal.name=水晶稳定器
 
 item.aunis.page_notebook.name=笔记本页面
 item.aunis.page_mysterious.name=神秘之页
+item.aunis.page_mysterious.empty=空的
 item.aunis.mysterious_page.tooltip=谁知道它指向哪里
 
 fluid.silicon_molten_black=熔融硅
@@ -70,4 +74,58 @@ tile.aunis.transportrings_block.name=传送环
 tile.aunis.transportrings_block.non_existing_address=无法到达此地址
 tile.aunis.transportrings_block.duplicate_address=复制地址
 tile.aunis.transportrings_block.wrong_address=错误的地址，应该是一到六个符号
-tile.aunis.transportrings_block.obstructed=传送环受阻，请清除传送环周围的5x5区域
+tile.aunis.transportrings_block.obstructed=此传送环受阻，请清除此传送环周围的5x5区域
+tile.aunis.transportrings_block.obstructed_target=目标传送环被阻塞，清除目标传送环周围的5x5区域
+tile.aunis.transportrings_block.busy=此传送环正在使用
+tile.aunis.transportrings_block.busy_target=目标传送环繁忙中
+tile.aunis.transportrings_block.rings_no=传送环编号 %s
+tile.aunis.transportrings_block.rings_not_in_grid=传送环不在网格中
+tile.aunis.transportrings_block.rings_address=传送环地址
+tile.aunis.transportrings_block.rings_name=传送环名称
+tile.aunis.transportrings_block.rings_save=保存传送环
+
+commands.sgcloseall.usage=/sgcloseall ["维度名", 维度ID or 空]
+
+death.attack.eventHorizon=%s 被虫洞视界打成分子级别，湮灭在了空气中
+
+ 
+
+glyph.aunis.sculptor=玉夫座
+glyph.aunis.scorpius=天蝎座
+glyph.aunis.centaurus=半人马座
+glyph.aunis.monoceros=麒麟座
+glyph.aunis.point_of_origin=Ori星系
+glyph.aunis.pegasus=飞马洗
+glyph.aunis.andromeda=仙女座
+glyph.aunis.serpens_caput=巨蛇座
+glyph.aunis.aries=白羊座
+glyph.aunis.libra=天枰座
+glyph.aunis.eridanus=波江座
+glyph.aunis.leo_minor=小狮座
+glyph.aunis.hydra=长蛇座
+glyph.aunis.sagittarius=射手座
+glyph.aunis.sextans=六分仪座
+glyph.aunis.scutum=盾牌座
+glyph.aunis.pisces=鱼座
+glyph.aunis.virgo=处女座
+glyph.aunis.boötes=牧夫座
+glyph.aunis.auriga=御夫座
+glyph.aunis.corona_australis=南冕座
+glyph.aunis.gemini=双子座
+glyph.aunis.leo=狮子座
+glyph.aunis.cetus=鲸鱼座
+glyph.aunis.triangulum=三角座
+glyph.aunis.aquarius=水瓶座
+glyph.aunis.microscopium=显微镜
+glyph.aunis.equuleus=小马座
+glyph.aunis.crater=巨爵座
+glyph.aunis.perseus=英仙座
+glyph.aunis.cancer=巨蟹座
+glyph.aunis.norma=矩尺座
+glyph.aunis.taurus=金牛座
+glyph.aunis.canis_minor=小犬座
+glyph.aunis.capricornus=摩羯座
+glyph.aunis.lynx=猞猁座
+glyph.aunis.orion=猎户座
+glyph.aunis.piscis_austrinus=南鱼座
+glyph.aunis.bright_red_button=明亮的红色按钮
