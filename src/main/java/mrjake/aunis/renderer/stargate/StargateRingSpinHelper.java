@@ -190,10 +190,11 @@ public class StargateRingSpinHelper extends SpinHelper {
 		
 		// Server side
 		if (!world.isRemote) {
-			gateTile.markStargateIdle();
 			gateTile.setEndingSymbol(symbol);
 			
 			if (getStargateSpinState().computerInitializedStop) {
+				gateTile.markStargateIdle();
+				
 				if (gateTile.addSymbolToAddress(getStargateSpinState().targetSymbol, gateTile.getLinkedDHD(world), true)) {	
 					
 					if (gateTile.isLinked())
