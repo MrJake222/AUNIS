@@ -1,8 +1,10 @@
 package mrjake.aunis.proxy;
 
+import mrjake.aunis.state.StargateAbstractRendererState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -43,4 +45,7 @@ public class ProxyServer implements IProxy {
 
 	@Override
 	public void addScheduledTaskClientSide(Runnable runnable) {}
+	
+	@Override
+	public void orlinRendererSpawnParticles(World world, StargateAbstractRendererState rendererState) {}
 }

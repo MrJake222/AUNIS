@@ -9,17 +9,16 @@ import mrjake.aunis.gui.StargateOrlinGui;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
-import mrjake.aunis.renderer.stargate.StargateAbstractRenderer;
-import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateOrlinMergeHelper;
+import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.state.StargateOrlinGuiState;
+import mrjake.aunis.state.StargateOrlinRendererState;
 import mrjake.aunis.state.StargateOrlinSparkState;
-import mrjake.aunis.state.StargateRendererStateBase;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.DHDTile;
@@ -51,9 +50,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 //	}
 //	
 	@Override
-	public void onLoad() {		
-		renderer = new StargateOrlinRenderer(world, pos);
-		
+	public void onLoad() {				
 		super.onLoad();
 	}
 	
@@ -64,8 +61,8 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 		super.update();
 		
 		if (world.isRemote) {
-			if (!world.getBlockState(pos).getValue(AunisProps.RENDER_BLOCK))
-				renderer.spawnParticles();
+			if (!world.getBlockState(pos).getValue(AunisProps.RENDER_BLOCK) && rendererStateClient != null)
+				Aunis.proxy.orlinRendererSpawnParticles(world, getRendererStateClient());
 		}
 	}
 	
@@ -124,17 +121,17 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 	// Killing
 	
 	@Override
-	protected AunisAxisAlignedBB getHorizonKillingBox() {
+	protected AunisAxisAlignedBB getHorizonKillingBox(boolean server) {
 		return new AunisAxisAlignedBB(-0.5, 1, -0.5, 0.5, 2, 1.5);
 	}
 	
 	@Override
-	protected int getHorizonSegmentCount() {
+	protected int getHorizonSegmentCount(boolean server) {
 		return 2;
 	}
 	
 	@Override
-	protected List<AunisAxisAlignedBB> getGateVaporizingBoxes() {
+	protected List<AunisAxisAlignedBB> getGateVaporizingBoxes(boolean server) {
 		return Arrays.asList(new AunisAxisAlignedBB(-0.5, 1, -0.5, 0.5, 2, 0.5));
 	}
 		
@@ -143,25 +140,23 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 	// Rendering
 	
 	@Override
-	protected AunisAxisAlignedBB getHorizonTeleportBox() {
+	protected AunisAxisAlignedBB getHorizonTeleportBox(boolean server) {
 		return new AunisAxisAlignedBB(-1.0, 0.6, -0.15, 1.0, 2.7, -0.05);
 	}
 	
-	private StargateOrlinRenderer renderer;
-	private StargateRendererStateBase rendererState = new StargateRendererStateBase();
-	
 	@Override
-	public StargateAbstractRenderer getRenderer() {
-		return renderer;
-	}
-	
-	public StargateOrlinRenderer getRendererOrlin() {
-		return renderer;
+	protected StargateAbstractRendererState getRendererStateServer() {
+		return new StargateOrlinRendererState(stargateState);
 	}
 	
 	@Override
-	protected StargateRendererStateBase getRendererState() {
-		return rendererState;
+	protected StargateAbstractRendererState createRendererStateClient() {
+		return new StargateOrlinRendererState();
+	}
+	
+	@Override
+	public StargateOrlinRendererState getRendererStateClient() {
+		return (StargateOrlinRendererState) super.getRendererStateClient();
 	}
 	
 	
@@ -217,7 +212,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 		
 			case SPARK_STATE:
 				StargateOrlinSparkState sparkState = (StargateOrlinSparkState) state;
-				getRendererOrlin().sparkFrom(sparkState.sparkIndex, sparkState.spartStart);
+				getRendererStateClient().sparkFrom(sparkState.sparkIndex, sparkState.spartStart);
 				
 				break;
 				
@@ -244,7 +239,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 	// Scheduled tasks
 	
 	@Override
-	public void executeTask(EnumScheduledTask scheduledTask) {
+	public void executeTask(EnumScheduledTask scheduledTask, NBTTagCompound customData) {
 		switch (scheduledTask) {
 			case STARGATE_ORLIN_OPEN:
 				StargateRenderingUpdatePacketToServer.attemptLightUp(world, this);
@@ -265,7 +260,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 				break;
 				
 			default:
-				super.executeTask(scheduledTask);
+				super.executeTask(scheduledTask, customData);
 				break;
 		}
 	}
@@ -306,20 +301,25 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 		return 7;
 	}
 
-	@Override
-	protected void firstGlyphDialed(boolean computer) {}
-
-	@Override
-	protected void lastGlyphDialed(boolean computer) {}
-
-	@Override
-	protected void dialingFailed(boolean stopRing) {}
+//	@Override
+//	protected void firstGlyphDialed(boolean computer) {}
+//
+//	@Override
+//	protected void lastGlyphDialed(boolean computer) {}
+//
+//	@Override
+//	protected void dialingFailed(boolean stopRing) {}
 
 	@Override
 	public DHDTile getLinkedDHD(World world) {
 		return null;
 	}
 
+//	@Override
+//	protected void clearLinkedDHDButtons(boolean dialingFailed) {}
+
 	@Override
-	protected void clearLinkedDHDButtons(boolean dialingFailed) {}
+	protected void updateChevronLight() {
+		
+	}
 }

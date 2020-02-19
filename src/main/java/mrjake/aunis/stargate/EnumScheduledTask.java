@@ -7,8 +7,8 @@ import mrjake.aunis.tileentity.TransportRingsTile;
 public enum EnumScheduledTask {
 	STARGATE_OPEN_SOUND(0, 25, false),
 	STARGATE_ENGAGE(1, 86),
-	STARGATE_CLOSE(2, 56),
-	STARGATE_FAIL(3, 50),
+	STARGATE_CLOSE(2, -1),
+//	STARGATE_FAIL(3, 50),
 	STARGATE_CHEVRON_SHUT_SOUND(4, 38, false),
 	STARGATE_CHEVRON_OPEN_SOUND(5, 19, false),
 	STARGATE_CHEVRON_LOCK_DHD_SOUND(6, 15, false),
@@ -22,14 +22,16 @@ public enum EnumScheduledTask {
 	RINGS_FADE_OUT(14, TransportRingsTile.TIMEOUT_FADE_OUT),
 	RINGS_TELEPORT(15, TransportRingsTile.TIMEOUT_TELEPORT),
 	RINGS_CLEAR_OUT(15, TransportRingsTile.RINGS_CLEAR_OUT),
-	RINGS_SOLID_BLOCKS(16, 20);
+	RINGS_SOLID_BLOCKS(16, 20),
+	STARGATE_ACTIVATE_CHEVRON(17, 10),
+	STARGATE_CLEAR_DHD_SYMBOLS(17, -1);
 	
 	public int id;
 	public int waitTicks;
 	
 	/**
-	 * Should the task be called on neatest occasion
-	 * when the scheduled wait time exceeded?
+	 * Should the task be called on nearest occasion
+	 * even when the scheduled wait time exceeded?
 	 */
 	public boolean overtime;
 	

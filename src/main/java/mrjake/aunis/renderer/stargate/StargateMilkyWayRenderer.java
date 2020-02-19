@@ -1,89 +1,47 @@
 package mrjake.aunis.renderer.stargate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
-import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.renderer.activation.Activation;
-import mrjake.aunis.renderer.activation.StargateActivation;
-import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisPositionedSound;
-import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
+import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.state.StargateMilkyWayRendererState;
-import mrjake.aunis.state.StargateRendererStateBase;
-import mrjake.aunis.state.StargateSpinStateRequest;
 import mrjake.aunis.util.FacingToRotation;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
 
 public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 	
 	private static final Vec3d RING_LOC = new Vec3d(0.0, -0.122333, -0.000597);
+	private static final float GATE_DIAMETER = 10.1815f;
+
+	public StargateMilkyWayRenderer() {		
 		
-	public StargateMilkyWayRenderer(World world, BlockPos pos) {
-		super(world, pos);
-		
-		for (int i=0; i<9; i++)
-			chevronTextureList.add(CHEVRON_TEXTURE_BASE + "0.png");
-		
-		// Load chevron textures
-//		for (int i=0; i<=10; i++)
-//			ModelLoader.getTexture("stargate/chevron/chevron" + i + ".png");
 	}
 	
-	private StargateMilkyWayRendererState getRendererStateMilkyWay() {
-		return (StargateMilkyWayRendererState) rendererState;
-	}
-	
-	public void setCurrentSymbol(EnumSymbol symbol) {
-		getRendererStateMilkyWay().ringCurrentSymbol = symbol;
-	}
+//	@Override TODO
+//	public void setRendererState(StargateAbstractRendererState state) {		
+//		super.setRendererState(state);
+//				
+//		setActiveChevrons(getRendererStateMilkyWay().activeChevrons, getRendererStateMilkyWay().isFinalActive);
+//				
+//		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, state.pos, state.doEventHorizonRender);
+//	}
 	
 	@Override
-	public void setRendererState(StargateRendererStateBase state) {		
-		super.setRendererState(state);
-		
-		ringAngularRotation = getRendererStateMilkyWay().ringCurrentSymbol.angle;
-		
-		setActiveChevrons(state.getActiveChevrons(), state.isFinalActive());
-		
-		ringSpinHelper = new StargateRingSpinHelper(world, pos, this, getRendererStateMilkyWay().spinState);
-		
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, pos, state.doEventHorizonRender);
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.RING_ROLL_START, pos, false);
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.RING_ROLL_LOOP, pos, getRendererStateMilkyWay().spinState.isSpinning);
-	}
-	
-	public static List<BlockPos> chevronBlocks = Arrays.asList(
-			new BlockPos(-4, 2, 0), 
-			new BlockPos(-5, 5, 0), 
-			new BlockPos(5, 5, 0), 
-			new BlockPos(4, 2, 0) ); 
-	
-	@Override
-	protected void applyLightMap(double partialTicks) {
+	protected void applyLightMap(StargateAbstractRendererState rendererState, double partialTicks) {
 		final int chevronCount = 6;
 		int skyLight = 0;
 		int blockLight = 0;
 		
 		for (int i=0; i<chevronCount; i++) {
-			BlockPos blockPos = StargateMilkyWayMergeHelper.INSTANCE.getChevronBlocks().get(i).rotate(FacingToRotation.get(facing)).add(pos);
+			BlockPos blockPos = StargateMilkyWayMergeHelper.INSTANCE.getChevronBlocks().get(i).rotate(FacingToRotation.get(rendererState.facing)).add(rendererState.pos);
 			
-			skyLight += world.getLightFor(EnumSkyBlock.SKY, blockPos);
-			blockLight += world.getLightFor(EnumSkyBlock.BLOCK, blockPos);
+			skyLight += getWorld().getLightFor(EnumSkyBlock.SKY, blockPos);
+			blockLight += getWorld().getLightFor(EnumSkyBlock.BLOCK, blockPos);
 		}
 		
 		skyLight /= chevronCount;
@@ -93,27 +51,15 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, blockLight * 16, skyLight * 16);
 //		Aunis.info("bl: " + blockLight + " sky: " + skyLight);
 	}
-	
-	private static final float GATE_DIAMETER = 10.1815f;
-	
+		
 	@Override
-	protected double getRenderScale() {
-		return getRendererStateMilkyWay().stargateSize.renderScale;
+	protected double getRenderScale(StargateAbstractRendererState rendererState) {
+		return ((StargateMilkyWayRendererState) rendererState).stargateSize.renderScale;
 	}
 	
 	@Override
-	protected Vec3d getRenderTranslation() {
-		return new Vec3d(0.50, GATE_DIAMETER/2 + getRendererStateMilkyWay().stargateSize.renderTranslationY, 0.50);
-	}
-	
-	@Override
-	protected boolean shouldRender() {
-		IBlockState state = world.getBlockState(pos);
-		
-		if (state.getBlock() != AunisBlocks.stargateMilkyWayBaseBlock)
-			return false;
-		
-		return (!state.getValue(AunisProps.RENDER_BLOCK)) && rendererState != null;
+	protected Vec3d getRenderTranslation(StargateAbstractRendererState rendererState) {
+		return new Vec3d(0.50, GATE_DIAMETER/2 + ((StargateMilkyWayRendererState) rendererState).stargateSize.renderTranslationY, 0.50);
 	}
 	
 	@Override
@@ -126,116 +72,24 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 			gateModel.render();
 		}
 	}
-
-	private StargateRingSpinHelper ringSpinHelper;
-	
-	private StargateRingSpinHelper getRingSpinHelper() {
-		if (ringSpinHelper == null)
-			ringSpinHelper = new StargateRingSpinHelper(world, pos, this, getRendererStateMilkyWay().spinState);
 		
-		return ringSpinHelper;
-	}
-		
-	public void setRingSpin(boolean spin, boolean dialingComplete, StargateSpinStateRequest stateRequest) {
-		rendererState.dialingComplete = dialingComplete;
-		
-		if (spin) {
-			AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.RING_ROLL_START, pos, true);
-			
-			if (getRendererStateMilkyWay().spinState.isSpinning)
-				ringAngularRotation = getRingSpinHelper().spin(0);
-			
-			getRendererStateMilkyWay().spinState.direction = stateRequest.direction;
-			getRendererStateMilkyWay().spinState.targetSymbol = stateRequest.targetSymbol;
-			getRendererStateMilkyWay().spinState.finalChevron = stateRequest.lock;
-			
-			getRingSpinHelper().requestStart(ringAngularRotation, getRendererStateMilkyWay().spinState.direction, stateRequest.targetSymbol, stateRequest.lock, false);		
-		}
-		
-		else {
-			stopRingSounds();
-						
-			getRingSpinHelper().requestStop();
-		}
-	}
-	
-	public void setRingSpin(boolean spin, boolean dialingComplete) {
-		setRingSpin(spin, dialingComplete, new StargateSpinStateRequest());
-	}
-	
-	public void requestStopByComputer(long worldTicks, boolean moveOnly) {
-		getRingSpinHelper().requestStopByComputer(worldTicks, moveOnly);
-	}
-	
-	public void stopRingSounds() {		
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.RING_ROLL_START, pos, false);
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.RING_ROLL_LOOP, pos, false);
-	}
-	
-	private boolean waitForFinalMove;
-	private long waitForFinalMoveStart;
-
-	public void requestFinalMove(long finalMoveStart, boolean finalChevron) {
-		waitForFinalMoveStart = finalMoveStart;
-		
-		waitForFinalMove = true;
-		getRendererStateMilkyWay().spinState.finalChevron = finalChevron;
-	}
-	
-	public void addComputerActivation(long finalMoveStart, boolean finalChevron) {		
-		long start = finalMoveStart + (finalChevron ? 20 : 15);		
-		Activation dimActivation = new StargateActivation(8, start + 19 + 3, true).inactive();
-		
-		activationList.add(new StargateActivation(8, start) {
-			@Override
-			protected void onActivated() {				
-				if (!finalChevron) {
-					activateNextChevron(false);
-					dimActivation.active();
-				}
-				
-				else {
-					activeChevrons++;
-				}
-			}
-		});
-		
-		if (!finalChevron)
-			activationList.add(dimActivation);
-	}
-	
-	private double ringAngularRotation;
-	
 	@Override
-	protected void renderRing(double partialTicks) {
+	protected void renderRing(StargateAbstractRendererState rendererState, double partialTicks) {
 //		ModelLoader.loadModel(EnumModel.RING_MODEL);
 		
 		Model ringModel = ModelLoader.getModel(EnumModel.RING_MODEL);
 				
 		if (ringModel != null) {
 			
-			if (getRendererStateMilkyWay().spinState.isSpinning) {				
-				ringAngularRotation = (float) (getRingSpinHelper().spin(partialTicks) % 360);
-			}
-			
-			if (waitForFinalMove && (world.getTotalWorldTime() - waitForFinalMoveStart) >= (getRendererStateMilkyWay().spinState.finalChevron ? 20 : 15)) {
-				waitForFinalMove = false;
-								
-				long start = waitForFinalMoveStart + (getRendererStateMilkyWay().spinState.finalChevron ? 20 : 15);
-				moveFinalChevron(start, true);
-			}
-			
 			GlStateManager.pushMatrix();
+						
+			float angularRotation = (float) 0;
 			
-//			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
-			
-			float angularRotation = (float) ringAngularRotation;
-			
-			if (horizontalRotation == 90 || horizontalRotation == 0)
+			if (rendererState.horizontalRotation == 90 || rendererState.horizontalRotation == 0)
 				angularRotation *= -1;
 
 			
-			if (horizontalRotation == 90 || horizontalRotation == 270) {
+			if (rendererState.horizontalRotation == 90 || rendererState.horizontalRotation == 270) {
 				GlStateManager.translate(RING_LOC.y, RING_LOC.z, RING_LOC.x);
 				GlStateManager.rotate(angularRotation, 1, 0, 0);
 				GlStateManager.translate(-RING_LOC.y, -RING_LOC.z, -RING_LOC.x);
@@ -247,7 +101,7 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 				GlStateManager.translate(-RING_LOC.x, -RING_LOC.z, -RING_LOC.y);
 			}
 			
-			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
+			GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 			
 			EnumModel.RING_MODEL.bindTexture();
 			ringModel.render();
@@ -287,95 +141,7 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 		}
 	}
 	
-	private List<String> chevronTextureList = new ArrayList<String>(9);
-	private static final String CHEVRON_TEXTURE_BASE = "stargate/chevron/chevron";
-	
-	private List<Activation> activationList = new ArrayList<>();
-	
-	private int activeChevrons = 0;
-	
-	private float finalChevronStart;
-	private boolean finalChevronMove;
-	
-	public void activateFinalChevron(boolean setRingSpin) {
-		activationList.add(new StargateActivation(8, world.getTotalWorldTime()));
-		activeChevrons++;
-		
-		if (setRingSpin)
-			setRingSpin( false, true );
-	}
-	
-	public void activateFinalChevron() {
-		activateFinalChevron(true);
-	}
-	
-	public void activateNextChevron(boolean setRingSpin) {		
-		activationList.add(new StargateActivation(activeChevrons, world.getTotalWorldTime()));
-					
-		if (activeChevrons == 0 && setRingSpin) {
-			setRingSpin( true, true );
-		}
-		
-		if (activeChevrons < 8)
-			activeChevrons++;
-	}
-	
-	@Override
-	public void clearChevrons(Long stateChange) {
-		changeChevrons(true, stateChange, activeChevrons, isLastChevronActive());
-	}
-	
-	public void clearChevrons() {
-		clearChevrons(null);
-	}
-	
-	public void lightUpChevrons(int chevronsToLightUp) {
-		Aunis.info("lightUpChevrons: " + chevronsToLightUp);
-		this.rendererState.dialingComplete = true;
-		
-		changeChevrons(false, null, chevronsToLightUp, true);
-	}
-	
-	private void changeChevrons(boolean clear, Long stateChange, int chevronsToChange, boolean changeFinal) {			
-		long activationStateChange;
-
-		Aunis.info("changeChevrons: " + chevronsToChange + ", final: " + changeFinal);
-		
-		if (stateChange != null)
-			activationStateChange = stateChange;
-		else
-			activationStateChange = world.getTotalWorldTime();
-		
-		if (clear) {
-			if (rendererState.dialingComplete)
-				activationStateChange += 10;
-			else
-				activationStateChange += 40;
-		}
-
-		activeChevrons = clear ? 0 : chevronsToChange;
-		
-		if (isLastChevronActive() || changeFinal)
-			chevronsToChange--;
-		
-		for (int i=0; i<chevronsToChange; i++) {
-			activationList.add(new StargateActivation(i, activationStateChange, clear));
-		}
-		
-		if (changeFinal)
-			activationList.add(new StargateActivation(8, activationStateChange, clear));
-	}
-	
-	public void moveFinalChevron(long finalChevronStart, boolean computer) {
-		this.finalChevronStart = finalChevronStart;
-		finalChevronMove = true;
-	}
-	
-	public void moveFinalChevron(long finalChevronStart) {
-		moveFinalChevron(finalChevronStart, false);
-	}
-	
-	private void renderChevron(int index, double partialTicks) {
+	private void renderChevron(StargateAbstractRendererState rendererState, int index, double partialTicks) {
 //		ModelLoader.loadModel(EnumModel.GATE_MODEL);
 		
 		Model ChevronLight = ModelLoader.getModel( EnumModel.ChevronLight );
@@ -389,47 +155,49 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 			int angularPosition = EnumChevron.getRotation(index);
 			GlStateManager.rotate(angularPosition, 0, 0, 1);
 			
-			ModelLoader.bindTexture( chevronTextureList.get(index) );
+			ModelLoader.bindTexture(((StargateMilkyWayRendererState) rendererState).chevronTextureList.get(index));
 						
-			if (index == 8 && finalChevronMove) {
-								
-				float tick = (float) (world.getTotalWorldTime() - finalChevronStart + partialTicks);
-				float arg = tick / 6.0f;
-				
-				float finalChevronOffset = 0;
-				
-				if (arg < 0)
-					finalChevronOffset = 0;
-				
-				else if (arg <= Math.PI/2)
-					finalChevronOffset = MathHelper.sin( arg ) / 12f;
-				
-				else if (arg <= Math.PI)
-					finalChevronOffset = 0.08333f; // 1 / 12
-				
-				else if (arg <= 3*Math.PI/2)
-					finalChevronOffset = -MathHelper.cos( arg ) / 12f;
-				
-				else {
-					finalChevronOffset = 0;
-					finalChevronMove = false;
-				}
-								
-				GlStateManager.pushMatrix();
-				
-				GlStateManager.translate(0, finalChevronOffset, 0);
-				ChevronLight.render();
+//			if (index == 8 && finalChevronMove) {
+//								
+//				float tick = (float) (getWorld().getTotalWorldTime() - finalChevronStart + partialTicks);
+//				float arg = tick / 6.0f;
+//				
+//				float finalChevronOffset = 0;
+//				
+//				if (arg < 0)
+//					finalChevronOffset = 0;
+//				
+//				else if (arg <= Math.PI/2)
+//					finalChevronOffset = MathHelper.sin( arg ) / 12f;
+//				
+//				else if (arg <= Math.PI)
+//					finalChevronOffset = 0.08333f; // 1 / 12
+//				
+//				else if (arg <= 3*Math.PI/2)
+//					finalChevronOffset = -MathHelper.cos( arg ) / 12f;
+//				
+//				else {
+//					finalChevronOffset = 0;
+//					finalChevronMove = false;
+//				}
+//								
+//				GlStateManager.pushMatrix();
+//				
+//				GlStateManager.translate(0, finalChevronOffset, 0);
+//				ChevronLight.render();
+//			
+//				GlStateManager.translate(0, -2*finalChevronOffset, 0);
+//				ChevronMoving.render();
+//				
+//				GlStateManager.popMatrix();
+//			}
+//			
+//			else {
+//				
+//			}
 			
-				GlStateManager.translate(0, -2*finalChevronOffset, 0);
-				ChevronMoving.render();
-				
-				GlStateManager.popMatrix();
-			}
-			
-			else {
-				ChevronLight.render();	
-				ChevronMoving.render();
-			}
+			ChevronLight.render();	
+			ChevronMoving.render();
 			
 			EnumModel.ChevronFrame.bindTexture();
 			ChevronFrame.render();
@@ -442,42 +210,10 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 	}
 	
 	@Override
-	protected void renderChevrons( double partialTicks) {
+	protected void renderChevrons(StargateAbstractRendererState rendererState, double partialTicks) {
 		for (int i=0; i<9; i++)
-			renderChevron(i, partialTicks);
+			renderChevron(rendererState, i, partialTicks);
 		
-		Activation.iterate(activationList, world.getTotalWorldTime(), partialTicks, (index, stage) -> {
-			chevronTextureList.set(index, CHEVRON_TEXTURE_BASE + stage + ".png");
-		});
-	}
-	
-	public boolean isLastChevronActive() {
-		return chevronTextureList.get(8).contains("10");
-	}
-	
-	public int getActiveChevrons() {
-		if ( isLastChevronActive() )
-			return activeChevrons - 1;
-		else
-			return activeChevrons;
-	}
-	
-	public void setActiveChevrons(int activeChevrons, boolean lastChevronActive) {
-		chevronTextureList.clear();
-		this.activeChevrons = activeChevrons;
-		
-		if (lastChevronActive)
-			activeChevrons--;
-		
-		for (int i=0; i<9; i++) {	
-			String tex = CHEVRON_TEXTURE_BASE;
-			
-			if ( i < activeChevrons || (i == 8 && lastChevronActive) )
-				tex += "10.png";
-			else
-				tex += "0.png";
-						
-			chevronTextureList.add(tex);
-		}
+		((StargateMilkyWayRendererState) rendererState).chevronTextureList.iterate(getWorld(), partialTicks);
 	}
 }

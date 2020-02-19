@@ -12,6 +12,9 @@ import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
 import mrjake.aunis.item.renderer.PageNotebookTEISR;
 import mrjake.aunis.renderer.SpecialRenderer;
+import mrjake.aunis.renderer.stargate.StargateMilkyWayRenderer;
+import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
+import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
@@ -24,6 +27,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -59,8 +63,8 @@ public class ProxyClient implements IProxy {
 		
 		SpecialRenderer specialRenderer = new SpecialRenderer();
 		
-		ClientRegistry.bindTileEntitySpecialRenderer(StargateMilkyWayBaseTile.class, specialRenderer);
-		ClientRegistry.bindTileEntitySpecialRenderer(StargateOrlinBaseTile.class, specialRenderer);
+		ClientRegistry.bindTileEntitySpecialRenderer(StargateMilkyWayBaseTile.class, new StargateMilkyWayRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(StargateOrlinBaseTile.class, new StargateOrlinRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, specialRenderer);
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, specialRenderer);
@@ -94,5 +98,10 @@ public class ProxyClient implements IProxy {
 	@Override
 	public void addScheduledTaskClientSide(Runnable runnable) {
 		Minecraft.getMinecraft().addScheduledTask(runnable);
+	}
+	
+	@Override
+	public void orlinRendererSpawnParticles(World world, StargateAbstractRendererState rendererState) {
+		StargateOrlinRenderer.spawnParticles(world, rendererState);
 	}
 }

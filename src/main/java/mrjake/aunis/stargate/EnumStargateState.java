@@ -1,9 +1,11 @@
 package mrjake.aunis.stargate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum EnumStargateState {
 	IDLE(0),
-	COMPUTER_DIALING(1),
-	DHD_DIALING(2),
+	DIALING(1),
 	ENGAGED(3),
 	ENGAGED_INITIATING(4),
 	UNSTABLE(5),
@@ -27,11 +29,17 @@ public enum EnumStargateState {
 		return this == ENGAGED_INITIATING;
 	}
 	
-	public boolean dialingDhd() {
-		return this == DHD_DIALING;
+//	public boolean dialingDhd() {
+//		return this == DHD_DIALING;
+//	}
+	
+	private static Map<Integer, EnumStargateState> idMap = new HashMap<>();
+	static {
+		for (EnumStargateState state : values())
+			idMap.put(state.id, state);
 	}
 	
 	public static EnumStargateState valueOf(int id) {
-		return EnumStargateState.values()[id];
+		return idMap.get(id);
 	}
 }

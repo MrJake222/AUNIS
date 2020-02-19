@@ -104,7 +104,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	}
 	
 	@Override
-	public void executeTask(EnumScheduledTask scheduledTask) {
+	public void executeTask(EnumScheduledTask scheduledTask, NBTTagCompound customData) {
 		switch (scheduledTask) {
 			case RINGS_START_ANIMATION:
 				animationStart();

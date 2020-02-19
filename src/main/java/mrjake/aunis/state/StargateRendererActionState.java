@@ -6,15 +6,14 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 
 public class StargateRendererActionState extends State {
-	public static final StargateRendererActionState STARGATE_HORIZON_WIDEN_ACTION = new StargateRendererActionState(EnumGateAction.STARGATE_HORIZON_WIDEN, false, -1);
-	public static final StargateRendererActionState STARGATE_HORIZON_SHRINK_ACTION = new StargateRendererActionState(EnumGateAction.STARGATE_HORIZON_SHRINK, false, -1);
+	public static final StargateRendererActionState STARGATE_HORIZON_WIDEN_ACTION = new StargateRendererActionState(EnumGateAction.STARGATE_HORIZON_WIDEN);
+	public static final StargateRendererActionState STARGATE_HORIZON_SHRINK_ACTION = new StargateRendererActionState(EnumGateAction.STARGATE_HORIZON_SHRINK);
 	
 	public static enum EnumGateAction {
-		ACTIVATE_NEXT(1),
-		ACTIVATE_FINAL(2),
+		ACTIVATE_CHEVRON(1),
 		OPEN_GATE(3),
 		CLOSE_GATE(4),
-		GATE_DIAL_FAILED(5),
+		CLEAR_CHEVRONS(5),
 		LIGHT_UP_CHEVRONS(6),
 		STARGATE_HORIZON_WIDEN(7),	// Used for rendering
 		STARGATE_HORIZON_SHRINK(8);	// Event horizon killing box
@@ -40,27 +39,35 @@ public class StargateRendererActionState extends State {
 	public StargateRendererActionState() {}
 	
 	public EnumGateAction action;
-	public boolean computer;
+//	public boolean computer;
 	public int chevronCount;
+	public boolean modifyFinal;
 	
-	public StargateRendererActionState(EnumGateAction action, boolean computer, int chevronCount) {
+	public StargateRendererActionState(EnumGateAction action) {
 		this.action = action;
-		this.computer = computer;
+	}
+	
+	public StargateRendererActionState(EnumGateAction action, int chevronCount, boolean modifyFinal) {
+		this.action = action;
+//		this.computer = computer;
 		this.chevronCount = chevronCount;
+		this.modifyFinal = modifyFinal;
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(action.actionID);
-		buf.writeBoolean(computer);
+//		buf.writeBoolean(computer);
 		buf.writeInt(chevronCount);
+		buf.writeBoolean(modifyFinal);
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		action = EnumGateAction.valueOf(buf.readInt());
-		computer = buf.readBoolean();
+//		computer = buf.readBoolean();
 		chevronCount = buf.readInt();
+		modifyFinal = buf.readBoolean();
 	}
 
 }

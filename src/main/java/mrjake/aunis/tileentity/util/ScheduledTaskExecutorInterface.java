@@ -1,6 +1,9 @@
 package mrjake.aunis.tileentity.util;
 
+import javax.annotation.Nullable;
+
 import mrjake.aunis.stargate.EnumScheduledTask;
+import net.minecraft.nbt.NBTTagCompound;
 
 /**
  * Used with {@link EnumScheduledTask} to execute scheduled tasks.
@@ -20,6 +23,7 @@ public interface ScheduledTaskExecutorInterface {
 	 * Executes given task.
 	 * 
 	 * @param scheduledTask The task.
+	 * @param customData Custom data passed by the user.
 	 */
-	public void executeTask(EnumScheduledTask scheduledTask);
+	public void executeTask(EnumScheduledTask scheduledTask, @Nullable NBTTagCompound customData);
 }

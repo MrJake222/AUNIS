@@ -12,7 +12,6 @@ import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.stargate.EnumGateState;
-import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateEnergyRequired;
@@ -21,8 +20,6 @@ import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.teleportation.TeleportHelper;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
-import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import mrjake.aunis.tileentity.util.ScheduledTask;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -158,11 +155,12 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 					if (sourceDhdTile != null) 
 						sourceDhdTile.activateSymbol(EnumSymbol.BRB.id);
 									
-					gateTile.openGate(true, 0, null);
+					gateTile.openGate(true, null, false);
 					
 					DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
+					boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
 					
-					targetTile.openGate(false, gateTile.dialedAddress.size(), gateTile.gateAddress);
+					targetTile.openGate(false, gateTile.gateAddress, eightChevronDial);
 					
 					if (targetDhdTile != null) 
 						targetDhdTile.activateSymbol(EnumSymbol.BRB.id);
@@ -231,7 +229,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 					}
 					
 					if (dhdTile != null && gateTile != null) {	
-						if ((gateTile.getStargateState() != EnumStargateState.COMPUTER_DIALING && gateTile.getStargateState() != EnumStargateState.FAILING)) {
+						if (gateTile.getStargateState().idle() || gateTile.getStargateState().engaged()) {
 							EnumSymbol symbol = EnumSymbol.valueOf(message.objectID);
 							
 							/*
@@ -294,7 +292,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 									EnumGateState gateState = attemptOpen(world, gateTile, dhdTile, true);
 									
 									if (gateState != EnumGateState.OK) {
-										((StargateMilkyWayBaseTile) gateTile).setRollPlayed();
+//										((StargateMilkyWayBaseTile) gateTile).setRollPlayed();
 										
 										if (gateState == EnumGateState.NOT_ENOUGH_POWER)
 											player.sendStatusMessage(new TextComponentTranslation("tile.aunis.stargatebase_block.not_enough_power"), true);
@@ -311,13 +309,6 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 																	
 									// Update the DHD's renderer
 									dhdTile.activateSymbol(message.objectID);
-									
-									// Limit not reached, activating in order
-									//if ( gateTile.getMaxSymbols() > symbolCount ) {
-									if ( (dhdTile.hasUpgrade() && symbolCount == 8) || (!dhdTile.hasUpgrade() && symbolCount == 7) || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN) ) {										
-										gateTile.addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_LOCK_DHD_SOUND));										
-										((StargateMilkyWayBaseTile) gateTile).setRollPlayed();
-									}
 															
 									boolean lock = symbol == EnumSymbol.ORIGIN;
 									
@@ -331,20 +322,20 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 							} // not brb else
 						} // Not busy if
 						
-						else { 
-							switch (gateTile.getStargateState()) {
-								case COMPUTER_DIALING:
-									player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.computer_dial"), true);
-									break;
-									
-//								case FAILING:
-//									player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.failing_dial")), true);
+//						else { 
+//							switch (gateTile.getStargateState()) {
+//								case COMPUTER_DIALING:
+//									player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.computer_dial"), true);
 //									break;
-									
-								default:
-									break;
-							}
-						}
+//									
+////								case FAILING:
+////									player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.failing_dial")), true);
+////									break;
+//									
+//								default:
+//									break;
+//							}
+//						}
 					} // gateTile and dhdTile not null if
 					
 					else {

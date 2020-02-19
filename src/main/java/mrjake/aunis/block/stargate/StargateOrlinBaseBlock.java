@@ -129,12 +129,8 @@ public class StargateOrlinBaseBlock extends Block {
 					.withProperty(AunisProps.RENDER_BLOCK, true);
 		
 			world.setBlockState(pos, state);
-			gateTile.updateFacing(facing);
+			gateTile.updateFacing(facing, true);
 			gateTile.updateMergeState(StargateOrlinMergeHelper.INSTANCE.checkBlocks(world, pos, facing), state);
-		}
-		
-		else {
-			gateTile.updateFacing(facing);
 		}
 	}
 	

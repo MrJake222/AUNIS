@@ -86,12 +86,8 @@ public class StargateMilkyWayBaseBlock extends Block {
 		
 			world.setBlockState(pos, state);
 					
-			gateTile.updateFacing(facing);
+			gateTile.updateFacing(facing, true);
 			gateTile.updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, pos, facing), state);
-		}
-		
-		else {
-			gateTile.updateFacing(facing);
 		}
 	}
 	
