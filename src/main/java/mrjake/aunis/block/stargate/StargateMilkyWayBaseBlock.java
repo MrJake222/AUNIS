@@ -5,6 +5,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.sound.AunisPositionedSoundEnum;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.stargate.StargateNetwork;
@@ -106,6 +107,9 @@ public class StargateMilkyWayBaseBlock extends Block {
 					InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphStargate));
 				}
 			}
+			
+			gateTile.playPositionedSound(AunisPositionedSoundEnum.RING_ROLL, false);
+			gateTile.playPositionedSound(AunisPositionedSoundEnum.WORMHOLE, false);
 		}
 		
 		super.breakBlock(world, pos, state);

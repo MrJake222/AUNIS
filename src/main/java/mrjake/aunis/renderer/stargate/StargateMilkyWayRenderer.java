@@ -7,9 +7,13 @@ import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.state.StargateMilkyWayRendererState;
 import mrjake.aunis.util.FacingToRotation;
+import mrjake.aunis.util.math.MathFunction;
+import mrjake.aunis.util.math.MathFunctionImpl;
+import mrjake.aunis.util.math.MathRange;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumSkyBlock;
 
@@ -75,6 +79,8 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 		
 	@Override
 	protected void renderRing(StargateAbstractRendererState rendererState, double partialTicks) {
+		StargateMilkyWayRendererState mwRendererState = (StargateMilkyWayRendererState) rendererState;
+		
 //		ModelLoader.loadModel(EnumModel.RING_MODEL);
 		
 		Model ringModel = ModelLoader.getModel(EnumModel.RING_MODEL);
@@ -82,8 +88,10 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 		if (ringModel != null) {
 			
 			GlStateManager.pushMatrix();
-						
-			float angularRotation = (float) 0;
+			float angularRotation = mwRendererState.spinHelper.currentSymbol.angle;
+			
+			if (mwRendererState.spinHelper.isSpinning)
+				angularRotation += ((StargateMilkyWayRendererState) rendererState).spinHelper.apply(getWorld().getTotalWorldTime() + partialTicks);
 			
 			if (rendererState.horizontalRotation == 90 || rendererState.horizontalRotation == 0)
 				angularRotation *= -1;
@@ -141,7 +149,46 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 		}
 	}
 	
+	private static MathRange chevronOpenRange = new MathRange(0, 1.57f);
+	private static MathFunction chevronOpenFunction = new MathFunctionImpl(x -> x*x*x*x/80f);
+	
+	private static MathRange chevronCloseRange = new MathRange(0, 1.428f);
+	private static MathFunction chevronCloseFunction = new MathFunctionImpl(x0 -> MathHelper.cos(x0*1.1f) / 12f);
+	
+//	private static Map<MathRange, MathFunction> topChevronMovementPhases = new HashMap<>(3);
+//	static {
+//		topChevronMovementPhases.put(new MathRange(0, 1.57f), new MathFunctionImpl(x -> x*x*x*x/80f));
+//		topChevronMovementPhases.put(new MathRange(1.57f, 3.14f), new MathFunctionImpl(x -> 0.08333f)); // 1 / 12
+//		topChevronMovementPhases.put(new MathRange(3.14f, 4.71f), new MathFunctionImpl(x -> -MathHelper.cos(x) / 12f));
+//	}
+	
+	private float calculateTopChevronOffset(StargateMilkyWayRendererState rendererState, double partialTicks) {
+		float tick = (float) (getWorld().getTotalWorldTime() - rendererState.chevronActionStart + partialTicks);
+		float x = tick / 6.0f;
+		
+		if (rendererState.chevronOpening) {
+			if (chevronOpenRange.test(x))
+				return chevronOpenFunction.apply(x);
+			else {
+				rendererState.chevronOpen = true;
+				rendererState.chevronOpening = false;
+			}
+		}
+		
+		else if (rendererState.chevronClosing) {
+			if (chevronCloseRange.test(x))
+				return chevronCloseFunction.apply(x);
+			else {
+				rendererState.chevronOpen = false;
+				rendererState.chevronClosing = false;
+			}
+		}
+		
+		return rendererState.chevronOpen ? 0.08333f : 0;
+	}
+	
 	private void renderChevron(StargateAbstractRendererState rendererState, int index, double partialTicks) {
+		StargateMilkyWayRendererState mwRendererState = (StargateMilkyWayRendererState) rendererState;
 //		ModelLoader.loadModel(EnumModel.GATE_MODEL);
 		
 		Model ChevronLight = ModelLoader.getModel( EnumModel.ChevronLight );
@@ -155,49 +202,26 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 			int angularPosition = EnumChevron.getRotation(index);
 			GlStateManager.rotate(angularPosition, 0, 0, 1);
 			
-			ModelLoader.bindTexture(((StargateMilkyWayRendererState) rendererState).chevronTextureList.get(index));
+			ModelLoader.bindTexture(mwRendererState.chevronTextureList.get(index));
 						
-//			if (index == 8 && finalChevronMove) {
-//								
-//				float tick = (float) (getWorld().getTotalWorldTime() - finalChevronStart + partialTicks);
-//				float arg = tick / 6.0f;
-//				
-//				float finalChevronOffset = 0;
-//				
-//				if (arg < 0)
-//					finalChevronOffset = 0;
-//				
-//				else if (arg <= Math.PI/2)
-//					finalChevronOffset = MathHelper.sin( arg ) / 12f;
-//				
-//				else if (arg <= Math.PI)
-//					finalChevronOffset = 0.08333f; // 1 / 12
-//				
-//				else if (arg <= 3*Math.PI/2)
-//					finalChevronOffset = -MathHelper.cos( arg ) / 12f;
-//				
-//				else {
-//					finalChevronOffset = 0;
-//					finalChevronMove = false;
-//				}
-//								
-//				GlStateManager.pushMatrix();
-//				
-//				GlStateManager.translate(0, finalChevronOffset, 0);
-//				ChevronLight.render();
-//			
-//				GlStateManager.translate(0, -2*finalChevronOffset, 0);
-//				ChevronMoving.render();
-//				
-//				GlStateManager.popMatrix();
-//			}
-//			
-//			else {
-//				
-//			}
+			if (index == 8) {
+				float chevronOffset = calculateTopChevronOffset(mwRendererState, partialTicks);
+				
+				GlStateManager.pushMatrix();
+				
+				GlStateManager.translate(0, chevronOffset, 0);
+				ChevronLight.render();
+				
+				GlStateManager.translate(0, -2*chevronOffset, 0);
+				ChevronMoving.render();
+				
+				GlStateManager.popMatrix();
+			}
 			
-			ChevronLight.render();	
-			ChevronMoving.render();
+			else {
+				ChevronLight.render();	
+				ChevronMoving.render();
+			}			
 			
 			EnumModel.ChevronFrame.bindTexture();
 			ChevronFrame.render();

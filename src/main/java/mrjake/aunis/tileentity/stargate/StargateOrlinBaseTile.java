@@ -21,34 +21,25 @@ import mrjake.aunis.state.StargateOrlinRendererState;
 import mrjake.aunis.state.StargateOrlinSparkState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-//@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
-public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implements SimpleComponent {
-	
+public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	
 	// ------------------------------------------------------------------------
 	// Ticking
 	
 	@Override
-	protected BlockPos getLightBlockPos() {
+	protected BlockPos getGateCenterPos() {
 		return pos.offset(EnumFacing.UP, 1);
 	}
 	
-//	@Override
-//	protected AxisAlignedBB getHorizonKillingBox() {
-//		return new AxisAlignedBB(-1, 3.5, 0, 2, 7, -6);
-//	}
-//	
 	@Override
 	public void onLoad() {				
 		super.onLoad();
@@ -269,11 +260,8 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 	// ------------------------------------------------------------------------
 	// OpenComputers
 	
-//	@Override
-//	public String getComponentName() {
-//		return "stargate_orlin";
-//	}
-
+	
+	
 	
 	// ------------------------------------------------------------------------
 	// NBT
@@ -290,36 +278,5 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile { //implemen
 		isPowered = compound.getBoolean("isPowered");
 		
 		super.readFromNBT(compound);
-	}
-	
-	
-	// ------------------------------------------------------------------------
-	// Overrides
-	
-	@Override
-	protected int getMaxChevrons(boolean computer, DHDTile dhdTile) {
-		return 7;
-	}
-
-//	@Override
-//	protected void firstGlyphDialed(boolean computer) {}
-//
-//	@Override
-//	protected void lastGlyphDialed(boolean computer) {}
-//
-//	@Override
-//	protected void dialingFailed(boolean stopRing) {}
-
-	@Override
-	public DHDTile getLinkedDHD(World world) {
-		return null;
-	}
-
-//	@Override
-//	protected void clearLinkedDHDButtons(boolean dialingFailed) {}
-
-	@Override
-	protected void updateChevronLight() {
-		
 	}
 }

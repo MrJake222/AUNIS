@@ -10,13 +10,17 @@ public class StargateRendererActionState extends State {
 	public static final StargateRendererActionState STARGATE_HORIZON_SHRINK_ACTION = new StargateRendererActionState(EnumGateAction.STARGATE_HORIZON_SHRINK);
 	
 	public static enum EnumGateAction {
-		ACTIVATE_CHEVRON(1),
+		CHEVRON_ACTIVATE(1),
 		OPEN_GATE(3),
 		CLOSE_GATE(4),
 		CLEAR_CHEVRONS(5),
 		LIGHT_UP_CHEVRONS(6),
 		STARGATE_HORIZON_WIDEN(7),	// Used for rendering
-		STARGATE_HORIZON_SHRINK(8);	// Event horizon killing box
+		STARGATE_HORIZON_SHRINK(8),	// Event horizon killing box
+		CHEVRON_OPEN(9),
+		CHEVRON_CLOSE(10),
+		CHEVRON_ACTIVATE_BOTH(11),
+		CHEVRON_DIM(12);
 		
 		public int actionID;
 		private static Map<Integer, EnumGateAction> map = new HashMap<Integer, EnumGateAction>();

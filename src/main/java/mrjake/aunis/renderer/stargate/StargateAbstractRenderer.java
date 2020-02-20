@@ -47,6 +47,7 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 			double scale = getRenderScale(rendererState);
 			GlStateManager.translate(vec.x, vec.y, vec.z);			
 			GlStateManager.scale(scale, scale, scale);
+            GlStateManager.disableRescaleNormal();
 			
 			applyLightMap(rendererState, partialTicks);
 //			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
@@ -171,7 +172,7 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 				else if (argState < 5.898f)
 					rendererState.vortexState = EnumVortexState.DECREASING;
 				else if ( rendererState.vortexState != EnumVortexState.CLOSING )
-					rendererState.engageGate();
+					rendererState.vortexState = EnumVortexState.STILL;
 			}
 
 			float prevZ = 0;
@@ -192,7 +193,7 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 						float end = 0.75f;
 						
 						if ( rendererState.vortexState == (EnumVortexState.DECREASING) && arg >= 5.398+end ) {
-							rendererState.engageGate();
+							rendererState.vortexState = EnumVortexState.STILL;
 						}
 						
 						if ( rendererState.vortexState == (EnumVortexState.FULL) ) {				

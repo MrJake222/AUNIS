@@ -107,7 +107,7 @@ public class StargateNetwork extends WorldSavedData {
 		if (address == null)
 			return false;
 		
-		if (address.size() < 7)
+		if (address.size() < 7 || address.get(address.size()-1) != EnumSymbol.ORIGIN)
 			return false;
 		
 		StargatePos stargatePos = stargateMap.get(EnumSymbol.toLong(address));

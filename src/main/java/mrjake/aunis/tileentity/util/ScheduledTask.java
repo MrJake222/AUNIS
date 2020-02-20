@@ -178,6 +178,9 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 		compound.setInteger("scheduledTask", scheduledTask.id);
 		compound.setBoolean("active", active);
 		
+		compound.setBoolean("customWaitTime", customWaitTime);
+		compound.setInteger("waitTime", waitTime);
+		
 		if (customData != null)
 			compound.setTag("customData", customData);
 		
@@ -190,13 +193,16 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 		scheduledTask = EnumScheduledTask.valueOf(compound.getInteger("scheduledTask"));
 		active = compound.getBoolean("active");
 		
+		customWaitTime = compound.getBoolean("customWaitTime");
+		waitTime = compound.getInteger("waitTime");
+		
 		if (compound.hasKey("customData"))
 			customData = compound.getCompoundTag("customData");
 	}
 	
 	@Override
 	public String toString() {
-		return scheduledTask.toString();
+		return scheduledTask.toString() + (customWaitTime ? ", custom time="+waitTime : "");
 	}
 
 	// Eclipse generated methods

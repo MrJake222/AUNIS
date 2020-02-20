@@ -37,30 +37,11 @@
     ]
   },
   
-  "ring_roll_start": {
+  "ring_roll": {
     "category": "ambient",
-    "subtitle": "aunis.subtitle.ring_roll_start",
+    "subtitle": "aunis.subtitle.ring_roll",
     "sounds": [
-      {
-      	"name": "aunis:gate/roll_start",
-      	"stream": true
-      }
-    ]
-  },
-  
-  "ring_roll_loop": {
-    "category": "ambient",
-    "subtitle": "aunis.subtitle.ring_roll_loop",
-    "sounds": [
-      "aunis:gate/roll_loop"
-    ]
-  },
-  
-  "chevron_lock_dhd": {
-    "category": "ambient",
-    "subtitle": "aunis.subtitle.chevron_lock_dhd",
-    "sounds": [
-      "aunis:gate/chevron_lock_dhd"
+      "aunis:gate/roll"
     ]
   },
   
@@ -144,15 +125,6 @@
       "aunis:gate/chevron/chevron_open_1",
       "aunis:gate/chevron/chevron_open_2",
       "aunis:gate/chevron/chevron_open_3"
-    ]
-  },
-  
-  "chevron_locking": {
-    "category": "ambient",
-    "subtitle": "aunis.subtitle.chevron_open",
-    "sounds": [
-      "aunis:gate/chevron/chevron_locking_1",
-      "aunis:gate/chevron/chevron_locking_2"
     ]
   },
   

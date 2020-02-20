@@ -3,8 +3,6 @@ package mrjake.aunis.state;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.stargate.StargateAbstractRenderer.EnumVortexState;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
-import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisPositionedSound;
 import mrjake.aunis.stargate.EnumStargateState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -67,13 +65,6 @@ public class StargateAbstractRendererState extends State {
 	public void closeGate(long totalWorldTime) {		
 		gateWaitClose = totalWorldTime;
 		vortexState = EnumVortexState.CLOSING;
-		
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, pos, false);
-	}
-	
-	public void engageGate() {
-		vortexState = EnumVortexState.STILL;
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, pos, true);
 	}
 
 	@Override

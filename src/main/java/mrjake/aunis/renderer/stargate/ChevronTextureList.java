@@ -50,6 +50,12 @@ public class ChevronTextureList {
 		isFinalActive = true;
 	}
 	
+	public void deactivateFinalChevron(long totalWorldTime) {
+		activationList.add(new StargateActivation(8, totalWorldTime, true));
+		activeChevrons--;
+		isFinalActive = false;
+	}
+	
 	public void clearChevrons(long totalWorldTime) {
 		for (int i=0; i<9; i++) {
 			if (isChevronActive(i)) {
