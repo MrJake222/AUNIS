@@ -3,17 +3,25 @@ package mrjake.aunis.renderer.stargate;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.renderer.BlockRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
+import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
@@ -26,54 +34,73 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 	public void render(StargateAbstractBaseTile te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		StargateAbstractRendererState rendererState = te.getRendererStateClient();
 		
-		if (shouldRender(rendererState)) {	
+		if (rendererState != null) {		
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(x, y, z);
 			
-			if (AunisConfig.debugConfig.renderBoundingBoxes || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
-				te.getEventHorizonLocalBox().render(x, y, z);
-				
-				int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? te.getLocalKillingBoxes().size() : rendererState.horizonSegments;
-
-				for (int i=0; i<segments; i++) {
-					te.getLocalKillingBoxes().get(i).render(x, y, z);
-				}
-							
-				for (AunisAxisAlignedBB b : te.getLocalInnerBlockBoxes())
-					b.render(x, y, z);
-			}
+			if (shouldRender(rendererState)) {				
+				if (AunisConfig.debugConfig.renderBoundingBoxes || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
+					te.getEventHorizonLocalBox().render(x, y, z);
 					
-			Vec3d vec = getRenderTranslation(rendererState);
-			double scale = getRenderScale(rendererState);
-			GlStateManager.translate(vec.x, vec.y, vec.z);			
-			GlStateManager.scale(scale, scale, scale);
-            GlStateManager.disableRescaleNormal();
+					int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? te.getLocalKillingBoxes().size() : rendererState.horizonSegments;
+	
+					for (int i=0; i<segments; i++) {
+						te.getLocalKillingBoxes().get(i).render(x, y, z);
+					}
+								
+					for (AunisAxisAlignedBB b : te.getLocalInnerBlockBoxes())
+						b.render(x, y, z);
+				}
+						
+				Vec3d vec = getRenderTranslation(rendererState);
+				double scale = getRenderScale(rendererState);
+				GlStateManager.translate(vec.x, vec.y, vec.z);			
+				GlStateManager.scale(scale, scale, scale);
+	            GlStateManager.disableRescaleNormal();
+				
+				applyLightMap(rendererState, partialTicks);
+	//			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
+				
+				renderRing(rendererState, partialTicks);
+				
+				GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
+				
+				renderGate();
+				renderChevrons(rendererState, partialTicks);
+				
+				if (rendererState.doEventHorizonRender)
+					renderKawoosh(rendererState, partialTicks);
+			}
 			
-			applyLightMap(rendererState, partialTicks);
-//			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
+			else {			
+				bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+	            GlStateManager.enableBlend();
+	            GlStateManager.blendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE_MINUS_CONSTANT_ALPHA);
+	            GL14.glBlendColor(1f, 1f, 1f, 0.7f);
+				            
+				for (Map.Entry<BlockPos, IBlockState> entry : getMemberBlockStates(rendererState.facing).entrySet()) {
+					BlockPos pos = entry.getKey().rotate(FacingToRotation.get(rendererState.facing));
+					
+					BlockRenderer.render(getWorld(), pos, entry.getValue());
+				}
+				
+	            GlStateManager.disableBlend();
+			}
 			
-			renderRing(rendererState, partialTicks);
-			
-			GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
-			
-			renderGate();
-			renderChevrons(rendererState, partialTicks);
-			
-			if (rendererState.doEventHorizonRender)
-				renderKawoosh(rendererState, partialTicks);
-			
-			GlStateManager.popMatrix();
+			GlStateManager.popMatrix();	
 		}
 	}
 	
 	protected boolean shouldRender(StargateAbstractRendererState rendererState) {
-		if (rendererState == null)
-			return false;
-		
 		IBlockState state = getWorld().getBlockState(rendererState.pos);
 		return state.getPropertyKeys().contains(AunisProps.RENDER_BLOCK) && !state.getValue(AunisProps.RENDER_BLOCK);
 	}
 	
+	/**
+	 * @return {@link Map} of {@link BlockPos} to {@link IBlockState} for rendering of the ghost blocks.
+	 */
+	protected abstract Map<BlockPos, IBlockState> getMemberBlockStates(EnumFacing facing);
+		
 	protected abstract void applyLightMap(StargateAbstractRendererState rendererState, double partialTicks);
 	protected abstract double getRenderScale(StargateAbstractRendererState rendererState);
 	protected abstract Vec3d getRenderTranslation(StargateAbstractRendererState rendererState);

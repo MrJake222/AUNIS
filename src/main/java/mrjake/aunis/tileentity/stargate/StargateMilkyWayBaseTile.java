@@ -349,8 +349,8 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				firstTick = false;
 				
 				// Doing this in onLoad causes ConcurrentModificationException
-				if (stargateSize != AunisConfig.stargateSize && isMerged() || true) {
-					StargateMilkyWayMergeHelper.INSTANCE.convertToPattern(world, pos, facing, StargateSizeEnum.LARGE, AunisConfig.stargateSize);
+				if (stargateSize != AunisConfig.stargateSize && isMerged()) {
+					StargateMilkyWayMergeHelper.INSTANCE.convertToPattern(world, pos, facing, stargateSize, AunisConfig.stargateSize);
 					updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, pos, facing), null);
 					
 					stargateSize = AunisConfig.stargateSize;

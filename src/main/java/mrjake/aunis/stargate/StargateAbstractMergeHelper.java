@@ -5,8 +5,11 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
+import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.pattern.BlockMatcher;

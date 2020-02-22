@@ -1,8 +1,14 @@
 package mrjake.aunis.renderer.stargate;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
+import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.state.StargateMilkyWayRendererState;
@@ -10,8 +16,10 @@ import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.math.MathFunction;
 import mrjake.aunis.util.math.MathFunctionImpl;
 import mrjake.aunis.util.math.MathRange;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -26,14 +34,18 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 		
 	}
 	
-//	@Override TODO
-//	public void setRendererState(StargateAbstractRendererState state) {		
-//		super.setRendererState(state);
-//				
-//		setActiveChevrons(getRendererStateMilkyWay().activeChevrons, getRendererStateMilkyWay().isFinalActive);
-//				
-//		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, state.pos, state.doEventHorizonRender);
-//	}
+	@Override
+	protected Map<BlockPos, IBlockState> getMemberBlockStates(EnumFacing facing) {
+		Map<BlockPos, IBlockState> map = new HashMap<BlockPos, IBlockState>();
+		
+		for (BlockPos pos : StargateMilkyWayMergeHelper.INSTANCE.getRingBlocks())
+			map.put(pos, AunisBlocks.stargateMilkyWayMemberBlock.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING).withProperty(AunisProps.FACING_HORIZONTAL, facing));
+		
+		for (BlockPos pos : StargateMilkyWayMergeHelper.INSTANCE.getChevronBlocks())
+			map.put(pos, AunisBlocks.stargateMilkyWayMemberBlock.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.CHEVRON).withProperty(AunisProps.FACING_HORIZONTAL, facing));
+		
+		return map;
+	}
 	
 	@Override
 	protected void applyLightMap(StargateAbstractRendererState rendererState, double partialTicks) {

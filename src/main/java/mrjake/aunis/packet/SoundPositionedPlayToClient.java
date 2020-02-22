@@ -2,7 +2,6 @@ package mrjake.aunis.packet;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
-import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.AunisPositionedSoundEnum;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;

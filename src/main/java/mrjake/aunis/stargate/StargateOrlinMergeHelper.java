@@ -56,7 +56,7 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 	public BlockMatcher getBaseMatcher() {
 		return BASE_MATCHER;
 	}
-
+	
 	@Override
 	protected boolean checkMemberBlock(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing, EnumMemberVariant variant) {
 		IBlockState state = blockAccess.getBlockState(pos);

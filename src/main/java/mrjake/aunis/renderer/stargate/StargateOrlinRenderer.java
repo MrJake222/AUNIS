@@ -1,19 +1,27 @@
 package mrjake.aunis.renderer.stargate;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.Model;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.particle.ParticleBlender;
 import mrjake.aunis.particle.ParticleBlender.RandomizeInterface;
 import mrjake.aunis.particle.ParticleBlender.SimpleVector;
 import mrjake.aunis.particle.ParticleBlenderSmoke;
 import mrjake.aunis.particle.ParticleBlenderSparks;
+import mrjake.aunis.stargate.StargateOrlinMergeHelper;
 import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.state.StargateOrlinRendererState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -34,6 +42,16 @@ public class StargateOrlinRenderer extends StargateAbstractRenderer {
 		}
 	}
 
+	@Override
+	protected Map<BlockPos, IBlockState> getMemberBlockStates(EnumFacing facing) {
+		Map<BlockPos, IBlockState> map = new HashMap<BlockPos, IBlockState>();
+		
+		for (BlockPos pos : StargateOrlinMergeHelper.INSTANCE.getRingBlocks())
+			map.put(pos, AunisBlocks.stargateOrlinMemberBlock.getDefaultState().withProperty(AunisProps.ORLIN_VARIANT, facing));
+		
+		return map;
+	}
+	
 	@Override
 	protected void applyLightMap(StargateAbstractRendererState rendererState, double partialTicks) {}
 	
