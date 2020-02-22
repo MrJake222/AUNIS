@@ -138,7 +138,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 	}
 	
 	private void sendRenderingUpdate(EnumGateAction gateAction, boolean computer, int chevronCount) {
-		if (isActionSupported(gateAction)) {
+		if (isActionSupported(gateAction) && targetPoint != null) {
 			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(gateAction, computer, chevronCount)), targetPoint);
 		}
 	}
@@ -531,7 +531,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Ren
 						
 						// Only if not loaded
 						if (!sourcePos.getWorld().isBlockLoaded(sourcePos.getPos())) {					
-							StargateMilkyWayBaseTile sourceTile = (StargateMilkyWayBaseTile) sourcePos.getWorld().getTileEntity(sourcePos.getPos());
+							StargateAbstractBaseTile sourceTile = (StargateAbstractBaseTile) sourcePos.getWorld().getTileEntity(sourcePos.getPos());
 							
 							sourceTile.updateEnergyStatus();
 						}
