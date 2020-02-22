@@ -11,7 +11,10 @@ import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.PositionedPacket;
+import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumGateState;
+import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateEnergyRequired;
@@ -21,6 +24,7 @@ import mrjake.aunis.stargate.teleportation.TeleportHelper;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
+import mrjake.aunis.tileentity.util.ScheduledTask;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -80,10 +84,10 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 		StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 		
 		if (!targetOnly) {
-			sourceTile.closeGate(false);
+			sourceTile.closeGate();
 		}
 
-		targetTile.closeGate(false);
+		targetTile.closeGate();
 	}
 	
 	public static StargateEnergyRequired getRequiredEnergy(World sourceWorld, BlockPos sourcePos, World targetWorld, BlockPos targetPos) {
@@ -140,6 +144,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 	
 	public static EnumGateState attemptOpen(World world, StargateAbstractBaseTile gateTile, @Nullable DHDTile sourceDhdTile, boolean stopRing) {
 		BlockPos sourcePos = gateTile.getPos();
+		EnumGateState gateState = EnumGateState.OK;
 		
 		// Check if symbols entered match the range, last is ORIGIN, target gate exists, and if not dialing self
 		if (checkDialedAddress(world, gateTile)) {
@@ -169,9 +174,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 				}
 			
 				else {
-					gateTile.closeGate(true);
-					
-					return EnumGateState.NOT_ENOUGH_POWER;
+					gateState = EnumGateState.NOT_ENOUGH_POWER;
 				}
 			}
 			
@@ -179,9 +182,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 				// Target gate busy
 				// Return address malformed
 				
-				gateTile.closeGate(true);
-				
-				return EnumGateState.ADDRESS_MALFORMED;
+				gateState = EnumGateState.ADDRESS_MALFORMED;
 			}
 		}
 		
@@ -189,12 +190,17 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			// Address malformed, dialing failed
 			// Execute GATE_DIAL_FAILED
 			
-			gateTile.closeGate(true);
-			
-			return EnumGateState.ADDRESS_MALFORMED;
+			gateState = EnumGateState.ADDRESS_MALFORMED;
 		}
 		
-		return EnumGateState.OK;
+		if (!gateState.ok()) {
+			AunisSoundHelper.playSoundEvent(world, sourcePos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
+			
+			gateTile.dialingFailed();
+			gateTile.addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 53));
+		}
+		
+		return gateState;
 	}
 	
 	

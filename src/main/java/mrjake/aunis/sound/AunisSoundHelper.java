@@ -40,6 +40,7 @@ public class AunisSoundHelper {
 		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_OPEN, createSoundEvent("gate_open"));
 		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_CLOSE, createSoundEvent("gate_close"));
 		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_DIAL_FAILED, createSoundEvent("gate_dial_fail"));
+		aunisSoundEvents.put(EnumAunisSoundEvent.GATE_DIAL_FAILED_COMPUTER, createSoundEvent("gate_dial_fail_computer"));
 		
 		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_LOCK_DHD, createSoundEvent("chevron_lock_dhd"));	
 		aunisSoundEvents.put(EnumAunisSoundEvent.CHEVRON_INCOMING, createSoundEvent("chevron_incoming"));	

@@ -53,6 +53,14 @@
     ]
   },
   
+  "gate_dial_fail_computer": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.gate_dial_fail",
+    "sounds": [
+      "aunis:gate/dial_fail_computer"
+    ]
+  },
+  
    "chevron_incoming": {
     "category": "ambient",
     "subtitle": "aunis.subtitle.gate_dial_fail",

@@ -281,31 +281,31 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	/**
-	 * Called either on pressing BRB on open gate or by pressing BRB on malformed address
-	 * 
-	 * @param dialingFailed - True if second case above
+	 * Called either on pressing BRB on open gate or close command from a computer.
 	 */
-	public void closeGate(boolean dialingFailed) {		
-		if (!dialingFailed) {		
-			stargateState = EnumStargateState.UNSTABLE;
-			
-			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 62));
-			sendSignal(null, "stargate_close", new Object[] {});
-			
-			AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_CLOSE, 0.3f);
-			sendRenderingUpdate(EnumGateAction.CLOSE_GATE, 0, false);
-			playPositionedSound(AunisPositionedSoundEnum.WORMHOLE, false);
-		}
+	public void closeGate() {
+		stargateState = EnumStargateState.UNSTABLE;
 		
-		else {			
-			stargateState = EnumStargateState.FAILING;
-			
-			AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
-			
-			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 53));
-			sendSignal(null, "stargate_failed", new Object[] {});
-		}
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 62));
+		sendSignal(null, "stargate_close", new Object[] {});
 		
+		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_CLOSE, 0.3f);
+		sendRenderingUpdate(EnumGateAction.CLOSE_GATE, 0, false);
+		playPositionedSound(AunisPositionedSoundEnum.WORMHOLE, false);
+		
+		horizonFlashTask = null;
+		
+		markDirty();
+	}
+	
+	/**
+	 * Called on the failed dialing.
+	 */
+	public void dialingFailed() {
+		stargateState = EnumStargateState.FAILING;
+				
+		sendSignal(null, "stargate_failed", new Object[] {});
+	
 		horizonFlashTask = null;
 
 		markDirty();

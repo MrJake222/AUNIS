@@ -18,7 +18,8 @@ public enum EnumAunisSoundEvent {
 	CHEVRON_SHUT(11),
 	CHEVRON_OPEN(12),
 	CHEVRON_LOCKING(13),
-	GATE_ORLIN_DIAL(14);
+	GATE_ORLIN_DIAL(14),
+	GATE_DIAL_FAILED_COMPUTER(15);
 	
 	public int id;
 	

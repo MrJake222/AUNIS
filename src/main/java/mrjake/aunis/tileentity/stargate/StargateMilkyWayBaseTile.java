@@ -139,8 +139,16 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	}
 	
 	@Override
-	public void closeGate(boolean dialingFailed) {
-		super.closeGate(dialingFailed);
+	public void closeGate() {
+		super.closeGate();
+		
+		if (isLinked())
+			getLinkedDHD(world).getDHDRendererState().activeButtons.clear();
+	}
+	
+	@Override
+	public void dialingFailed() {
+		super.dialingFailed();
 		
 		if (isLinked())
 			getLinkedDHD(world).getDHDRendererState().activeButtons.clear();
@@ -639,7 +647,10 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				
 			case STARGATE_CHEVRON_FAIL:
 				sendRenderingUpdate(EnumGateAction.CHEVRON_CLOSE, 0, false);
-				closeGate(true);
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED_COMPUTER, 1.50f);
+				
+				dialingFailed();
+				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 10));
 								
 				break;
 				
