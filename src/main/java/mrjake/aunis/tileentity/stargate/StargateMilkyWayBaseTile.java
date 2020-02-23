@@ -32,8 +32,8 @@ import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.state.StargateMilkyWayGuiState;
 import mrjake.aunis.state.StargateMilkyWayRendererState;
 import mrjake.aunis.state.StargateRendererActionState;
-import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
+import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.UniversalEnergyState;
@@ -331,7 +331,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	
 	// ------------------------------------------------------------------------
 	// Ticking and loading
-		
+	
 	@Override
 	public void onLoad() {		
 		if (world.isRemote) {

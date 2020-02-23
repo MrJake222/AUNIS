@@ -6,6 +6,7 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.util.math.BlockPos;
 
 public class AunisSoundHelperClient {
@@ -30,9 +31,14 @@ public class AunisSoundHelperClient {
 			soundRecord = getSoundRecord(soundEnum, pos);
 			soundRecordsMap.put(soundEnum, soundRecord);
 		}
-				
-		if (play)
-			Minecraft.getMinecraft().getSoundHandler().playSound(soundRecord);
+			
+		SoundHandler soundHandler = Minecraft.getMinecraft().getSoundHandler();
+		
+		if (play) {
+			if (!soundHandler.isSoundPlaying(soundRecord))
+				soundHandler.playSound(soundRecord);
+		}
+		
 		else
 			Minecraft.getMinecraft().getSoundHandler().stopSound(soundRecord);
 	}

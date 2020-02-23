@@ -136,7 +136,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 				// To renderer: light up chevrons and target dhd glyphs		
 				if (targetTile instanceof StargateMilkyWayBaseTile) {
 					if (((StargateMilkyWayBaseTile) targetTile).isLinked())
-						((StargateMilkyWayBaseTile) targetTile).getLinkedDHD(world).activateSymbols(EnumSymbol.toIntegerList(eightChevronDial ? gateTile.gateAddress : gateTile.gateAddress.subList(0, 6), EnumSymbol.ORIGIN));
+						((StargateMilkyWayBaseTile) targetTile).getLinkedDHD(targetWorld).activateSymbols(EnumSymbol.toIntegerList(eightChevronDial ? gateTile.gateAddress : gateTile.gateAddress.subList(0, 6), EnumSymbol.ORIGIN));
 				}
 			}
 		 }
@@ -169,7 +169,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 					
 					if (targetTile instanceof StargateMilkyWayBaseTile) {
 						if (((StargateMilkyWayBaseTile) targetTile).isLinked()) 
-							((StargateMilkyWayBaseTile) targetTile).getLinkedDHD(world).activateSymbol(EnumSymbol.BRB.id);
+							((StargateMilkyWayBaseTile) targetTile).getLinkedDHD(targetWorld).activateSymbol(EnumSymbol.BRB.id);
 					}
 				}
 			

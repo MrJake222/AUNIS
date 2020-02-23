@@ -14,6 +14,7 @@ import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
+import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateOrlinMergeHelper;
 import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.state.StargateOrlinGuiState;
@@ -41,8 +42,12 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	}
 	
 	@Override
-	public void onLoad() {				
+	public void onLoad() {
 		super.onLoad();
+		
+		if (!world.isRemote) {
+			StargateNetwork.get(world).addOrlinAddress(gateAddress);
+		}
 	}
 	
 	public long animStart;

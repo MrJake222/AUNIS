@@ -55,6 +55,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
@@ -504,6 +505,14 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		super.invalidate();
 	}
 	
+	@Override
+	public void rotate(Rotation rotation) {
+		IBlockState state = world.getBlockState(pos);
+		
+		EnumFacing facing = state.getValue(AunisProps.FACING_HORIZONTAL);
+		world.setBlockState(pos, state.withProperty(AunisProps.FACING_HORIZONTAL, rotation.rotate(facing)));
+	}
+	
 	// ------------------------------------------------------------------------
 	// Killing and block vaporizing
 	
@@ -587,7 +596,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	protected void setRendererStateClient(StargateAbstractRendererState rendererState) {
 		this.rendererStateClient = rendererState;
-
+		
 		playPositionedSound(AunisPositionedSoundEnum.WORMHOLE, rendererState.doEventHorizonRender);
 	}
 	
@@ -845,7 +854,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				break;
 				
 			case STARGATE_HORIZON_LIGHT_BLOCK:
-				world.setBlockState(getGateCenterPos(), AunisBlocks.invisibleBlock.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false));
+				world.setBlockState(getGateCenterPos(), AunisBlocks.invisibleBlock.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false), 3);
+				
 				break;
 				
 			case STARGATE_HORIZON_WIDEN:

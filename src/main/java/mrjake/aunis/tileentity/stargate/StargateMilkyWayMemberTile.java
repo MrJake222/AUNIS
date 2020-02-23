@@ -18,7 +18,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -62,6 +64,14 @@ public class StargateMilkyWayMemberTile extends TileEntity implements ITickable,
 				}
 			}
 		}
+	}
+	
+	@Override
+	public void rotate(Rotation rotation) {
+		IBlockState state = world.getBlockState(pos);
+		
+		EnumFacing facing = state.getValue(AunisProps.FACING_HORIZONTAL);
+		world.setBlockState(pos, state.withProperty(AunisProps.FACING_HORIZONTAL, rotation.rotate(facing)));
 	}
 	
 	// ---------------------------------------------------------------------------------
