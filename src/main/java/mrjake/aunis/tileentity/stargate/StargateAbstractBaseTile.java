@@ -107,7 +107,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	public void updateTargetGate() {
-		if (stargateState.initiating()) {
+		if (stargateState.engaged() || stargateState == EnumStargateState.UNSTABLE) {
 			StargatePos stargatePos = StargateNetwork.get(world).getStargate(dialedAddress);
 			stargatePos.getWorld().getTileEntity(stargatePos.getPos()).markDirty();
 		}
@@ -126,9 +126,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	protected void disconnectGate() {	
+		updateTargetGate();
 		stargateState = EnumStargateState.IDLE;
 		getAutoCloseManager().reset();
-		updateTargetGate();
 
 		if (!(this instanceof StargateOrlinBaseTile))
 			dialedAddress.clear();
@@ -390,7 +390,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 						
 			// Not initiating
 			if (stargateState == EnumStargateState.ENGAGED) {
-//				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
+				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
 //				Aunis.info(scheduledTasks.toString());
 			}
 						
