@@ -11,10 +11,7 @@ import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.PositionedPacket;
-import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumGateState;
-import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateEnergyRequired;
@@ -24,7 +21,6 @@ import mrjake.aunis.stargate.teleportation.TeleportHelper;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import mrjake.aunis.tileentity.util.ScheduledTask;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -193,11 +189,8 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			gateState = EnumGateState.ADDRESS_MALFORMED;
 		}
 		
-		if (!gateState.ok()) {
-			AunisSoundHelper.playSoundEvent(world, sourcePos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
-			
+		if (!gateState.ok()) {			
 			gateTile.dialingFailed();
-			gateTile.addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 53));
 		}
 		
 		return gateState;

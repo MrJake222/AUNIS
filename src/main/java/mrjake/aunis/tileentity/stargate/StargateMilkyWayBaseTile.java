@@ -48,6 +48,7 @@ import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.ILinkable;
 import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -83,6 +84,17 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 			getLinkedDHD(world).clearSymbols();
 	}
 	
+	@Override
+	public void onBlockBroken() {
+		super.onBlockBroken();
+		
+		playPositionedSound(AunisPositionedSoundEnum.RING_ROLL, false);
+		
+		if (hasUpgrade() || getUpgradeRendererState().doInsertAnimation) {
+			InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphStargate));
+		}
+	}
+	
 	// ------------------------------------------------------------------------
 	// Stargate Network
 	
@@ -106,6 +118,19 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ACTIVATE_CHEVRON, 10, taskData));
 		
 		markDirty();
+	}
+	
+	@Override
+	public boolean canAddSymbol(EnumSymbol symbol) {
+		if (dialedAddress.contains(symbol)) 
+			return false;
+		
+		int maxSymbols = getLinkedDHD(world).hasUpgrade() ? 8 : 7;
+		
+		if (dialedAddress.size() == maxSymbols)
+			return false;
+		
+		return true;
 	}
 	
 	@Override
@@ -149,6 +174,9 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	@Override
 	public void dialingFailed() {
 		super.dialingFailed();
+		
+		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 53));
 		
 		if (isLinked())
 			getLinkedDHD(world).getDHDRendererState().activeButtons.clear();

@@ -84,7 +84,7 @@ tile.aunis.transportrings_block.rings_address=Address
 tile.aunis.transportrings_block.rings_name=Name
 tile.aunis.transportrings_block.rings_save=Save
 
-commands.sgcloseall.usage=/sgcloseall ["world", dimensionID or empty]
+commands.sgcloseall.usage=/sgcloseall ["world", dimensionID, "force", empty] ["force" or empty]
 
 death.attack.eventHorizon=%s was given a kawoosh cremation
 

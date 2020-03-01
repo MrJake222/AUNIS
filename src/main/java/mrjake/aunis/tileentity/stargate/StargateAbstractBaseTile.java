@@ -106,6 +106,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		energyStorage.extractEnergyUncapped(energy);
 	}
 	
+	public void updateTargetGate() {
+		StargatePos stargatePos = StargateNetwork.get(world).getStargate(dialedAddress);
+		stargatePos.getWorld().getTileEntity(stargatePos.getPos()).markDirty();
+	}
+	
 	protected void engageGate() {	
 		gateOpenTime = world.getTotalWorldTime();
 		energyConsumed = 0;
@@ -121,13 +126,24 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	protected void disconnectGate() {	
 		stargateState = EnumStargateState.IDLE;
 		getAutoCloseManager().reset();
-				
+		updateTargetGate();
+
 		if (!(this instanceof StargateOrlinBaseTile))
 			dialedAddress.clear();
 		
 		isFinalActive = false;
 		
 		markDirty();
+	}
+	
+	public void onBlockBroken() {
+		updateTargetGate();
+		world.setBlockToAir(getGateCenterPos());
+		
+		updateMergeState(false, facing);
+		StargateNetwork.get(world).removeStargate(gateAddress);
+		
+		playPositionedSound(AunisPositionedSoundEnum.WORMHOLE, false);
 	}
 	
 	protected void sendRenderingUpdate(EnumGateAction gateAction, int chevronCount, boolean modifyFinal) {
@@ -337,14 +353,14 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			
 			if (gateAddress == null) {
 				gateAddress = generateAddress();
-				
+				markDirty();
+								
 //				if (StargateNetwork.get(world).checkForStargate(gateAddress))
 //					Aunis.info(pos+"double address");
 				if (StargateNetwork.get(world).checkForStargate(gateAddress))
 					throw new IllegalStateException("Stargate with given address already exists");
 				
 				StargateNetwork.get(world).addStargate(gateAddress, world.provider.getDimension(), pos);
-				markDirty();
 			}
 		}
 		
@@ -355,6 +371,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	@Override
 	public void update() {
+		// Scheduled tasks
+		ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());		
 		
 		if (!world.isRemote) {
 			// Event horizon teleportation			
@@ -368,9 +386,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 //				Aunis.info(scheduledTasks.toString());
 			}
 						
-			// Scheduled tasks
-			ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());
-			
 			if (horizonFlashTask != null && horizonFlashTask.isActive()) {
 				horizonFlashTask.update(world.getTotalWorldTime());
 			}
@@ -598,6 +613,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		this.rendererStateClient = rendererState;
 		
 		playPositionedSound(AunisPositionedSoundEnum.WORMHOLE, rendererState.doEventHorizonRender);
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_LIGHTING_UPDATE_CLIENT, 10));
 	}
 	
 	public void updateFacing(EnumFacing facing, boolean server) {
@@ -670,9 +686,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * Checks gate's merge state
 	 * 
 	 * @param shouldBeMerged - True if gate's multiblock structure is valid
-	 * @param state State of the base block.
+	 * @param facing Facing of the base block.
 	 */
-	public final void updateMergeState(boolean shouldBeMerged, @Nullable IBlockState state) {		
+	public final void updateMergeState(boolean shouldBeMerged, EnumFacing facing) {		
 		this.isMerged = shouldBeMerged;
 		
 		if (!shouldBeMerged) {
@@ -688,18 +704,13 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		}
 		
 		IBlockState actualState = world.getBlockState(pos);
-		EnumFacing baseFacing;
 		
 		// When the block is destroyed, there will be air in this place and we cannot set it's block state
 		if (getMergeHelper().getBaseMatcher().apply(actualState)) {
-			baseFacing = actualState.getValue(AunisProps.FACING_HORIZONTAL);
 			world.setBlockState(pos, actualState.withProperty(AunisProps.RENDER_BLOCK, !shouldBeMerged), 2);
 		}
 		
-		else
-			baseFacing = state.getValue(AunisProps.FACING_HORIZONTAL);
-		
-		getMergeHelper().updateMembersMergeStatus(world, pos, baseFacing, shouldBeMerged);
+		getMergeHelper().updateMembersMergeStatus(world, pos, facing, shouldBeMerged);
 		
 		markDirty();
 	}
@@ -854,7 +865,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				break;
 				
 			case STARGATE_HORIZON_LIGHT_BLOCK:
-				world.setBlockState(getGateCenterPos(), AunisBlocks.invisibleBlock.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false), 3);
+				world.setBlockState(getGateCenterPos(), AunisBlocks.invisibleBlock.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false));
+				Aunis.info("place");
 				
 				break;
 				
@@ -893,11 +905,12 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			case STARGATE_ENGAGE:
 				engageGate();
 				
-				if (!stargateState.initiating()) {
-					world.notifyLightSet(getGateCenterPos());
-					world.checkLightFor(EnumSkyBlock.BLOCK, getGateCenterPos());
-				}
+				break;
 				
+			case STARGATE_LIGHTING_UPDATE_CLIENT:
+				world.notifyLightSet(getGateCenterPos());
+				world.checkLightFor(EnumSkyBlock.BLOCK, getGateCenterPos());
+								
 				break;
 				
 			case HORIZON_FLASH:
@@ -1022,7 +1035,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				compound.setInteger("symbol"+i, gateAddress.get(i).id);
 			}
 		}
-		
+				
 		compound.setInteger("dialedAddressLength", dialedAddress.size());
 		
 		for (int i=0; i<dialedAddress.size(); i++) {
@@ -1068,7 +1081,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				gateAddress.add( EnumSymbol.valueOf(id) );
 			}
 		}
-		
+				
 		dialedAddress.clear();
 		int dialedAddressLength = compound.getInteger("dialedAddressLength");
 		

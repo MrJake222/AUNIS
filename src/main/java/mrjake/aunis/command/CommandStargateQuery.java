@@ -27,7 +27,15 @@ public class CommandStargateQuery extends CommandBase {
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-		notifyCommandListener(sender, this, "Stargates:");
+		boolean checkDim = false;
+		int dimId = 0;
+		
+		if (args.length == 1) {
+			checkDim = true;
+			dimId = parseInt(args[0]);
+		}
+		
+		notifyCommandListener(sender, this, checkDim ? ("Stargates[dim="+dimId+"]: ") : "Stargates:");
 		Map<Long, StargatePos> stargates = StargateNetwork.get(sender.getEntityWorld()).queryStargates();
 		
 		for (long serialized : stargates.keySet()) {
@@ -35,10 +43,12 @@ public class CommandStargateQuery extends CommandBase {
 			StargatePos stargatePos = stargates.get(serialized);
 			BlockPos pos = stargatePos.getPos();
 			
-			String addr = address.toString().replace("[", "").replace("]", "");
-			String posStr = "[" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ", dim="+stargatePos.getDimension()+"]";
-			
-			notifyCommandListener(sender, this, posStr + ": " + TextFormatting.AQUA + addr + ", " + TextFormatting.DARK_PURPLE + stargatePos.get7thSymbol().localize() + "\n");
+			if (stargatePos.getDimension() == dimId) {
+				String addr = address.toString().replace("[", "").replace("]", "");
+				String posStr = "[" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ", dim="+stargatePos.getDimension()+"]";
+				
+				notifyCommandListener(sender, this, posStr + ": " + TextFormatting.AQUA + addr + ", " + TextFormatting.DARK_PURPLE + stargatePos.get7thSymbol().localize() + "\n");
+			}
 		}
 	}
 

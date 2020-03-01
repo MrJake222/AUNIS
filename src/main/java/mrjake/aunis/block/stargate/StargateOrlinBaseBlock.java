@@ -1,7 +1,5 @@
 package mrjake.aunis.block.stargate;
 
-import java.util.ArrayList;
-
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
@@ -32,7 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
 public class StargateOrlinBaseBlock extends Block {
 	
@@ -113,7 +110,7 @@ public class StargateOrlinBaseBlock extends Block {
 		
 			world.setBlockState(pos, state);
 			gateTile.updateFacing(facing, true);
-			gateTile.updateMergeState(StargateOrlinMergeHelper.INSTANCE.checkBlocks(world, pos, facing), state);
+			gateTile.updateMergeState(StargateOrlinMergeHelper.INSTANCE.checkBlocks(world, pos, facing), facing);
 			
 			
 			// ------------------------------------------
@@ -139,9 +136,7 @@ public class StargateOrlinBaseBlock extends Block {
 		if (!world.isRemote) {
 			StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
 			
-			gateTile.updateMergeState(false, state);			
-			StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
-			StargateNetwork.get(world).removeOrlinAddress(gateTile.gateAddress);
+			gateTile.onBlockBroken();
 		}
 	}
 	

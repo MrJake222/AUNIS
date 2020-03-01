@@ -34,6 +34,24 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	
 	// ------------------------------------------------------------------------
+	// Stargate state
+	
+	@Override
+	public void dialingFailed() {
+		super.dialingFailed();
+		
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_FAILED_SOUND, 30));
+	}
+	
+	@Override
+	public void onBlockBroken() {
+		super.onBlockBroken();
+		
+		StargateNetwork.get(world).removeOrlinAddress(gateAddress);
+	}
+	
+	
+	// ------------------------------------------------------------------------
 	// Ticking
 	
 	@Override
@@ -71,29 +89,27 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	public void redstonePowerUpdate(boolean power) {
 		if ((isPowered && !power) || (!isPowered && power)) {
 			isPowered = power;
-			
-			if (isPowered) {
-				if (stargateState == EnumStargateState.IDLE) {
-					if (StargateRenderingUpdatePacketToServer.checkDialedAddress(world, this)) {
-						startSparks();
-						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_ORLIN_DIAL, 1.0f);
 						
-						addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_OPEN));
-					}
+			if (isPowered && stargateState.idle()) {
+				if (StargateRenderingUpdatePacketToServer.checkDialedAddress(world, this)) {
+					stargateState = EnumStargateState.DIALING;
 					
-					else {
-						Aunis.info("wrong dialed address");
-					}
+					startSparks();
+					AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_ORLIN_DIAL, 1.0f);
+					
+					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_OPEN));
+				}
+				
+				else {
+					Aunis.info("wrong dialed address");
 				}
 			}
 			
-			else {
-				if (stargateState == EnumStargateState.ENGAGED_INITIATING)
-					StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+			else if (!isPowered && stargateState.initiating()) {
+				StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 			}
 			
 			markDirty();
-			Aunis.info("Gate is powered: " + isPowered);
 		}
 	}
 	
@@ -243,15 +259,19 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 				
 				break;
 				
-			case STARGATE_ORLIN_SPARK:
-				Aunis.info("sparkIndex: " + sparkIndex);
-				
+			case STARGATE_ORLIN_SPARK:				
 				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPARK_STATE, new StargateOrlinSparkState(sparkIndex, world.getTotalWorldTime())), targetPoint);
 				
 				if (sparkIndex < 6 && sparkIndex != -1)
 					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_SPARK, 24));
 				
 				sparkIndex++;
+				
+				break;
+				
+			case STARGATE_ORLIN_FAILED_SOUND:
+				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
+				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 53));
 				
 				break;
 				

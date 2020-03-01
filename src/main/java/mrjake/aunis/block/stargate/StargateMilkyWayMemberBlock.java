@@ -351,7 +351,7 @@ public class StargateMilkyWayMemberBlock extends Block {
 			StargateMilkyWayBaseTile gateTile = memberTile.getBaseTile(world);
 			
 			if (gateTile != null && memberTile.isMerged())
-				gateTile.updateMergeState(false, state);
+				gateTile.updateMergeState(false, state.getValue(AunisProps.FACING_HORIZONTAL));
 			
 			if (memberTile.getCamoItemStack() != null)
 				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), memberTile.getCamoItemStack());
