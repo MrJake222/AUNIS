@@ -370,7 +370,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	}
 	
 	@Override
-	protected BlockPos getGateCenterPos() {
+	public BlockPos getGateCenterPos() {
 		return pos.offset(EnumFacing.UP, 4);
 	}
 	

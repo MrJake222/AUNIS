@@ -43,7 +43,7 @@ public class CommandStargateQuery extends CommandBase {
 			StargatePos stargatePos = stargates.get(serialized);
 			BlockPos pos = stargatePos.getPos();
 			
-			if (stargatePos.getDimension() == dimId) {
+			if (!checkDim || stargatePos.getDimension() == dimId) {
 				String addr = address.toString().replace("[", "").replace("]", "");
 				String posStr = "[" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ", dim="+stargatePos.getDimension()+"]";
 				

@@ -107,8 +107,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	public void updateTargetGate() {
-		StargatePos stargatePos = StargateNetwork.get(world).getStargate(dialedAddress);
-		stargatePos.getWorld().getTileEntity(stargatePos.getPos()).markDirty();
+		if (stargateState.initiating()) {
+			StargatePos stargatePos = StargateNetwork.get(world).getStargate(dialedAddress);
+			stargatePos.getWorld().getTileEntity(stargatePos.getPos()).markDirty();
+		}
 	}
 	
 	protected void engageGate() {	
@@ -200,8 +202,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		return dialedAddress.size();
 	}
 	
-	private List<EnumSymbol> generateAddress() {			
-		Random rand = new Random(pos.hashCode() * 31 + world.provider.getDimension());
+	private List<EnumSymbol> generateAddress(Random rand) {			
 		List<EnumSymbol> address = new ArrayList<EnumSymbol>(7); 
 						
 		while (address.size() < 7) {
@@ -211,6 +212,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				address.add(symbol);
 			}
 		}
+		
+		if (StargateNetwork.get(world).isAddressReserved(address))
+			return generateAddress(new Random());
 		
 		return address;
 	}
@@ -331,7 +335,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	// ------------------------------------------------------------------------
 	// Ticking and loading
 
-	protected abstract BlockPos getGateCenterPos();
+	public abstract BlockPos getGateCenterPos();
 	
 	public void playPositionedSound(AunisPositionedSoundEnum soundEnum, boolean play) {
 		if (world.isRemote)
@@ -343,6 +347,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	protected TargetPoint targetPoint;
 	protected EnumFacing facing = EnumFacing.NORTH;
 	
+	public EnumFacing getFacing() {
+		return facing;
+	}
+	
 	@Override
 	public void onLoad() {		
 		if (!world.isRemote) {
@@ -352,9 +360,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			Aunis.ocWrapper.joinOrCreateNetwork(this);
 			
 			if (gateAddress == null) {
-				gateAddress = generateAddress();
+				gateAddress = generateAddress(new Random(pos.hashCode() * 31 + world.provider.getDimension()));
 				markDirty();
-								
+												
 //				if (StargateNetwork.get(world).checkForStargate(gateAddress))
 //					Aunis.info(pos+"double address");
 				if (StargateNetwork.get(world).checkForStargate(gateAddress))
@@ -382,7 +390,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 						
 			// Not initiating
 			if (stargateState == EnumStargateState.ENGAGED) {
-				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
+//				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
 //				Aunis.info(scheduledTasks.toString());
 			}
 						
@@ -1171,6 +1179,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	@Optional.Method(modid = "opencomputers")
 	@Callback(getter = true)
 	public Object[] dialedAddress(Context context, Arguments args) {
-		return new Object[] {isMerged ? dialedAddress : null};
+		return new Object[] {(isMerged && stargateState.initiating()) ? dialedAddress : null};
 	}
 }

@@ -95,8 +95,7 @@ public class StargateOrlinBaseBlock extends Block {
 			}
 		}
 				
-		return  heldItem == AunisItems.pageNotebookItem ||
-				heldItem == AunisItems.analyzerAncient;
+		return heldItem == AunisItems.analyzerAncient;
 	}
 	
 	@Override

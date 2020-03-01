@@ -124,16 +124,8 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			BlockPos targetPos = targetGate.getPos();
 			StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 				
-			if (targetTile.getStargateState().idle() && gateTile.hasEnergyToDial(getRequiredEnergy(world, gateTile.getPos(), targetWorld, targetPos))) {
-				boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
-				
+			if (targetTile.getStargateState().idle() && gateTile.hasEnergyToDial(getRequiredEnergy(world, gateTile.getPos(), targetWorld, targetPos))) {				
 				targetTile.incomingWormhole(gateTile.gateAddress, gateTile.dialedAddress.size());
-				
-				// To renderer: light up chevrons and target dhd glyphs		
-				if (targetTile instanceof StargateMilkyWayBaseTile) {
-					if (((StargateMilkyWayBaseTile) targetTile).isLinked())
-						((StargateMilkyWayBaseTile) targetTile).getLinkedDHD(targetWorld).activateSymbols(EnumSymbol.toIntegerList(eightChevronDial ? gateTile.gateAddress : gateTile.gateAddress.subList(0, 6), EnumSymbol.ORIGIN));
-				}
 			}
 		 }
 	}
@@ -316,6 +308,14 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 									boolean lock = symbol == EnumSymbol.ORIGIN;
 									
 									gateTile.sendSignal(null, "stargate_dhd_chevron_engaged", new Object[] { symbolCount, lock, symbol.englishName });
+									
+									StargateNetwork network = StargateNetwork.get(world);
+									
+									if (gateTile.dialedAddress.equals(StargateNetwork.EARTH_ADDRESS) && network.hasLastActivatedOrlinAddress()) {
+										gateTile.dialedAddress.clear();
+										gateTile.dialedAddress.addAll(StargateNetwork.get(world).getLastActivatedOrlinAddress());
+										gateTile.dialedAddress.add(EnumSymbol.ORIGIN);
+									}
 									
 									// Light up target gate, if exists
 									if (lock) {	

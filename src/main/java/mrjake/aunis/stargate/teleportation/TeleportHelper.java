@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import javax.vecmath.Vector2f;
 
-import mrjake.aunis.AunisProps;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
@@ -141,28 +141,29 @@ public class TeleportHelper {
 		int sourceDim = world.provider.getDimension();
 		
 		StargateAbstractBaseTile sourceTile = (StargateAbstractBaseTile) world.getTileEntity(sourceGatePos);
-		
-		// TODO Cross dimension entity teleport not supported YET
-//		if (sourceDim != targetGatePos.getDimension() && !(entity instanceof EntityPlayerMP))
-//			return;
-		
-		EnumFacing sourceFacing = world.getBlockState(sourceGatePos).getValue(AunisProps.FACING_HORIZONTAL);
-		EnumFacing targetFacing = targetGatePos.getWorld().getBlockState(targetGatePos.getPos()).getValue(AunisProps.FACING_HORIZONTAL);
+		StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) getWorld(targetGatePos.getDimension()).getTileEntity(targetGatePos.getPos());
 		
 		int flipAxis = 0;
 		
-		if (sourceFacing.getAxis() == targetFacing.getAxis())
+		if (sourceTile.getFacing().getAxis() == targetTile.getFacing().getAxis())
 			flipAxis |= EnumFlipAxis.X.mask;
 		else
 			flipAxis |= EnumFlipAxis.Z.mask;
 		
-		float yDiff = 0;
+		Vec3d pos = null;
+		BlockPos tPos = targetGatePos.getPos();
+		
 		if (sourceTile instanceof StargateOrlinBaseTile)
-			yDiff = 1.5f;
+			pos = new Vec3d(tPos.getX() + 0.5, tPos.getY() + 2.0, tPos.getZ() + 0.5);
+		else if (targetTile instanceof StargateOrlinBaseTile)
+			pos = new Vec3d(tPos.getX() + 0.5, tPos.getY() + 0.5, tPos.getZ() + 0.5);
+		else
+			pos = getPosition(entity, sourceTile.getGateCenterPos(), targetTile.getGateCenterPos(), rotation, targetTile.getFacing().getAxis()==Axis.Z ? ~flipAxis : flipAxis);
 		
 		float yaw = getRotation(entity, rotation, flipAxis);
-		Vec3d pos = getPosition(entity, sourceGatePos, targetGatePos.getPos(), rotation, targetFacing.getAxis()==Axis.Z ? ~flipAxis : flipAxis, yDiff);
 		boolean isPlayer = entity instanceof EntityPlayerMP;
+		
+		Aunis.info("pos: " + pos);
 		
 		if (sourceDim == targetGatePos.getDimension()) {
 			entity.rotationYaw = yaw;
@@ -189,8 +190,6 @@ public class TeleportHelper {
 		setMotion(entity, rotation, motionVector);
 		
 		sourceTile.entityPassing(isPlayer, false);
-		
-		StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) getWorld(targetGatePos.getDimension()).getTileEntity(targetGatePos.getPos());
 		targetTile.entityPassing(isPlayer, true);
 	}
 	
@@ -247,7 +246,7 @@ public class TeleportHelper {
 		}
 	}
 	
-	public static Vec3d getPosition(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, int flipAxis, float yDiff) {
+	public static Vec3d getPosition(Entity player, BlockPos sourceGatePos, BlockPos targetGatePos, float rotation, int flipAxis) {
 		Vector2f sourceCenter = new Vector2f( sourceGatePos.getX()+0.5f, sourceGatePos.getZ()+0.5f );
 		Vector2f destCenter = new Vector2f( targetGatePos.getX()+0.5f, targetGatePos.getZ()+0.5f );
 		Vector2f playerPosition = new Vector2f( (float)(player.posX), (float)(player.posZ) );  
@@ -256,7 +255,7 @@ public class TeleportHelper {
 		rotateAround00(playerPosition, rotation, flipAxis);				
 		translateToDest(playerPosition, destCenter);
 		
-		float y = (float) (targetGatePos.getY() + ( player.posY - sourceGatePos.getY() )) + yDiff;
+		float y = (float) (targetGatePos.getY() + ( player.posY - sourceGatePos.getY() ));
 		return new Vec3d(playerPosition.x, y, playerPosition.y);
 	}
 	

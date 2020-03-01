@@ -13,6 +13,7 @@ import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
+import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateOrlinMergeHelper;
@@ -32,7 +33,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
-	
+		
 	// ------------------------------------------------------------------------
 	// Stargate state
 	
@@ -44,10 +45,17 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	}
 	
 	@Override
+	public void openGate(boolean initiating, List<EnumSymbol> incomingAddress, boolean eightChevronDial) {
+		super.openGate(initiating, incomingAddress, eightChevronDial);
+		
+		StargateNetwork.get(world).setLastActivatedOrlinAddress(gateAddress);
+	}
+	
+	@Override
 	public void onBlockBroken() {
 		super.onBlockBroken();
 		
-		StargateNetwork.get(world).removeOrlinAddress(gateAddress);
+//		StargateNetwork.get(world).getLastActivatedOrlinAddress()
 	}
 	
 	
@@ -55,17 +63,8 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	// Ticking
 	
 	@Override
-	protected BlockPos getGateCenterPos() {
+	public BlockPos getGateCenterPos() {
 		return pos.offset(EnumFacing.UP, 1);
-	}
-	
-	@Override
-	public void onLoad() {
-		super.onLoad();
-		
-		if (!world.isRemote) {
-			StargateNetwork.get(world).addOrlinAddress(gateAddress);
-		}
 	}
 	
 	public long animStart;

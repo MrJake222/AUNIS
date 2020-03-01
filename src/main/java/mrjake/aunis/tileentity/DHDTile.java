@@ -207,7 +207,7 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 		activateSymbols(Arrays.asList(id));
 	}
 	
-	public void activateSymbols(List<Integer> idList) {		
+	private void activateSymbols(List<Integer> idList) {		
 		if (idList.size() == 1) {
 			if (idList.get(0) == EnumSymbol.BRB.id)
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS_BRB, 0.5f);
