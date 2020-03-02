@@ -148,6 +148,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		playPositionedSound(AunisPositionedSoundEnum.WORMHOLE, false);
 	}
 	
+	public boolean canAcceptConnectionFrom(StargateAbstractBaseTile gateTile) {
+		return stargateState.idle();
+	}
+		
 	protected void sendRenderingUpdate(EnumGateAction gateAction, int chevronCount, boolean modifyFinal) {
 		if (targetPoint != null) {
 			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(gateAction, chevronCount, modifyFinal)), targetPoint);
@@ -260,8 +264,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		dialedAddress.addAll(incomingAddress);
 		
 		isFinalActive = true;
-		
-		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_INCOMING, 0.5f);
 		
 		sendSignal(null, "stargate_incoming_wormhole", new Object[] { dialedAddressSize });
 	}

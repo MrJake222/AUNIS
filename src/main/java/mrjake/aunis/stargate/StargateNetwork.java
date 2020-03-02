@@ -56,7 +56,7 @@ public class StargateNetwork extends WorldSavedData {
 		
 		if (netherGateAddress != null) {
 			compound.setLong("netherGateAddress", EnumSymbol.toLong(netherGateAddress));
-			compound.setInteger("netherGate7th", netherGateAddress.get(6).id);
+//			compound.setInteger("netherGate7th", netherGateAddress.get(6).id);
 		}
 		
 		if (lastActivatedOrlin != null) {
@@ -82,7 +82,7 @@ public class StargateNetwork extends WorldSavedData {
 		
 		if (compound.hasKey("netherGateAddress")) {			
 			netherGateAddress = EnumSymbol.toSymbolList(EnumSymbol.fromLong(compound.getLong("netherGateAddress")));
-			netherGateAddress.add(EnumSymbol.valueOf(compound.getInteger("netherGate7th")));
+//			netherGateAddress.add(EnumSymbol.valueOf(compound.getInteger("netherGate7th")));
 		}
 		
 		if (compound.hasKey("lastActivatedOrlin")) {			
@@ -93,8 +93,8 @@ public class StargateNetwork extends WorldSavedData {
 	}
 	
 	public void setNetherGate(List<EnumSymbol> address) {
-		netherGateAddress = new ArrayList<EnumSymbol>(7);
-		netherGateAddress.addAll(address);
+		netherGateAddress = new ArrayList<EnumSymbol>(6);
+		netherGateAddress.addAll(address.subList(0, 6));
 				
 		markDirty();
 	}
@@ -125,7 +125,8 @@ public class StargateNetwork extends WorldSavedData {
 //	}
 	
 	public void setLastActivatedOrlinAddress(List<EnumSymbol> address) {
-		lastActivatedOrlin = address;
+		lastActivatedOrlin = new ArrayList<EnumSymbol>(6);
+		lastActivatedOrlin.addAll(address.subList(0, 6));
 		
 		markDirty();
 	}
@@ -223,9 +224,9 @@ public class StargateNetwork extends WorldSavedData {
 				}
 				
 				// Travelling from Overworld to Nether or vice-versa
-//				if (currentWorld.provider.getDimensionType() == DimensionType.NETHER || stargatePos.getDimension() == DimensionType.OVERWORLD.getId() ||
-//					currentWorld.provider.getDimensionType() == DimensionType.OVERWORLD || stargatePos.getDimension() == DimensionType.NETHER.getId())
-//					return true;
+				if (currentWorld.provider.getDimensionType() == DimensionType.NETHER || stargatePos.getDimension() == DimensionType.OVERWORLD.getId() ||
+					currentWorld.provider.getDimensionType() == DimensionType.OVERWORLD || stargatePos.getDimension() == DimensionType.NETHER.getId())
+					return true;
 				
 			}
 			

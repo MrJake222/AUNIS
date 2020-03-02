@@ -7,6 +7,7 @@ import java.util.Map;
 
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
@@ -73,7 +74,9 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 		checkPos = checkPos.rotate(FacingToRotation.get(baseFacing)).add(basePos);
 		IBlockState memberState = world.getBlockState(checkPos);
 		
-		if (MEMBER_MATCHER.apply(memberState)) {		
+		if (MEMBER_MATCHER.apply(memberState)) {
+			StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(checkPos);
+			
 			if (baseFacing == EnumFacing.NORTH) {
 				if (variant == EnumFacing.WEST) variant = EnumFacing.EAST;
 				else if (variant == EnumFacing.EAST) variant = EnumFacing.WEST;
@@ -88,14 +91,22 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 				if (variant == EnumFacing.WEST) variant = EnumFacing.SOUTH;
 				else if (variant == EnumFacing.EAST) variant = EnumFacing.NORTH;
 			}
-			
-			boolean renderblock = memberState.getValue(AunisProps.RENDER_BLOCK);
-			
-			if ((!shouldBeMerged && !renderblock) || (shouldBeMerged && renderblock))
-				memberState = memberState.withProperty(AunisProps.ORLIN_VARIANT, shouldBeMerged ? variant : baseFacing);
-			
-			world.setBlockState(checkPos, memberState.withProperty(AunisProps.RENDER_BLOCK, !shouldBeMerged));
+						
+			if ((shouldBeMerged && !memberTile.isMerged()) || (memberTile.isMerged() && memberTile.getBasePos().equals(basePos))) {
+				memberState = memberState.withProperty(AunisProps.ORLIN_VARIANT, shouldBeMerged ? variant : baseFacing);			
+				world.setBlockState(checkPos, memberState.withProperty(AunisProps.RENDER_BLOCK, !shouldBeMerged));
+				
+				memberTile.setBasePos(basePos);
+			}
 		}
 	}
-	
+
+	public void updateMembersBrokenStatus(World world, BlockPos basePos, EnumFacing baseFacing, boolean isBroken) {
+		for (BlockPos pos : getRingBlocks()) {
+			pos = pos.rotate(FacingToRotation.get(baseFacing)).add(basePos);
+
+			StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
+			memberTile.setBroken(isBroken);
+		}
+	}	
 }

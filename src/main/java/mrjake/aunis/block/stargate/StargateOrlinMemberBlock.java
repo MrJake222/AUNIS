@@ -1,11 +1,16 @@
 package mrjake.aunis.block.stargate;
 
 import java.util.List;
+import java.util.Random;
+
+import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.StargateOrlinMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -13,9 +18,14 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -81,20 +91,50 @@ public class StargateOrlinMemberBlock extends Block {
 			world.setBlockState(pos, state, 0);
 			
 			StargateAbstractBaseTile gateTile = StargateOrlinMergeHelper.INSTANCE.findBaseTile(world, pos, facing);
+			
 			if (gateTile != null) {
-				gateTile.updateMergeState(StargateOrlinMergeHelper.INSTANCE.checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), null);
+				gateTile.updateMergeState(StargateOrlinMergeHelper.INSTANCE.checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), facing);
 			}				
 		}
 	}
 	
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-		StargateAbstractBaseTile gateTile = StargateOrlinMergeHelper.INSTANCE.findBaseTile(world, pos, EnumFacing.NORTH);
+		StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
+		StargateOrlinBaseTile gateTile = memberTile.getBaseTile(world);
+		
 		if (gateTile != null) {
-			gateTile.updateMergeState(false, null);
+			gateTile.updateMergeState(false, world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL));
 		}	
 	}
 	
+	@Override
+	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+		StargateOrlinMemberTile gateTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
+		
+		Random rand = new Random();
+				
+		if (gateTile.isBroken()) {
+			drops.add(new ItemStack(Items.IRON_INGOT, 1 + rand.nextInt(2)));
+			drops.add(new ItemStack(Items.REDSTONE, 1 + rand.nextInt(2)));
+		}
+			
+		else {
+			drops.add(new ItemStack(Item.getItemFromBlock(this)));
+		}
+	}
+	
+	@Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        if (willHarvest) return true; //If it will harvest, delay deletion of the block until after getDrops
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+	
+    @Override
+    public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack tool) {
+        super.harvestBlock(world, player, pos, state, te, tool);
+        world.setBlockToAir(pos);
+    }
 	
 	// ------------------------------------------------------------------------
 	// Render
@@ -156,6 +196,16 @@ public class StargateOrlinMemberBlock extends Block {
 					break;
 			}
 		}
+	}
+	
+	@Override
+	public boolean hasTileEntity(IBlockState state) {
+		return true;
+	}
+	
+	@Override
+	public TileEntity createTileEntity(World world, IBlockState state) {
+		return new StargateOrlinMemberTile();
 	}
 	
 	@Override

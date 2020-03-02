@@ -146,10 +146,8 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	@Override
 	public void incomingWormhole(List<EnumSymbol> incomingAddress, int dialedAddressSize) {
 		super.incomingWormhole(incomingAddress, dialedAddressSize);
-				
-		if (isLinked()) {			
-			getLinkedDHD(world).getDHDRendererState().activeButtons = EnumSymbol.toIntegerList(incomingAddress.subList(0, dialedAddressSize - 1), EnumSymbol.ORIGIN);
-		}
+		
+		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_INCOMING, 0.5f);
 		
 		sendRenderingUpdate(EnumGateAction.LIGHT_UP_CHEVRONS, dialedAddressSize, true);
 	}

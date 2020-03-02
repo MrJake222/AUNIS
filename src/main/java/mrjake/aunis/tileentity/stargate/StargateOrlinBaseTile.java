@@ -5,6 +5,7 @@ import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.gui.StargateOrlinGui;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -29,6 +30,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -37,27 +39,47 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	// ------------------------------------------------------------------------
 	// Stargate state
 	
+	private int openCount = 0;
+	
+	public boolean isBroken() {
+		return openCount == AunisConfig.stargateConfig.stargateOrlinMaxOpenCount;
+	}
+	
 	@Override
 	public void dialingFailed() {
 		super.dialingFailed();
 		
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_FAILED_SOUND, 30));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 83));
 	}
 	
 	@Override
 	public void openGate(boolean initiating, List<EnumSymbol> incomingAddress, boolean eightChevronDial) {
 		super.openGate(initiating, incomingAddress, eightChevronDial);
 		
-		StargateNetwork.get(world).setLastActivatedOrlinAddress(gateAddress);
+		openCount++;
+		markDirty();
+		
+		if (isBroken()) {
+			StargateOrlinMergeHelper.INSTANCE.updateMembersBrokenStatus(world, pos, facing, true);
+		}
+		
+		if (world.provider.getDimensionType() == DimensionType.OVERWORLD)
+			StargateNetwork.get(world).setLastActivatedOrlinAddress(gateAddress);
 	}
 	
 	@Override
-	public void onBlockBroken() {
-		super.onBlockBroken();
+	protected void disconnectGate() {
+		super.disconnectGate();
 		
-//		StargateNetwork.get(world).getLastActivatedOrlinAddress()
+		if (isBroken())
+			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_FAILED_SOUND, 5));
 	}
 	
+	@Override
+	public boolean canAcceptConnectionFrom(StargateAbstractBaseTile gateTile) {
+		return super.canAcceptConnectionFrom(gateTile) && gateTile.getWorld().provider.getDimensionType() == DimensionType.NETHER && !isBroken();
+	}
 	
 	// ------------------------------------------------------------------------
 	// Ticking
@@ -89,7 +111,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		if ((isPowered && !power) || (!isPowered && power)) {
 			isPowered = power;
 						
-			if (isPowered && stargateState.idle()) {
+			if (isPowered && stargateState.idle() && !isBroken()) {
 				if (StargateRenderingUpdatePacketToServer.checkDialedAddress(world, this)) {
 					stargateState = EnumStargateState.DIALING;
 					
@@ -270,7 +292,6 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 				
 			case STARGATE_ORLIN_FAILED_SOUND:
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
-				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 53));
 				
 				break;
 				
@@ -293,6 +314,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		compound.setBoolean("isPowered", isPowered);
+		compound.setInteger("openCount", openCount);
 		
 		return super.writeToNBT(compound);
 	}
@@ -300,6 +322,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		isPowered = compound.getBoolean("isPowered");
+		openCount = compound.getInteger("openCount");
 		
 		super.readFromNBT(compound);
 	}

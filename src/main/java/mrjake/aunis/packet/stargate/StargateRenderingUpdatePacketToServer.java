@@ -124,7 +124,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			BlockPos targetPos = targetGate.getPos();
 			StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 				
-			if (targetTile.getStargateState().idle() && gateTile.hasEnergyToDial(getRequiredEnergy(world, gateTile.getPos(), targetWorld, targetPos))) {				
+			if (targetTile.canAcceptConnectionFrom(gateTile) && gateTile.hasEnergyToDial(getRequiredEnergy(world, gateTile.getPos(), targetWorld, targetPos))) {				
 				targetTile.incomingWormhole(gateTile.gateAddress, gateTile.dialedAddress.size());
 			}
 		 }
@@ -143,7 +143,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 						
 			StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 
-			if (targetTile.getStargateState().idle()) {			
+			if (targetTile.canAcceptConnectionFrom(gateTile)) {			
 				
 				if (gateTile.hasEnergyToDial(getRequiredEnergy(world, sourcePos, targetWorld, targetPos))) {
 					
@@ -167,7 +167,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			}
 			
 			else {
-				// Target gate busy
+				// Target gate busy or cannot accept connection
 				// Return address malformed
 				
 				gateState = EnumGateState.ADDRESS_MALFORMED;

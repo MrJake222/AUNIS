@@ -14,6 +14,9 @@ public class AunisConfig {
 	@RequiresWorldRestart
 	public static StargateSizeEnum stargateSize = StargateSizeEnum.SMALL; 
 	
+	@Name("Stargate config options")
+	public static StargateConfig stargateConfig = new StargateConfig();
+	
 	@Name("DHD config options")
 	public static DHDConfig dhdConfig = new DHDConfig();
 	
@@ -31,6 +34,12 @@ public class AunisConfig {
 	
 	@Name("AutoClose options")
 	public static AutoCloseConfig autoCloseConfig = new AutoCloseConfig();
+	
+	public static class StargateConfig {
+		@Name("Orlin's gate max open count")
+		@RangeInt(min=0)
+		public int stargateOrlinMaxOpenCount = 2;
+	}
 	
 	public static class PowerConfig {
 		@Name("Stargate's internal buffer size")
