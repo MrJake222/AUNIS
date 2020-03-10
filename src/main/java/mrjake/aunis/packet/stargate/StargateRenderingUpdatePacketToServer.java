@@ -6,16 +6,13 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
-import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.stargate.EnumGateState;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.teleportation.TeleportHelper;
@@ -29,15 +26,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 	public StargateRenderingUpdatePacketToServer() {}
@@ -204,8 +197,8 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 							 * If no power or no crystal, DHD will appear dead
 							 */
 							
-							ItemStackHandler itemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-							ItemStack powerCrystal = itemStackHandler.getStackInSlot(0);
+//							ItemStackHandler itemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+//							ItemStack powerCrystal = itemStackHandler.getStackInSlot(0);
 							
 //							if (powerCrystal.isEmpty()) {
 //								// No control crystal, display message

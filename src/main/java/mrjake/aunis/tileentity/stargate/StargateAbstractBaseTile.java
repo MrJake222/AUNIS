@@ -396,7 +396,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
 //				Aunis.info(scheduledTasks.toString());
 			}
-									
+			
 			if (horizonFlashTask != null && horizonFlashTask.isActive()) {
 				horizonFlashTask.update(world.getTotalWorldTime());
 			}
@@ -483,12 +483,20 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 					((EnergyStorageUncapped) energyStorage).extractEnergyUncapped(keepAliveCostPerTick);
 					
 					markDirty();
-					Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
+//					Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
 				}
 				
 				else
 					StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 			}
+			
+			energyTransferedLastTick = energyStorage.getEnergyStored() - energyStoredLastTick;
+			energyStoredLastTick = energyStorage.getEnergyStored();
+			
+			if (stargateState.initiating())
+				energySecondsToClose = (float)(energyStorage.getEnergyStored()) / keepAliveCostPerTick / 20;
+			else
+				energySecondsToClose = 0;
 		}
 	}
 	
@@ -955,10 +963,28 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	private int openCost = 0;
 	private int keepAliveCostPerTick = 0;
+	private int energyStoredLastTick = 0;
+	protected int energyTransferedLastTick = 0;
+	protected float energySecondsToClose = 0;
 	
-	protected EnergyStorageUncapped energyStorage = new EnergyStorageUncapped(AunisConfig.powerConfig.stargateEnergyStorage, AunisConfig.powerConfig.stargateMaxEnergyTransfer) {
+	protected int getMaxEnergyStorage() {
+		return AunisConfig.powerConfig.stargateEnergyStorage;
+	}
+	
+	protected boolean canReceiveEnergy() {
+		return true;
+	}
+	
+	protected EnergyStorageUncapped energyStorage = new EnergyStorageUncapped(getMaxEnergyStorage(), AunisConfig.powerConfig.stargateMaxEnergyTransfer) {
+		
+		@Override
 		protected void onEnergyChanged() {			
 			markDirty();
+		};
+		
+		@Override
+		public boolean canReceive() {
+			return canReceiveEnergy();
 		};
 	};
 	

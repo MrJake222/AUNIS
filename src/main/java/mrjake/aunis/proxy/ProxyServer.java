@@ -1,6 +1,5 @@
 package mrjake.aunis.proxy;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.sound.AunisPositionedSoundEnum;
 import mrjake.aunis.state.StargateAbstractRendererState;
 import net.minecraft.entity.player.EntityPlayer;

@@ -459,10 +459,10 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				return getUpgradeRendererState();
 				
 			case GUI_STATE:
-				return new StargateMilkyWayGuiState(gateAddress, hasUpgrade, energyStorage.getMaxEnergyStored(), new UniversalEnergyState(energyStorage.getEnergyStored()));
+				return new StargateMilkyWayGuiState(gateAddress, hasUpgrade, energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored(), energyTransferedLastTick, energySecondsToClose);
 				
 			case ENERGY_STATE:
-				return new UniversalEnergyState(energyStorage.getEnergyStored());
+				return new UniversalEnergyState(energyStorage.getEnergyStored(), energyTransferedLastTick);
 				
 			default:
 				return super.getState(stateType);
@@ -558,7 +558,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				
 			case ENERGY_STATE:
 				if (stargateGui != null && stargateGui.isOpen) {
-					stargateGui.state.energyState = (UniversalEnergyState) state;
+					stargateGui.state.energy = ((UniversalEnergyState) state).energy;
 				}
 				
 				break;

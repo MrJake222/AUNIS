@@ -19,8 +19,8 @@ import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateOrlinMergeHelper;
+import mrjake.aunis.state.StargateAbstractGuiState;
 import mrjake.aunis.state.StargateAbstractRendererState;
-import mrjake.aunis.state.StargateOrlinGuiState;
 import mrjake.aunis.state.StargateOrlinRendererState;
 import mrjake.aunis.state.StargateOrlinSparkState;
 import mrjake.aunis.state.State;
@@ -58,12 +58,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	public void openGate(boolean initiating, List<EnumSymbol> incomingAddress, boolean eightChevronDial) {
 		super.openGate(initiating, incomingAddress, eightChevronDial);
 		
-		openCount++;
 		markDirty();
-		
-		if (isBroken()) {
-			StargateOrlinMergeHelper.INSTANCE.updateMembersBrokenStatus(world, pos, facing, true);
-		}
 		
 		if (world.provider.getDimensionType() == DimensionType.OVERWORLD)
 			StargateNetwork.get(world).setLastActivatedOrlinAddress(gateAddress);
@@ -72,6 +67,12 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	@Override
 	protected void disconnectGate() {
 		super.disconnectGate();
+		
+		openCount++;
+		
+		if (isBroken()) {
+			StargateOrlinMergeHelper.INSTANCE.updateMembersBrokenStatus(world, pos, facing, true);
+		}
 		
 		if (isBroken())
 			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_FAILED_SOUND, 5));
@@ -201,7 +202,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case GUI_STATE:
-				return new StargateOrlinGuiState(energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored());
+				return new StargateAbstractGuiState(energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored(), energyTransferedLastTick, energySecondsToClose);
 		
 			case SPARK_STATE:
 				return null;
@@ -216,7 +217,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case GUI_STATE:
-				return new StargateOrlinGuiState();
+				return new StargateAbstractGuiState();
 		
 			case SPARK_STATE:
 				return new StargateOrlinSparkState();
@@ -234,12 +235,12 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		switch (stateType) {
 			case GUI_STATE:
 				if (stargateGui == null || !stargateGui.isOpen) {
-					stargateGui = new StargateOrlinGui(pos, (StargateOrlinGuiState) state);
+					stargateGui = new StargateOrlinGui(pos, (StargateAbstractGuiState) state);
 					Minecraft.getMinecraft().displayGuiScreen(stargateGui);
 				}
 				
 				else {
-					stargateGui.state = (StargateOrlinGuiState) state;
+					stargateGui.state = (StargateAbstractGuiState) state;
 				}
 				
 				break;
@@ -311,6 +312,15 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		return super.getRequiredEnergyToDial(distance, targetDimensionType).mul(AunisConfig.powerConfig.stargateOrlinEnergyMul);
 	}
 	
+	@Override
+	protected int getMaxEnergyStorage() {
+		return AunisConfig.powerConfig.stargateOrlinEnergyStorage;
+	}
+	
+	@Override
+	protected boolean canReceiveEnergy() {
+		return !isBroken();
+	}
 	
 	// ------------------------------------------------------------------------
 	// NBT

@@ -6,7 +6,6 @@ import java.util.Map;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.config.AunisConfig;
