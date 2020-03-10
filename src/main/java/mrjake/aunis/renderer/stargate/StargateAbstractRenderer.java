@@ -6,6 +6,7 @@ import java.util.Map;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.config.AunisConfig;
@@ -16,6 +17,7 @@ import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -72,19 +74,23 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 					renderKawoosh(rendererState, partialTicks);
 			}
 			
-			else {			
+			else {
 				bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-	            GlStateManager.enableBlend();
+				
+				GlStateManager.enableBlend();
 	            GlStateManager.blendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE_MINUS_CONSTANT_ALPHA);
-	            GL14.glBlendColor(1f, 1f, 1f, 0.7f);
-				            
-				for (Map.Entry<BlockPos, IBlockState> entry : getMemberBlockStates(rendererState.facing).entrySet()) {
+	            GL14.glBlendColor(0, 0, 0, 0.7f);
+				
+				Minecraft.getMinecraft().entityRenderer.disableLightmap();
+				
+				for (Map.Entry<BlockPos, IBlockState> entry : getMemberBlockStates(rendererState.facing).entrySet()) {				
 					BlockPos pos = entry.getKey().rotate(FacingToRotation.get(rendererState.facing));
 					
 					BlockRenderer.render(getWorld(), pos, entry.getValue());
 				}
 				
-	            GlStateManager.disableBlend();
+				Minecraft.getMinecraft().entityRenderer.enableLightmap();
+				GlStateManager.disableBlend();
 			}
 			
 			GlStateManager.popMatrix();	

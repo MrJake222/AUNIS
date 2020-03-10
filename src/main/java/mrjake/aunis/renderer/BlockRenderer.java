@@ -22,7 +22,7 @@ public class BlockRenderer {
 		
 		Tessellator tessellator = Tessellator.getInstance();
         tessellator.getBuffer().begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        blockRendererDispatcher.getBlockModelRenderer().renderModel(world, model, state, pos, tessellator.getBuffer(), true);
+        blockRendererDispatcher.getBlockModelRenderer().renderModelFlat(world, model, state, pos, tessellator.getBuffer(), false, 0);
 		tessellator.draw();
 		
         GlStateManager.enableLighting();
