@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.stargate.teleportation.TeleportHelper;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
@@ -279,6 +280,10 @@ public class StargateNetwork extends WorldSavedData {
 		
 		public World getWorld() {
 			return TeleportHelper.getWorld(dimension);
+		}
+		
+		public StargateAbstractBaseTile getTileEntity() {
+			return (StargateAbstractBaseTile) getWorld().getTileEntity(gatePos);
 		}
 		
 		public EnumSymbol get7thSymbol() {

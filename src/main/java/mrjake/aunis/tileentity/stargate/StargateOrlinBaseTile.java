@@ -16,6 +16,7 @@ import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
+import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateOrlinMergeHelper;
 import mrjake.aunis.state.StargateAbstractRendererState;
@@ -303,9 +304,12 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	
 
 	// ------------------------------------------------------------------------
-	// OpenComputers
+	// Power
 	
-	
+	@Override
+	protected StargateEnergyRequired getRequiredEnergyToDial(int distance, DimensionType targetDimensionType) {
+		return super.getRequiredEnergyToDial(distance, targetDimensionType).mul(AunisConfig.powerConfig.stargateOrlinEnergyMul);
+	}
 	
 	
 	// ------------------------------------------------------------------------

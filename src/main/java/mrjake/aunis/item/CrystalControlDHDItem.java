@@ -75,14 +75,13 @@ public class CrystalControlDHDItem extends Item {
 	
 	@Override
 	public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-//		stack.
 		IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
 		
 		String energy = String.format("%,d", energyStorage.getEnergyStored());
 		String capacity = String.format("%,d", energyStorage.getMaxEnergyStored());
 		
 		tooltip.add(energy + " / " + capacity + " µI");
-		String percent = new DecimalFormat("00.00").format(100 * energyStorage.getEnergyStored() / ((double)energyStorage.getMaxEnergyStored())); 
+		String percent = new DecimalFormat("00.00").format(energyStorage.getEnergyStored() / ((double)energyStorage.getMaxEnergyStored()) * 100); 
 		
 		tooltip.add(percent + " %");
 	}

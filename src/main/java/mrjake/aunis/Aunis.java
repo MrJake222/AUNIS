@@ -1,5 +1,7 @@
 package mrjake.aunis;
 
+import java.io.IOException;
+
 import org.apache.logging.log4j.Logger;
 
 import mrjake.aunis.command.AunisCommands;
@@ -9,6 +11,7 @@ import mrjake.aunis.integration.OCWrapperInterface;
 import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
+import mrjake.aunis.stargate.DimensionPowerMap;
 import mrjake.aunis.worldgen.AunisWorldGen;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraftforge.common.util.CompoundDataFixer;
@@ -23,6 +26,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
@@ -60,13 +64,15 @@ public class Aunis {
     static {
     	FluidRegistry.enableUniversalBucket();
     }
-	
+        	
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
+    public void preInit(FMLPreInitializationEvent event){
         logger = event.getModLog();
         
         AunisPacketHandler.registerPackets();
         AunisFluids.registerFluids();
+        
+    	DimensionPowerMap.load(event.getModConfigurationDirectory());
         
         proxy.preInit(event);
     }
@@ -75,6 +81,9 @@ public class Aunis {
     public void init(FMLInitializationEvent event) {
     	GameRegistry.registerWorldGenerator(new AunisWorldGen(), 0);
     	ThermalIntegration.registerRecipes();
+    	
+    	// ----------------------------------------------------------------------------------------------------------------
+    	// OpenComputers
     	
     	try {
 	    	if (Loader.isModLoaded("opencomputers"))
@@ -88,7 +97,10 @@ public class Aunis {
     		e.printStackTrace();
     	}
     	
+    	
+    	// ----------------------------------------------------------------------------------------------------------------
     	// Data fixers
+    	
 		ModFixs modFixs = ((CompoundDataFixer) FMLCommonHandler.instance().getDataFixer()).init(ModID, DATA_VERSION);
 		modFixs.registerFix(FixTypes.BLOCK_ENTITY, new TileNamesFixer());
 		
@@ -96,13 +108,18 @@ public class Aunis {
     }
  
     @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {    	
+    public void postInit(FMLPostInitializationEvent event) throws IOException {    	
     	proxy.postInit(event);
     }
     
     @EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
     	AunisCommands.registerCommands(event);
+    }
+    
+    @EventHandler
+    public void serverStarted(FMLServerStartedEvent event) throws IOException {    	
+    	DimensionPowerMap.update();
     }
     
 	public static void log(String msg) {

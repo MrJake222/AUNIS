@@ -1,5 +1,6 @@
 package mrjake.aunis.proxy;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.sound.AunisPositionedSoundEnum;
 import mrjake.aunis.state.StargateAbstractRendererState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,15 +16,15 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 @SuppressWarnings("deprecation")
 public class ProxyServer implements IProxy {
 	public void preInit(FMLPreInitializationEvent event) {
-
+		
 	}
  
     public void init(FMLInitializationEvent event) {
- 
+    
     }
  
     public void postInit(FMLPostInitializationEvent event) {
- 
+
     }
 
 	public String localize(String unlocalized, Object... args) {

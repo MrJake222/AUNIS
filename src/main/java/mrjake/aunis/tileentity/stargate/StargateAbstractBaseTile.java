@@ -28,6 +28,7 @@ import mrjake.aunis.sound.AunisPositionedSoundEnum;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.AutoCloseManager;
+import mrjake.aunis.stargate.DimensionPowerMap;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
@@ -58,8 +59,14 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
+import net.minecraftforge.common.ForgeChunkManager.Ticket;
+import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -82,41 +89,15 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	private boolean isInitiating;
-		
-	/**
-	 * Set on engageGate(). Indicates when the gate has been opened.
-	 * 
-	 * Used to calculate energy use while not loaded 
-	 */
-	public long gateOpenTime;
 	
-	/**
-	 * How much energy gate already consumed to keep the connection alive
-	 * 
-	 * Subtracted from calculated energy use at the closeGate()
-	 */
-	public int energyConsumed;
-	
-	public final void updateEnergyStatus() {
-		long ticks = world.getTotalWorldTime() - gateOpenTime;
-		int energy = (int) (ticks * keepAliveCostPerTick);
-				
-		energy -= energyConsumed;
-		
-		energyStorage.extractEnergyUncapped(energy);
-	}
-	
-	public void updateTargetGate() {
-		if (stargateState.engaged() || stargateState == EnumStargateState.UNSTABLE) {
-			StargatePos stargatePos = StargateNetwork.get(world).getStargate(dialedAddress);
-			stargatePos.getWorld().getTileEntity(stargatePos.getPos()).markDirty();
-		}
-	}
+//	public void updateTargetGate() {
+//		if (stargateState.engaged() || stargateState == EnumStargateState.UNSTABLE) {
+//			StargatePos stargatePos = StargateNetwork.get(world).getStargate(dialedAddress);
+//			stargatePos.getWorld().getTileEntity(stargatePos.getPos()).markDirty();
+//		}
+//	}
 	
 	protected void engageGate() {	
-		gateOpenTime = world.getTotalWorldTime();
-		energyConsumed = 0;
-		
 		stargateState = isInitiating ? EnumStargateState.ENGAGED_INITIATING : EnumStargateState.ENGAGED;
 		eventHorizon.reset();
 		
@@ -126,7 +107,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	protected void disconnectGate() {	
-		updateTargetGate();
+//		updateTargetGate();
 		stargateState = EnumStargateState.IDLE;
 		getAutoCloseManager().reset();
 
@@ -135,15 +116,19 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		isFinalActive = false;
 		
+		ForgeChunkManager.unforceChunk(chunkLoadingTicket, new ChunkPos(pos));
+		
 		markDirty();
 	}
 	
 	public void onBlockBroken() {
-		updateTargetGate();
+//		updateTargetGate();
 		world.setBlockToAir(getGateCenterPos());
 		
 		updateMergeState(false, facing);
 		StargateNetwork.get(world).removeStargate(gateAddress);
+		
+		ForgeChunkManager.unforceChunk(chunkLoadingTicket, new ChunkPos(pos));
 		
 		playPositionedSound(AunisPositionedSoundEnum.WORMHOLE, false);
 	}
@@ -298,6 +283,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			((EnergyStorageUncapped) getEnergyStorage(openCost)).extractEnergyUncapped(openCost);
 		}
 		
+		ForgeChunkManager.forceChunk(chunkLoadingTicket, new ChunkPos(pos));
+		
 		sendSignal(null, "stargate_open", new Object[] { isInitiating });
 		
 		markDirty();
@@ -317,6 +304,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		playPositionedSound(AunisPositionedSoundEnum.WORMHOLE, false);
 		
 		horizonFlashTask = null;
+		updateFlashState(false);
 		
 		markDirty();
 	}
@@ -336,7 +324,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	// ------------------------------------------------------------------------
 	// Ticking and loading
-
+	
 	public abstract BlockPos getGateCenterPos();
 	
 	public void playPositionedSound(AunisPositionedSoundEnum soundEnum, boolean play) {
@@ -349,6 +337,16 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	protected TargetPoint targetPoint;
 	protected EnumFacing facing = EnumFacing.NORTH;
 	
+	protected Ticket chunkLoadingTicket;
+	protected LoadingCallback chunkLoadingCallback = new LoadingCallback() {
+		
+		@Override
+		public void ticketsLoaded(List<Ticket> tickets, World world) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
+	
 	public EnumFacing getFacing() {
 		return facing;
 	}
@@ -360,6 +358,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 			Aunis.ocWrapper.joinOrCreateNetwork(this);
+			
+			ForgeChunkManager.setForcedChunkLoadingCallback(Aunis.instance, chunkLoadingCallback);
+			chunkLoadingTicket = ForgeChunkManager.requestTicket(Aunis.instance, world, Type.NORMAL);
 			
 			if (gateAddress == null) {
 				gateAddress = generateAddress(new Random(pos.hashCode() * 31 + world.provider.getDimension()));
@@ -391,11 +392,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			}
 						
 			// Not initiating
-			if (stargateState == EnumStargateState.ENGAGED) {
+			if (stargateState == EnumStargateState.ENGAGED && AunisConfig.autoCloseConfig.autocloseEnabled) {
 				getAutoCloseManager().update(StargateNetwork.get(world).getStargate(dialedAddress));
 //				Aunis.info(scheduledTasks.toString());
 			}
-						
+									
 			if (horizonFlashTask != null && horizonFlashTask.isActive()) {
 				horizonFlashTask.update(world.getTotalWorldTime());
 			}
@@ -453,63 +454,40 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			 * 	True: Extract energy each tick
 			 * 	False: Update the source gate about consumed energy each second
 			 */
-			if (stargateState.engaged()) {
-				if (stargateState.initiating()) {
+			if (stargateState.initiating()) {				
+				IEnergyStorage energyStorage = getEnergyStorage(keepAliveCostPerTick);
+				
+				if (energyStorage != null) {
+					int threshold = keepAliveCostPerTick*20 * AunisConfig.powerConfig.instabilitySeconds;
 
-					// If we have enough energy(minimal DHD operable)
-					if (getEnergyStorage(AunisConfig.powerConfig.dhdMinimalEnergy * 2) != null) {
-						IEnergyStorage energyStorage = getEnergyStorage(keepAliveCostPerTick);
+					/*
+					 * If energy can sustain connection for less than AunisConfig.powerConfig.instabilitySeconds seconds
+					 * Start flickering
+					 */
+					
+					// Horizon becomes unstable
+					if (horizonFlashTask == null && energyStorage.getEnergyStored() < threshold) {
+						resetFlashingSequence();
 						
-						if (energyStorage != null) {
-							int sec = keepAliveCostPerTick*20;
-	
-							/*
-							 * If energy can sustain connection for less than AunisConfig.powerConfig.instabilitySeconds seconds
-							 * Start flickering
-							 */
-							
-							// Horizon becomes unstable
-							if (horizonFlashTask == null && energyStorage.getEnergyStored() < sec*AunisConfig.powerConfig.instabilitySeconds) {
-								resetFlashingSequence();
-								
-								horizonFlashTask = new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int) (Math.random() * 40) + 5);
-							}
-							
-							// Horizon becomes stable
-							if (horizonFlashTask != null && energyStorage.getEnergyStored() > sec*AunisConfig.powerConfig.instabilitySeconds) {
-								horizonFlashTask = null;
-								isCurrentlyUnstable = false;
-								
-								updateFlashState(false);
-							}
-							
-							energyConsumed += ((EnergyStorageUncapped) energyStorage).extractEnergyUncapped(keepAliveCostPerTick);
-							
-							markDirty();
-	//						Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
-						}
-						
-						else
-							StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+						setHorizonFlashTask(new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int) (Math.random() * 40) + 5));
 					}
 					
-					else {
-						StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+					// Horizon becomes stable
+					if (horizonFlashTask != null && energyStorage.getEnergyStored() > threshold) {
+						horizonFlashTask = null;
+						isCurrentlyUnstable = false;
+						
+						updateFlashState(false);
 					}
+					
+					((EnergyStorageUncapped) energyStorage).extractEnergyUncapped(keepAliveCostPerTick);
+					
+					markDirty();
+					Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
 				}
 				
-				else {
-					if (world.getTotalWorldTime() % 20 == 0 && dialedAddress.size() > 0) {
-						StargatePos sourcePos = StargateNetwork.get(world).getStargate(dialedAddress);
-						
-						// Only if not loaded
-						if (!sourcePos.getWorld().isBlockLoaded(sourcePos.getPos())) {					
-							StargateMilkyWayBaseTile sourceTile = (StargateMilkyWayBaseTile) sourcePos.getWorld().getTileEntity(sourcePos.getPos());
-							
-							sourceTile.updateEnergyStatus();
-						}
-					}
-				}
+				else
+					StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 			}
 		}
 	}
@@ -742,6 +720,14 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	// -----------------------------------------------------------------
 	// Horizon flashing
 	private ScheduledTask horizonFlashTask;
+	
+	private void setHorizonFlashTask(ScheduledTask horizonFlashTask) {
+		horizonFlashTask.setExecutor(this);
+		horizonFlashTask.setTaskCreated(world.getTotalWorldTime());
+		
+		this.horizonFlashTask = horizonFlashTask;
+		markDirty();
+	}
 
 	private int flashIndex = 0;
 	private boolean isCurrentlyUnstable = false;
@@ -923,27 +909,31 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 								
 				break;
 				
-			case HORIZON_FLASH:
+			case HORIZON_FLASH:				
 				isCurrentlyUnstable ^= true;
 				
 				if (isCurrentlyUnstable) {
 					flashIndex++;
 					
-					if (flashIndex == 1)
+					if (flashIndex == 1) {
 						AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.WORMHOLE_FLICKER, 0.5f);
+						
+						StargatePos targetGate = StargateNetwork.get(world).getStargate(dialedAddress);
+						AunisSoundHelper.playSoundEvent(targetGate.getWorld(), targetGate.getPos(), EnumAunisSoundEvent.WORMHOLE_FLICKER, 0.5f);
+					}
 					
 					// Schedule change into stable state
-					horizonFlashTask = new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 3) + 3);
+					setHorizonFlashTask(new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 3) + 3));
 				}
 				
 				else {
 					if (flashIndex == 1)
 						// Schedule second flash
-						horizonFlashTask = new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 4) + 1);
+						setHorizonFlashTask(new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 4) + 1));
 					
 					else {
 						// Schedule next flash sequence
-						horizonFlashTask = new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 40) + 5);
+						setHorizonFlashTask(new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int)(Math.random() * 40) + 5));
 						
 						resetFlashingSequence();
 					}
@@ -989,14 +979,17 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		return null;
 	}
 	
-	/**
-	 * Checks if this {@link StargateAbstractBaseTile} can provide enough energy.
-	 * 
-	 * @param energy Energy required.
-	 * @return Will it suffice?
-	 */
-	public boolean hasEnergy(int energy) {
-		return getEnergyStorage(energy) != null;
+	protected StargateEnergyRequired getRequiredEnergyToDial(int distance, DimensionType targetDimensionType) {		
+		double distanceAdjusted = 0;
+		
+		if (distance < 5000)
+			distanceAdjusted = 0.8 * distance;
+		else
+			distanceAdjusted = 5000 * Math.log10(distance) / Math.log10(5000);	
+		
+		StargateEnergyRequired baseEnergy = new StargateEnergyRequired(AunisConfig.powerConfig.openingBlockToEnergyRatio, AunisConfig.powerConfig.keepAliveBlockToEnergyRatioPerTick);
+		
+		return baseEnergy.mul(distanceAdjusted).add(DimensionPowerMap.getCost(world.provider.getDimensionType(), targetDimensionType));
 	}
 	
 	/**
@@ -1006,9 +999,23 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * @param distance - distance in blocks to target gate
 	 * @param targetWorld - target world, used for multiplier
 	 */
-	public boolean hasEnergyToDial(StargateEnergyRequired energyRequired) {		
-//		Aunis.info("Energy required to dial [distance="+distance+", mul="+multiplier+"] = " + energy + " / keepAlive: "+(keepAlive*20)+"/s, stored: " + (getEnergyStorage(1) != null ? getEnergyStorage(1).getEnergyStored() : 0));
-				
+	public boolean hasEnergyToDial(StargateAbstractBaseTile gateTile) {
+		BlockPos sPos = pos;
+		BlockPos tPos = gateTile.getPos();
+		
+		DimensionType sourceDim = world.provider.getDimensionType();
+		DimensionType targetDim = gateTile.getWorld().provider.getDimensionType();
+		
+		if (sourceDim == DimensionType.OVERWORLD && targetDim == DimensionType.NETHER)
+			tPos = new BlockPos(tPos.getX()*8, tPos.getY(), tPos.getZ()*8);
+		else if (sourceDim == DimensionType.NETHER && targetDim == DimensionType.OVERWORLD)
+			sPos = new BlockPos(sPos.getX()*8, sPos.getY(), sPos.getZ()*8);
+		
+		int distance = (int) sPos.getDistance(tPos.getX(), tPos.getY(), tPos.getZ());
+		StargateEnergyRequired energyRequired = getRequiredEnergyToDial(distance, gateTile.getWorld().provider.getDimensionType());
+		
+		Aunis.info("Energy required to dial [distance="+distance+", from="+world.provider.getDimensionType()+", to="+gateTile.getWorld().provider.getDimensionType()+"] = " + energyRequired.energyToOpen + " / keepAlive: "+energyRequired.keepAlive+"/t");
+		
 		if (getEnergyStorage(energyRequired.energyToOpen) != null) {
 			this.openCost = energyRequired.energyToOpen;
 			this.keepAliveCostPerTick = energyRequired.keepAlive;
@@ -1059,9 +1066,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		compound.setInteger("openCost", openCost);
 		compound.setInteger("keepAliveCostPerTick", keepAliveCostPerTick);
-		
-		compound.setLong("gateOpenTime", gateOpenTime);
-		compound.setInteger("energyConsumed", energyConsumed);
 		
 		if (stargateState != null)
 			compound.setInteger("stargateState", stargateState.id);
@@ -1118,9 +1122,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		this.openCost = compound.getInteger("openCost");
 		this.keepAliveCostPerTick = compound.getInteger("keepAliveCostPerTick");
-		
-		this.gateOpenTime = compound.getLong("gateOpenTime");
-		this.energyConsumed = compound.getInteger("energyConsumed");
 		
 		stargateState = EnumStargateState.valueOf(compound.getInteger("stargateState"));
 		if (stargateState == null)
