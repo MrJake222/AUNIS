@@ -7,10 +7,8 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
-import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.UpgradeHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -21,7 +19,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumBlockRenderType;
@@ -86,12 +83,8 @@ public class StargateMilkyWayBaseBlock extends Block {
 		
 			world.setBlockState(pos, state);
 					
-			gateTile.updateFacing(facing);
-			gateTile.updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, pos, facing), state);
-		}
-		
-		else {
-			gateTile.updateFacing(facing);
+			gateTile.updateFacing(facing, true);
+			gateTile.updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, pos, facing), facing);
 		}
 	}
 	
@@ -100,16 +93,7 @@ public class StargateMilkyWayBaseBlock extends Block {
 		StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
 						
 		if (!world.isRemote) {
-			gateTile.updateMergeState(false, state);
-			
-			StargateNetwork.get(world).removeStargate(gateTile.gateAddress);
-			
-			// Supports upgrades
-			if (gateTile instanceof ITileEntityUpgradeable) {			
-				if (gateTile.hasUpgrade() || gateTile.getUpgradeRendererState().doInsertAnimation) {
-					InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphStargate));
-				}
-			}
+			gateTile.onBlockBroken();
 		}
 		
 		super.breakBlock(world, pos, state);

@@ -12,4 +12,5 @@
   * *https://www.deviantart.com/mclatchyt/art/Event-Horizon-173205058*
 * Stargate DHD's model from **blenderjunky** on BlendSwap
   * *https://www.blendswap.com/blends/view/75540*
-
+* Gate dialing failed sound from Stargate Network
+  * *https://www.stargate-network.net*

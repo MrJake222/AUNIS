@@ -7,11 +7,11 @@ import mrjake.aunis.tileentity.TransportRingsTile;
 public enum EnumScheduledTask {
 	STARGATE_OPEN_SOUND(0, 25, false),
 	STARGATE_ENGAGE(1, 86),
-	STARGATE_CLOSE(2, 56),
-	STARGATE_FAIL(3, 50),
-	STARGATE_CHEVRON_SHUT_SOUND(4, 38, false),
-	STARGATE_CHEVRON_OPEN_SOUND(5, 19, false),
-	STARGATE_CHEVRON_LOCK_DHD_SOUND(6, 15, false),
+	STARGATE_CLOSE(2, -1),
+	STARGATE_SPIN_FINISHED(3, -1),
+	STARGATE_CHEVRON_OPEN(4, 19, false),
+	STARGATE_CHEVRON_OPEN_SECOND(5, 38, false),
+	STARGATE_CHEVRON_CLOSE(6, 15, false),
 	HORIZON_FLASH(7, -1, false), 
 	STARGATE_ORLIN_OPEN(8, 144), // 8.93s(duration of dial sound) * 20(tps) − 25(STARGATE_OPEN_SOUND wait time)
 	STARGATE_ORLIN_SPARK(9, 27, false),
@@ -22,14 +22,22 @@ public enum EnumScheduledTask {
 	RINGS_FADE_OUT(14, TransportRingsTile.TIMEOUT_FADE_OUT),
 	RINGS_TELEPORT(15, TransportRingsTile.TIMEOUT_TELEPORT),
 	RINGS_CLEAR_OUT(15, TransportRingsTile.RINGS_CLEAR_OUT),
-	RINGS_SOLID_BLOCKS(16, 20);
+	RINGS_SOLID_BLOCKS(16, 20),
+	STARGATE_ACTIVATE_CHEVRON(17, 10),
+	STARGATE_CLEAR_DHD_SYMBOLS(17, -1),
+	STARGATE_CHEVRON_LIGHT_UP(18, -1),
+	STARGATE_CHEVRON_DIM(19, -1),
+	STARGATE_CHEVRON_FAIL(20, -1),
+	STARGATE_MANUAL_OPEN(21, -1),
+	STARGATE_LIGHTING_UPDATE_CLIENT(22, 5),
+	STARGATE_ORLIN_FAILED_SOUND(23, -1);	
 	
 	public int id;
 	public int waitTicks;
 	
 	/**
-	 * Should the task be called on neatest occasion
-	 * when the scheduled wait time exceeded?
+	 * Should the task be called on nearest occasion
+	 * even when the scheduled wait time exceeded?
 	 */
 	public boolean overtime;
 	

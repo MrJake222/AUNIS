@@ -33,11 +33,24 @@ public class CommandStargateCloseAll extends CommandBase {
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
 		boolean limitWorld = false;
 		int worldId = 0;
+		boolean force = false;
 		
-		if (args.length == 0) 		
-			notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
-		else if (args.length == 1) {
-			if (args[0].equals("world")) {
+		if (args.length == 2) {
+			if (args[1].equals("force")) {
+				force = true;
+			}
+			
+			else {
+				notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
+			}
+		}
+		
+		if (args.length >= 1) {
+			if (args[0].equals("force")) {
+				force = true;
+			}
+			
+			else if (args[0].equals("world")) {
 				limitWorld = true;
 				worldId = sender.getEntityWorld().provider.getDimension();
 				
@@ -58,9 +71,8 @@ public class CommandStargateCloseAll extends CommandBase {
 			}
 		}
 		
-		else {
-			throw new WrongUsageException("commands.sgcloseall.usage", new Object[0]);
-		}
+		if (args.length == 0) 		
+			notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
 		
 		Map<Long, StargatePos> stargates = StargateNetwork.get(sender.getEntityWorld()).queryStargates();
 		int closed = 0;
@@ -81,7 +93,7 @@ public class CommandStargateCloseAll extends CommandBase {
 			if (tileEntity instanceof StargateAbstractBaseTile) {
 				StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) tileEntity;
 				
-				if (gateTile.getStargateState().initiating()) {
+				if (gateTile.getStargateState().initiating() || (force && gateTile.getStargateState().engaged())) {
 					StargateRenderingUpdatePacketToServer.closeGatePacket(gateTile, false);
 					closed++;
 				}

@@ -5,17 +5,11 @@ import java.util.Map;
 import java.util.Random;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.AunisProps;
-import mrjake.aunis.capability.EnergyStorageUncapped;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
-import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
-import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -30,9 +24,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.structure.template.PlacementSettings;
 import net.minecraft.world.gen.structure.template.Template;
 import net.minecraft.world.gen.structure.template.TemplateManager;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class StargateGenerator {
 	
@@ -185,7 +176,7 @@ public class StargateGenerator {
 				if (name.equals("base")) {
 					gatePos = dataPos.add(0, -3, 0);
 					
-					world.setBlockState(gatePos, world.getBlockState(gatePos).withProperty(AunisProps.FACING_HORIZONTAL, facing));
+//					world.setBlockState(gatePos, world.getBlockState(gatePos).withProperty(AunisProps.FACING_HORIZONTAL, facing));
 //					MergeHelper.updateChevRingRotation(world, gatePos, facing);
 					// TODO Check updateChevRingRotation for Mysterious Page
 					StargateMilkyWayMergeHelper.INSTANCE.updateMembersBasePos(world, gatePos, facing);
@@ -202,11 +193,11 @@ public class StargateGenerator {
 					}
 					
 					else {
-						IBlockState dhdState = world.getBlockState(dhdPos);
-						int horizontalRotation = dhdState.getValue(AunisProps.ROTATION_HORIZONTAL);
-						horizontalRotation = rotation.rotate(horizontalRotation, 16);
+//						IBlockState dhdState = world.getBlockState(dhdPos);
+//						int horizontalRotation = dhdState.getValue(AunisProps.ROTATION_HORIZONTAL);
+//						horizontalRotation = rotation.rotate(horizontalRotation, 16);
 						
-						world.setBlockState(dhdPos, dhdState.withProperty(AunisProps.ROTATION_HORIZONTAL, horizontalRotation));
+//						world.setBlockState(dhdPos, dhdState.withProperty(AunisProps.ROTATION_HORIZONTAL, horizontalRotation));
 						
 						if (rand.nextFloat() < AunisConfig.mysteriousConfig.despawnCrystalChance) {							
 //							Aunis.info("despawning crystal");
@@ -214,11 +205,8 @@ public class StargateGenerator {
 						
 						else {
 							int power = (int) ((0.3 + (rand.nextFloat() * 0.6)) * AunisConfig.powerConfig.dhdCrystalEnergyStorage);
-							ItemStack crystal = new ItemStack(AunisItems.crystalControlDhd);
-							EnergyStorageUncapped uncapped = (EnergyStorageUncapped) crystal.getCapability(CapabilityEnergy.ENERGY, null);
-							uncapped.setEnergyStored(power);
 							
-							((ItemStackHandler) world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)).setStackInSlot(0, crystal);
+							StargateGenerationHelper.spawnDhdCrystal(world, dhdPos, power);
 						}
 					}
 					
@@ -226,13 +214,8 @@ public class StargateGenerator {
 				}
 			}
 			
+			StargateGenerationHelper.updateLinkedGate(world, gatePos, dhdPos);
 			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(gatePos);
-			DHDTile dhdTile = (DHDTile) world.getTileEntity(dhdPos);
-			
-			if (dhdTile != null) {
-				dhdTile.setLinkedGate(gatePos);
-				gateTile.setLinkedDHD(dhdPos);
-			}
 			
 			return new GeneratedStargate(gateTile.gateAddress, biome.getRegistryName().getPath());
 		}

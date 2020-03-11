@@ -117,25 +117,25 @@ public class GuiBase extends GuiScreen {
 	 * Draws frame and background in it
 	 */
 	protected void drawBackground() {
-		frame(imageWidth, imageHeight, frameThickness, frameColor, true);
+		frame(0, 0, imageWidth, imageHeight, frameThickness, frameColor, true);
 	}
 	
 	
-	protected void frame(int w, int h, int thickness, int color, boolean background) {
+	protected void frame(int x, int y, int w, int h, int thickness, int color, boolean background) {
 		// Up
-		drawRect(0, 0, w, thickness, color);
+		drawRect(x, y, x+w, y+thickness, color);
 		
 		// Down
-		drawRect(0, h-thickness, w, h, color);
+		drawRect(x, y+h-thickness, x+w, y+h, color);
 				
 		// Left
-		drawRect(0, thickness, thickness, h-thickness, color);
+		drawRect(x, y+thickness, x+thickness, y+h-thickness, color);
 		
 		// Right
-		drawRect(w-thickness, thickness, w, h-thickness, color);
+		drawRect(x+w-thickness, y+thickness, x+w, y+h-thickness, color);
 		
 		if (background)
-			drawRect(thickness, thickness, w-thickness, h-thickness, bgColor);
+			drawRect(x+thickness, y+thickness, x+w-thickness, y+h-thickness, bgColor);
 	}
 	
 	

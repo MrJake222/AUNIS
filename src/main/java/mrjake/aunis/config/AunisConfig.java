@@ -1,7 +1,6 @@
 package mrjake.aunis.config;
 
 import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
 import net.minecraftforge.common.config.Config.RangeDouble;
 import net.minecraftforge.common.config.Config.RangeInt;
@@ -13,6 +12,9 @@ public class AunisConfig {
 	@Name("Stargate size")
 	@RequiresWorldRestart
 	public static StargateSizeEnum stargateSize = StargateSizeEnum.SMALL; 
+	
+	@Name("Stargate config options")
+	public static StargateConfig stargateConfig = new StargateConfig();
 	
 	@Name("DHD config options")
 	public static DHDConfig dhdConfig = new DHDConfig();
@@ -32,62 +34,48 @@ public class AunisConfig {
 	@Name("AutoClose options")
 	public static AutoCloseConfig autoCloseConfig = new AutoCloseConfig();
 	
+	public static class StargateConfig {
+		@Name("Orlin's gate max open count")
+		@RangeInt(min=0)
+		public int stargateOrlinMaxOpenCount = 2;
+	}
+	
 	public static class PowerConfig {
 		@Name("Stargate's internal buffer size")
-		@RangeInt(min=10000)
-		public int stargateEnergyStorage = 15728640;
+		@RangeInt(min=0)
+		public int stargateEnergyStorage = 71280000;
 		
 		@Name("Stargate's max power throughput")
 		@RangeInt(min=1)
-		public int stargateMaxEnergyTransfer = 5120;
-		
-		
+		public int stargateMaxEnergyTransfer = 26360;
 		
 		@Name("Stargate wormhole open power draw")
-		@Comment({
-			"Calculated as per block one-time draw.",
-			"So, if this field is 150, 1500 RF would be required",
-			"to open a tunnel 10m across. Drawed only once per open."
-		})
-		@RangeDouble(min=0)
-		public double openingBlockToEnergyRatio = 1536 / 10.0; // 1,536 RF / 10m
+		@RangeInt(min=0)
+		public int openingBlockToEnergyRatio = 4608;
 		
 		@Name("Stargate wormhole sustain power draw")
-		@Comment({
-			"Drawed each tick. This is multipiled by distance."
-		})
-		@RangeDouble(min=0)
-		public double keepAliveBlockToEnergyRatioPerTick = 8 / 10.0; // 8 RF / 10m PER ONE TICK
+		@RangeInt(min=0)
+		public int keepAliveBlockToEnergyRatioPerTick = 2;
 
 		@Name("Stargate instability threshold(seconds to close)")
 		@RangeInt(min=1)
 		public int instabilitySeconds = 10;
-		
-		@Name("Energy draw multiplier for cross-dimension travel")
-		@RangeDouble(min=1)
-		public double crossDimensionMul = 2.0;
-		
-//		@Name("Energy draw multiplier for Nether")
-//		@RangeDouble(min=1)
-//		public double netherMultiplier = 2.0;
-//
-//		@Name("Energy draw multiplier for The End")
-//		@RangeDouble(min=1)
-//		public double theEndMultiplier = 2.5;
-		
-		
-		
-		@Name("Minimal energy required by DHD to be functional")
-		@RangeInt(min=0)
-		public int dhdMinimalEnergy = 5120;
 
 		@Name("Power crystal buffer size")
 		@RangeInt(min=10000)
-		public int dhdCrystalEnergyStorage = 15728640; // 14 000 000
+		public int dhdCrystalEnergyStorage = 71280000;
 		
 		@Name("Power crystal max IO")
 		@RangeInt(min=10000)
-		public int dhdCrystalMaxEnergyTransfer = 5120; // 140 000
+		public int dhdCrystalMaxEnergyTransfer = 26360;
+		
+		@Name("Orlin's gate energy multiplier")
+		@RangeDouble(min=0)
+		public double stargateOrlinEnergyMul = 1.5;
+
+		@Name("Orlin's gate's internal buffer size")
+		@RangeInt(min=0)
+		public int stargateOrlinEnergyStorage = 7128000;
 	}
 	
 	public static class RingsConfig {
@@ -147,10 +135,10 @@ public class AunisConfig {
 	
 	public static class AutoCloseConfig {
 		@Name("autoclose enabled")
-		public boolean autocloseEnabled = false;
+		public boolean autocloseEnabled = true;
 		
 		@Name("Seconds to autoclose with no players nearby")
 		@RangeInt(min=1, max=300)
-		public int secondsToAutoclose = 10;
+		public int secondsToAutoclose = 5;
 	}
 }

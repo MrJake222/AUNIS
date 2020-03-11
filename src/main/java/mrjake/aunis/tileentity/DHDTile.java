@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -25,10 +26,12 @@ import mrjake.aunis.upgrade.DHDUpgradeRenderer;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.UpgradeRenderer;
 import mrjake.aunis.util.ILinkable;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -46,6 +49,14 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 	private UpgradeRendererState upgradeRendererState;
 	
 	private BlockPos linkedGate = null;
+	
+	@Override
+	public void rotate(Rotation rotation) {
+		IBlockState state = world.getBlockState(pos);
+		
+		int rotationOrig = state.getValue(AunisProps.ROTATION_HORIZONTAL);
+		world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, rotation.rotate(rotationOrig, 16)));
+	}
 	
 	@Override
 	public RendererInterface getRenderer() {
@@ -196,7 +207,7 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 		activateSymbols(Arrays.asList(id));
 	}
 	
-	public void activateSymbols(List<Integer> idList) {		
+	private void activateSymbols(List<Integer> idList) {		
 		if (idList.size() == 1) {
 			if (idList.get(0) == EnumSymbol.BRB.id)
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS_BRB, 0.5f);

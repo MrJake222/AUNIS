@@ -6,7 +6,7 @@ import java.util.List;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.stargate.EnumSymbol;
 
-public class StargateMilkyWayGuiState extends State {
+public class StargateMilkyWayGuiState extends StargateAbstractGuiState {
 	public StargateMilkyWayGuiState() {}
 	
 	private List<EnumSymbol> gateAddress;
@@ -15,19 +15,17 @@ public class StargateMilkyWayGuiState extends State {
 	private boolean hasUpgrade;
 	public boolean hasUpgrade() { return hasUpgrade; }
 	
-	public int maxEnergy;	
-	public UniversalEnergyState energyState;
-	
-	public StargateMilkyWayGuiState(List<EnumSymbol> gateAddress, boolean hasUpgrade, int maxEnergy, UniversalEnergyState energyState) {
+	public StargateMilkyWayGuiState(List<EnumSymbol> gateAddress, boolean hasUpgrade, int energy, int maxEnergy, int transferedLastTick, float secondsToClose) {
+		super(energy, maxEnergy, transferedLastTick, secondsToClose);
+		
 		this.gateAddress = gateAddress;
 		this.hasUpgrade = hasUpgrade;
-		
-		this.maxEnergy =  maxEnergy;
-		this.energyState = energyState;
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
+		super.toBytes(buf);
+		
 		buf.writeLong(EnumSymbol.toLong(gateAddress));
 		
 		buf.writeBoolean(hasUpgrade);
@@ -35,12 +33,12 @@ public class StargateMilkyWayGuiState extends State {
 			buf.writeInt(gateAddress.get(6).id);
 		
 		buf.writeInt(maxEnergy);
-		
-		energyState.toBytes(buf);
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
+		super.fromBytes(buf);
+		
 		gateAddress = new ArrayList<EnumSymbol>();
 		
 		for (int id : EnumSymbol.fromLong(buf.readLong())) {
@@ -53,8 +51,5 @@ public class StargateMilkyWayGuiState extends State {
 			gateAddress.add(EnumSymbol.valueOf(buf.readInt()));
 		
 		maxEnergy = buf.readInt();
-		
-		energyState = new UniversalEnergyState();
-		energyState.fromBytes(buf);
 	}
 }

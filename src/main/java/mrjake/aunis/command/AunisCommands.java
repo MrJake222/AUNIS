@@ -10,8 +10,9 @@ public class AunisCommands {
 	
 	private static List<CommandBase> commands = Arrays.asList(
 			new CommandStargateQuery(),
+			new CommandPrepare(),
 			new CommandStargateCloseAll(),
-			new CommandPrepare());
+			new CommandDebug());
 	
 	public static void registerCommands(FMLServerStartingEvent event) {
 		for (CommandBase command : commands) {

@@ -8,21 +8,17 @@ import javax.annotation.Nullable;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
-import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.stargate.EnumGateState;
-import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.stargate.teleportation.TeleportHelper;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import mrjake.aunis.tileentity.util.ScheduledTask;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -31,13 +27,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 	public StargateRenderingUpdatePacketToServer() {}
@@ -82,29 +75,10 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 		StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
 		
 		if (!targetOnly) {
-			sourceTile.closeGate(false, true);
+			sourceTile.closeGate();
 		}
 
-		targetTile.closeGate(false, true);
-	}
-	
-	public static StargateEnergyRequired getRequiredEnergy(World sourceWorld, BlockPos sourcePos, World targetWorld, BlockPos targetPos) {
-		int distance = (int) sourcePos.getDistance(targetPos.getX(), targetPos.getY(), targetPos.getZ());
-		double multiplier = 1;
-		
-		// It the dimensions are the same, no multiplier
-		if (targetWorld.provider.getDimensionType() != sourceWorld.provider.getDimensionType()) { 
-			if (targetWorld.provider.getDimensionType() == DimensionType.NETHER || sourceWorld.provider.getDimensionType() == DimensionType.NETHER) {
-				distance /= 8;
-			}
-			
-			multiplier = AunisConfig.powerConfig.crossDimensionMul;
-		}
-		
-		int energy = (int) (distance * AunisConfig.powerConfig.openingBlockToEnergyRatio * multiplier);
-		int keepAlive = (int) Math.ceil(distance * AunisConfig.powerConfig.keepAliveBlockToEnergyRatioPerTick * multiplier);
-		
-		return new StargateEnergyRequired(energy, keepAlive);
+		targetTile.closeGate();
 	}
 	
 	/**
@@ -120,68 +94,49 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 	
 	public static void attemptLightUp(World world, StargateAbstractBaseTile gateTile) {
 		if (checkDialedAddress(world, gateTile)) {
-			StargatePos targetGate = StargateNetwork.get(world).getStargate(gateTile.dialedAddress);
-			World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
+			StargateAbstractBaseTile targetTile = StargateNetwork.get(world).getStargate(gateTile.dialedAddress).getTileEntity();
 			
-			BlockPos targetPos = targetGate.getPos();
-			StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
-			DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
-				
-			if (targetTile.getStargateState().idle() && gateTile.hasEnergyToDial(getRequiredEnergy(world, gateTile.getPos(), targetWorld, targetPos))) {
-				boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
-				
+			if (targetTile.canAcceptConnectionFrom(gateTile) && gateTile.hasEnergyToDial(targetTile)) {				
 				targetTile.incomingWormhole(gateTile.gateAddress, gateTile.dialedAddress.size());
-				
-				// To renderer: light up chevrons and target dhd glyphs																
-				if (targetDhdTile != null)
-					targetDhdTile.activateSymbols(EnumSymbol.toIntegerList(eightChevronDial ? gateTile.gateAddress : gateTile.gateAddress.subList(0, 6), EnumSymbol.ORIGIN));
 			}
 		 }
 	}
 	
 	public static EnumGateState attemptOpen(World world, StargateAbstractBaseTile gateTile, @Nullable DHDTile sourceDhdTile, boolean stopRing) {
-		BlockPos sourcePos = gateTile.getPos();
+		EnumGateState gateState = EnumGateState.OK;
 		
 		// Check if symbols entered match the range, last is ORIGIN, target gate exists, and if not dialing self
 		if (checkDialedAddress(world, gateTile)) {
-			
-			StargatePos targetGate = StargateNetwork.get(world).getStargate( gateTile.dialedAddress );
-			BlockPos targetPos = targetGate.getPos();
-			World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
-						
-			StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) targetWorld.getTileEntity(targetPos);
+			StargateAbstractBaseTile targetTile = StargateNetwork.get(world).getStargate(gateTile.dialedAddress).getTileEntity();
 
-			if (targetTile.getStargateState().idle()) {			
+			if (targetTile.canAcceptConnectionFrom(gateTile)) {			
 				
-				if (gateTile.hasEnergyToDial(getRequiredEnergy(world, sourcePos, targetWorld, targetPos))) {
+				if (gateTile.hasEnergyToDial(targetTile)) {
 					
 					if (sourceDhdTile != null) 
 						sourceDhdTile.activateSymbol(EnumSymbol.BRB.id);
 									
-					gateTile.openGate(true, 0, null);
+					gateTile.openGate(true, null, false);
 					
-					DHDTile targetDhdTile = targetTile.getLinkedDHD(targetWorld);
+					boolean eightChevronDial = gateTile.dialedAddress.size() == 8;
+					targetTile.openGate(false, gateTile.gateAddress, eightChevronDial);
 					
-					targetTile.openGate(false, gateTile.dialedAddress.size(), gateTile.gateAddress);
-					
-					if (targetDhdTile != null) 
-						targetDhdTile.activateSymbol(EnumSymbol.BRB.id);
+					if (targetTile instanceof StargateMilkyWayBaseTile) {
+						if (((StargateMilkyWayBaseTile) targetTile).isLinked()) 
+							((StargateMilkyWayBaseTile) targetTile).getLinkedDHD(targetTile.getWorld()).activateSymbol(EnumSymbol.BRB.id);
+					}
 				}
 			
 				else {
-					gateTile.closeGate(true, stopRing);
-					
-					return EnumGateState.NOT_ENOUGH_POWER;
+					gateState = EnumGateState.NOT_ENOUGH_POWER;
 				}
 			}
 			
 			else {
-				// Target gate busy
+				// Target gate busy or cannot accept connection
 				// Return address malformed
 				
-				gateTile.closeGate(true, stopRing);
-				
-				return EnumGateState.ADDRESS_MALFORMED;
+				gateState = EnumGateState.ADDRESS_MALFORMED;
 			}
 		}
 		
@@ -189,12 +144,14 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			// Address malformed, dialing failed
 			// Execute GATE_DIAL_FAILED
 			
-			gateTile.closeGate(true, stopRing);
-			
-			return EnumGateState.ADDRESS_MALFORMED;
+			gateState = EnumGateState.ADDRESS_MALFORMED;
 		}
 		
-		return EnumGateState.OK;
+		if (!gateState.ok()) {			
+			gateTile.dialingFailed();
+		}
+		
+		return gateState;
 	}
 	
 	
@@ -211,17 +168,17 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 				
 				if ( block instanceof StargateMilkyWayBaseBlock || block instanceof DHDBlock ) {					
 					TileEntity te = world.getTileEntity(pos);
-					StargateAbstractBaseTile gateTile;
+					StargateMilkyWayBaseTile gateTile;
 					DHDTile dhdTile;
 					
-					if ( te instanceof StargateAbstractBaseTile ) {
-						gateTile = (StargateAbstractBaseTile) te;
+					if ( te instanceof StargateMilkyWayBaseTile ) {
+						gateTile = (StargateMilkyWayBaseTile) te;
 						dhdTile = gateTile.getLinkedDHD(world);
 					}
 					
 					else if ( te instanceof DHDTile ) {
 						dhdTile = (DHDTile) te;
-						gateTile = dhdTile.getLinkedGate(world);
+						gateTile = (StargateMilkyWayBaseTile) dhdTile.getLinkedGate(world);
 					}
 					
 					else {
@@ -231,7 +188,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 					}
 					
 					if (dhdTile != null && gateTile != null) {	
-						if ((gateTile.getStargateState() != EnumStargateState.COMPUTER_DIALING && gateTile.getStargateState() != EnumStargateState.FAILING)) {
+						if (gateTile.getStargateState().idle() || gateTile.getStargateState().engaged()) {
 							EnumSymbol symbol = EnumSymbol.valueOf(message.objectID);
 							
 							/*
@@ -240,23 +197,15 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 							 * If no power or no crystal, DHD will appear dead
 							 */
 							
-							ItemStackHandler itemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-							ItemStack powerCrystal = itemStackHandler.getStackInSlot(0);
+//							ItemStackHandler itemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+//							ItemStack powerCrystal = itemStackHandler.getStackInSlot(0);
 							
-							if (powerCrystal.isEmpty()) {
-								// No control crystal, display message
-								player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.no_crystal_warn"), true);
-								
-								return;
-							}
-							
-							else {							
-								if (!gateTile.hasEnergy(AunisConfig.powerConfig.dhdMinimalEnergy)) {
-									player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.no_enough_power"), true);
-									
-									return;
-								}
-							}
+//							if (powerCrystal.isEmpty()) {
+//								// No control crystal, display message
+//								player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.no_crystal_warn"), true);
+//								
+//								return;
+//							}
 							
 							if ( symbol == EnumSymbol.BRB ) {						
 								if ( gateTile.getStargateState().engaged() ) {
@@ -294,7 +243,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 									EnumGateState gateState = attemptOpen(world, gateTile, dhdTile, true);
 									
 									if (gateState != EnumGateState.OK) {
-										((StargateMilkyWayBaseTile) gateTile).setRollPlayed();
+//										((StargateMilkyWayBaseTile) gateTile).setRollPlayed();
 										
 										if (gateState == EnumGateState.NOT_ENOUGH_POWER)
 											player.sendStatusMessage(new TextComponentTranslation("tile.aunis.stargatebase_block.not_enough_power"), true);
@@ -305,23 +254,26 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 							
 							// Not BRB, some glyph pressed
 							else {								
-								if ( gateTile.addSymbolToAddress(symbol, dhdTile, false) ) {
+								if ( gateTile.canAddSymbol(symbol) ) {
+									gateTile.addSymbolToAddressDHD(symbol);
+									
 									// We can still add glyphs(no limit reached)
 									int symbolCount = gateTile.getEnteredSymbolsCount();				
 																	
 									// Update the DHD's renderer
-									dhdTile.activateSymbol(message.objectID);
-									
-									// Limit not reached, activating in order
-									//if ( gateTile.getMaxSymbols() > symbolCount ) {
-									if ( (dhdTile.hasUpgrade() && symbolCount == 8) || (!dhdTile.hasUpgrade() && symbolCount == 7) || (symbolCount == 7 && symbol == EnumSymbol.ORIGIN) ) {										
-										gateTile.addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_LOCK_DHD_SOUND));										
-										((StargateMilkyWayBaseTile) gateTile).setRollPlayed();
-									}
+//									dhdTile.activateSymbol(message.objectID);
 															
 									boolean lock = symbol == EnumSymbol.ORIGIN;
 									
 									gateTile.sendSignal(null, "stargate_dhd_chevron_engaged", new Object[] { symbolCount, lock, symbol.englishName });
+									
+									StargateNetwork network = StargateNetwork.get(world);
+									
+									if (gateTile.dialedAddress.equals(StargateNetwork.EARTH_ADDRESS) && network.hasLastActivatedOrlinAddress()) {
+										gateTile.dialedAddress.clear();
+										gateTile.dialedAddress.addAll(StargateNetwork.get(world).getLastActivatedOrlinAddress());
+										gateTile.dialedAddress.add(EnumSymbol.ORIGIN);
+									}
 									
 									// Light up target gate, if exists
 									if (lock) {	
@@ -331,20 +283,20 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 							} // not brb else
 						} // Not busy if
 						
-						else { 
-							switch (gateTile.getStargateState()) {
-								case COMPUTER_DIALING:
-									player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.computer_dial"), true);
-									break;
-									
-//								case FAILING:
-//									player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.failing_dial")), true);
+//						else { 
+//							switch (gateTile.getStargateState()) {
+//								case COMPUTER_DIALING:
+//									player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.computer_dial"), true);
 //									break;
-									
-								default:
-									break;
-							}
-						}
+//									
+////								case FAILING:
+////									player.sendStatusMessage(new TextComponentString(Aunis.proxy.localize("tile.aunis.dhd_block.failing_dial")), true);
+////									break;
+//									
+//								default:
+//									break;
+//							}
+//						}
 					} // gateTile and dhdTile not null if
 					
 					else {

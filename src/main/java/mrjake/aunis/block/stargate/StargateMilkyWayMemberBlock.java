@@ -340,7 +340,7 @@ public class StargateMilkyWayMemberBlock extends Block {
 			StargateAbstractBaseTile gateTile = StargateMilkyWayMergeHelper.INSTANCE.findBaseTile(world, pos, facing);
 							
 			if (gateTile != null && !gateTile.isMerged())
-				gateTile.updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), null);
+				gateTile.updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), facing);
 		}
 	}
 	
@@ -351,7 +351,7 @@ public class StargateMilkyWayMemberBlock extends Block {
 			StargateMilkyWayBaseTile gateTile = memberTile.getBaseTile(world);
 			
 			if (gateTile != null && memberTile.isMerged())
-				gateTile.updateMergeState(false, state);
+				gateTile.updateMergeState(false, state.getValue(AunisProps.FACING_HORIZONTAL));
 			
 			if (memberTile.getCamoItemStack() != null)
 				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), memberTile.getCamoItemStack());

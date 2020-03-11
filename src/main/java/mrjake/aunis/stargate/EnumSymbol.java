@@ -79,7 +79,7 @@ public enum EnumSymbol {
 	static {
 		for (EnumSymbol symbol : EnumSymbol.values()) {
 			idSymbolMap.put(symbol.id, symbol);
-			nameSymbolMap.put(symbol.englishName, symbol);
+			nameSymbolMap.put(symbol.englishName.toLowerCase(), symbol);
 			angleIndexSymbolMap.put(symbol.angleIndex, symbol);
 		}
 	}
@@ -89,7 +89,7 @@ public enum EnumSymbol {
 	}
 	
 	public static EnumSymbol forEnglishName(String translationKey) {
-		return nameSymbolMap.get(translationKey);
+		return nameSymbolMap.get(translationKey.toLowerCase());
 	}
 	
 	public static EnumSymbol fromAngleIndex(int index) {

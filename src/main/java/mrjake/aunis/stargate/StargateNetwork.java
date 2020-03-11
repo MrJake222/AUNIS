@@ -1,16 +1,23 @@
 package mrjake.aunis.stargate;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import mrjake.aunis.Aunis;
 import mrjake.aunis.stargate.teleportation.TeleportHelper;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.common.util.INBTSerializable;
 
 public class StargateNetwork extends WorldSavedData {	
 	public static final String DATA_NAME = Aunis.ModID + "_StargateNetworkData";
@@ -27,6 +34,12 @@ public class StargateNetwork extends WorldSavedData {
 	// StargatePos - BlockPos/int Object
 	private Map<Long, StargatePos> stargateMap = new HashMap<Long, StargatePos>();
 	
+	@Nullable
+	private List<EnumSymbol> netherGateAddress = null;
+	
+	@Nullable
+	private List<EnumSymbol> lastActivatedOrlin = null;
+		
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		compound.setInteger( "size", stargateMap.size() );
@@ -40,6 +53,15 @@ public class StargateNetwork extends WorldSavedData {
 			compound.setInteger( "dim"+i, entry.getValue().getDimension() );
 			
 			i++;
+		}
+		
+		if (netherGateAddress != null) {
+			compound.setLong("netherGateAddress", EnumSymbol.toLong(netherGateAddress));
+//			compound.setInteger("netherGate7th", netherGateAddress.get(6).id);
+		}
+		
+		if (lastActivatedOrlin != null) {
+			compound.setLong("lastActivatedOrlin", EnumSymbol.toLong(lastActivatedOrlin));
 		}
 		
 		return compound;
@@ -59,17 +81,74 @@ public class StargateNetwork extends WorldSavedData {
 			stargateMap.put(addr, new StargatePos(pos, last, dim));
 		}
 		
+		if (compound.hasKey("netherGateAddress")) {			
+			netherGateAddress = EnumSymbol.toSymbolList(EnumSymbol.fromLong(compound.getLong("netherGateAddress")));
+//			netherGateAddress.add(EnumSymbol.valueOf(compound.getInteger("netherGate7th")));
+		}
+		
+		if (compound.hasKey("lastActivatedOrlin")) {			
+			lastActivatedOrlin = EnumSymbol.toSymbolList(EnumSymbol.fromLong(compound.getLong("lastActivatedOrlin")));
+		}
+		
 		// Aunis.log("Read gates from NBT: " + stargateMap.toString());
 	}
+	
+	public void setNetherGate(List<EnumSymbol> address) {
+		netherGateAddress = new ArrayList<EnumSymbol>(6);
+		netherGateAddress.addAll(address.subList(0, 6));
+				
+		markDirty();
+	}
+	
+	@Nullable
+	public List<EnumSymbol> getNetherAddress() {
+		return netherGateAddress;
+	}
+	
+	public boolean isNetherGateGenerated() {
+		return netherGateAddress != null;
+	}
+	
+//	public void addOrlinAddress(List<EnumSymbol> address) {
+//		orlinGatesOverworldAddresses.add(EnumSymbol.toLong(address));
+//		
+//		markDirty();
+//	}
+//	
+//	public void removeOrlinAddress(List<EnumSymbol> address) {
+//		orlinGatesOverworldAddresses.remove(EnumSymbol.toLong(address));
+//		
+//		markDirty();
+//	}
+//	
+//	public List<Long> getOrlinAddressList() {
+//		return orlinGatesOverworldAddresses;
+//	}
+	
+	public void setLastActivatedOrlinAddress(List<EnumSymbol> address) {
+		lastActivatedOrlin = new ArrayList<EnumSymbol>(6);
+		lastActivatedOrlin.addAll(address.subList(0, 6));
 		
-	public void addStargate(List<EnumSymbol> address, int dimension, BlockPos pos) {	
+		markDirty();
+	}
+	
+	@Nullable
+	public List<EnumSymbol> getLastActivatedOrlinAddress() {
+		return lastActivatedOrlin;
+	}
+	
+	public boolean hasLastActivatedOrlinAddress() {
+		return lastActivatedOrlin != null;
+	}
+	
+	public void addStargate(List<EnumSymbol> address, int dimension, BlockPos pos) {
 		if ( !checkForStargate(address) ) {
 			stargateMap.put(EnumSymbol.toLong(address), new StargatePos(pos, address.get(address.size()-1), dimension));
 			
 			markDirty();
 		}
 	}
-	
+		
 	public void removeStargate(List<EnumSymbol> address) {
 		removeStargate(EnumSymbol.toLong(address));
 	}
@@ -103,12 +182,33 @@ public class StargateNetwork extends WorldSavedData {
 		return checkForStargate(EnumSymbol.toLong(address));
 	}
 	
-	public boolean stargateInWorld(World currentWorld, List<EnumSymbol> address) {
+	public boolean isAddressReserved(List<EnumSymbol> address) {
+		long serialized = EnumSymbol.toLong(address);
+		
+		return serialized == EARTH_ADDRESS_SERIALIZED;
+	}
+	
+	public static final List<EnumSymbol> EARTH_ADDRESS = Arrays.asList(
+			EnumSymbol.AURIGA,
+			EnumSymbol.CETUS,
+			EnumSymbol.CENTAURUS,
+			EnumSymbol.CANCER,
+			EnumSymbol.SCUTUM,
+			EnumSymbol.ERIDANUS,
+			EnumSymbol.ORIGIN);
+	
+	private static final long EARTH_ADDRESS_SERIALIZED = EnumSymbol.toLong(EARTH_ADDRESS);
+	
+	public boolean stargateInWorld(World currentWorld, List<EnumSymbol> address) {		
 		if (address == null)
 			return false;
 		
-		if (address.size() < 7)
+		if (address.size() < 7 || address.get(address.size()-1) != EnumSymbol.ORIGIN)
 			return false;
+		
+		if (address.equals(EARTH_ADDRESS) && currentWorld.provider.getDimensionType() == DimensionType.NETHER) {
+			return lastActivatedOrlin != null;
+		}
 		
 		StargatePos stargatePos = stargateMap.get(EnumSymbol.toLong(address));
 		
@@ -123,13 +223,19 @@ public class StargateNetwork extends WorldSavedData {
 				if (currentWorld.provider.getDimension() == stargatePos.getDimension()) {
 					return true;
 				}
+				
+				// Travelling from Overworld to Nether or vice-versa
+				if (currentWorld.provider.getDimensionType() == DimensionType.NETHER || stargatePos.getDimension() == DimensionType.OVERWORLD.getId() ||
+					currentWorld.provider.getDimensionType() == DimensionType.OVERWORLD || stargatePos.getDimension() == DimensionType.NETHER.getId())
+					return true;
+				
 			}
 			
 			// Cross dimensional dial
 			else {
 				
-				// No need to check dimension
-				return true;
+				// No need to check dimension, only check last symbol
+				return address.get(6) == getStargate(address).lastSymbol;
 			}
 		}
 		
@@ -149,7 +255,7 @@ public class StargateNetwork extends WorldSavedData {
 	}
 
 	
-	public static class StargatePos {
+	public static class StargatePos implements INBTSerializable<NBTTagCompound> {		
 		private BlockPos gatePos;
 		private int dimension;
 		private EnumSymbol lastSymbol;
@@ -160,6 +266,10 @@ public class StargateNetwork extends WorldSavedData {
 			this.dimension = dimension;
 		}
 		
+		public StargatePos(NBTTagCompound compound) {
+			deserializeNBT(compound);
+		}
+				
 		public BlockPos getPos() {
 			return gatePos;
 		}
@@ -172,6 +282,10 @@ public class StargateNetwork extends WorldSavedData {
 			return TeleportHelper.getWorld(dimension);
 		}
 		
+		public StargateAbstractBaseTile getTileEntity() {
+			return (StargateAbstractBaseTile) getWorld().getTileEntity(gatePos);
+		}
+		
 		public EnumSymbol get7thSymbol() {
 			return lastSymbol;
 		}
@@ -179,6 +293,24 @@ public class StargateNetwork extends WorldSavedData {
 		@Override
 		public String toString() {
 			return gatePos+" in dim:"+dimension+", last: "+lastSymbol;
+		}
+
+		@Override
+		public NBTTagCompound serializeNBT() {
+			NBTTagCompound compound = new NBTTagCompound();
+			
+			compound.setLong("pos", gatePos.toLong());
+			compound.setInteger("last", lastSymbol.id);
+			compound.setInteger("dim", dimension);
+			
+			return compound;
+		}
+
+		@Override
+		public void deserializeNBT(NBTTagCompound compound) {
+			gatePos = BlockPos.fromLong(compound.getLong("pos"));
+			lastSymbol = EnumSymbol.valueOf(compound.getInteger("last"));
+			dimension = compound.getInteger("dim");
 		}
 	}
 }

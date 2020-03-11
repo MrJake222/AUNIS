@@ -44,6 +44,11 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 	 */
 	private boolean customWaitTime;
 	private int waitTime;
+
+	/**
+	 * User can pass custom data to the {@link ScheduledTaskExecutorInterface} instance.
+	 */
+	private NBTTagCompound customData = null;
 	
 	/**
 	 * Main constructor
@@ -58,11 +63,21 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 		this.customWaitTime = false;
 	}
 	
+	public ScheduledTask(EnumScheduledTask scheduledTask, NBTTagCompound customData) {
+		this(scheduledTask);
+		this.customData = customData;
+	}
+	
 	public ScheduledTask(EnumScheduledTask scheduledTask, int waitTime) {
 		this(scheduledTask);
 		
 		this.customWaitTime = true;
 		this.waitTime = waitTime;
+	}
+	
+	public ScheduledTask(EnumScheduledTask scheduledTask, int waitTime, NBTTagCompound customData) {
+		this(scheduledTask, waitTime);
+		this.customData = customData;
 	}
 	
 	public ScheduledTask(NBTTagCompound compound) {		
@@ -142,7 +157,7 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 		if (call) {
 			try {
 //				Aunis.info("execute " + scheduledTask + " time: " + (worldTicks-taskCreated));
-				executor.executeTask(scheduledTask);
+				executor.executeTask(scheduledTask, customData);
 			}
 			
 			catch (UnsupportedOperationException e) {
@@ -163,6 +178,12 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 		compound.setInteger("scheduledTask", scheduledTask.id);
 		compound.setBoolean("active", active);
 		
+		compound.setBoolean("customWaitTime", customWaitTime);
+		compound.setInteger("waitTime", waitTime);
+		
+		if (customData != null)
+			compound.setTag("customData", customData);
+		
 		return compound;
 	}
 
@@ -171,11 +192,17 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 		taskCreated = compound.getLong("taskCreated");
 		scheduledTask = EnumScheduledTask.valueOf(compound.getInteger("scheduledTask"));
 		active = compound.getBoolean("active");
+		
+		customWaitTime = compound.getBoolean("customWaitTime");
+		waitTime = compound.getInteger("waitTime");
+		
+		if (compound.hasKey("customData"))
+			customData = compound.getCompoundTag("customData");
 	}
 	
 	@Override
 	public String toString() {
-		return scheduledTask.toString();
+		return scheduledTask.toString() + (customWaitTime ? ", custom time="+waitTime : "");
 	}
 
 	// Eclipse generated methods
