@@ -178,7 +178,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		super.dialingFailed();
 		
 		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 53));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 53));
 		
 		if (isLinked())
 			getLinkedDHD(world).getDHDRendererState().activeButtons.clear();

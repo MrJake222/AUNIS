@@ -90,13 +90,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	private boolean isInitiating;
 	
-//	public void updateTargetGate() {
-//		if (stargateState.engaged() || stargateState == EnumStargateState.UNSTABLE) {
-//			StargatePos stargatePos = StargateNetwork.get(world).getStargate(dialedAddress);
-//			stargatePos.getWorld().getTileEntity(stargatePos.getPos()).markDirty();
-//		}
-//	}
-	
 	protected void engageGate() {	
 		stargateState = isInitiating ? EnumStargateState.ENGAGED_INITIATING : EnumStargateState.ENGAGED;
 		eventHorizon.reset();
@@ -107,7 +100,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	protected void disconnectGate() {	
-//		updateTargetGate();
 		stargateState = EnumStargateState.IDLE;
 		getAutoCloseManager().reset();
 
@@ -117,6 +109,17 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		isFinalActive = false;
 		
 		ForgeChunkManager.unforceChunk(chunkLoadingTicket, new ChunkPos(pos));
+		
+		markDirty();
+	}
+	
+	protected void failGate() {
+		stargateState = EnumStargateState.IDLE;
+
+		if (!(this instanceof StargateOrlinBaseTile))
+			dialedAddress.clear();
+		
+		isFinalActive = false;
 		
 		markDirty();
 	}
@@ -908,6 +911,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			case STARGATE_CLOSE:
 				world.setBlockToAir(getGateCenterPos());
 				disconnectGate();
+				break;
+				
+			case STARGATE_FAIL:
+				failGate();
 				break;
 				
 			case STARGATE_ENGAGE:

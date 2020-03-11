@@ -51,7 +51,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		super.dialingFailed();
 		
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_FAILED_SOUND, 30));
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 83));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 83));
 	}
 	
 	@Override
