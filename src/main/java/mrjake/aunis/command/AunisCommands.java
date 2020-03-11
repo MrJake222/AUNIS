@@ -12,6 +12,8 @@ public class AunisCommands {
 			new CommandStargateQuery(),
 			new CommandPrepare(),
 			new CommandStargateCloseAll(),
+			new CommandStargateSetAddress(),
+			new CommandPageGive(),
 			new CommandDebug());
 	
 	public static void registerCommands(FMLServerStartingEvent event) {

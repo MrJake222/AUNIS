@@ -105,8 +105,10 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 		for (BlockPos pos : getRingBlocks()) {
 			pos = pos.rotate(FacingToRotation.get(baseFacing)).add(basePos);
 
-			StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
-			memberTile.setBroken(isBroken);
+			if (MEMBER_MATCHER.apply(world.getBlockState(pos))) {
+				StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
+				memberTile.setBroken(isBroken);
+			}
 		}
 	}	
 }

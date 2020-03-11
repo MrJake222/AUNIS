@@ -85,6 +85,10 @@ tile.aunis.transportrings_block.rings_name=Name
 tile.aunis.transportrings_block.rings_save=Save
 
 commands.sgcloseall.usage=/sgcloseall ["world", dimensionID, "force", empty] ["force" or empty]
+commands.sgsetaddress.notstargate=Targeted block is not a Stargate Base
+commands.sgsetaddress.wrongaddress=Address should be a space-separated list of 7 symbols (English names)
+commands.sgsetaddress.wrongsymbol=Wrong %s. symbol name
+commands.sgsetaddress.exists=Stargate with given address already exists
 
 death.attack.eventHorizon=%s was given a kawoosh cremation
 

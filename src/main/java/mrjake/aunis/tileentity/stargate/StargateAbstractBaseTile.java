@@ -187,6 +187,19 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	public List<EnumSymbol> dialedAddress = new ArrayList<EnumSymbol>();
 	protected boolean isFinalActive;
 	
+	public void setGateAddress(List<EnumSymbol> gateAddress) {
+		if (StargateNetwork.get(world).checkForStargate(gateAddress))
+			throw new IllegalStateException("Stargate with given address already exists");
+		
+		if (this.gateAddress != null)
+			StargateNetwork.get(world).removeStargate(this.gateAddress);
+				
+		StargateNetwork.get(world).addStargate(gateAddress, world.provider.getDimension(), pos);
+		
+		this.gateAddress = gateAddress;
+		markDirty();
+	}
+	
 	public int getEnteredSymbolsCount() {
 		return dialedAddress.size();
 	}
@@ -363,15 +376,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			chunkLoadingTicket = ForgeChunkManager.requestTicket(Aunis.instance, world, Type.NORMAL);
 			
 			if (gateAddress == null) {
-				gateAddress = generateAddress(new Random(pos.hashCode() * 31 + world.provider.getDimension()));
-				markDirty();
-												
-//				if (StargateNetwork.get(world).checkForStargate(gateAddress))
-//					Aunis.info(pos+"double address");
-				if (StargateNetwork.get(world).checkForStargate(gateAddress))
-					throw new IllegalStateException("Stargate with given address already exists");
-				
-				StargateNetwork.get(world).addStargate(gateAddress, world.provider.getDimension(), pos);
+				setGateAddress(generateAddress(new Random(pos.hashCode() * 31 + world.provider.getDimension())));
 			}
 		}
 		
