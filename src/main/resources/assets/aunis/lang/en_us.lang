@@ -89,6 +89,7 @@ commands.sgsetaddress.notstargate=Targeted block is not a Stargate Base
 commands.sgsetaddress.wrongaddress=Address should be a space-separated list of 7 symbols (English names)
 commands.sgsetaddress.wrongsymbol=Wrong %s. symbol name
 commands.sgsetaddress.exists=Stargate with given address already exists
+commands.sgsetaddress.success=Set Stargate's address at %s to %s 
 
 death.attack.eventHorizon=%s was given a kawoosh cremation
 

@@ -39,7 +39,7 @@ public class CommandPageGive extends CommandBase {
 		// Check if the 7th argument is valid symbol,
 		// If no, it's a biome
 		if (args.length == 7) {
-			if (EnumSymbol.forEnglishName(args[6]) == null) {
+			if (EnumSymbol.forEnglishName(args[6].replace("-", " ")) == null) {
 				len = 6;
 				hasBiome = true;
 			}
@@ -53,7 +53,7 @@ public class CommandPageGive extends CommandBase {
 		List<EnumSymbol> address = new ArrayList<EnumSymbol>(7);
 		
 		for (int i=0; i<len; i++) {
-			EnumSymbol symbol = EnumSymbol.forEnglishName(args[i]);
+			EnumSymbol symbol = EnumSymbol.forEnglishName(args[i].replace("-", " "));
 			
 			if (symbol == null) {
 				notifyCommandListener(sender, this, "commands.sgsetaddress.wrongsymbol", i+1);

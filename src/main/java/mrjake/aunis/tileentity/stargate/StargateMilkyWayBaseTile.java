@@ -150,6 +150,10 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_INCOMING, 0.5f);
 		
 		sendRenderingUpdate(EnumGateAction.LIGHT_UP_CHEVRONS, dialedAddressSize, true);
+		
+		if (isLinked()) {
+			getLinkedDHD(world).clearSymbols();
+		}
 	}
 	
 	@Override

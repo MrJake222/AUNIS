@@ -256,7 +256,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * @param dialedAddressSize - How many symbols are there pressed on the DHD
 	 */
 	public void incomingWormhole(List<EnumSymbol> incomingAddress, int dialedAddressSize) {
-		Aunis.info("incoming size: " + dialedAddressSize);
+//		Aunis.info("incoming size: " + dialedAddressSize);
 		
 		dialedAddress.clear();
 		dialedAddress.addAll(incomingAddress);
@@ -875,7 +875,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				
 			case STARGATE_HORIZON_LIGHT_BLOCK:
 				world.setBlockState(getGateCenterPos(), AunisBlocks.invisibleBlock.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false));
-				Aunis.info("place");
 				
 				break;
 				

@@ -41,7 +41,7 @@ public class CommandStargateSetAddress extends CommandBase {
 		List<EnumSymbol> newAddress = new ArrayList<EnumSymbol>(7);
 		
 		for (int i=0; i<7; i++) {
-			EnumSymbol symbol = EnumSymbol.forEnglishName(args[i]);
+			EnumSymbol symbol = EnumSymbol.forEnglishName(args[i].replace("-", " "));
 			
 			if (symbol == null) {
 				notifyCommandListener(sender, this, "commands.sgsetaddress.wrongsymbol", i+1);
@@ -63,6 +63,7 @@ public class CommandStargateSetAddress extends CommandBase {
 				StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) tileEntity;
 				
 				gateTile.setGateAddress(newAddress);
+				notifyCommandListener(sender, this, "commands.sgsetaddress.success", gateTile.getPos().toString(), newAddress.toString());
 			}
 			
 			else
