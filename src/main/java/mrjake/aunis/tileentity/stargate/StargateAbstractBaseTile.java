@@ -632,7 +632,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			
 			localKillingBoxes.add(box);
 		}
-		
+				
 		localInnerBlockBoxes = new ArrayList<AunisAxisAlignedBB>(3);
 		localInnerEntityBoxes = new ArrayList<AunisAxisAlignedBB>(3);
 		for (AunisAxisAlignedBB lBox : getGateVaporizingBoxes(server)) {

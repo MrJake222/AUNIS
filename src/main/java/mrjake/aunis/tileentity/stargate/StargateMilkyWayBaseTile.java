@@ -100,7 +100,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	
 	@Override
 	protected AunisAxisAlignedBB getHorizonTeleportBox(boolean server) {
-		return getStargateSize(server).teleportBox;
+		return getStargateSizeConfig(server).teleportBox;
 	}
 	
 	public void addSymbolToAddressDHD(EnumSymbol symbol) {		
@@ -389,7 +389,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				// Doing this in onLoad causes ConcurrentModificationException
 				if (stargateSize != AunisConfig.stargateSize && isMerged()) {
 					StargateMilkyWayMergeHelper.INSTANCE.convertToPattern(world, pos, facing, stargateSize, AunisConfig.stargateSize);
-					updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, pos, facing), null);
+					updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, pos, facing), facing);
 					
 					stargateSize = AunisConfig.stargateSize;
 					markDirty();
@@ -404,17 +404,19 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		
 	@Override
 	protected AunisAxisAlignedBB getHorizonKillingBox(boolean server) {
-		return getStargateSize(server).killingBox;
+		return getStargateSizeConfig(server).killingBox;
 	}
 	
 	@Override
 	protected int getHorizonSegmentCount(boolean server) {
-		return getStargateSize(server).horizonSegmentCount;
+		return getStargateSizeConfig(server).horizonSegmentCount;
 	}
 	
 	@Override
 	protected  List<AunisAxisAlignedBB> getGateVaporizingBoxes(boolean server) {
-		return getStargateSize(server).gateVaporizingBoxes;
+		Aunis.info("Stargate size: " + getStargateSizeConfig(server));
+		
+		return getStargateSizeConfig(server).gateVaporizingBoxes;
 	}
 	
 	
@@ -435,8 +437,15 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	
 	private StargateSizeEnum stargateSize = AunisConfig.stargateSize;
 	
-	private StargateSizeEnum getStargateSize(boolean server) {
-		return server ? stargateSize : getRendererStateClient().stargateSize;
+	/**
+	 * Returns stargate state either from config or from client's state.
+	 * THIS IS NOT A GETTER OF stargateSize.
+	 * 
+	 * @param server Is the code running on server
+	 * @return Stargate's size
+	 */
+	private StargateSizeEnum getStargateSizeConfig(boolean server) {
+		return server ? AunisConfig.stargateSize : getRendererStateClient().stargateSize;
 	}
 		
 	@Override
