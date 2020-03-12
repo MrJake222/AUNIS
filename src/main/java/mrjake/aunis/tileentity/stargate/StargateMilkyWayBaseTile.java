@@ -95,6 +95,17 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		}
 	}
 	
+	@Override
+	protected void failGate() {
+		super.failGate();
+		
+		updateChevronLight();
+		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, dialedAddress.size(), isFinalActive);
+		
+		if (isLinked())
+			getLinkedDHD(world).clearSymbols();
+	}
+	
 	// ------------------------------------------------------------------------
 	// Stargate Network
 	
