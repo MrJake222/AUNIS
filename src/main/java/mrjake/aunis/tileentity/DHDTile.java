@@ -294,7 +294,7 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 	}
 	
 	// -----------------------------------------------------------------------------
-	private ItemStackHandler inventory = new ItemStackHandler(1) {
+	private ItemStackHandler inventory = new ItemStackHandler(5) {
 		
 		protected void onContentsChanged(int slot) {
 			super.onContentsChanged(slot);

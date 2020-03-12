@@ -21,7 +21,7 @@ public class StargateOrlinGui extends GuiBase {
 	}	
 	
 	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {		
 		GlStateManager.pushMatrix();		
 		if (width < imageWidth) {
 			GlStateManager.translate((width - imageWidth/2f)/2f, (height - imageHeight/2f)/2f, 0);

@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
@@ -20,6 +21,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
@@ -35,13 +37,13 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class DHDBlock extends Block {
 	
-	private static final String blockName = "dhd_block";
+	public static final String BLOCK_NAME = "dhd_block";
 	
 	public DHDBlock() {		
 		super(Material.IRON);
 		
-		setRegistryName(Aunis.ModID + ":" + blockName);
-		setTranslationKey(Aunis.ModID + "." + blockName);
+		setRegistryName(Aunis.ModID + ":" + BLOCK_NAME);
+		setTranslationKey(Aunis.ModID + "." + BLOCK_NAME);
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -98,53 +100,57 @@ public class DHDBlock extends Block {
 	 * TODO Rewrite upgrade system using GUIs not some stupid lazy-ass sides ;)
 	 */
 	@Override
-	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		ItemStack itemStack = playerIn.getHeldItemMainhand();
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		ItemStack heldItemStack = player.getHeldItem(hand);
+		Item heldItem = heldItemStack.getItem();
 		
-		if (!worldIn.isRemote) {
+		if (!world.isRemote) {
 			if (hand == EnumHand.MAIN_HAND) {
 				EnumFacing dhdFacingOpposite = EnumFacing.byHorizontalIndex( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
 								
 				// Back side of block
-				if (facing == dhdFacingOpposite) {
-					DHDTile dhdTile = (DHDTile) worldIn.getTileEntity(pos);
-					ItemStackHandler itemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+				if (facing == dhdFacingOpposite && heldItem == AunisItems.analyzerAncient) {
+					player.openGui(Aunis.instance, GuiIdEnum.DHD_GUI.id, world, pos.getX(), pos.getY(), pos.getZ());
 					
-					ItemStack slotItemStack = itemStackHandler.getStackInSlot(0);
-					ItemStack heldItemStack = playerIn.getHeldItem(hand);
-					
-					if (slotItemStack.isEmpty()) {
-						if (heldItemStack.getItem() == AunisItems.crystalControlDhd) {
-							// Insert the crystal
-							
-							ItemStack remainder = itemStackHandler.insertItem(0, heldItemStack, false);
-							playerIn.setHeldItem(hand, remainder);
-						}
-						
-						else {
-							ITileEntityUpgradeable upgradeable = (ITileEntityUpgradeable) worldIn.getTileEntity(pos);
-							
-							return UpgradeHelper.upgradeInteract((EntityPlayerMP) playerIn, upgradeable, itemStack);
-						}
-					}
-					
-					else {
-						if (heldItemStack.isEmpty())
-							playerIn.setHeldItem(hand, slotItemStack);
-						else
-							playerIn.addItemStackToInventory(slotItemStack);
-						
-						itemStackHandler.setStackInSlot(0, ItemStack.EMPTY);
-					}
+//					DHDTile dhdTile = (DHDTile) worldIn.getTileEntity(pos);
+//					ItemStackHandler itemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+//					
+//					ItemStack slotItemStack = itemStackHandler.getStackInSlot(0);
+//					
+//					if (slotItemStack.isEmpty()) {
+//						if (heldItemStack.getItem() == AunisItems.crystalControlDhd) {
+//							// Insert the crystal
+//							
+//							ItemStack remainder = itemStackHandler.insertItem(0, heldItemStack, false);
+//							playerIn.setHeldItem(hand, remainder);
+//						}
+//						
+//						else {
+//							ITileEntityUpgradeable upgradeable = (ITileEntityUpgradeable) worldIn.getTileEntity(pos);
+//							
+//							return UpgradeHelper.upgradeInteract((EntityPlayerMP) playerIn, upgradeable, itemStack);
+//						}
+//					}
+//					
+//					else {
+//						if (heldItemStack.isEmpty())
+//							playerIn.setHeldItem(hand, slotItemStack);
+//						else
+//							playerIn.addItemStackToInventory(slotItemStack);
+//						
+//						itemStackHandler.setStackInSlot(0, ItemStack.EMPTY);
+//					}
 				}
 			}
 		}
 		
 		// Client side
 		else {
-			return	itemStack.getItem() == AunisItems.crystalGlyphDhd || 
-					itemStack.getItem() == AunisItems.crystalControlDhd ||
-					itemStack.getItem() == Items.AIR;
+			return heldItem == AunisItems.analyzerAncient;
+			
+//			return	itemStack.getItem() == AunisItems.crystalGlyphDhd || 
+//					itemStack.getItem() == AunisItems.crystalControlDhd ||
+//					itemStack.getItem() == Items.AIR;
 		}
 		
 		return false;

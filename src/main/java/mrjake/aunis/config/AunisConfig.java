@@ -75,7 +75,7 @@ public class AunisConfig {
 
 		@Name("Orlin's gate's internal buffer size")
 		@RangeInt(min=0)
-		public int stargateOrlinEnergyStorage = 7128000;
+		public int stargateOrlinEnergyStorage = 12000000;
 	}
 	
 	public static class RingsConfig {
