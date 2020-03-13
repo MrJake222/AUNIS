@@ -227,10 +227,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	/**
 	 * Checks whether the symbol can be added to the address.
 	 * 
-	 * @param symbol Symbol to be added
+	 * @param symbol Symbol to be added.
+	 * @param manual True if dialing from computer.
 	 * @return
 	 */
-	public boolean canAddSymbol(EnumSymbol symbol) {
+	public boolean canAddSymbol(EnumSymbol symbol, boolean manual) {
 		if (dialedAddress.contains(symbol)) 
 			return false;
 				
@@ -244,9 +245,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * Adds symbol to address. Called from GateRenderingUpdatePacketToServer.
 	 * 
 	 * @param symbol Currently added symbol.
+	 * @param manual True if dialing from computer.
 	 */
-	protected void addSymbolToAddress(EnumSymbol symbol) {
-		if (!canAddSymbol(symbol))
+	protected void addSymbolToAddress(EnumSymbol symbol, boolean manual) {
+		if (!canAddSymbol(symbol, manual))
 			throw new IllegalStateException("Cannot add that symbol");
 		
 		dialedAddress.add(symbol);

@@ -10,6 +10,8 @@ import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.PositionedPacket;
+import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumGateState;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
@@ -147,7 +149,9 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 			gateState = EnumGateState.ADDRESS_MALFORMED;
 		}
 		
-		if (!gateState.ok()) {			
+		if (!gateState.ok()) {		
+			AunisSoundHelper.playSoundEvent(world, gateTile.getPos(), EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
+			
 			gateTile.dialingFailed();
 		}
 		
@@ -254,7 +258,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 							
 							// Not BRB, some glyph pressed
 							else {								
-								if ( gateTile.canAddSymbol(symbol) ) {
+								if ( gateTile.canAddSymbol(symbol, false) ) {
 									gateTile.addSymbolToAddressDHD(symbol);
 									
 									// We can still add glyphs(no limit reached)

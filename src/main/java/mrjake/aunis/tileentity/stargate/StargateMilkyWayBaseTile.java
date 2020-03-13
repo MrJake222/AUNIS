@@ -115,7 +115,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	}
 	
 	public void addSymbolToAddressDHD(EnumSymbol symbol) {		
-		addSymbolToAddress(symbol);
+		addSymbolToAddress(symbol, false);
 		stargateState = EnumStargateState.DIALING;
 		
 		int maxChevrons = getLinkedDHD(world).hasUpgrade() ? 8 : 7;
@@ -132,11 +132,14 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	}
 	
 	@Override
-	public boolean canAddSymbol(EnumSymbol symbol) {
+	public boolean canAddSymbol(EnumSymbol symbol, boolean manual) {
 		if (dialedAddress.contains(symbol)) 
 			return false;
 		
-		int maxSymbols = getLinkedDHD(world).hasUpgrade() ? 8 : 7;
+		int maxSymbols = 8;
+		
+		if (!manual && isLinked() && !getLinkedDHD(world).hasUpgrade())
+			maxSymbols = 7;
 		
 		if (dialedAddress.size() == maxSymbols)
 			return false;
@@ -145,8 +148,8 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	}
 	
 	@Override
-	public void addSymbolToAddress(EnumSymbol symbol) {
-		super.addSymbolToAddress(symbol);
+	public void addSymbolToAddress(EnumSymbol symbol, boolean manual) {
+		super.addSymbolToAddress(symbol, manual);
 		
 		updateChevronLight();
 		
@@ -188,7 +191,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	public void dialingFailed() {
 		super.dialingFailed();
 		
-		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 53));
 		
 		if (isLinked())
@@ -627,8 +629,8 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.CHEVRON_OPEN, 1.0f);
 				sendRenderingUpdate(EnumGateAction.CHEVRON_OPEN, 0, false);
 				
-				if (canAddSymbol(targetRingSymbol)) {
-					super.addSymbolToAddress(targetRingSymbol);
+				if (canAddSymbol(targetRingSymbol, true)) {
+					addSymbolToAddress(targetRingSymbol, true);
 					
 					if (locking) {
 						if (StargateRenderingUpdatePacketToServer.checkDialedAddress(world, this)) {
@@ -662,8 +664,8 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				
 				updateChevronLight();
 				
-				if (isLinked())
-					getLinkedDHD(world).activateSymbol(targetRingSymbol.id);
+//				if (isLinked())
+//					getLinkedDHD(world).activateSymbol(targetRingSymbol.id);
 				
 				if (locking)
 					StargateRenderingUpdatePacketToServer.attemptLightUp(world, this);
