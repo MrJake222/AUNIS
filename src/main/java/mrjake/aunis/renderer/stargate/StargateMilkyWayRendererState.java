@@ -1,9 +1,8 @@
-package mrjake.aunis.state;
+package mrjake.aunis.renderer.stargate;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
-import mrjake.aunis.renderer.stargate.ChevronTextureList;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;

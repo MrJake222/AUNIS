@@ -1,4 +1,4 @@
-package mrjake.aunis.state;
+package mrjake.aunis.renderer.stargate;
 
 import mrjake.aunis.stargate.EnumStargateState;
 

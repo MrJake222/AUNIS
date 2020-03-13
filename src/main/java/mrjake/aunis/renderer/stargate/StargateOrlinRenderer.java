@@ -16,8 +16,6 @@ import mrjake.aunis.particle.ParticleBlender.SimpleVector;
 import mrjake.aunis.particle.ParticleBlenderSmoke;
 import mrjake.aunis.particle.ParticleBlenderSparks;
 import mrjake.aunis.stargate.StargateOrlinMergeHelper;
-import mrjake.aunis.state.StargateAbstractRendererState;
-import mrjake.aunis.state.StargateOrlinRendererState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;

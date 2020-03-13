@@ -17,6 +17,8 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
+import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
+import mrjake.aunis.renderer.stargate.StargateMilkyWayRendererState;
 import mrjake.aunis.sound.AunisPositionedSoundEnum;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
@@ -28,9 +30,7 @@ import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.stargate.StargateSpinHelper;
-import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.state.StargateMilkyWayGuiState;
-import mrjake.aunis.state.StargateMilkyWayRendererState;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.StargateSpinState;
@@ -39,6 +39,7 @@ import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.UniversalEnergyState;
 import mrjake.aunis.state.UpgradeRendererState;
 import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.DHDTile.DHDUpgradeEnum;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import mrjake.aunis.upgrade.StargateUpgradeRenderer;
@@ -85,6 +86,17 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	}
 	
 	@Override
+	protected void failGate() {
+		super.failGate();
+		
+		updateChevronLight();
+		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, dialedAddress.size(), isFinalActive);
+		
+		if (isLinked())
+			getLinkedDHD(world).clearSymbols();
+	}
+	
+	@Override
 	public void onBlockBroken() {
 		super.onBlockBroken();
 		
@@ -107,7 +119,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		addSymbolToAddress(symbol);
 		stargateState = EnumStargateState.DIALING;
 		
-		int maxChevrons = getLinkedDHD(world).hasUpgrade() ? 8 : 7;
+		int maxChevrons = getLinkedDHD(world).isUpgradeInstalled(DHDUpgradeEnum.CHEVRON_UPGRADE) ? 8 : 7;
 		NBTTagCompound taskData = new NBTTagCompound();
 		
 		if (dialedAddress.size() == maxChevrons || (dialedAddress.size() == 7 && symbol == EnumSymbol.ORIGIN)) {
@@ -125,7 +137,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		if (dialedAddress.contains(symbol)) 
 			return false;
 		
-		int maxSymbols = getLinkedDHD(world).hasUpgrade() ? 8 : 7;
+		int maxSymbols = getLinkedDHD(world).isUpgradeInstalled(DHDUpgradeEnum.CHEVRON_UPGRADE) ? 8 : 7;
 		
 		if (dialedAddress.size() == maxSymbols)
 			return false;
@@ -139,8 +151,9 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		
 		updateChevronLight();
 		
-		if (isLinked())
-			getLinkedDHD(world).activateSymbol(symbol.id);
+		if (isLinked()) {
+			getLinkedDHD(world).activateSymbol(symbol);
+		}
 	}
 	
 	@Override
@@ -159,18 +172,11 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	@Override
 	public void openGate(boolean initiating, List<EnumSymbol> incomingAddress, boolean eightChevronDial) {
 		super.openGate(initiating, incomingAddress, eightChevronDial);
-		
-		if (isLinked()) {
-			getLinkedDHD(world).getDHDRendererState().activeButtons.add(EnumSymbol.BRB.id);
-		}
 	}
 	
 	@Override
 	public void closeGate() {
 		super.closeGate();
-		
-		if (isLinked())
-			getLinkedDHD(world).getDHDRendererState().activeButtons.clear();
 	}
 	
 	@Override
@@ -179,9 +185,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		
 		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 53));
-		
-		if (isLinked())
-			getLinkedDHD(world).getDHDRendererState().activeButtons.clear();
 	}
 	
 	
@@ -651,9 +654,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				
 				updateChevronLight();
 				
-				if (isLinked())
-					getLinkedDHD(world).activateSymbol(targetRingSymbol.id);
-				
 				if (locking)
 					StargateRenderingUpdatePacketToServer.attemptLightUp(world, this);
 				
@@ -768,10 +768,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 			EnumGateState gateState = StargateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
 	
 			if (gateState == EnumGateState.OK) {
-				if (isLinked()) {
-					getLinkedDHD(world).activateSymbol(EnumSymbol.BRB.id);
-				}
-				
 				return new Object[] {"stargate_engage"};
 			}
 			

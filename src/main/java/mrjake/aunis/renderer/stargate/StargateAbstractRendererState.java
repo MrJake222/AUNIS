@@ -1,9 +1,10 @@
-package mrjake.aunis.state;
+package mrjake.aunis.renderer.stargate;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.stargate.StargateAbstractRenderer.EnumVortexState;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.stargate.EnumStargateState;
+import mrjake.aunis.state.State;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 

@@ -10,8 +10,6 @@ import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
-import mrjake.aunis.state.StargateAbstractRendererState;
-import mrjake.aunis.state.StargateMilkyWayRendererState;
 import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.math.MathFunction;
 import mrjake.aunis.util.math.MathFunctionImpl;

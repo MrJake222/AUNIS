@@ -114,7 +114,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 				if (gateTile.hasEnergyToDial(targetTile)) {
 					
 					if (sourceDhdTile != null) 
-						sourceDhdTile.activateSymbol(EnumSymbol.BRB.id);
+						sourceDhdTile.activateSymbol(EnumSymbol.BRB);
 									
 					gateTile.openGate(true, null, false);
 					
@@ -123,7 +123,7 @@ public class StargateRenderingUpdatePacketToServer extends PositionedPacket {
 					
 					if (targetTile instanceof StargateMilkyWayBaseTile) {
 						if (((StargateMilkyWayBaseTile) targetTile).isLinked()) 
-							((StargateMilkyWayBaseTile) targetTile).getLinkedDHD(targetTile.getWorld()).activateSymbol(EnumSymbol.BRB.id);
+							((StargateMilkyWayBaseTile) targetTile).getLinkedDHD(targetTile.getWorld()).activateSymbol(EnumSymbol.BRB);
 					}
 				}
 			

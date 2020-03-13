@@ -11,12 +11,13 @@ import mrjake.aunis.item.color.CrystalControlDHDItemColor;
 import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
 import mrjake.aunis.item.renderer.PageNotebookTEISR;
+import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.SpecialRenderer;
+import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRenderer;
 import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
 import mrjake.aunis.sound.AunisPositionedSoundEnum;
 import mrjake.aunis.sound.AunisSoundHelperClient;
-import mrjake.aunis.state.StargateAbstractRendererState;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
@@ -68,7 +69,7 @@ public class ProxyClient implements IProxy {
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateMilkyWayBaseTile.class, new StargateMilkyWayRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateOrlinBaseTile.class, new StargateOrlinRenderer());
-		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, specialRenderer);
+		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, new DHDRenderer());
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, specialRenderer);
 		ClientRegistry.bindTileEntitySpecialRenderer(TransportRingsTile.class, specialRenderer);

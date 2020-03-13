@@ -1,52 +1,37 @@
 package mrjake.aunis.state;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.stargate.EnumSymbol;
 
 public class DHDActivateButtonState extends State {
 	public DHDActivateButtonState() {}
 	
-	public boolean clearOnly;
-	public List<Integer> idList;
-	
-	public DHDActivateButtonState(boolean clearOnly) {
-		this.clearOnly = clearOnly;
+	public EnumSymbol symbol;
+	public boolean clearAll = false;
+
+	public DHDActivateButtonState(boolean clearAll) {
+		this.clearAll = clearAll;
 	}
 	
-	public DHDActivateButtonState(List<Integer> idList) {
-		this.idList = idList;
-	}
-	
-	public DHDActivateButtonState(int id) {
-		this.idList = Arrays.asList(id);
+	public DHDActivateButtonState(EnumSymbol symbol) {
+		this.symbol  = symbol;
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeBoolean(clearOnly);
+		buf.writeBoolean(clearAll);
 		
-		if (!clearOnly) {
-			buf.writeInt(idList.size());
-
-			for (int id : idList)
-				buf.writeInt(id);
+		if (!clearAll) {
+			buf.writeInt(symbol.id);
 		}
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		clearOnly = buf.readBoolean();
+		clearAll = buf.readBoolean();
 		
-		if (!clearOnly) {
-			int count = buf.readInt();
-			idList = new ArrayList<Integer>(count);
-			
-			for (int i=0; i<count; i++) {
-				idList.add(buf.readInt());
-			}
+		if (!clearAll) {
+			symbol = EnumSymbol.valueOf(buf.readInt());
 		}
 	}
 }

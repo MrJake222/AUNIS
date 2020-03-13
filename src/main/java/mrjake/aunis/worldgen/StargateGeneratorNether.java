@@ -181,7 +181,6 @@ public class StargateGeneratorNether {
 			StargateGenerationHelper.spawnDhdCrystal(world, dhdPos, power);
 			
 			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(basePos);
-			gateTile.getLinkedDHD(world).setUpgrade(true);
 			
 			return gateTile.gateAddress;
 		}

@@ -9,25 +9,19 @@ import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
-import mrjake.aunis.renderer.DHDRenderer;
+import mrjake.aunis.renderer.DHDRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.EnumAunisSoundEvent;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.state.DHDActivateButtonState;
-import mrjake.aunis.state.DHDRendererState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.state.UpgradeRendererState;
-import mrjake.aunis.tesr.RendererInterface;
-import mrjake.aunis.tesr.RendererProviderInterface;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
-import mrjake.aunis.upgrade.DHDUpgradeRenderer;
-import mrjake.aunis.upgrade.ITileEntityUpgradeable;
-import mrjake.aunis.upgrade.UpgradeRenderer;
 import mrjake.aunis.util.ILinkable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -40,13 +34,10 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class DHDTile extends TileEntity implements RendererProviderInterface, ITileEntityUpgradeable, ILinkable, StateProviderInterface {
+public class DHDTile extends TileEntity implements ILinkable, StateProviderInterface {
 	
-	private DHDRenderer renderer;
-	private DHDRendererState rendererState;
-	
-	private DHDUpgradeRenderer upgradeRenderer;
-	private UpgradeRendererState upgradeRendererState;
+	// ---------------------------------------------------------------------------------------------------
+	// Gate linking
 	
 	private BlockPos linkedGate = null;
 	
@@ -58,28 +49,8 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 		world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, rotation.rotate(rotationOrig, 16)));
 	}
 	
-	@Override
-	public RendererInterface getRenderer() {
-		if (renderer == null)
-			renderer = new DHDRenderer(this);
-		
-		return renderer;
-	}
-	
-	public DHDRenderer getDHDRenderer() {
-		return (DHDRenderer) getRenderer();
-	}
-	
-	public DHDRendererState getDHDRendererState() {
-		if (rendererState == null)
-			rendererState = new DHDRendererState();
-		
-		return rendererState;
-	}
-
 	public void setLinkedGate(BlockPos gate) {		
 		this.linkedGate = gate;
-		Aunis.info("setLinkedGate: " + gate);
 		
 		markDirty();
 	}
@@ -89,22 +60,6 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 		return this.linkedGate != null;
 	}
 	
-	@Override
-	public UpgradeRenderer getUpgradeRenderer() {		
-		if (upgradeRenderer == null)
-			upgradeRenderer = new DHDUpgradeRenderer(world, getDHDRenderer().getHorizontalRotation());
-		
-		return upgradeRenderer;
-	}
-	
-	@Override
-	public UpgradeRendererState getUpgradeRendererState() {
-		if (upgradeRendererState == null)
-			upgradeRendererState = new UpgradeRendererState();
-		
-		return upgradeRendererState;
-	}
-	
 	public StargateAbstractBaseTile getLinkedGate(World world) {
 		if (linkedGate == null)
 			return null;
@@ -112,136 +67,70 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 		return (StargateAbstractBaseTile) world.getTileEntity(linkedGate);
 	}
 	
-	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-		BlockPos gate;
-		
-		if (linkedGate == null)
-			gate = new BlockPos(0,0,0);
-		else
-			gate = linkedGate;
-		
-		compound.setLong("linkedGate", gate.toLong());
-		compound.setBoolean("hasUpgrade", hasUpgrade);
-		compound.setBoolean("insertAnimation", insertAnimation);
-		
-		compound.setTag("rendererState", getDHDRendererState().serializeNBT());
-		compound.setTag("upgradeRendererState", getUpgradeRendererState().serializeNBT());
-		
-		compound.setTag("inventory", inventory.serializeNBT());
-		
-		return super.writeToNBT(compound);
+	
+	// ---------------------------------------------------------------------------------------------------
+	// Renderer state
+	
+	private DHDRendererState rendererStateClient;
+	
+	public DHDRendererState getRendererStateClient() {
+		return rendererStateClient;
 	}
 	
-	@Override
-	public void readFromNBT(NBTTagCompound compound) {
-		
-		try {
-			getDHDRendererState().deserializeNBT(compound.getCompoundTag("rendererState"));
-			getUpgradeRendererState().deserializeNBT(compound.getCompoundTag("upgradeRendererState"));
-		}
-		
-		catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
-			Aunis.info("Exception at reading RendererState");
-			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
-
-			e.printStackTrace();
-		}
-		
-		linkedGate = BlockPos.fromLong( compound.getLong("linkedGate") );
-		hasUpgrade = compound.getBoolean("hasUpgrade");
-		insertAnimation = compound.getBoolean("insertAnimation");
-		
-		if (compound.hasKey("inventory"))
-			inventory.deserializeNBT(compound.getCompoundTag("inventory"));
-
-		super.readFromNBT(compound);
-	}
-			
-//	@Override
-//	public void update() {
-//		
-//	}
+	// ---------------------------------------------------------------------------------------------------
+	// Loading
+	
+	private TargetPoint targetPoint;
 	
 	@Override
 	public void onLoad() {
-		if (world.isRemote) {
+		if (!world.isRemote) {
+			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
+		}
+		
+		else {
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
-			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.UPGRADE_RENDERER_STATE));
 		}
 	}
 	
-	private boolean hasUpgrade = false;
-	private boolean insertAnimation = false;
-	
-	@Override
-	public boolean hasUpgrade() {
-		return hasUpgrade;
-	}
-	
-	@Override
-	public void setUpgrade(boolean hasUpgrade) {
-		this.hasUpgrade = hasUpgrade;
-		
-		markDirty();
-	}
-	
-	@Override
-	public Item getAcceptedUpgradeItem() {
-		return AunisItems.crystalGlyphDhd;
-	}
-
-	@Override
-	public AxisAlignedBB getRenderBoundingBox() {
-		return new AxisAlignedBB(getPos().add(-1, 0, -1), getPos().add(1, 2, 1));
-	}
-	
-	@Override
-	public double getMaxRenderDistanceSquared() {
-		return 65536;
-	}
 	
 	// -----------------------------------------------------------------------------
 	// Symbol activation
-	public void activateSymbol(int id) {
-		activateSymbols(Arrays.asList(id));
-	}
 	
-	private void activateSymbols(List<Integer> idList) {		
-		if (idList.size() == 1) {
-			if (idList.get(0) == EnumSymbol.BRB.id)
-				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS_BRB, 0.5f);
-			else
-				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS, 0.5f);
-		}
+	public void activateSymbol(EnumSymbol symbol) {	
+		if (symbol == EnumSymbol.BRB)
+			AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS_BRB, 0.5f);
+		else
+			AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS, 0.5f);
 		
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(idList)), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
-		
-		getDHDRendererState().activeButtons.addAll(idList);
-		markDirty();
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(symbol)), targetPoint);
 	}
 	
 	public void clearSymbols() {
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(true)), new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512));
-		
-		getDHDRendererState().activeButtons.clear();
-		markDirty();
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(true)), targetPoint);
 	}
+	
 	
 	// -----------------------------------------------------------------------------
 	// States
+	
 	@Override
 	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case RENDERER_STATE:
-				return getDHDRendererState();
+				if (isLinked()) {
+					StargateAbstractBaseTile gateTile = getLinkedGate(world);
+					List<Integer> symbols = EnumSymbol.toIntegerList(gateTile.dialedAddress);
+					
+					if (gateTile.getStargateState().initiating())
+						symbols.add(EnumSymbol.BRB.id);
+					else if (gateTile.getStargateState().engaged())
+						symbols = Arrays.asList(EnumSymbol.BRB.id);
+					
+					return new DHDRendererState(symbols);
+				}
 				
-			case UPGRADE_RENDERER_STATE:
-				return getUpgradeRendererState();
-				
-			case DHD_ACTIVATE_BUTTON:
-				return null;
-				// Should send this directly from the server
+				return new DHDRendererState();
 				
 			default:
 				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
@@ -253,9 +142,6 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 		switch (stateType) {
 			case RENDERER_STATE:
 				return new DHDRendererState();
-				
-			case UPGRADE_RENDERER_STATE:
-				return new UpgradeRendererState();
 		
 			case DHD_ACTIVATE_BUTTON:
 				return new DHDActivateButtonState();
@@ -269,22 +155,18 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
 			case RENDERER_STATE:
-				getDHDRenderer().activateSymbols(((DHDRendererState) state).activeButtons); 
-				
-				break;
-				
-			case UPGRADE_RENDERER_STATE:
-				getUpgradeRenderer().setState((UpgradeRendererState) state);
+				float horizontalRotation = world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
+				rendererStateClient = ((DHDRendererState) state).initClient(pos, horizontalRotation);
 				
 				break;
 		
 			case DHD_ACTIVATE_BUTTON:
 				DHDActivateButtonState activateState = (DHDActivateButtonState) state;
 				
-				if (activateState.clearOnly)
-					getDHDRenderer().clearSymbols();
+				if (activateState.clearAll)
+					getRendererStateClient().clearSymbols(world.getTotalWorldTime());
 				else
-					getDHDRenderer().activateSymbols(activateState.idList);
+					getRendererStateClient().activateSymbol(world.getTotalWorldTime(), activateState.symbol);
 				
 				break;
 				
@@ -294,14 +176,64 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 	}
 	
 	// -----------------------------------------------------------------------------
-	private ItemStackHandler inventory = new ItemStackHandler(5) {
+	// Item handler
+	
+	public static final List<Item> SUPPORTED_UPGRADES = Arrays.asList(
+			AunisItems.crystalGlyphDhd);
+	
+	private ItemStackHandler itemStackHandler = new ItemStackHandler(5) {
 		
+		@Override
+		public boolean isItemValid(int slot, ItemStack stack) {
+			Item item = stack.getItem();
+			
+			switch (slot) {
+				case 0:
+					return item == AunisItems.crystalControlDhd;
+				
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+					return SUPPORTED_UPGRADES.contains(item);
+					
+				default:
+					return true;
+			}
+		}
+		
+		@Override
+		protected int getStackLimit(int slot, ItemStack stack) {
+			return 1;
+		}
+		
+		@Override
 		protected void onContentsChanged(int slot) {
 			super.onContentsChanged(slot);
 			
 			markDirty();
-		};
+		}
 	};
+	
+	public static enum DHDUpgradeEnum {
+		CHEVRON_UPGRADE(AunisItems.crystalGlyphDhd);
+		
+		public Item item;
+
+		private DHDUpgradeEnum(Item item) {
+			this.item = item;
+			
+		}
+	}
+	
+	public boolean isUpgradeInstalled(DHDUpgradeEnum upgrade) {
+		for (int slot=1; slot<5; slot++) {
+			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade.item)
+				return true;
+		}
+		
+		return false;
+	}
 	
 	@Override
 	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
@@ -311,6 +243,49 @@ public class DHDTile extends TileEntity implements RendererProviderInterface, IT
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T)inventory : super.getCapability(capability, facing);	
+		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T)itemStackHandler : super.getCapability(capability, facing);	
+	}
+	
+	
+	// ---------------------------------------------------------------------------------------------------
+	// NBT
+	
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound compound) {		
+		if (linkedGate != null)
+			compound.setLong("linkedGate", linkedGate.toLong());
+		
+		compound.setTag("inventory", itemStackHandler.serializeNBT());
+		
+		return super.writeToNBT(compound);
+	}
+	
+	@Override
+	public void readFromNBT(NBTTagCompound compound) {
+		if (compound.hasKey("linkedGate"))
+			linkedGate = BlockPos.fromLong(compound.getLong("linkedGate"));
+		
+		if (compound.getBoolean("hasUpgrade") || compound.getBoolean("insertAnimation")) {
+			itemStackHandler.setStackInSlot(1, new ItemStack(AunisItems.crystalGlyphDhd));
+		}
+		
+		if (compound.hasKey("inventory"))
+			itemStackHandler.deserializeNBT(compound.getCompoundTag("inventory"));
+
+		super.readFromNBT(compound);
+	}
+	
+	
+	// ---------------------------------------------------------------------------------------------------
+	// Rendering distance
+	
+	@Override
+	public AxisAlignedBB getRenderBoundingBox() {
+		return new AxisAlignedBB(getPos().add(-1, 0, -1), getPos().add(1, 2, 1));
+	}
+	
+	@Override
+	public double getMaxRenderDistanceSquared() {
+		return 65536;
 	}
 }
