@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.DHDActivation;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.state.State;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 

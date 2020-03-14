@@ -27,6 +27,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 public class DHDBlock extends Block {
@@ -97,8 +98,10 @@ public class DHDBlock extends Block {
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		EnumFacing dhdFacingOpposite = EnumFacing.byHorizontalIndex( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
 		
-		if (facing == dhdFacingOpposite && !player.isSneaking()) {								
-			player.openGui(Aunis.instance, GuiIdEnum.DHD_GUI.id, world, pos.getX(), pos.getY(), pos.getZ());
+		if (facing == dhdFacingOpposite && !player.isSneaking()) {
+			if (!FluidUtil.interactWithFluidHandler(player, hand, world, pos, null))
+				player.openGui(Aunis.instance, GuiIdEnum.DHD_GUI.id, world, pos.getX(), pos.getY(), pos.getZ());
+			
 			return true;
 		}
 		

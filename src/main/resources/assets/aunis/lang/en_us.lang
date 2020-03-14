@@ -134,3 +134,18 @@ glyph.aunis.lynx=Lynx
 glyph.aunis.orion=Orion
 glyph.aunis.piscis_austrinus=Piscis Austrinus
 glyph.aunis.bright_red_button=Bright Red Button
+
+
+
+gui.dhd.upgrades=Upgrades
+gui.dhd.fusion=Cold fusion
+gui.dhd.crystalStatus=Control crystal:
+gui.dhd.no_crystal=Missing
+gui.dhd.crystal_ok=In place
+gui.dhd.linkStatus=Subspace link status:
+gui.dhd.linked=Linked
+gui.dhd.not_linked=Not linked
+gui.dhd.reactorStatus=Cold fusion reactor:
+gui.dhd.running=Running
+gui.dhd.standby=Stand-by
+gui.dhd.no_fuel=No fuel

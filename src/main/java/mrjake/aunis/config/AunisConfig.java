@@ -1,6 +1,7 @@
 package mrjake.aunis.config;
 
 import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
 import net.minecraftforge.common.config.Config.RangeDouble;
 import net.minecraftforge.common.config.Config.RangeInt;
@@ -99,6 +100,22 @@ public class AunisConfig {
 		@Name("DHD range's radius vertical")
 		@RangeInt(min=1)
 		public int rangeVertical = 5;
+		
+		@Name("DHD's max fluid capacity")
+		@RangeInt(min=1)
+		public int fluidCapacity = 60000;
+
+		@Name("Energy per 1mB Naquadah")
+		@RangeInt(min=1)
+		public int energyPerNaquadah = 10240;
+
+		@Name("Generation multiplier")
+		@RangeInt(min=1)
+		@Comment({
+			"Energy per 1mB is multiplied by this",
+			"Consumed mB/t is equal to this"
+		})
+		public int powerGenerationMultiplier = 1;
 	}
 	
 	public static class DebugConfig {

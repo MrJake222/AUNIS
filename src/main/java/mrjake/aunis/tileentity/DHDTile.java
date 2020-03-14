@@ -5,6 +5,9 @@ import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.fluid.AunisFluids;
+import mrjake.aunis.gui.DHDContainerGuiState;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -18,6 +21,7 @@ import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.util.ReactorStateEnum;
 import mrjake.aunis.util.ILinkable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
@@ -25,16 +29,22 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class DHDTile extends TileEntity implements ILinkable, StateProviderInterface {
+public class DHDTile extends TileEntity implements ILinkable, StateProviderInterface, ITickable {
 	
 	// ---------------------------------------------------------------------------------------------------
 	// Gate linking
@@ -78,9 +88,14 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	}
 	
 	// ---------------------------------------------------------------------------------------------------
-	// Loading
+	// Loading and ticking
 	
 	private TargetPoint targetPoint;
+	private ReactorStateEnum reactorState = ReactorStateEnum.STANDBY;
+	
+	public ReactorStateEnum getReactorState() {
+		return reactorState;
+	}
 	
 	@Override
 	public void onLoad() {
@@ -90,6 +105,51 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		
 		else {
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
+		}
+	}
+	
+	@Override
+	public void update() {
+		if (!world.isRemote) {
+			
+			// Has crystal
+			if (!itemStackHandler.getStackInSlot(0).isEmpty()) {
+				if (isLinked()) {
+					StargateAbstractBaseTile gateTile = getLinkedGate(world);
+					IEnergyStorage energyStorage = (IEnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
+					
+					if (energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored() >= AunisConfig.dhdConfig.energyPerNaquadah) {
+						
+						// Has fuel
+						if (fluidHandler.drainInternal(1 * AunisConfig.dhdConfig.powerGenerationMultiplier, false) != null) {
+							fluidHandler.drainInternal(1 * AunisConfig.dhdConfig.powerGenerationMultiplier, true);
+							energyStorage.receiveEnergy(AunisConfig.dhdConfig.energyPerNaquadah * AunisConfig.dhdConfig.powerGenerationMultiplier, false);
+							
+							reactorState = ReactorStateEnum.ONLINE;
+						}
+						
+						// No fuel
+						else {
+							reactorState = ReactorStateEnum.NO_FUEL;
+						}
+					}
+					
+					// Buffer full
+					else {
+						reactorState = ReactorStateEnum.STANDBY;
+					}
+				}
+				
+				// Not linked
+				else {
+					reactorState = ReactorStateEnum.NOT_LINKED;
+				}
+			}
+			
+			// No crystal
+			else {
+				reactorState = ReactorStateEnum.NO_FUEL;
+			}
 		}
 	}
 	
@@ -146,6 +206,9 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			case DHD_ACTIVATE_BUTTON:
 				return new DHDActivateButtonState();
 				
+			case GUI_STATE:
+				return new DHDContainerGuiState();
+				
 			default:
 				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
 		}
@@ -170,10 +233,20 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 				
 				break;
 				
+			case GUI_STATE:
+				DHDContainerGuiState guiState = (DHDContainerGuiState) state;
+				
+				fluidHandler.setFluid(new FluidStack(AunisFluids.moltenNaquadahRefined, guiState.fluidAmount));
+				fluidHandler.setCapacity(guiState.tankCapacity);
+				reactorState = guiState.reactorState;
+				
+				break;
+				
 			default:
 				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
 		}
 	}
+	
 	
 	// -----------------------------------------------------------------------------
 	// Item handler
@@ -235,15 +308,41 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		return false;
 	}
 	
+	// -----------------------------------------------------------------------------
+	// Item handler
+	
+	private FluidTank fluidHandler = new FluidTank(new FluidStack(AunisFluids.moltenNaquadahRefined, 0), AunisConfig.dhdConfig.fluidCapacity) {
+		
+		@Override
+		public boolean canFillFluidType(FluidStack fluid) {
+			return fluid.getFluid() == AunisFluids.moltenNaquadahRefined;
+		}
+		
+		protected void onContentsChanged() {
+			markDirty();
+		}
+	};
+	
+	
+	// -----------------------------------------------------------------------------
+	// Capabilities
+	
 	@Override
 	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
+		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
+				|| (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && (facing == null || facing == EnumFacing.DOWN))
+				|| super.hasCapability(capability, facing);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T)itemStackHandler : super.getCapability(capability, facing);	
+		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
+		else if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && (facing == null || facing == EnumFacing.DOWN))
+			return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(fluidHandler);
+
+		
+		return super.getCapability(capability, facing);	
 	}
 	
 	
@@ -257,6 +356,10 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		
 		compound.setTag("inventory", itemStackHandler.serializeNBT());
 		
+		NBTTagCompound fluidHandlerCompound = new NBTTagCompound();
+		fluidHandler.writeToNBT(fluidHandlerCompound);
+		compound.setTag("fluidHandler", fluidHandlerCompound);
+		
 		return super.writeToNBT(compound);
 	}
 	
@@ -269,8 +372,8 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			itemStackHandler.setStackInSlot(1, new ItemStack(AunisItems.crystalGlyphDhd));
 		}
 		
-		if (compound.hasKey("inventory"))
-			itemStackHandler.deserializeNBT(compound.getCompoundTag("inventory"));
+		itemStackHandler.deserializeNBT(compound.getCompoundTag("inventory"));
+		fluidHandler.readFromNBT(compound.getCompoundTag("fluidHandler"));
 
 		super.readFromNBT(compound);
 	}
