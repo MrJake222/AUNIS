@@ -90,10 +90,6 @@ public class DHDBlock extends Block {
 		}
 	}
 	
-	/*
-	 * Maybe not-so-late-future:
-	 * TODO Rewrite upgrade system using GUIs not some stupid lazy-ass sides ;)
-	 */
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		EnumFacing dhdFacingOpposite = EnumFacing.byHorizontalIndex( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );

@@ -6,7 +6,6 @@ import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import mrjake.aunis.util.ItemHandlerHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -23,7 +22,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.items.CapabilityItemHandler;
 
 public class StargateMilkyWayBaseBlock extends Block {
 
@@ -90,8 +88,6 @@ public class StargateMilkyWayBaseBlock extends Block {
 						
 		if (!world.isRemote) {
 			gateTile.onBlockBroken();
-			
-			ItemHandlerHelper.dropInventoryItems(world, pos, gateTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
 		}
 		
 		super.breakBlock(world, pos, state);

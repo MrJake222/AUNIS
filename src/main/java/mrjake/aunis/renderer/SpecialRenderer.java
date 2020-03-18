@@ -2,7 +2,6 @@ package mrjake.aunis.renderer;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.tesr.RendererProviderInterface;
-import mrjake.aunis.upgrade.ITileEntityUpgradeable;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 
@@ -12,10 +11,6 @@ public class SpecialRenderer extends TileEntitySpecialRenderer<TileEntity> {
 	public void render(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		try {
 			((RendererProviderInterface) te).getRenderer().render(x, y, z, partialTicks);
-			
-			if (te instanceof ITileEntityUpgradeable) {
-				((ITileEntityUpgradeable) te).getUpgradeRenderer().render(x, y, z, partialTicks);
-			}
 		}
 		
 		catch (ClassCastException e) {

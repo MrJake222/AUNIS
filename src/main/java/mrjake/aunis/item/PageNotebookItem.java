@@ -88,10 +88,11 @@ public class PageNotebookItem extends Item {
 				long serialized = EnumSymbol.toLong(gateTile.gateAddress);
 				compound.setLong("address", serialized);
 				
-				if (gateTile.hasUpgrade())
-					compound.setInteger("7th", gateTile.gateAddress.get(6).id);
-				else
-					compound.removeTag("7th");
+				// TODO Restore 7th symbol
+//				if (gateTile.hasUpgrade())
+//					compound.setInteger("7th", gateTile.gateAddress.get(6).id);
+//				else
+//					compound.removeTag("7th");
 				
 				
 				String reg = world.getBiome(pos).getRegistryName().getPath();

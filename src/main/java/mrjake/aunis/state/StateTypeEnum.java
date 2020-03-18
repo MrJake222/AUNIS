@@ -14,9 +14,8 @@ import java.util.Map;
  */
 public enum StateTypeEnum {
 	RENDERER_STATE(0),
-	UPGRADE_RENDERER_STATE(1),
-	GUI_STATE(2),
-	GUI_UPDATE(13),
+	GUI_STATE(1),
+	GUI_UPDATE(2),
 	CAMO_STATE(3),
 	LIGHT_STATE(4),
 	ENERGY_STATE(5),

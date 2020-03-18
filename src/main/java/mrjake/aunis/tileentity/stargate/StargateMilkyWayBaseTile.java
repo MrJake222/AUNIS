@@ -16,7 +16,6 @@ import mrjake.aunis.gui.container.StargateContainerGuiState;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
-import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRendererState;
@@ -37,18 +36,14 @@ import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.state.UniversalEnergyState;
-import mrjake.aunis.state.UpgradeRendererState;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.DHDTile.DHDUpgradeEnum;
 import mrjake.aunis.tileentity.util.ScheduledTask;
-import mrjake.aunis.upgrade.ITileEntityUpgradeable;
-import mrjake.aunis.upgrade.StargateUpgradeRenderer;
-import mrjake.aunis.upgrade.UpgradeRenderer;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.ILinkable;
+import mrjake.aunis.util.ItemHandlerHelper;
 import mrjake.aunis.util.LinkingHelper;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -64,10 +59,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implements ITileEntityUpgradeable, ILinkable {
-		
-	private StargateUpgradeRenderer upgradeRenderer;
-	private UpgradeRendererState upgradeRendererState;
+public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implements ILinkable {
 	
 	private BlockPos linkedDHD = null;	
 	
@@ -101,10 +93,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		super.onBlockBroken();
 		
 		playPositionedSound(AunisPositionedSoundEnum.RING_ROLL, false);
-		
-		if (hasUpgrade() || getUpgradeRendererState().doInsertAnimation) {
-			InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphStargate));
-		}
+		ItemHandlerHelper.dropInventoryItems(world, pos, itemStackHandler);
 	}
 	
 	// ------------------------------------------------------------------------
@@ -216,22 +205,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		return StargateMilkyWayMergeHelper.INSTANCE;
 	}
 	
-	@Override
-	public UpgradeRenderer getUpgradeRenderer() {
-		if (upgradeRenderer == null)
-			upgradeRenderer = new StargateUpgradeRenderer(world, 0);
-		
-		return upgradeRenderer;
-	}
-	
-	@Override
-	public UpgradeRendererState getUpgradeRendererState() {
-		if (upgradeRendererState == null)
-			upgradeRendererState = new UpgradeRendererState();
-		
-		return upgradeRendererState;
-	}
-	
 	@Nullable
 	public DHDTile getLinkedDHD(World world) {
 		if (linkedDHD == null)
@@ -255,11 +228,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {		
 		if (isLinked())
 			compound.setLong("linkedDHD", linkedDHD.toLong());
-		
-		compound.setBoolean("hasUpgrade", hasUpgrade);
-		
-		compound.setTag("upgradeRendererState", getUpgradeRendererState().serializeNBT());
-		
+						
 		compound.setInteger("stargateSize", stargateSize.id);
 
 		compound.setBoolean("isSpinning", isSpinning);
@@ -278,19 +247,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	public void readFromNBT(NBTTagCompound compound) {
 		if (compound.hasKey("linkedDHD"))
 			this.linkedDHD = BlockPos.fromLong( compound.getLong("linkedDHD") );
-		
-		hasUpgrade = compound.getBoolean("hasUpgrade");
-			
-		try {
-			getUpgradeRendererState().deserializeNBT(compound.getCompoundTag("upgradeRendererState"));
-		}
-		
-		catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
-			Aunis.info("Exception at reading RendererState");
-			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
-
-			e.printStackTrace();
-		}
 				
 		if (compound.hasKey("patternVersion"))
 			stargateSize = StargateSizeEnum.SMALL;
@@ -309,6 +265,10 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		spinDirection = EnumSpinDirection.valueOf(compound.getInteger("spinDirection"));
 	
 		itemStackHandler.deserializeNBT(compound.getCompoundTag("itemHandler"));
+		
+		if (compound.getBoolean("hasUpgrade")) {
+			itemStackHandler.setStackInSlot(0, new ItemStack(AunisItems.crystalGlyphStargate));
+		}
 		
 		super.readFromNBT(compound);
 	}
@@ -368,15 +328,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	
 	// ------------------------------------------------------------------------
 	// Ticking and loading
-	
-	@Override
-	public void onLoad() {		
-		if (world.isRemote) {
-			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.UPGRADE_RENDERER_STATE));
-		}
-		
-		super.onLoad();
-	}
 	
 	@Override
 	public BlockPos getGateCenterPos() {
@@ -475,9 +426,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	@Override
 	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {		
-			case UPGRADE_RENDERER_STATE:
-				return getUpgradeRendererState();
-								
 			case ENERGY_STATE:
 				return new UniversalEnergyState(energyStorage.getEnergyStored(), energyTransferedLastTick);
 				
@@ -489,9 +437,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	@Override
 	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
-			case UPGRADE_RENDERER_STATE:
-				return new UpgradeRendererState();
-		
 			case GUI_STATE:
 				return new StargateContainerGuiState();
 				
@@ -510,11 +455,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 	@SideOnly(Side.CLIENT)
 	public void setState(StateTypeEnum stateType, State state) {		
 		switch (stateType) {		
-			case UPGRADE_RENDERER_STATE:
-				getUpgradeRenderer().setState((UpgradeRendererState) state);
-				
-				break;
-		
 			case RENDERER_UPDATE:
 				StargateRendererActionState gateActionState = (StargateRendererActionState) state;
 				
@@ -563,7 +503,6 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				StargateContainerGuiState guiState = (StargateContainerGuiState) state;
 				
 				gateAddress = guiState.getGateAddress();
-				hasUpgrade = guiState.hasUpgrade();
 				
 				Aunis.info(this + ": Setting address to " + gateAddress);
 				
@@ -899,27 +838,5 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		else {
 			return new Object[] {null, "stargate_failure_not_open", "The gate is closed"};
 		}
-	}
-	
-	
-	// -----------------------------------------------------------------
-	// Upgrade
-	private boolean hasUpgrade = false;
-	
-	@Override
-	public boolean hasUpgrade() {
-		return hasUpgrade;
-	}
-	
-	@Override
-	public void setUpgrade(boolean hasUpgrade) {
-		this.hasUpgrade = hasUpgrade;
-		
-		markDirty();
-	}
-
-	@Override
-	public Item getAcceptedUpgradeItem() {
-		return AunisItems.crystalGlyphStargate;
 	}
 }
