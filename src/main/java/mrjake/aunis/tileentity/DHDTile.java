@@ -14,7 +14,7 @@ import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.state.DHDActivateButtonState;
 import mrjake.aunis.state.State;
@@ -159,9 +159,9 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	
 	public void activateSymbol(EnumSymbol symbol) {	
 		if (symbol == EnumSymbol.BRB)
-			AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS_BRB, 0.5f);
+			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS_BRB, 0.5f);
 		else
-			AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.DHD_PRESS, 0.5f);
+			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS, 0.5f);
 		
 		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(symbol)), targetPoint);
 	}

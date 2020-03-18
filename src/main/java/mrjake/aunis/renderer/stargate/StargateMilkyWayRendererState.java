@@ -4,28 +4,17 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.stargate.EnumSpinDirection;
-import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateSpinHelper;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 
-public class StargateMilkyWayRendererState extends StargateAbstractRendererState {
+public class StargateMilkyWayRendererState extends StargateClassicRendererState {
 	public StargateMilkyWayRendererState() {}
 	
-	public StargateMilkyWayRendererState(StargateSizeEnum stargateSize, EnumStargateState stargateState, int activeChevrons, boolean isFinalActive, EnumSymbol currentRingSymbol, EnumSpinDirection spinDirection, boolean isSpinning, EnumSymbol targetRingSymbol, long spinStartTime) {
-		super(stargateState);
+	public StargateMilkyWayRendererState(StargateMilkyWayRendererStateBuilder builder) {
+		super(builder);
 		
-		this.stargateSize = stargateSize;
-		this.chevronTextureList = new ChevronTextureList(activeChevrons, isFinalActive);
-		this.spinHelper = new StargateSpinHelper(currentRingSymbol, spinDirection, isSpinning, targetRingSymbol, spinStartTime);
-	}
-	
-	@Override
-	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing) {
-		chevronTextureList.initClient();
-		
-		return super.initClient(pos, facing);
+		this.stargateSize = builder.stargateSize;
+		this.spinHelper = new StargateSpinHelper(builder.currentRingSymbol, builder.spinDirection, builder.isSpinning, builder.targetRingSymbol, builder.spinStartTime);
 	}
 		
 	// Gate
@@ -33,8 +22,6 @@ public class StargateMilkyWayRendererState extends StargateAbstractRendererState
 	public StargateSizeEnum stargateSize = AunisConfig.stargateSize;
 	
 	// Chevrons
-	// Saved
-	public ChevronTextureList chevronTextureList;
 	// Not saved
 	public boolean chevronOpen;
 	public long chevronActionStart;
@@ -58,7 +45,6 @@ public class StargateMilkyWayRendererState extends StargateAbstractRendererState
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(stargateSize.id);
-		chevronTextureList.toBytes(buf);
 		spinHelper.toBytes(buf);
 		
 		super.toBytes(buf);
@@ -68,12 +54,62 @@ public class StargateMilkyWayRendererState extends StargateAbstractRendererState
 	public void fromBytes(ByteBuf buf) {	
 		stargateSize = StargateSizeEnum.fromId(buf.readInt());
 		
-		chevronTextureList = new ChevronTextureList();
-		chevronTextureList.fromBytes(buf);
-		
 		spinHelper = new StargateSpinHelper();
 		spinHelper.fromBytes(buf);
 				
 		super.fromBytes(buf);
+	}
+	
+	
+	// ------------------------------------------------------------------------
+	// Builder
+	
+	public static StargateMilkyWayRendererStateBuilder builder() {
+		return new StargateMilkyWayRendererStateBuilder();
+	}
+	
+	public static class StargateMilkyWayRendererStateBuilder extends StargateClassicRendererStateBuilder {
+		
+		private StargateSizeEnum stargateSize;
+		private EnumSymbol currentRingSymbol;
+		private EnumSpinDirection spinDirection; 
+		private boolean isSpinning;
+		private EnumSymbol targetRingSymbol;
+		private long spinStartTime;
+		
+		public StargateMilkyWayRendererStateBuilder setStargateSize(StargateSizeEnum stargateSize) {
+			this.stargateSize = stargateSize;
+			return this;
+		}
+		
+		public StargateMilkyWayRendererStateBuilder setCurrentRingSymbol(EnumSymbol currentRingSymbol) {
+			this.currentRingSymbol = currentRingSymbol;
+			return this;
+		}
+		
+		public StargateMilkyWayRendererStateBuilder setSpinDirection(EnumSpinDirection spinDirection) {
+			this.spinDirection = spinDirection;
+			return this;
+		}
+		
+		public StargateMilkyWayRendererStateBuilder setSpinning(boolean isSpinning) {
+			this.isSpinning = isSpinning;
+			return this;
+		}
+		
+		public StargateMilkyWayRendererStateBuilder setTargetRingSymbol(EnumSymbol targetRingSymbol) {
+			this.targetRingSymbol = targetRingSymbol;
+			return this;
+		}
+		
+		public StargateMilkyWayRendererStateBuilder setSpinStartTime(long spinStartTime) {
+			this.spinStartTime = spinStartTime;
+			return this;
+		}
+
+		@Override
+		public StargateMilkyWayRendererState build() {
+			return new StargateMilkyWayRendererState(this);
+		}
 	}
 }

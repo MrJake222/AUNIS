@@ -12,8 +12,9 @@ import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateOrlinRendererState;
+import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
@@ -21,6 +22,8 @@ import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
 import mrjake.aunis.stargate.StargateOrlinMergeHelper;
+import mrjake.aunis.stargate.StargateSoundEventEnum;
+import mrjake.aunis.stargate.StargateSoundPositionedEnum;
 import mrjake.aunis.state.StargateAbstractGuiState;
 import mrjake.aunis.state.StargateOrlinSparkState;
 import mrjake.aunis.state.State;
@@ -118,7 +121,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 					stargateState = EnumStargateState.DIALING;
 					
 					startSparks();
-					AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_ORLIN_DIAL, 1.0f);
+					AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.GATE_ORLIN_DIAL, 1.0f);
 					
 					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_OPEN));
 				}
@@ -181,7 +184,8 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	
 	@Override
 	protected StargateAbstractRendererState getRendererStateServer() {
-		return new StargateOrlinRendererState(stargateState);
+		return StargateAbstractRendererState.builder()
+				.setStargateState(stargateState).build();
 	}
 	
 	@Override
@@ -194,6 +198,25 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		return (StargateOrlinRendererState) super.getRendererStateClient();
 	}
 	
+	
+	// ------------------------------------------------------------------------
+	// Sounds
+	
+	@Override
+	protected SoundEventEnum getSoundEvent(StargateSoundEventEnum soundEnum) {
+		switch (soundEnum) {
+			case DIAL_FAILED:
+				return SoundEventEnum.GATE_MILKYWAY_DIAL_FAILED;
+				
+			default:
+				return null;
+		}
+	}
+	
+	@Override
+	protected SoundPositionedEnum getPositionedSound(StargateSoundPositionedEnum soundEnum) {
+		return null;
+	}
 	
 	// ------------------------------------------------------------------------
 	// States
@@ -261,7 +284,6 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	// ------------------------------------------------------------------------
 	// Sparks
 	
-	
 	private int sparkIndex;
 	
 	public void startSparks() {
@@ -269,6 +291,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_SPARK, 5));
 	}
+	
 	
 	// ------------------------------------------------------------------------
 	// Scheduled tasks
@@ -293,7 +316,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 				break;
 				
 			case STARGATE_ORLIN_FAILED_SOUND:
-				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
+				playSoundEvent(StargateSoundEventEnum.DIAL_FAILED, 0.3f);
 				
 				break;
 				

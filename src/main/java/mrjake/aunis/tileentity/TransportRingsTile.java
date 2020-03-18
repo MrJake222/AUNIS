@@ -17,7 +17,7 @@ import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient;
 import mrjake.aunis.renderer.transportrings.TransportRingsRenderer;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
@@ -195,11 +195,11 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RINGS_START_ANIMATION, new TransportRingsStartAnimationRequest(rendererState.animationStart)), point);
 		
-		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
-		AunisSoundHelper.playSoundEvent(world, targetRingsPos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
+		AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.RINGS_TRANSPORT, 0.8f);
+		AunisSoundHelper.playSoundEvent(world, targetRingsPos, SoundEventEnum.RINGS_TRANSPORT, 0.8f);
 		
 		for (EntityPlayerMP player : world.getEntitiesWithinAABB(EntityPlayerMP.class, globalTeleportBox)) {
-			AunisSoundHelper.playSoundToPlayer(player, EnumAunisSoundEvent.RINGS_TRANSPORT, targetRingsPos, 0.8f);
+			AunisSoundHelper.playSoundToPlayer(player, SoundEventEnum.RINGS_TRANSPORT, targetRingsPos, 0.8f);
 		}
 	}
 

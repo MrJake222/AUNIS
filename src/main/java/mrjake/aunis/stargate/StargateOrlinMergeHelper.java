@@ -54,8 +54,13 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 	}
 
 	@Override
-	public BlockMatcher getBaseMatcher() {
-		return BASE_MATCHER;
+	public boolean matchBase(IBlockState state) {
+		return BASE_MATCHER.apply(state);
+	}
+	
+	@Override
+	public boolean matchMember(IBlockState state) {
+		return MEMBER_MATCHER.apply(state);
 	}
 	
 	@Override

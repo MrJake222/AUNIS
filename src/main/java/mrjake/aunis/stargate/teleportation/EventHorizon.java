@@ -10,7 +10,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToClient;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.stargate.StargateNetwork.StargatePos;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.entity.Entity;
@@ -100,7 +100,7 @@ public class EventHorizon {
 	public void teleportEntity(int entityId) {
 		scheduledTeleportMap.get(entityId).teleport();
 		
-		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.WORMHOLE_GO, 1.0f);
+		AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.WORMHOLE_GO, 1.0f);
 		scheduledTeleportMap.remove(entityId);
 	}
 	

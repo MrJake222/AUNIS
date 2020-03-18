@@ -11,8 +11,8 @@ import net.minecraft.util.math.BlockPos;
 public class StargateAbstractRendererState extends State {
 	public StargateAbstractRendererState() {}
 	
-	public StargateAbstractRendererState(EnumStargateState stargateState) {
-		if (stargateState.engaged()) {
+	protected StargateAbstractRendererState(StargateAbstractRendererStateBuilder builder) {
+		if (builder.stargateState.engaged()) {
 			doEventHorizonRender = true;
 			vortexState = EnumVortexState.STILL;
 		}
@@ -78,5 +78,28 @@ public class StargateAbstractRendererState extends State {
 	public void fromBytes(ByteBuf buf) {		
 		doEventHorizonRender = buf.readBoolean();
 		vortexState = EnumVortexState.valueOf( buf.readInt() );
+	}
+	
+	
+	// ------------------------------------------------------------------------
+	// Builder
+	
+	public static StargateAbstractRendererStateBuilder builder() {
+		return new StargateAbstractRendererStateBuilder();
+	}
+	
+	public static class StargateAbstractRendererStateBuilder {
+		
+		// Gate
+		private EnumStargateState stargateState;
+		
+		public StargateAbstractRendererStateBuilder setStargateState(EnumStargateState stargateState) {
+			this.stargateState = stargateState;
+			return this;
+		}
+		
+		public StargateAbstractRendererState build() {
+			return new StargateAbstractRendererState(this);
+		}
 	}
 }

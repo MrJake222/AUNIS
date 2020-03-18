@@ -1,7 +1,7 @@
 package mrjake.aunis.proxy;
 
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
-import mrjake.aunis.sound.AunisPositionedSoundEnum;
+import mrjake.aunis.sound.SoundPositionedEnum;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
@@ -52,5 +52,5 @@ public class ProxyServer implements IProxy {
 	public void orlinRendererSpawnParticles(World world, StargateAbstractRendererState rendererState) {}
 	
 	@Override
-	public void playPositionedSoundClientSide(BlockPos pos, AunisPositionedSoundEnum soundEnum, boolean play) {}
+	public void playPositionedSoundClientSide(BlockPos pos, SoundPositionedEnum soundEnum, boolean play) {}
 }

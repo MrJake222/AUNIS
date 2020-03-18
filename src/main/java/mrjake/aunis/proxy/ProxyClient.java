@@ -16,7 +16,7 @@ import mrjake.aunis.renderer.SpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRenderer;
 import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
-import mrjake.aunis.sound.AunisPositionedSoundEnum;
+import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.sound.AunisSoundHelperClient;
 import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
@@ -110,7 +110,7 @@ public class ProxyClient implements IProxy {
 	}
 	
 	@Override
-	public void playPositionedSoundClientSide(BlockPos pos, AunisPositionedSoundEnum soundEnum, boolean play) {
+	public void playPositionedSoundClientSide(BlockPos pos, SoundPositionedEnum soundEnum, boolean play) {
 		AunisSoundHelperClient.playPositionedSoundClientSide(pos, soundEnum, play);
 	}
 }

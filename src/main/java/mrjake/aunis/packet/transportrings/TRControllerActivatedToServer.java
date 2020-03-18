@@ -3,7 +3,7 @@ package mrjake.aunis.packet.transportrings;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -53,7 +53,7 @@ public class TRControllerActivatedToServer extends PositionedPacket {
 				TransportRingsTile ringsTile = controllerTile.getLinkedRingsTile(world);
 				
 				if (ringsTile != null) {
-					AunisSoundHelper.playSoundEvent(world, message.pos, EnumAunisSoundEvent.RINGS_CONTROLLER_BUTTON, 0.5f);
+					AunisSoundHelper.playSoundEvent(world, message.pos, SoundEventEnum.RINGS_CONTROLLER_BUTTON, 0.5f);
 					
 					ringsTile.attemptTransportTo(player, message.address);
 				}

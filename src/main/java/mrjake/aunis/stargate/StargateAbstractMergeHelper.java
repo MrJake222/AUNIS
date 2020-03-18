@@ -12,7 +12,7 @@ import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
-import net.minecraft.block.state.pattern.BlockMatcher;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -40,9 +40,16 @@ public abstract class StargateAbstractMergeHelper {
 	public abstract AunisAxisAlignedBB getBaseSearchBox();
 	
 	/**
-	 * @return {@link BlockMatcher} for the base block.
+	 * @param state State of the block for the check.
+	 * @return True if the {@link IBlockState} represents the Base block, false otherwise.
 	 */
-	public abstract BlockMatcher getBaseMatcher();
+	public abstract boolean matchBase(IBlockState state);
+	
+	/**
+	 * @param state State of the block for the check.
+	 * @return True if the {@link IBlockState} represents the Member block, false otherwise.
+	 */
+	public abstract boolean matchMember(IBlockState state);
 	
 	/**
 	 * Method searches for a {@link StargateMilkyWayBaseBlock} within {@link this#BASE_SEARCH_BOX}
@@ -58,7 +65,7 @@ public abstract class StargateAbstractMergeHelper {
 		AunisAxisAlignedBB globalBox = getBaseSearchBox().rotate(facing).offset(memberPos);
 		
 		for (MutableBlockPos pos : BlockPos.getAllInBoxMutable(globalBox.getMinBlockPos(), globalBox.getMaxBlockPos())) {
-			if (getBaseMatcher().apply(blockAccess.getBlockState(pos))) {
+			if (matchBase(blockAccess.getBlockState(pos))) {
 				return (StargateAbstractBaseTile) blockAccess.getTileEntity(pos.toImmutable());
 			}
 		}
