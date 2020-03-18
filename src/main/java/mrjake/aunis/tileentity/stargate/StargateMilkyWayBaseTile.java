@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity.stargate;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -11,7 +12,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
-import mrjake.aunis.gui.StargateMilkyWayGui;
+import mrjake.aunis.gui.container.StargateContainerGuiState;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -30,7 +31,6 @@ import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
 import mrjake.aunis.stargate.StargateSpinHelper;
-import mrjake.aunis.state.StargateMilkyWayGuiState;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.StargateSpinState;
@@ -48,7 +48,6 @@ import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.ILinkable;
 import mrjake.aunis.util.LinkingHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -56,6 +55,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.Optional;
@@ -269,6 +269,8 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		compound.setInteger("targetRingSymbol", targetRingSymbol.id);
 		compound.setInteger("spinDirection", spinDirection.id);
 		
+		compound.setTag("itemHandler", itemStackHandler.serializeNBT());
+		
 		return super.writeToNBT(compound);
 	}
 	
@@ -305,6 +307,8 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		currentRingSymbol = EnumSymbol.valueOf(compound.getInteger("currentRingSymbol"));
 		targetRingSymbol = EnumSymbol.valueOf(compound.getInteger("targetRingSymbol"));
 		spinDirection = EnumSpinDirection.valueOf(compound.getInteger("spinDirection"));
+	
+		itemStackHandler.deserializeNBT(compound.getCompoundTag("itemHandler"));
 		
 		super.readFromNBT(compound);
 	}
@@ -473,10 +477,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 		switch (stateType) {		
 			case UPGRADE_RENDERER_STATE:
 				return getUpgradeRendererState();
-				
-			case GUI_STATE:
-				return new StargateMilkyWayGuiState(gateAddress, hasUpgrade, energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored(), energyTransferedLastTick, energySecondsToClose);
-				
+								
 			case ENERGY_STATE:
 				return new UniversalEnergyState(energyStorage.getEnergyStored(), energyTransferedLastTick);
 				
@@ -492,7 +493,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				return new UpgradeRendererState();
 		
 			case GUI_STATE:
-				return new StargateMilkyWayGuiState();
+				return new StargateContainerGuiState();
 				
 			case ENERGY_STATE:
 				return new UniversalEnergyState();
@@ -504,9 +505,7 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				return super.createState(stateType);
 		}
 	}
-	
-	private StargateMilkyWayGui stargateGui;
-	
+		
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void setState(StateTypeEnum stateType, State state) {		
@@ -561,23 +560,33 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				break;
 		
 			case GUI_STATE:
-				if (stargateGui == null || !stargateGui.isOpen) {
-					stargateGui = new StargateMilkyWayGui(pos, (StargateMilkyWayGuiState) state);
-					Minecraft.getMinecraft().displayGuiScreen(stargateGui);
-				}
+				StargateContainerGuiState guiState = (StargateContainerGuiState) state;
 				
-				else {
-					stargateGui.state = (StargateMilkyWayGuiState) state;
-				}
+				gateAddress = guiState.getGateAddress();
+				hasUpgrade = guiState.hasUpgrade();
+				
+				Aunis.info(this + ": Setting address to " + gateAddress);
 				
 				break;
 				
-			case ENERGY_STATE:
-				if (stargateGui != null && stargateGui.isOpen) {
-					stargateGui.state.energy = ((UniversalEnergyState) state).energy;
-				}
-				
-				break;
+//			case GUI_STATE:
+//				if (stargateGui == null || !stargateGui.isOpen) {
+//					stargateGui = new StargateMilkyWayGui(pos, (StargateMilkyWayGuiState) state);
+//					Minecraft.getMinecraft().displayGuiScreen(stargateGui);
+//				}
+//				
+//				else {
+//					stargateGui.state = (StargateMilkyWayGuiState) state;
+//				}
+//				
+//				break;
+//				
+//			case ENERGY_STATE:
+//				if (stargateGui != null && stargateGui.isOpen) {
+//					stargateGui.state.energy = ((UniversalEnergyState) state).energy;
+//				}
+//				
+//				break;
 				
 			case SPIN_STATE:
 				StargateSpinState spinState = (StargateSpinState) state;
@@ -697,6 +706,92 @@ public class StargateMilkyWayBaseTile extends StargateAbstractBaseTile implement
 				super.executeTask(scheduledTask, customData);
 		}
 	}
+	
+	
+	// -----------------------------------------------------------------------------
+	// Item handler
+	
+	public static final List<Item> SUPPORTED_UPGRADES = Arrays.asList(
+			AunisItems.crystalGlyphStargate);
+	
+	private ItemStackHandler itemStackHandler = new ItemStackHandler(10) {
+		
+		@Override
+		public boolean isItemValid(int slot, ItemStack stack) {
+			Item item = stack.getItem();
+			
+			switch (slot) {
+				case 0:				
+				case 1:
+				case 2:
+				case 3:
+					return SUPPORTED_UPGRADES.contains(item);
+					
+				case 4:
+				case 5:
+				case 6:
+					return true;
+					
+				case 7:
+				case 8:
+				case 9:
+					return item == AunisItems.pageNotebookItem;
+					
+				default:
+					return true;
+			}
+		}
+		
+		@Override
+		protected int getStackLimit(int slot, ItemStack stack) {
+			return 1;
+		}
+		
+		@Override
+		protected void onContentsChanged(int slot) {
+			super.onContentsChanged(slot);
+			
+			markDirty();
+		}
+	};
+	
+	public static enum StargateUpgradeEnum {
+		CHEVRON_UPGRADE(AunisItems.crystalGlyphStargate);
+		
+		public Item item;
+
+		private StargateUpgradeEnum(Item item) {
+			this.item = item;
+			
+		}
+	}
+	
+	public boolean isUpgradeInstalled(DHDUpgradeEnum upgrade) {
+		for (int slot=0; slot<4; slot++) {
+			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade.item)
+				return true;
+		}
+		
+		return false;
+	}
+	
+	
+	// -----------------------------------------------------------------------------
+	// Capabilities
+	
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
+				|| super.hasCapability(capability, facing);
+	}
+	
+	@Override
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
+		
+		return super.getCapability(capability, facing);	
+	}	
 	
 	
 	// -----------------------------------------------------------------

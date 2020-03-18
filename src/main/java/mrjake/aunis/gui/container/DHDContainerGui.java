@@ -1,4 +1,4 @@
-package mrjake.aunis.gui;
+package mrjake.aunis.gui.container;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ import net.minecraftforge.fluids.FluidStack;
 
 public class DHDContainerGui extends GuiContainer {
 
-	private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/gui/dhd_container.png");
+	private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/gui/container_dhd.png");
 	
 	private DHDContainer container;
 	private FluidTankElement tank;
@@ -37,6 +37,9 @@ public class DHDContainerGui extends GuiContainer {
 	
 	public DHDContainerGui(DHDContainer container) {
 		super(container);
+		
+		this.xSize = 176;
+		this.ySize = 168;
 				
 		this.container = container;
 		container.tankNaquadah.setFluid(new FluidStack(AunisFluids.moltenNaquadahRefined, 0));
@@ -137,9 +140,9 @@ public class DHDContainerGui extends GuiContainer {
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		String fusion = I18n.format("gui.dhd.fusion");
-		fontRenderer.drawString(fusion, 168-fontRenderer.getStringWidth(fusion)+1, 6, 4210752);
-		fontRenderer.drawString(I18n.format("gui.dhd.upgrades"), 8, 6, 4210752);
-        fontRenderer.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 4, 4210752);
+		fontRenderer.drawString(fusion, 168-fontRenderer.getStringWidth(fusion)+2, 6, 4210752);
+		fontRenderer.drawString(I18n.format("gui.upgrades"), 7, 6, 4210752);
+        fontRenderer.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
         
         tank.renderTank();
         

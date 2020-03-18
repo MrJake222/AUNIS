@@ -1,17 +1,17 @@
-package mrjake.aunis.gui;
+package mrjake.aunis.gui.container;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.state.State;
 import mrjake.aunis.tileentity.util.ReactorStateEnum;
 
-public class DHDContainerGuiState extends State {
-	public DHDContainerGuiState() {}
+public class DHDContainerGuiUpdate extends State {
+	public DHDContainerGuiUpdate() {}
 	
 	public int fluidAmount;
 	public int tankCapacity;
 	public ReactorStateEnum reactorState;
 	
-	public DHDContainerGuiState(int fluidAmount, int tankCapacity, ReactorStateEnum reactorState) {
+	public DHDContainerGuiUpdate(int fluidAmount, int tankCapacity, ReactorStateEnum reactorState) {
 		this.fluidAmount = fluidAmount;
 		this.tankCapacity = tankCapacity;
 		this.reactorState = reactorState;

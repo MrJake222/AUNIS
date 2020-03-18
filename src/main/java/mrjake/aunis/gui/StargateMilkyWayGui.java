@@ -1,10 +1,10 @@
 package mrjake.aunis.gui;
 
+import mrjake.aunis.gui.container.StargateContainerGuiState;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.state.StargateMilkyWayGuiState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 public class StargateMilkyWayGui extends GuiBase {
 		
 	private BlockPos pos;
-	public StargateMilkyWayGuiState state;
+	public StargateContainerGuiState state;
 	
 	private final static int sectionSize = 90;
 	private final static int frameThickness = 8;
@@ -29,7 +29,7 @@ public class StargateMilkyWayGui extends GuiBase {
 		return bgWidth + 2*frameThickness;
 	}
 	
-	public StargateMilkyWayGui(BlockPos pos, StargateMilkyWayGuiState state) {
+	public StargateMilkyWayGui(BlockPos pos, StargateContainerGuiState state) {
 		super(0, imageHeight, frameThickness, FRAME_COLOR, BG_COLOR, TEXT_COLOR, 0);
 		
 		sections = state.hasUpgrade() ? 7 : 6;

@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum GuiIdEnum {
-	DHD_GUI(0);
+	GUI_DHD(0),
+	GUI_STARGATE(1);
 	
 	public int id;
 	

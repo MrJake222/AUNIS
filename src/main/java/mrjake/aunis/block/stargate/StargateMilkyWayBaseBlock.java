@@ -2,14 +2,11 @@ package mrjake.aunis.block.stargate;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
-import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import mrjake.aunis.upgrade.UpgradeHelper;
+import mrjake.aunis.util.ItemHandlerHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -17,10 +14,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -28,6 +22,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 public class StargateMilkyWayBaseBlock extends Block {
 
@@ -94,6 +90,8 @@ public class StargateMilkyWayBaseBlock extends Block {
 						
 		if (!world.isRemote) {
 			gateTile.onBlockBroken();
+			
+			ItemHandlerHelper.dropInventoryItems(world, pos, gateTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
 		}
 		
 		super.breakBlock(world, pos, state);
@@ -101,51 +99,60 @@ public class StargateMilkyWayBaseBlock extends Block {
 	
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
-		ItemStack heldItem = player.getHeldItem(hand);
+//		StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
+//		ItemStack heldItem = player.getHeldItem(hand);
+		
+		if (!player.isSneaking()) {
+			if (!FluidUtil.interactWithFluidHandler(player, hand, world, pos, null))
+				player.openGui(Aunis.instance, GuiIdEnum.GUI_STARGATE.id, world, pos.getX(), pos.getY(), pos.getZ());
+			
+			return true;
+		}
+		
+		return false;
 		
 		// Server side
-		if (!world.isRemote) {			
-			if (heldItem.getItem() == AunisItems.analyzerAncient) {
-				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(gateTile.getPos(), StateTypeEnum.GUI_STATE, gateTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
-								
-				return true;
-			}
-			
-			else if (heldItem.getItem() == AunisItems.dialerFast) {				
-				NBTTagCompound compound = heldItem.getTagCompound();
-				if (compound == null) 
-					compound = new NBTTagCompound();
-				
-				byte[] symbols = new byte[gateTile.gateAddress.size()];
-				
-				for (int i=0; i<gateTile.gateAddress.size(); i++)
-					symbols[i] = (byte) gateTile.gateAddress.get(i).id;
-				
-				compound.setByteArray("address", symbols);
-				
-				heldItem.setTagCompound(compound);
-				
-				return true;
-			}
-			
-			else if (!state.getValue(AunisProps.RENDER_BLOCK) && hand == EnumHand.MAIN_HAND) {
-				return UpgradeHelper.upgradeInteract((EntityPlayerMP) player, gateTile, heldItem);
-			}
-			
-			return false;
-		}
-		
-		// Client side
-		else {
-			// Aunis.info("horizontalRotation: " + gateTile.getRenderer().byHorizontalIndexRotation());
-			
-			return  heldItem.getItem() == AunisItems.analyzerAncient ||
-					heldItem.getItem() == AunisItems.dialerFast || 
-					heldItem.getItem() == AunisItems.crystalGlyphStargate || 
-					heldItem.getItem() == AunisItems.pageNotebookItem || 
-					heldItem.getItem() == Items.AIR;
-		}
+//		if (!world.isRemote) {			
+//			if (heldItem.getItem() == AunisItems.analyzerAncient) {
+//				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(gateTile.getPos(), StateTypeEnum.GUI_STATE, gateTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
+//								
+//				return true;
+//			}
+//			
+//			else if (heldItem.getItem() == AunisItems.dialerFast) {				
+//				NBTTagCompound compound = heldItem.getTagCompound();
+//				if (compound == null) 
+//					compound = new NBTTagCompound();
+//				
+//				byte[] symbols = new byte[gateTile.gateAddress.size()];
+//				
+//				for (int i=0; i<gateTile.gateAddress.size(); i++)
+//					symbols[i] = (byte) gateTile.gateAddress.get(i).id;
+//				
+//				compound.setByteArray("address", symbols);
+//				
+//				heldItem.setTagCompound(compound);
+//				
+//				return true;
+//			}
+//			
+//			else if (!state.getValue(AunisProps.RENDER_BLOCK) && hand == EnumHand.MAIN_HAND) {
+//				return UpgradeHelper.upgradeInteract((EntityPlayerMP) player, gateTile, heldItem);
+//			}
+//			
+//			return false;
+//		}
+//		
+//		// Client side
+//		else {
+//			// Aunis.info("horizontalRotation: " + gateTile.getRenderer().byHorizontalIndexRotation());
+//			
+//			return  heldItem.getItem() == AunisItems.analyzerAncient ||
+//					heldItem.getItem() == AunisItems.dialerFast || 
+//					heldItem.getItem() == AunisItems.crystalGlyphStargate || 
+//					heldItem.getItem() == AunisItems.pageNotebookItem || 
+//					heldItem.getItem() == Items.AIR;
+//		}
 	}
 	
 	// ------------------------------------------------------------------------

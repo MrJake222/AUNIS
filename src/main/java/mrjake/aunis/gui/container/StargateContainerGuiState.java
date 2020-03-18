@@ -1,13 +1,14 @@
-package mrjake.aunis.state;
+package mrjake.aunis.gui.container;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.state.StargateAbstractGuiState;
 
-public class StargateMilkyWayGuiState extends StargateAbstractGuiState {
-	public StargateMilkyWayGuiState() {}
+public class StargateContainerGuiState extends StargateAbstractGuiState {
+	public StargateContainerGuiState() {}
 	
 	private List<EnumSymbol> gateAddress;
 	public List<EnumSymbol> getGateAddress() { return gateAddress; }
@@ -15,7 +16,7 @@ public class StargateMilkyWayGuiState extends StargateAbstractGuiState {
 	private boolean hasUpgrade;
 	public boolean hasUpgrade() { return hasUpgrade; }
 	
-	public StargateMilkyWayGuiState(List<EnumSymbol> gateAddress, boolean hasUpgrade, int energy, int maxEnergy, int transferedLastTick, float secondsToClose) {
+	public StargateContainerGuiState(List<EnumSymbol> gateAddress, boolean hasUpgrade, int energy, int maxEnergy, int transferedLastTick, float secondsToClose) {
 		super(energy, maxEnergy, transferedLastTick, secondsToClose);
 		
 		this.gateAddress = gateAddress;

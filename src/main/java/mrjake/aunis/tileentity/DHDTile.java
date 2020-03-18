@@ -7,7 +7,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.fluid.AunisFluids;
-import mrjake.aunis.gui.DHDContainerGuiState;
+import mrjake.aunis.gui.container.DHDContainerGuiUpdate;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -206,8 +206,8 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			case DHD_ACTIVATE_BUTTON:
 				return new DHDActivateButtonState();
 				
-			case GUI_STATE:
-				return new DHDContainerGuiState();
+			case GUI_UPDATE:
+				return new DHDContainerGuiUpdate();
 				
 			default:
 				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
@@ -233,8 +233,8 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 				
 				break;
 				
-			case GUI_STATE:
-				DHDContainerGuiState guiState = (DHDContainerGuiState) state;
+			case GUI_UPDATE:
+				DHDContainerGuiUpdate guiState = (DHDContainerGuiUpdate) state;
 				
 				fluidHandler.setFluid(new FluidStack(AunisFluids.moltenNaquadahRefined, guiState.fluidAmount));
 				fluidHandler.setCapacity(guiState.tankCapacity);
@@ -309,7 +309,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	}
 	
 	// -----------------------------------------------------------------------------
-	// Item handler
+	// Fluid handler
 	
 	private FluidTank fluidHandler = new FluidTank(new FluidStack(AunisFluids.moltenNaquadahRefined, 0), AunisConfig.dhdConfig.fluidCapacity) {
 		

@@ -1,6 +1,8 @@
 package mrjake.aunis.gui.element;
 
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -41,4 +43,14 @@ public class GuiHelper {
 	public static boolean isPointInRegion(int rectX, int rectY, int rectWidth, int rectHeight, int pointX, int pointY) {
         return pointX >= rectX - 1 && pointX < rectX + rectWidth + 1 && pointY >= rectY - 1 && pointY < rectY + rectHeight + 1;
     }
+	
+	public static void drawTexturedRectWithShadow(int x, int y, int xOffset, int yOffset, int size) {		
+		GlStateManager.enableBlend();
+		GlStateManager.color(1,1,1, 1);
+		Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, size, size, size, size);
+		
+		GlStateManager.color(1,1,1, 0.2f);
+		Gui.drawModalRectWithCustomSizedTexture(x+xOffset, y+yOffset, 0, 0, size, size, size, size);
+		GlStateManager.disableBlend();
+	}
 }

@@ -115,12 +115,26 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 	private void renderSymbol(int col, float row, EnumSymbol symbol) {
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableBlend();
+		GlStateManager.color(1, 1, 1, 0.8f);
 		
 		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("aunis:textures/gui/symbol/" + symbol.iconFile));		
 		GL11.glBegin(GL11.GL_QUADS);
 		
 		float offx = 0.21f*col;
 		float offy = 0.2f*row;
+		
+		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(0.04f + offx, 0.79f - offy, 0.001f);
+		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(0.24f + offx, 0.79f - offy, 0.001f);
+		GL11.glTexCoord2f(0, 0); GL11.glVertex3f(0.24f + offx, 0.99f - offy, 0.001f);
+		GL11.glTexCoord2f(1, 0); GL11.glVertex3f(0.04f + offx, 0.99f - offy, 0.001f);
+		
+	    GL11.glEnd();
+	    
+ 		GlStateManager.color(1, 1, 1, 0.2f);
+	    GL11.glBegin(GL11.GL_QUADS);
+		
+		offx += 0.01f;
+		offy += 0.01f;
 		
 		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(0.04f + offx, 0.79f - offy, 0.001f);
 		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(0.24f + offx, 0.79f - offy, 0.001f);

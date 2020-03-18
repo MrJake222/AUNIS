@@ -137,7 +137,8 @@ glyph.aunis.bright_red_button=Bright Red Button
 
 
 
-gui.dhd.upgrades=Upgrades
+gui.upgrades=Upgrades
+
 gui.dhd.fusion=Cold fusion
 gui.dhd.crystalStatus=Control crystal:
 gui.dhd.no_crystal=Missing
@@ -149,3 +150,6 @@ gui.dhd.reactorStatus=Cold fusion reactor:
 gui.dhd.running=Running
 gui.dhd.standby=Stand-by
 gui.dhd.no_fuel=No fuel
+
+gui.stargate.milky_way_address=Milky Way address
+gui.stargate.capacitors=Capacitors

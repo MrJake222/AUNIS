@@ -100,7 +100,7 @@ public class DHDBlock extends Block {
 		
 		if (facing == dhdFacingOpposite && !player.isSneaking()) {
 			if (!FluidUtil.interactWithFluidHandler(player, hand, world, pos, null))
-				player.openGui(Aunis.instance, GuiIdEnum.DHD_GUI.id, world, pos.getX(), pos.getY(), pos.getZ());
+				player.openGui(Aunis.instance, GuiIdEnum.GUI_DHD.id, world, pos.getX(), pos.getY(), pos.getZ());
 			
 			return true;
 		}

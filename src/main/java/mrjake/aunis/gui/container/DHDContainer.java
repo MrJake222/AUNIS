@@ -1,5 +1,6 @@
-package mrjake.aunis.gui;
+package mrjake.aunis.gui.container;
 
+import mrjake.aunis.gui.util.ContainerHelper;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -46,22 +47,9 @@ public class DHDContainer extends Container {
 				addSlotToContainer(new SlotItemHandler(itemHandler, row*2+col+1, 9+18*col, 18+18*row));
 			}
 		}
-				
-		addPlayerSlots(playerInventory);
-	}
-	
-	private void addPlayerSlots(IInventory playerInventory) {		
-		addSlotRow(playerInventory, 0, 8, 18, 144);
-				
-		for (int row=0; row<3; row++) {
-			addSlotRow(playerInventory, 9*(row+1), 8, 18, 86 + 18*row);
-		}
-	}
-	
-	private void addSlotRow(IInventory playerInventory, int firstIndex, int xStart, int xOffset, int y) {		
-		for (int col=0; col<9; col++) {
-			addSlotToContainer(new Slot(playerInventory, firstIndex+col, 18*col + 8, y));
-		}
+		
+		for (Slot slot : ContainerHelper.generatePlayerSlots(playerInventory, 86))
+			addSlotToContainer(slot);
 	}
 	
 	@Override
@@ -116,7 +104,7 @@ public class DHDContainer extends Container {
 		if (tankLastAmount != tankNaquadah.getFluidAmount() || lastReactorState != dhdTile.getReactorState()) {			
 			for (IContainerListener listener : listeners) {
 				if (listener instanceof EntityPlayerMP) {
-					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_STATE, new DHDContainerGuiState(tankNaquadah.getFluidAmount(), tankNaquadah.getCapacity(), dhdTile.getReactorState())), (EntityPlayerMP) listener);
+					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_UPDATE, new DHDContainerGuiUpdate(tankNaquadah.getFluidAmount(), tankNaquadah.getCapacity(), dhdTile.getReactorState())), (EntityPlayerMP) listener);
 				}
 			}
 			
