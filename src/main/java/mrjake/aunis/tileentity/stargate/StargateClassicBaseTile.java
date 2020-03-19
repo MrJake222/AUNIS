@@ -19,6 +19,8 @@ import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.DHDTile.DHDUpgradeEnum;
 import mrjake.aunis.tileentity.util.ScheduledTask;
+import mrjake.aunis.util.EnumKeyInterface;
+import mrjake.aunis.util.EnumKeyMap;
 import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.ItemHandlerHelper;
 import net.minecraft.item.Item;
@@ -249,9 +251,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	// -----------------------------------------------------------------------------
 	// Item handler
 	
-	public static final List<Item> SUPPORTED_UPGRADES = Arrays.asList(
-			AunisItems.crystalGlyphStargate);
-	
 	private ItemStackHandler itemStackHandler = new ItemStackHandler(10) {
 		
 		@Override
@@ -263,7 +262,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				case 1:
 				case 2:
 				case 3:
-					return SUPPORTED_UPGRADES.contains(item);
+					return StargateUpgradeEnum.contains(item);
 					
 				case 4:
 				case 5:
@@ -293,18 +292,35 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		}
 	};
 	
-	public static enum StargateUpgradeEnum {
+	public static enum StargateUpgradeEnum implements EnumKeyInterface<Item> {
+		MILKYWAY_GLYPHS(AunisItems.crystalGlyphMilkyWay),
+		PEGASUS_GLYPHS(AunisItems.crystalGlyphPegasus),
+		UNIVERSE_GLYPHS(AunisItems.crystalGlyphUniverse),
 		CHEVRON_UPGRADE(AunisItems.crystalGlyphStargate);
 		
 		public Item item;
 
 		private StargateUpgradeEnum(Item item) {
 			this.item = item;
-			
+		}
+		
+		@Override
+		public Item getKey() {
+			return item;
+		}
+		
+		private static EnumKeyMap<Item, StargateUpgradeEnum> idMap = new EnumKeyMap<Item, StargateClassicBaseTile.StargateUpgradeEnum>(values());
+		
+		public static StargateUpgradeEnum valueOf(Item item) {
+			return idMap.valueOf(item);
+		}
+		
+		public static boolean contains(Item item) {
+			return idMap.contains(item);
 		}
 	}
 	
-	public boolean isUpgradeInstalled(DHDUpgradeEnum upgrade) {
+	public boolean hasUpgradeInstalled(StargateUpgradeEnum upgrade) {
 		for (int slot=0; slot<4; slot++) {
 			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade.item)
 				return true;

@@ -26,6 +26,9 @@ public class AunisItems {
 	public static Item crystalGlyphDhd = ItemHelper.createGenericItem("crystal_glyph_dhd");
 //	public static Item crystalGlyphEmpty = ItemHelper.createGenericItem("crystal_glyph_empty");
 	public static Item crystalGlyphStargate = ItemHelper.createGenericItem("crystal_glyph_stargate");
+	public static Item crystalGlyphMilkyWay = ItemHelper.createGenericItem("crystal_glyph_milkyway");
+	public static Item crystalGlyphPegasus = ItemHelper.createGenericItem("crystal_glyph_pegasus");
+	public static Item crystalGlyphUniverse = ItemHelper.createGenericItem("crystal_glyph_universe");
 	
 	/**
 	 * Used for fast dialing the gate
@@ -69,6 +72,9 @@ public class AunisItems {
 		
 		crystalGlyphDhd,
 		crystalGlyphStargate,
+		crystalGlyphMilkyWay,
+		crystalGlyphPegasus,
+		crystalGlyphUniverse,
 		
 		dialerFast,
 		

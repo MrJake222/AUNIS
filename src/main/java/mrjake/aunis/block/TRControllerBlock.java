@@ -95,7 +95,7 @@ public class TRControllerBlock extends Block {
 		TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {			
-			BlockPos closestRings = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.transportRingsBlock);
+			BlockPos closestRings = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.TRANSPORT_RINGS_BLOCK);
 			
 			if (closestRings != null) {
 				TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(closestRings);

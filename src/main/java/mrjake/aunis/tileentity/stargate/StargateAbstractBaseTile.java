@@ -904,7 +904,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				break;
 				
 			case STARGATE_HORIZON_LIGHT_BLOCK:
-				world.setBlockState(getGateCenterPos(), AunisBlocks.invisibleBlock.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false));
+				world.setBlockState(getGateCenterPos(), AunisBlocks.INVISIBLE_BLOCK.getDefaultState().withProperty(AunisProps.HAS_COLLISIONS, false));
 				
 				break;
 				

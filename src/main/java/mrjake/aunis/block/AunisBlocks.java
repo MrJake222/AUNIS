@@ -35,38 +35,41 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 @EventBusSubscriber
 public class AunisBlocks {
-	public static NaquadahOreBlock naquadahOreBlock = new NaquadahOreBlock();
-	public static Block naquadahBlock = new Block(Material.IRON).setRegistryName(Aunis.ModID, "naquadah_block").setTranslationKey(Aunis.ModID + ".naquadah_block");
+	public static final NaquadahOreBlock ORE_NAQUADAH_BLOCK = new NaquadahOreBlock();
+	public static final Block NAQUADAH_BLOCK = new Block(Material.IRON).setRegistryName(Aunis.ModID, "naquadah_block").setTranslationKey(Aunis.ModID + ".naquadah_block");
 	
-	public static StargateMilkyWayBaseBlock stargateMilkyWayBaseBlock = new StargateMilkyWayBaseBlock();	
-	public static StargateOrlinBaseBlock stargateOrlinBaseBlock = new StargateOrlinBaseBlock();	
-	public static StargateOrlinMemberBlock stargateOrlinMemberBlock = new StargateOrlinMemberBlock();	
+	public static final StargateMilkyWayBaseBlock STARGATE_MILKY_WAY_BASE_BLOCK = new StargateMilkyWayBaseBlock();	
+	public static final StargateOrlinBaseBlock STARGATE_ORLIN_BASE_BLOCK = new StargateOrlinBaseBlock();	
+	public static final StargateOrlinMemberBlock STARGATE_ORLIN_MEMBER_BLOCK = new StargateOrlinMemberBlock();	
 	
-	public static DHDBlock dhdBlock = new DHDBlock();
-	public static CrystalInfuserBlock crystalInfuserBlock = new CrystalInfuserBlock();
+	public static final DHDBlock DHD_BLOCK = new DHDBlock();
+	public static final CrystalInfuserBlock CRYSTAL_INFUSER_BLOCK = new CrystalInfuserBlock();
 	
-	public static TransportRingsBlock transportRingsBlock = new TransportRingsBlock();
-	public static TRControllerBlock trControllerBlock = new TRControllerBlock();
-	public static InvisibleBlock invisibleBlock = new InvisibleBlock();	
+	public static final TransportRingsBlock TRANSPORT_RINGS_BLOCK = new TransportRingsBlock();
+	public static final TRControllerBlock TR_CONTROLLER_BLOCK = new TRControllerBlock();
+	public static final InvisibleBlock INVISIBLE_BLOCK = new InvisibleBlock();	
+	
+	public static final CapacitorBlock CAPACITOR_BLOCK = new CapacitorBlock();
 	
 	// -----------------------------------------------------------------------------
 	public static StargateMilkyWayMemberBlock stargateMilkyWayMemberBlock = new StargateMilkyWayMemberBlock();
 	
 	
 	private static Block[] blocks = {
-		naquadahOreBlock,
-		naquadahBlock,
+		ORE_NAQUADAH_BLOCK,
+		NAQUADAH_BLOCK,
 		
-		stargateMilkyWayBaseBlock,
-		stargateOrlinBaseBlock,
-		stargateOrlinMemberBlock,
+		STARGATE_MILKY_WAY_BASE_BLOCK,
+		STARGATE_ORLIN_BASE_BLOCK,
+		STARGATE_ORLIN_MEMBER_BLOCK,
 		
-		dhdBlock,
-		crystalInfuserBlock,
+		DHD_BLOCK,
+		CRYSTAL_INFUSER_BLOCK,
 		
-		transportRingsBlock,
-		trControllerBlock,
-		invisibleBlock
+		TRANSPORT_RINGS_BLOCK,
+		TR_CONTROLLER_BLOCK,
+		INVISIBLE_BLOCK,
+		CAPACITOR_BLOCK
 	};
 		
 	@SubscribeEvent
@@ -76,15 +79,15 @@ public class AunisBlocks {
 		registry.registerAll(blocks);
 		registry.register(stargateMilkyWayMemberBlock);
 		
-		GameRegistry.registerTileEntity(StargateMilkyWayBaseTile.class, AunisBlocks.stargateMilkyWayBaseBlock.getRegistryName());
-		GameRegistry.registerTileEntity(StargateOrlinBaseTile.class, AunisBlocks.stargateOrlinBaseBlock.getRegistryName());
+		GameRegistry.registerTileEntity(StargateMilkyWayBaseTile.class, AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(StargateOrlinBaseTile.class, AunisBlocks.STARGATE_ORLIN_BASE_BLOCK.getRegistryName());
 		
 		GameRegistry.registerTileEntity(StargateMilkyWayMemberTile.class, AunisBlocks.stargateMilkyWayMemberBlock.getRegistryName());
-		GameRegistry.registerTileEntity(StargateOrlinMemberTile.class, AunisBlocks.stargateOrlinMemberBlock.getRegistryName());
-		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.dhdBlock.getRegistryName());
-		GameRegistry.registerTileEntity(CrystalInfuserTile.class, AunisBlocks.crystalInfuserBlock.getRegistryName());
-		GameRegistry.registerTileEntity(TransportRingsTile.class, AunisBlocks.transportRingsBlock.getRegistryName());
-		GameRegistry.registerTileEntity(TRControllerTile.class, AunisBlocks.trControllerBlock.getRegistryName());
+		GameRegistry.registerTileEntity(StargateOrlinMemberTile.class, AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.DHD_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(CrystalInfuserTile.class, AunisBlocks.CRYSTAL_INFUSER_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(TransportRingsTile.class, AunisBlocks.TRANSPORT_RINGS_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(TRControllerTile.class, AunisBlocks.TR_CONTROLLER_BLOCK.getRegistryName());
 	}
 	
 	@SubscribeEvent
@@ -114,16 +117,16 @@ public class AunisBlocks {
 	public static Block remapBlock(String oldBlockName) {
 		switch (oldBlockName) {
 			case "aunis:stargatebase_block":
-				return stargateMilkyWayBaseBlock;
+				return STARGATE_MILKY_WAY_BASE_BLOCK;
 				
 			case "aunis:stargate_member_block":
 				return stargateMilkyWayMemberBlock;
 				
 			case "aunis:stargatebase_orlin_block":
-				return stargateOrlinBaseBlock;
+				return STARGATE_ORLIN_BASE_BLOCK;
 				
 			case "aunis:stargatemember_orlin_block":
-				return stargateOrlinMemberBlock;
+				return STARGATE_ORLIN_MEMBER_BLOCK;
 				
 			default:
 				return null;
@@ -145,7 +148,7 @@ public class AunisBlocks {
 		for (Mapping<Item> mapping : event.getMappings()) {
 			switch (mapping.key.toString()) {
 				case "aunis:stargatebase_block":
-					mapping.remap(ItemBlock.getItemFromBlock(stargateMilkyWayBaseBlock));
+					mapping.remap(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_BASE_BLOCK));
 					break;
 				
 				case "aunis:stargate_member_block":
@@ -153,11 +156,11 @@ public class AunisBlocks {
 					break;
 					
 				case "aunis:stargatebase_orlin_block":
-					mapping.remap(ItemBlock.getItemFromBlock(stargateOrlinBaseBlock));
+					mapping.remap(ItemBlock.getItemFromBlock(STARGATE_ORLIN_BASE_BLOCK));
 					break;
 					
 				case "aunis:stargatemember_orlin_block":
-					mapping.remap(ItemBlock.getItemFromBlock(stargateOrlinMemberBlock));
+					mapping.remap(ItemBlock.getItemFromBlock(STARGATE_ORLIN_MEMBER_BLOCK));
 					break;
 			}
 		}

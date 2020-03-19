@@ -21,7 +21,7 @@ public class DHDContainerGuiUpdate extends State {
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(fluidAmount);
 		buf.writeInt(tankCapacity);
-		buf.writeShort(reactorState.getId());
+		buf.writeShort(reactorState.getKey());
 	}
 
 	@Override

@@ -30,8 +30,7 @@ public class StargateContainerGuiState extends StargateAbstractGuiState {
 		buf.writeLong(EnumSymbol.toLong(gateAddress));
 		
 		buf.writeBoolean(hasUpgrade);
-		if (hasUpgrade)
-			buf.writeInt(gateAddress.get(6).id);
+		buf.writeInt(gateAddress.get(6).id);
 		
 		buf.writeInt(maxEnergy);
 	}
@@ -46,10 +45,7 @@ public class StargateContainerGuiState extends StargateAbstractGuiState {
 			gateAddress.add(EnumSymbol.valueOf(id));
 		}
 		
-		hasUpgrade = buf.readBoolean();
-		
-		if (hasUpgrade)
-			gateAddress.add(EnumSymbol.valueOf(buf.readInt()));
+		gateAddress.add(EnumSymbol.valueOf(buf.readInt()));
 		
 		maxEnergy = buf.readInt();
 	}

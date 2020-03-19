@@ -1,6 +1,9 @@
 package mrjake.aunis.tileentity.util;
 
-public enum ReactorStateEnum implements EnumIdInterface {
+import mrjake.aunis.util.EnumKeyMap;
+import mrjake.aunis.util.EnumKeyInterface;
+
+public enum ReactorStateEnum implements EnumKeyInterface<Integer> {
 	ONLINE(0),
 	NOT_LINKED(1),
 	NO_FUEL(2),
@@ -13,11 +16,11 @@ public enum ReactorStateEnum implements EnumIdInterface {
 	}
 	
 	@Override
-	public int getId() {
+	public Integer getKey() {
 		return id;
 	}
 	
-	private static EnumIdMap<ReactorStateEnum> enumIdMap = new EnumIdMap<ReactorStateEnum>(values());
+	private static EnumKeyMap<Integer, ReactorStateEnum> enumIdMap = new EnumKeyMap<Integer, ReactorStateEnum>(values());
 	
 	public static ReactorStateEnum valueOf(int id) {
 		return enumIdMap.valueOf(id);

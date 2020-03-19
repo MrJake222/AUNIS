@@ -45,7 +45,7 @@ public class StargateOrlinRenderer extends StargateAbstractRenderer {
 		Map<BlockPos, IBlockState> map = new HashMap<BlockPos, IBlockState>();
 		
 		for (BlockPos pos : StargateOrlinMergeHelper.INSTANCE.getRingBlocks())
-			map.put(pos, AunisBlocks.stargateOrlinMemberBlock.getDefaultState().withProperty(AunisProps.ORLIN_VARIANT, facing));
+			map.put(pos, AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK.getDefaultState().withProperty(AunisProps.ORLIN_VARIANT, facing));
 		
 		return map;
 	}

@@ -281,7 +281,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	}
 	
 	private void setBarrierBlocks(boolean set, boolean passable) {
-		IBlockState invBlockState = AunisBlocks.invisibleBlock.getDefaultState();
+		IBlockState invBlockState = AunisBlocks.INVISIBLE_BLOCK.getDefaultState();
 		
 		if (passable)
 			invBlockState = invBlockState.withProperty(AunisProps.HAS_COLLISIONS, false);
@@ -294,7 +294,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 					if (set)
 						world.setBlockState(newPos, invBlockState, 3);
 					else {
-						if (world.getBlockState(newPos).getBlock() == AunisBlocks.invisibleBlock)
+						if (world.getBlockState(newPos).getBlock() == AunisBlocks.INVISIBLE_BLOCK)
 							world.setBlockToAir(newPos);
 					}
 				}
@@ -394,7 +394,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
 		
 		for (BlockPos newRingsPos : BlockPos.getAllInBoxMutable(new BlockPos(x-radius, y-vertical, z-radius), new BlockPos(x+radius, y+vertical, z+radius))) {
-			if (world.getBlockState(newRingsPos).getBlock() == AunisBlocks.transportRingsBlock && !pos.equals(newRingsPos)) {
+			if (world.getBlockState(newRingsPos).getBlock() == AunisBlocks.TRANSPORT_RINGS_BLOCK && !pos.equals(newRingsPos)) {
 				
 				TransportRingsTile newRingsTile = (TransportRingsTile) world.getTileEntity(newRingsPos);	
 				ringsTilesInRange.add(newRingsTile);

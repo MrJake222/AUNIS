@@ -76,7 +76,7 @@ public class PageNotebookItem extends Item {
 		if (!world.isRemote) {
 			Block block = world.getBlockState(pos).getBlock();
 			
-			if (block == AunisBlocks.stargateMilkyWayBaseBlock) {
+			if (block == AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) {
 				StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
 				NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
 				

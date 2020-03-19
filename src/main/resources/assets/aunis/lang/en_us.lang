@@ -6,6 +6,9 @@ item.aunis.dialer_fast.name=Fast dialer (debug)
 
 item.aunis.crystal_glyph_dhd.name=DHD Glyph Crystal
 item.aunis.crystal_glyph_stargate.name=Stargate Glyph Crystal
+item.aunis.crystal_glyph_milkyway.name=Milky Way Glyphs Crystal
+item.aunis.crystal_glyph_pegasus.name=Pegasus Glyphs Crystal
+item.aunis.crystal_glyph_universe.name=Universe Code Crystal
 
 tile.aunis.naquadah_ore.name=Naquadah Ore
 tile.aunis.naquadah_block.name=Naquadah Block
@@ -18,6 +21,7 @@ tile.aunis.stargate_milkyway_base_block.name=Stargate Base (Milky Way)
 tile.aunis.stargate_milkyway_ring_block.name=Stargate Ring (Milky Way)
 tile.aunis.stargate_milkyway_chevron_block.name=Stargate Chevron (Milky Way)
 tile.aunis.dhd_block.name=Dial Home Device (DHD)
+tile.aunis.capacitor_block.name=Capacitor Bank
 
 tile.aunis.stargate_orlin_base_block.name=Stargate Base (Orlin)
 tile.aunis.stargate_orlin_member_block.name=Stargate Ring (Orlin)

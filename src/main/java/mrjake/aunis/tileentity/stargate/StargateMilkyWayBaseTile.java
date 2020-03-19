@@ -142,7 +142,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	
 	@Override
 	protected void mergeGate() {
-		BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.dhdBlock);
+		BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.DHD_BLOCK);
 		
 		if (closestDhd != null) {
 			DHDTile dhdTile = (DHDTile) world.getTileEntity(closestDhd);

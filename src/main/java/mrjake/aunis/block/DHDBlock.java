@@ -79,7 +79,7 @@ public class DHDBlock extends Block {
 			world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, facing), 3);
 			
 			DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
-			BlockPos closestGate = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.stargateMilkyWayBaseBlock);
+			BlockPos closestGate = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK);
 			
 			if (closestGate != null) {
 				StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(closestGate);

@@ -1,12 +1,12 @@
 package mrjake.aunis.sound;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.tileentity.util.EnumIdInterface;
-import mrjake.aunis.tileentity.util.EnumIdMap;
+import mrjake.aunis.util.EnumKeyMap;
+import mrjake.aunis.util.EnumKeyInterface;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 
-public enum SoundEventEnum implements EnumIdInterface {
+public enum SoundEventEnum implements EnumKeyInterface<Integer> {
 	
 	// ----------------------------------------------------------
 	// Stargate - General
@@ -50,11 +50,11 @@ public enum SoundEventEnum implements EnumIdInterface {
 	}
 	
 	@Override
-	public int getId() {
+	public Integer getKey() {
 		return id;
 	}
 	
-	private static EnumIdMap<SoundEventEnum> idMap = new EnumIdMap<SoundEventEnum>(values());
+	private static EnumKeyMap<Integer, SoundEventEnum> idMap = new EnumKeyMap<Integer, SoundEventEnum>(values());
 	
 	public static SoundEventEnum valueOf(int id) {
 		return idMap.valueOf(id);

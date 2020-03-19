@@ -45,9 +45,9 @@ public class AunisEventHandler {
 			
 			boolean cancelled = false;
 			
-			cancelled |= block == AunisBlocks.dhdBlock;
-			cancelled |= (block == AunisBlocks.stargateMilkyWayMemberBlock || block == AunisBlocks.stargateMilkyWayBaseBlock) && !blockState.getValue(AunisProps.RENDER_BLOCK);
-			cancelled |= (block == AunisBlocks.stargateOrlinMemberBlock) && !blockState.getValue(AunisProps.RENDER_BLOCK);
+			cancelled |= block == AunisBlocks.DHD_BLOCK;
+			cancelled |= (block == AunisBlocks.stargateMilkyWayMemberBlock || block == AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
+			cancelled |= (block == AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
 //			cancelled |= block instanceof CrystalInfuserBlock;
 			
 			event.setCanceled(cancelled);
@@ -69,7 +69,7 @@ public class AunisEventHandler {
 		World world = player.getEntityWorld();
 		
 		if (player.isSneaking()) {
-			if (event instanceof RightClickBlock && world.getBlockState(event.getPos()).getBlock() == AunisBlocks.dhdBlock) {
+			if (event instanceof RightClickBlock && world.getBlockState(event.getPos()).getBlock() == AunisBlocks.DHD_BLOCK) {
 				((RightClickBlock) event).setUseBlock(Result.ALLOW);
 			}
 		}
@@ -86,7 +86,7 @@ public class AunisEventHandler {
 				for (BlockPos activatedBlock : blocks) {
 					Block block = world.getBlockState(activatedBlock).getBlock();
 
-					if (block == AunisBlocks.dhdBlock) {
+					if (block == AunisBlocks.DHD_BLOCK) {
 						RaycasterDHD.INSTANCE.onActivated(world, activatedBlock, player);
 					}
 				}

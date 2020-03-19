@@ -39,7 +39,7 @@ public class StargateMilkyWayMergeHelper extends StargateAbstractMergeHelper {
 	private static final AunisAxisAlignedBB BASE_SEARCH_BOX_SMALL = new AunisAxisAlignedBB(-3, -7, 0, 3, 0, 0);
 	private static final AunisAxisAlignedBB BASE_SEARCH_BOX_LARGE = new AunisAxisAlignedBB(-5, -9, 0, 5, 0, 0);
 	
-	public static final BlockMatcher BASE_MATCHER = BlockMatcher.forBlock(AunisBlocks.stargateMilkyWayBaseBlock);
+	public static final BlockMatcher BASE_MATCHER = BlockMatcher.forBlock(AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK);
 	public static final BlockMatcher MEMBER_MATCHER = BlockMatcher.forBlock(AunisBlocks.stargateMilkyWayMemberBlock);
 		
 	private static final List<BlockPos> RING_BLOCKS_SMALL = Arrays.asList(

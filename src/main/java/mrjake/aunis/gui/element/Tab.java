@@ -63,6 +63,16 @@ public class Tab {
 		startingOffsetX = defaultX;
 	}
 	
+	private boolean isVisible = true;
+	
+	public void setVisible(boolean isVisible) {
+		this.isVisible = isVisible;
+	}
+	
+	public void setPositionY(int y) {
+		this.defaultY = y;
+	}
+	
 	private boolean animate = false;
 	private int startingOffsetX = 0;
 	private boolean isTabOpen = false;
@@ -70,6 +80,10 @@ public class Tab {
 	
 	public boolean isOpen() {
 		return isTabOpen;
+	}
+	
+	public boolean isVisible() {
+		return isVisible;
 	}
 	
 	public boolean isHidden() {
@@ -83,6 +97,9 @@ public class Tab {
 	protected int currentOffsetX = 0;
 	
 	public void render(FontRenderer fontRenderer) {
+		if (!isVisible)
+			return;
+		
 		Minecraft mc = Minecraft.getMinecraft();
 		updateAnimation(mc);
 		
@@ -99,13 +116,16 @@ public class Tab {
 	}
 	
 	public void renderFg(GuiScreen screen, FontRenderer fontRenderer, int mouseX, int mouseY) {
+		if (!isVisible)
+			return;
+		
 		if (!isTabOpen && isCursorOnTab(mouseX, mouseY)) {
 			screen.drawHoveringText(tabTitle, mouseX-guiLeft, mouseY-guiTop);
 		}
 	}
 	
 	public boolean isCursorOnTab(int mouseX, int mouseY) {
-		return GuiHelper.isPointInRegion(guiLeft+iconX+currentOffsetX, guiTop+defaultY+iconY, iconWidth - (isTabHidden ? 15 : 0), iconHeight, mouseX, mouseY);
+		return isVisible && GuiHelper.isPointInRegion(guiLeft+iconX+currentOffsetX, guiTop+defaultY+iconY, iconWidth - (isTabHidden ? 15 : 0), iconHeight, mouseX, mouseY);
 	}
 	
 	public void openTab() {		
@@ -179,6 +199,17 @@ public class Tab {
 			tab.closeTab();
 		else
 			tab.openTab();
+	}
+	
+	public static void updatePositions(List<Tab> tabs) {
+		int yOffset = 2;
+		
+		for (Tab tab : tabs) {
+			if (tab.isVisible()) {
+				tab.setPositionY(yOffset);
+				yOffset += 22;
+			}
+		}
 	}
 	
 	

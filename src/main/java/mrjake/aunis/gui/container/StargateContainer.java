@@ -1,10 +1,12 @@
 package mrjake.aunis.gui.container;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.gui.util.ContainerHelper;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile.StargateUpgradeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -21,14 +23,14 @@ import net.minecraftforge.items.SlotItemHandler;
 
 public class StargateContainer extends Container {
 
-	public StargateAbstractBaseTile gateTile;
+	public StargateClassicBaseTile gateTile;
 	public int powerTier;
 	
 	private BlockPos pos;
 	
 	public StargateContainer(IInventory playerInventory, World world, int x, int y, int z) {
 		pos = new BlockPos(x, y, z);
-		gateTile = (StargateAbstractBaseTile) world.getTileEntity(pos);
+		gateTile = (StargateClassicBaseTile) world.getTileEntity(pos);
 		IItemHandler itemHandler = gateTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 		
 		// Upgrades 2x2 (index 0-3)
@@ -75,7 +77,7 @@ public class StargateContainer extends Container {
 //        	
 //        	else 
         	
-        	if (StargateMilkyWayBaseTile.SUPPORTED_UPGRADES.contains(stack.getItem())) {
+        	if (StargateUpgradeEnum.contains(stack.getItem())) {
         		for (int i=0; i<4; i++) {
         			if (!getSlot(i).getHasStack()) {
         				ItemStack stack1 = stack.copy();
@@ -98,6 +100,13 @@ public class StargateContainer extends Container {
 	@Override
 	public void detectAndSendChanges() {
 		super.detectAndSendChanges();
+	}
+	
+	@Override
+	public void putStackInSlot(int slotID, ItemStack stack) {
+		super.putStackInSlot(slotID, stack);
+		
+//		Aunis.info("id="+slotID+", stack="+stack);
 	}
 	
 	@Override

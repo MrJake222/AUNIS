@@ -23,8 +23,8 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 
 	private static final AunisAxisAlignedBB BASE_SEARCH_BOX = new AunisAxisAlignedBB(-1, -2, -1, 1, 0, 1);
 	
-	public static final BlockMatcher BASE_MATCHER = BlockMatcher.forBlock(AunisBlocks.stargateOrlinBaseBlock);
-	public static final BlockMatcher MEMBER_MATCHER = BlockMatcher.forBlock(AunisBlocks.stargateOrlinMemberBlock);
+	public static final BlockMatcher BASE_MATCHER = BlockMatcher.forBlock(AunisBlocks.STARGATE_ORLIN_BASE_BLOCK);
+	public static final BlockMatcher MEMBER_MATCHER = BlockMatcher.forBlock(AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK);
 	
 	private static final Map<BlockPos, EnumFacing> BLOCK_MAP = new HashMap<>(); 
 	

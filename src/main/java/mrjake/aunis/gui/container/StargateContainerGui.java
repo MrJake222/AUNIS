@@ -7,9 +7,12 @@ import java.util.List;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.gui.element.Tab;
 import mrjake.aunis.gui.element.TabAddress;
+import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile.StargateUpgradeEnum;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 public class StargateContainerGui extends GuiContainer {
@@ -19,6 +22,10 @@ public class StargateContainerGui extends GuiContainer {
 	private StargateContainer container;
 	private List<Tab> tabs;
 	
+	private TabAddress milkyWayAddressTab;
+	private TabAddress pegasusAddressTab;
+	private TabAddress universeAddressTab;
+		
 	public StargateContainerGui(StargateContainer container) {
 		super(container);
 		this.container = container;
@@ -33,50 +40,94 @@ public class StargateContainerGui extends GuiContainer {
 		
 		tabs = new ArrayList<Tab>();
 				
-		tabs.add(TabAddress.builder()
+		milkyWayAddressTab = (TabAddress) TabAddress.builder()
 				.setGateTile(container.gateTile)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2)
 				.setOpenPosition(-128)
-				.setTabSize(128, 84)
+				.setTabSize(128, 113)
 				.setTabTitle(I18n.format("gui.stargate.milky_way_address"))
 				.setTexture(BACKGROUND_TEXTURE, 512)
 				.setBackgroundTextureLocation(176, 0)
 				.setIconRenderPos(1, 7)
 				.setIconSize(20, 18)
-				.setIconTextureLocation(128, 0).build());
+				.setIconTextureLocation(128, 0).build();
 		
-		tabs.add(TabAddress.builder()
+		pegasusAddressTab = (TabAddress) TabAddress.builder()
 				.setGateTile(container.gateTile)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2+22)
 				.setOpenPosition(-128)
-				.setTabSize(128, 84)
+				.setTabSize(128, 113)
 				.setTabTitle(I18n.format("gui.stargate.milky_way_address"))
 				.setTexture(BACKGROUND_TEXTURE, 512)
 				.setBackgroundTextureLocation(176, 0)
 				.setIconRenderPos(1, 7)
 				.setIconSize(20, 18)
-				.setIconTextureLocation(128, 18).build());
+				.setIconTextureLocation(128, 18).build();
 		
-		tabs.add(TabAddress.builder()
+		universeAddressTab = (TabAddress) TabAddress.builder()
 				.setGateTile(container.gateTile)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2+22*2)
 				.setOpenPosition(-128)
-				.setTabSize(128, 84)
+				.setTabSize(128, 113)
 				.setTabTitle(I18n.format("gui.stargate.milky_way_address"))
 				.setTexture(BACKGROUND_TEXTURE, 512)
 				.setBackgroundTextureLocation(176, 0)
 				.setIconRenderPos(1, 7)
 				.setIconSize(20, 18)
-				.setIconTextureLocation(128, 18*2).build());
+				.setIconTextureLocation(128, 18*2).build();
+		
+		universeAddressTab.setMaxSymbols(7);
+		
+		tabs.add(milkyWayAddressTab);
+		tabs.add(pegasusAddressTab);
+		tabs.add(universeAddressTab);
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		drawDefaultBackground();
-				
+		
+		boolean hasAddressUpgrade = false;
+		boolean hasMilkyWayUpgrade = false;
+		boolean hasAtlantisUpgrade = false;
+		boolean hasUniverseUpgrade = false;
+		
+		for (int i=0; i<4; i++) {
+			ItemStack itemStack = container.getSlot(i).getStack();
+			
+			if (!itemStack.isEmpty()) {
+				switch (StargateUpgradeEnum.valueOf(itemStack.getItem())) {
+					case CHEVRON_UPGRADE:
+						hasAddressUpgrade = true;
+						break;
+						
+					case MILKYWAY_GLYPHS:
+						hasMilkyWayUpgrade = true;
+						break;
+						
+					case PEGASUS_GLYPHS:
+						hasAtlantisUpgrade = true;
+						break;
+						
+					case UNIVERSE_GLYPHS:
+						hasUniverseUpgrade = true;
+						break;
+				}
+			}
+		}
+		
+		milkyWayAddressTab.setMaxSymbols(hasAddressUpgrade ? 7 : 6);
+		pegasusAddressTab.setMaxSymbols(hasAddressUpgrade ? 7 : 6);
+		
+		milkyWayAddressTab.setVisible(hasMilkyWayUpgrade);
+		pegasusAddressTab.setVisible(hasAtlantisUpgrade);
+		universeAddressTab.setVisible(hasUniverseUpgrade);
+		
+		Tab.updatePositions(tabs);
+		
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		renderHoveredToolTip(mouseX, mouseY);
 	}

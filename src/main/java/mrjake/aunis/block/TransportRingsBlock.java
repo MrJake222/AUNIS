@@ -59,7 +59,7 @@ private static final String blockName = "transportrings_block";
 		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {			
-			BlockPos closestController = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.trControllerBlock);
+			BlockPos closestController = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.TR_CONTROLLER_BLOCK);
 			
 			if (closestController != null) {
 				TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(closestController);

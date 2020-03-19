@@ -201,7 +201,7 @@ public class StargateMilkyWayMemberBlock extends Block {
 			IBlockState camoBlockState = memberTile.getCamoState();
 			
 			if (heldItem == Item.getItemFromBlock(AunisBlocks.stargateMilkyWayMemberBlock) ||
-				heldItem == Item.getItemFromBlock(AunisBlocks.stargateMilkyWayBaseBlock) ||
+				heldItem == Item.getItemFromBlock(AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) ||
 				!memberTile.isMerged())
 				
 				return false;
@@ -321,7 +321,7 @@ public class StargateMilkyWayMemberBlock extends Block {
 		
 		else {			
 			return 	heldItem != Item.getItemFromBlock(AunisBlocks.stargateMilkyWayMemberBlock) &&
-					heldItem != Item.getItemFromBlock(AunisBlocks.stargateMilkyWayBaseBlock);// &&
+					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK);// &&
 //					!heldItemStack.isItemEqual(stack);
 		}
 	}
