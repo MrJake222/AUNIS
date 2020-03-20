@@ -37,10 +37,10 @@ public class StargateMilkyWayRenderer extends StargateAbstractRenderer {
 		Map<BlockPos, IBlockState> map = new HashMap<BlockPos, IBlockState>();
 		
 		for (BlockPos pos : StargateMilkyWayMergeHelper.INSTANCE.getRingBlocks())
-			map.put(pos, AunisBlocks.stargateMilkyWayMemberBlock.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING).withProperty(AunisProps.FACING_HORIZONTAL, facing));
+			map.put(pos, AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING).withProperty(AunisProps.FACING_HORIZONTAL, facing));
 		
 		for (BlockPos pos : StargateMilkyWayMergeHelper.INSTANCE.getChevronBlocks())
-			map.put(pos, AunisBlocks.stargateMilkyWayMemberBlock.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.CHEVRON).withProperty(AunisProps.FACING_HORIZONTAL, facing));
+			map.put(pos, AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.CHEVRON).withProperty(AunisProps.FACING_HORIZONTAL, facing));
 		
 		return map;
 	}

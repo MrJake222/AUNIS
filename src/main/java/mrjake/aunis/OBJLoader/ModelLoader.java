@@ -68,9 +68,6 @@ public class ModelLoader {
 		ChevronMoving("ChevronMoving", "stargate/chevron/chevronMoving.obj", "stargate/chevron/chevron0.png"),
 		ChevronBack("ChevronBack", "stargate/chevron/chevronBack.obj", "stargate/gatering7.png"),
 		
-		CrystalInfuserPylon("CrystalInfuserPylon", "crystalinfuser/CrystalInfuserPylon.obj", "stargate/gatering7.png"),
-		CrystalInfuserBase("CrystalInfuserBase", "crystalinfuser/CrystalInfuserBase.obj", "stargate/gatering7.png"),
-		
 		RingsBlack("RingsBlack", "transportrings/rings_black.obj", "transportrings/rings_black.png"),
 		RingsController_goauld("RingsController_goauld", "transportrings/plate_goauld.obj", "transportrings/goauld_panel.png"),
 		RingsController_goauld_buttons("RingsController_goauld_buttons", "transportrings/buttons_goauld.obj", "transportrings/goauld_buttons.png"),

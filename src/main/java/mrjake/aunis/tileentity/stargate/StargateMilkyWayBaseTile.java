@@ -15,8 +15,8 @@ import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRendererState;
-import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.sound.SoundEventEnum;
+import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.stargate.EnumGateState;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
@@ -38,18 +38,13 @@ import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.ILinkable;
 import mrjake.aunis.util.LinkingHelper;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements ILinkable {
 		
@@ -70,6 +65,15 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		
 		if (isLinked())
 			getLinkedDHD(world).clearSymbols();
+	}
+	
+	@Override
+	public void onBlockBroken() {
+		super.onBlockBroken();
+		
+		if (isLinked()) {
+			getLinkedDHD(world).setLinkedGate(null);
+		}
 	}
 	
 	// ------------------------------------------------------------------------
@@ -550,22 +554,22 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	// -----------------------------------------------------------------
 	// Power system
 	
-	@Override
-	protected IEnergyStorage getEnergyStorage(int minEnergy) {
-		if (isLinked()) {
-			ItemStackHandler dhdItemStackHandler = (ItemStackHandler) getLinkedDHD(world).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-			ItemStack crystalItemStack = dhdItemStackHandler.getStackInSlot(0);
-					
-			if (!crystalItemStack.isEmpty()) {
-				IEnergyStorage crystalEnergyStorage = crystalItemStack.getCapability(CapabilityEnergy.ENERGY, null);
-			
-				if (crystalEnergyStorage.getEnergyStored() >= minEnergy)
-					return crystalEnergyStorage;
-			}
-		}
-		
-		return super.getEnergyStorage(minEnergy);
-	}
+//	@Override
+//	protected IEnergyStorage getEnergyStorage(int minEnergy) {
+//		if (isLinked()) {
+//			ItemStackHandler dhdItemStackHandler = (ItemStackHandler) getLinkedDHD(world).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+//			ItemStack crystalItemStack = dhdItemStackHandler.getStackInSlot(0);
+//					
+//			if (!crystalItemStack.isEmpty()) {
+//				IEnergyStorage crystalEnergyStorage = crystalItemStack.getCapability(CapabilityEnergy.ENERGY, null);
+//			
+//				if (crystalEnergyStorage.getEnergyStored() >= minEnergy)
+//					return crystalEnergyStorage;
+//			}
+//		}
+//		
+//		return super.getEnergyStorage(minEnergy);
+//	}
 	
 	
 	// -----------------------------------------------------------------

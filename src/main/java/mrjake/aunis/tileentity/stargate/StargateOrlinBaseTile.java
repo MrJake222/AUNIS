@@ -18,6 +18,7 @@ import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
@@ -224,8 +225,8 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	@Override
 	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
-			case GUI_STATE:
-				return new StargateAbstractGuiState(energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored(), energyTransferedLastTick, energySecondsToClose);
+//			case GUI_STATE:
+//				return new StargateAbstractGuiState(energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored(), energyTransferedLastTick, energySecondsToClose);
 		
 			case SPARK_STATE:
 				return null;
@@ -330,20 +331,27 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	// ------------------------------------------------------------------------
 	// Power
 	
+	private StargateAbstractEnergyStorage energyStorate = new StargateAbstractEnergyStorage();
+	
+	@Override
+	protected StargateAbstractEnergyStorage getEnergyStorage() {
+		return energyStorate;
+	}
+	
 	@Override
 	protected StargateEnergyRequired getRequiredEnergyToDial(int distance, DimensionType targetDimensionType) {
 		return super.getRequiredEnergyToDial(distance, targetDimensionType).mul(AunisConfig.powerConfig.stargateOrlinEnergyMul);
 	}
 	
-	@Override
-	protected int getMaxEnergyStorage() {
-		return AunisConfig.powerConfig.stargateOrlinEnergyStorage;
-	}
-	
-	@Override
-	protected boolean canReceiveEnergy() {
-		return !isBroken();
-	}
+//	@Override
+//	protected int getMaxEnergyStorage() {
+//		return AunisConfig.powerConfig.stargateOrlinEnergyStorage;
+//	}
+//	
+//	@Override
+//	protected boolean canReceiveEnergy() {
+//		return !isBroken();
+//	}
 	
 	// ------------------------------------------------------------------------
 	// NBT

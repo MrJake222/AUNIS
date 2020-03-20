@@ -7,20 +7,14 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import mrjake.aunis.capability.EnergyStorageUncapped;
-import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class StargateGenerationHelper {
 	
@@ -187,10 +181,12 @@ public class StargateGenerationHelper {
 	}
 	
 	public static void spawnDhdCrystal(World world, BlockPos dhdPos, int power) {
-		ItemStack crystal = new ItemStack(AunisItems.crystalControlDhd);
-		EnergyStorageUncapped uncapped = (EnergyStorageUncapped) crystal.getCapability(CapabilityEnergy.ENERGY, null);
-		uncapped.setEnergyStored(power);
+		// TODO Rework spawning crystals
 		
-		((ItemStackHandler) world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)).setStackInSlot(0, crystal);
+//		ItemStack crystal = new ItemStack(AunisItems.crystalControlDhd);
+//		EnergyStorageUncapped uncapped = (EnergyStorageUncapped) crystal.getCapability(CapabilityEnergy.ENERGY, null);
+//		uncapped.setEnergyStored(power);
+//		
+//		((ItemStackHandler) world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)).setStackInSlot(0, crystal);
 	}
 }

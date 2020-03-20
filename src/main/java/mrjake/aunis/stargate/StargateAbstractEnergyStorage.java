@@ -1,18 +1,20 @@
-package mrjake.aunis.capability;
+package mrjake.aunis.stargate;
 
+import mrjake.aunis.config.AunisConfig;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.INBTSerializable;
+
 import net.minecraftforge.energy.EnergyStorage;
 
-public class EnergyStorageSerializable extends EnergyStorage implements INBTSerializable<NBTTagCompound> {
-	
-	public EnergyStorageSerializable(int capacity, int maxTransfer) {
-		super(capacity, maxTransfer);
+public class StargateAbstractEnergyStorage extends EnergyStorage implements INBTSerializable<NBTTagCompound> {
+
+	public StargateAbstractEnergyStorage() {
+		super(AunisConfig.powerConfig.stargateEnergyStorage/4, AunisConfig.powerConfig.stargateMaxEnergyTransfer);
 	}
 	
-	public EnergyStorageSerializable(int capacity, int maxReceive, int maxExtract) {
-		super(capacity, maxReceive, maxExtract);
-    }
+//	public StargateAbstractEnergyStorage(int capacity) {
+//		super(capacity, AunisConfig.powerConfig.stargateMaxEnergyTransfer);
+//	}
 
 	@Override
 	public NBTTagCompound serializeNBT() {
@@ -44,16 +46,21 @@ public class EnergyStorageSerializable extends EnergyStorage implements INBTSeri
 	
 	@Override
 	public int extractEnergy(int maxExtract, boolean simulate) {
-		int tx = super.extractEnergy(maxExtract, simulate);
+		if (!canExtract())
+			return 0;
 		
-		if (tx > 0)
+		int energyExtracted = Math.min(energy, maxExtract);
+		
+		if (!simulate) {
+			energy -= energyExtracted;
 			onEnergyChanged();
+		}
 		
-		return tx;
+		return energyExtracted;
 	}
 	
 	public void setEnergyStored(int energyStored) {
-		this.energy = energyStored;
+		this.energy = Math.min(energyStored, capacity);
 		
 		onEnergyChanged();
 	}

@@ -1,23 +1,25 @@
 package mrjake.aunis.tileentity.stargate;
 
-import java.util.Arrays;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.container.StargateContainerGuiState;
+import mrjake.aunis.gui.container.StargateContainerGuiUpdate;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateClassicRendererState;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
+import mrjake.aunis.stargate.StargateClassicEnergyStorage;
 import mrjake.aunis.stargate.StargateSoundEventEnum;
 import mrjake.aunis.stargate.StargateSoundPositionedEnum;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.tileentity.DHDTile.DHDUpgradeEnum;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.EnumKeyInterface;
 import mrjake.aunis.util.EnumKeyMap;
@@ -28,7 +30,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -99,11 +103,16 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	
 	// ------------------------------------------------------------------------
 	// NBT
-			
+	
+	@Override
+	protected void setWorldCreate(World world) {
+		setWorld(world);
+	}
+	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		compound.setTag("itemHandler", itemStackHandler.serializeNBT());
-		
+				
 		return super.writeToNBT(compound);
 	}
 	
@@ -114,6 +123,8 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		if (compound.getBoolean("hasUpgrade")) {
 			itemStackHandler.setStackInSlot(0, new ItemStack(AunisItems.crystalGlyphStargate));
 		}
+				
+		updatePowerTier();
 		
 		super.readFromNBT(compound);
 	}
@@ -163,6 +174,9 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			case GUI_STATE:
 				return new StargateContainerGuiState();
 				
+			case GUI_UPDATE:
+				return new StargateContainerGuiUpdate();
+				
 			default:
 				return super.createState(stateType);
 		}
@@ -211,6 +225,11 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				StargateContainerGuiState guiState = (StargateContainerGuiState) state;
 				gateAddress = guiState.getGateAddress();
 				Aunis.info(this + ": Setting address to " + gateAddress);
+				
+				break;
+				
+			case GUI_UPDATE:
+				energyStorage.setEnergyStoredInternally(((StargateContainerGuiUpdate) state).energyStored);
 				
 				break;
 				
@@ -267,7 +286,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				case 4:
 				case 5:
 				case 6:
-					return true;
+					return item == Item.getItemFromBlock(AunisBlocks.CAPACITOR_BLOCK);
 					
 				case 7:
 				case 8:
@@ -287,6 +306,17 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		@Override
 		protected void onContentsChanged(int slot) {
 			super.onContentsChanged(slot);
+			
+			switch (slot) {
+				case 4:
+				case 5:
+				case 6:			
+					updatePowerTier();
+					break;
+					
+				default:
+					break;
+			}
 			
 			markDirty();
 		}
@@ -327,6 +357,59 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		}
 		
 		return false;
+	}
+	
+	
+	// -----------------------------------------------------------------------------
+	// Power system
+	
+	private StargateClassicEnergyStorage energyStorage = new StargateClassicEnergyStorage() {
+		
+		@Override
+		protected void onEnergyChanged() {
+			markDirty();
+		}
+	};
+	
+	@Override
+	protected StargateAbstractEnergyStorage getEnergyStorage() {
+		return energyStorage;
+	}
+	
+	private int currentPowerTier;
+	
+	public int getPowerTier() {
+		return currentPowerTier;
+	}
+	
+	private void updatePowerTier() {
+		if (!world.isRemote)
+			Aunis.info("updatePowerTier called");
+		
+		int powerTier = 1;
+				
+		for (int i=4; i<7; i++) {
+			if (!itemStackHandler.getStackInSlot(i).isEmpty()) {
+				powerTier++;
+			}
+		}
+		
+		if (powerTier != currentPowerTier) {
+			currentPowerTier = powerTier;
+			
+			energyStorage.clearStorages();
+			
+			for (int i=4; i<7; i++) {
+				ItemStack stack = itemStackHandler.getStackInSlot(i);
+				
+				if (!stack.isEmpty()) {
+					energyStorage.addStorage(stack.getCapability(CapabilityEnergy.ENERGY, null));
+				}
+			}
+				
+			Aunis.info("Updated to power tier: " + powerTier);
+			markDirty();
+		}
 	}
 	
 	

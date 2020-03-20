@@ -17,7 +17,6 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisDamageSources;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.capability.EnergyStorageUncapped;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -25,14 +24,15 @@ import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.particle.ParticleWhiteSmoke;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
-import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.SoundEventEnum;
+import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.stargate.AutoCloseManager;
 import mrjake.aunis.stargate.DimensionPowerMap;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.StargateEnergyRequired;
 import mrjake.aunis.stargate.StargateNetwork;
@@ -72,7 +72,6 @@ import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
@@ -193,8 +192,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	protected boolean isFinalActive;
 	
 	public void setGateAddress(List<EnumSymbol> gateAddress) {
-		if (StargateNetwork.get(world).checkForStargate(gateAddress))
-			throw new IllegalStateException("Stargate with given address already exists");
+//		if (StargateNetwork.get(world).checkForStargate(gateAddress))
+//			throw new IllegalStateException("Stargate with given address already exists");
 		
 		if (this.gateAddress != null)
 			StargateNetwork.get(world).removeStargate(this.gateAddress);
@@ -298,7 +297,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ENGAGE));
 		
 		if (isInitiating) {
-			((EnergyStorageUncapped) getEnergyStorage(openCost)).extractEnergyUncapped(openCost);
+			getEnergyStorage().extractEnergy(openCost, false);
 		}
 		
 		ForgeChunkManager.forceChunk(chunkLoadingTicket, new ChunkPos(pos));
@@ -489,10 +488,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			 * 	True: Extract energy each tick
 			 * 	False: Update the source gate about consumed energy each second
 			 */
-			if (stargateState.initiating()) {				
-				IEnergyStorage energyStorage = getEnergyStorage(keepAliveCostPerTick);
-				
-				if (energyStorage != null) {
+			if (stargateState.initiating()) {								
+				if (getEnergyStorage().getEnergyStored() >= keepAliveCostPerTick) {
 					int threshold = keepAliveCostPerTick*20 * AunisConfig.powerConfig.instabilitySeconds;
 
 					/*
@@ -501,21 +498,21 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 					 */
 					
 					// Horizon becomes unstable
-					if (horizonFlashTask == null && energyStorage.getEnergyStored() < threshold) {
+					if (horizonFlashTask == null && getEnergyStorage().getEnergyStored() < threshold) {
 						resetFlashingSequence();
 						
 						setHorizonFlashTask(new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int) (Math.random() * 40) + 5));
 					}
 					
 					// Horizon becomes stable
-					if (horizonFlashTask != null && energyStorage.getEnergyStored() > threshold) {
+					if (horizonFlashTask != null && getEnergyStorage().getEnergyStored() > threshold) {
 						horizonFlashTask = null;
 						isCurrentlyUnstable = false;
 						
 						updateFlashState(false);
 					}
 					
-					((EnergyStorageUncapped) energyStorage).extractEnergyUncapped(keepAliveCostPerTick);
+					getEnergyStorage().extractEnergy(keepAliveCostPerTick, false);
 					
 					markDirty();
 //					Aunis.info("Stargate energy: " + energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + "\t\tAlive for: " + (float)(energyStorage.getEnergyStored())/keepAliveCostPerTick/20);
@@ -525,13 +522,13 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 					StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
 			}
 			
-			energyTransferedLastTick = energyStorage.getEnergyStored() - energyStoredLastTick;
-			energyStoredLastTick = energyStorage.getEnergyStored();
-			
-			if (stargateState.initiating())
-				energySecondsToClose = (float)(energyStorage.getEnergyStored()) / keepAliveCostPerTick / 20;
-			else
-				energySecondsToClose = 0;
+//			energyTransferedLastTick = energyStorage.getEnergyStored() - energyStoredLastTick;
+//			energyStoredLastTick = energyStorage.getEnergyStored();
+//			
+//			if (stargateState.initiating())
+//				energySecondsToClose = (float)(energyStorage.getEnergyStored()) / keepAliveCostPerTick / 20;
+//			else
+//				energySecondsToClose = 0;
 		}
 	}
 	
@@ -1001,30 +998,32 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	private int openCost = 0;
 	private int keepAliveCostPerTick = 0;
-	private int energyStoredLastTick = 0;
-	protected int energyTransferedLastTick = 0;
-	protected float energySecondsToClose = 0;
+//	private int energyStoredLastTick = 0;
+//	protected int energyTransferedLastTick = 0;
+//	protected float energySecondsToClose = 0;
 	
-	protected int getMaxEnergyStorage() {
-		return AunisConfig.powerConfig.stargateEnergyStorage;
-	}
+	protected abstract StargateAbstractEnergyStorage getEnergyStorage();
 	
-	protected boolean canReceiveEnergy() {
-		return true;
-	}
+//	protected int getMaxEnergyStorage() {
+//		return AunisConfig.powerConfig.stargateEnergyStorage;
+//	}
+//	
+//	protected boolean canReceiveEnergy() {
+//		return true;
+//	}
 	
-	protected EnergyStorageUncapped energyStorage = new EnergyStorageUncapped(getMaxEnergyStorage(), AunisConfig.powerConfig.stargateMaxEnergyTransfer) {
-		
-		@Override
-		protected void onEnergyChanged() {			
-			markDirty();
-		};
-		
-		@Override
-		public boolean canReceive() {
-			return canReceiveEnergy();
-		};
-	};
+//	protected EnergyStorageUncapped energyStorage = new EnergyStorageUncapped(getMaxEnergyStorage(), AunisConfig.powerConfig.stargateMaxEnergyTransfer) {
+//		
+//		@Override
+//		protected void onEnergyChanged() {			
+//			markDirty();
+//		};
+//		
+//		@Override
+//		public boolean canReceive() {
+//			return canReceiveEnergy();
+//		};
+//	};
 	
 	/**
 	 * Unifies energy consumption methods
@@ -1035,13 +1034,13 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * @param minEnergy - minimal energy 
 	 * @return First IEnergyStorage that has enough energy, CAN BE NULL if no source can provide such energy
 	 */
-	@Nullable
-	protected IEnergyStorage getEnergyStorage(int minEnergy) {
-		if (energyStorage.getEnergyStored() >= minEnergy)
-			return energyStorage;
-		
-		return null;
-	}
+//	@Nullable
+//	protected IEnergyStorage getEnergyStorage(int minEnergy) {
+//		if (energyStorage.getEnergyStored() >= minEnergy)
+//			return energyStorage;
+//		
+//		return null;
+//	}
 	
 	protected StargateEnergyRequired getRequiredEnergyToDial(int distance, DimensionType targetDimensionType) {		
 		double distanceAdjusted = 0;
@@ -1078,9 +1077,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		int distance = (int) sPos.getDistance(tPos.getX(), tPos.getY(), tPos.getZ());
 		StargateEnergyRequired energyRequired = getRequiredEnergyToDial(distance, gateTile.getWorld().provider.getDimensionType());
 		
-		Aunis.info("Energy required to dial [distance="+distance+", from="+world.provider.getDimensionType()+", to="+gateTile.getWorld().provider.getDimensionType()+"] = " + energyRequired.energyToOpen + " / keepAlive: "+energyRequired.keepAlive+"/t");
+		Aunis.info("Energy required to dial [distance="+distance+", from="+world.provider.getDimensionType()+", to="+gateTile.getWorld().provider.getDimensionType()+"] = " + energyRequired.energyToOpen + " / keepAlive: "+energyRequired.keepAlive+"/t, stored="+getEnergyStorage().getEnergyStored());
 		
-		if (getEnergyStorage(energyRequired.energyToOpen) != null) {
+		if (getEnergyStorage().getEnergyStored() >= energyRequired.energyToOpen) {
 			this.openCost = energyRequired.energyToOpen;
 			this.keepAliveCostPerTick = energyRequired.keepAlive;
 		
@@ -1096,11 +1095,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		return (capability == CapabilityEnergy.ENERGY) || super.hasCapability(capability, facing);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		if (capability == CapabilityEnergy.ENERGY) {
-			return (T)energyStorage;
+			return CapabilityEnergy.ENERGY.cast(getEnergyStorage());
 		}
 		
 		return super.getCapability(capability, facing);
@@ -1126,7 +1124,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		compound.setBoolean("isFinalActive", isFinalActive);
 		compound.setBoolean("isMerged", isMerged);
 		compound.setTag("autoCloseManager", getAutoCloseManager().serializeNBT());
-		compound.setTag("energyStorage", energyStorage.serializeNBT());
 		
 		compound.setInteger("openCost", openCost);
 		compound.setInteger("keepAliveCostPerTick", keepAliveCostPerTick);
@@ -1135,6 +1132,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			compound.setInteger("stargateState", stargateState.id);
 		
 		compound.setTag("scheduledTasks", ScheduledTask.serializeList(scheduledTasks));
+		
+		compound.setTag("energyStorage", getEnergyStorage().serializeNBT());
 		
 		if (node != null) {
 			NBTTagCompound nodeCompound = new NBTTagCompound();
@@ -1182,7 +1181,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			e.printStackTrace();
 		}
 		
-		energyStorage.deserializeNBT(compound.getCompoundTag("energyStorage"));
+		getEnergyStorage().deserializeNBT(compound.getCompoundTag("energyStorage"));
 		
 		this.openCost = compound.getInteger("openCost");
 		this.keepAliveCostPerTick = compound.getInteger("keepAliveCostPerTick");

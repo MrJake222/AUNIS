@@ -19,7 +19,7 @@ public class StargateMilkyWayMemberItemBlock extends ItemBlock {
 	
 	@Override
 	public String getTranslationKey(ItemStack stack) {		
-		EnumMemberVariant variant = AunisBlocks.stargateMilkyWayMemberBlock.getStateFromMeta(stack.getMetadata()).getValue(AunisProps.MEMBER_VARIANT);
+		EnumMemberVariant variant = AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.getStateFromMeta(stack.getMetadata()).getValue(AunisProps.MEMBER_VARIANT);
 		
 		switch (variant) {
 			case CHEVRON:

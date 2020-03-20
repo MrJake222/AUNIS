@@ -33,7 +33,7 @@ public class BoundingHelper {
 		}
 		
 		else {	
-			if (state.getBlock() == AunisBlocks.stargateMilkyWayMemberBlock && access.getBlockState(pos).getBlock() == AunisBlocks.stargateMilkyWayMemberBlock) {
+			if (state.getBlock() == AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK && access.getBlockState(pos).getBlock() == AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK) {
 				state = state.getBlock().getExtendedState(state, access, pos);
 				IBlockState camoState = ((IExtendedBlockState) state).getValue(AunisProps.CAMO_BLOCKSTATE);
 				

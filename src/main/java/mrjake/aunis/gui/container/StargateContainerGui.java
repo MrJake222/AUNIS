@@ -5,15 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.gui.element.Tab;
 import mrjake.aunis.gui.element.TabAddress;
+import mrjake.aunis.stargate.StargateClassicEnergyStorage;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile.StargateUpgradeEnum;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 
 public class StargateContainerGui extends GuiContainer {
 	
@@ -25,6 +28,9 @@ public class StargateContainerGui extends GuiContainer {
 	private TabAddress milkyWayAddressTab;
 	private TabAddress pegasusAddressTab;
 	private TabAddress universeAddressTab;
+	
+	private int energyStored;
+	private int maxEnergyStored;
 		
 	public StargateContainerGui(StargateContainer container) {
 		super(container);
@@ -89,7 +95,7 @@ public class StargateContainerGui extends GuiContainer {
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		drawDefaultBackground();
-		
+				
 		boolean hasAddressUpgrade = false;
 		boolean hasMilkyWayUpgrade = false;
 		boolean hasAtlantisUpgrade = false;
@@ -128,6 +134,20 @@ public class StargateContainerGui extends GuiContainer {
 		
 		Tab.updatePositions(tabs);
 		
+		StargateClassicEnergyStorage energyStorageInternal = (StargateClassicEnergyStorage) container.gateTile.getCapability(CapabilityEnergy.ENERGY, null);
+		energyStored = energyStorageInternal.getEnergyStoredInternally();
+		maxEnergyStored = energyStorageInternal.getMaxEnergyStoredInternally();
+		
+		for (int i=4; i<7; i++) {
+			IEnergyStorage energyStorage = container.getSlot(i).getStack().getCapability(CapabilityEnergy.ENERGY, null);
+			
+			if (energyStorage == null)
+				continue;
+			
+			energyStored += energyStorage.getEnergyStored();
+			maxEnergyStored += energyStorage.getMaxEnergyStored();
+		}
+				
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		renderHoveredToolTip(mouseX, mouseY);
 	}
@@ -142,14 +162,18 @@ public class StargateContainerGui extends GuiContainer {
 		GlStateManager.color(1,1,1, 1);
 		drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 512, 512);
 		
-		drawGradientRect(guiLeft+10, guiTop+61, guiLeft+10+156/4/2, guiTop+61+6, 0xffcc2828, 0xff731616);
+		for (int i=container.gateTile.getPowerTier(); i<4; i++)
+			drawModalRectWithCustomSizedTexture(guiLeft+10+39*i, guiTop+61, 0, 168, 39, 6, 512, 512);
+		
+		int width = Math.round((energyStored/(float)AunisConfig.powerConfig.stargateEnergyStorage * 156));
+		drawGradientRect(guiLeft+10, guiTop+61, guiLeft+10+width, guiTop+61+6, 0xffcc2828, 0xff731616);
 	}
 	
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		fontRenderer.drawString(I18n.format("gui.stargate.capacitors"), 112, 29, 4210752);
-		
-		String energy = "23.54 %";
+				
+		String energy = String.format("%.2f", energyStored/(float)maxEnergyStored * 100) + " %";
 		fontRenderer.drawString(energy, 168-fontRenderer.getStringWidth(energy)+2, 71, 4210752);
 
 		fontRenderer.drawString(I18n.format("gui.upgrades"), 7, 6, 4210752);

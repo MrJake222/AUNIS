@@ -18,7 +18,7 @@ public class AunisItems {
 	/**
 	 * DHD power/control crystal
 	 */
-	public static CrystalControlDHDItem crystalControlDhd = new CrystalControlDHDItem();
+	public static Item crystalControlDhd = ItemHelper.createGenericItem("crystal_control_dhd");
 	
 	/**
 	 * These allow for dialing 8th glyph(cross dimension travel)

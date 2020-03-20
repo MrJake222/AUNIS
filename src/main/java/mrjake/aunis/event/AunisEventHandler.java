@@ -46,7 +46,7 @@ public class AunisEventHandler {
 			boolean cancelled = false;
 			
 			cancelled |= block == AunisBlocks.DHD_BLOCK;
-			cancelled |= (block == AunisBlocks.stargateMilkyWayMemberBlock || block == AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
+			cancelled |= (block == AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK || block == AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
 			cancelled |= (block == AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
 //			cancelled |= block instanceof CrystalInfuserBlock;
 			

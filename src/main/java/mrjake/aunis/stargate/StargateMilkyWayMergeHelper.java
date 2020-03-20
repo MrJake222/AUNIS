@@ -40,7 +40,7 @@ public class StargateMilkyWayMergeHelper extends StargateAbstractMergeHelper {
 	private static final AunisAxisAlignedBB BASE_SEARCH_BOX_LARGE = new AunisAxisAlignedBB(-5, -9, 0, 5, 0, 0);
 	
 	public static final BlockMatcher BASE_MATCHER = BlockMatcher.forBlock(AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK);
-	public static final BlockMatcher MEMBER_MATCHER = BlockMatcher.forBlock(AunisBlocks.stargateMilkyWayMemberBlock);
+	public static final BlockMatcher MEMBER_MATCHER = BlockMatcher.forBlock(AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK);
 		
 	private static final List<BlockPos> RING_BLOCKS_SMALL = Arrays.asList(
 			new BlockPos(1, 7, 0),
@@ -245,7 +245,7 @@ public class StargateMilkyWayMergeHelper extends StargateAbstractMergeHelper {
 		for (BlockPos pos : oldPatternBlocks)
 			world.setBlockToAir(pos.rotate(FacingToRotation.get(baseFacing)).add(basePos));
 		
-		IBlockState memberState = AunisBlocks.stargateMilkyWayMemberBlock.getDefaultState()
+		IBlockState memberState = AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.getDefaultState()
 				.withProperty(AunisProps.FACING_HORIZONTAL, baseFacing)
 				.withProperty(AunisProps.RENDER_BLOCK, false);
 		

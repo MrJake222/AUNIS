@@ -7,7 +7,6 @@ import mrjake.aunis.fluid.AunisBlockFluid;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.PageNotebookItem;
-import mrjake.aunis.item.color.CrystalControlDHDItemColor;
 import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
 import mrjake.aunis.item.renderer.PageNotebookTEISR;
@@ -18,7 +17,6 @@ import mrjake.aunis.renderer.stargate.StargateMilkyWayRenderer;
 import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
 import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.sound.AunisSoundHelperClient;
-import mrjake.aunis.tileentity.CrystalInfuserTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
@@ -48,10 +46,9 @@ public class ProxyClient implements IProxy {
 	}
 
 	public void init(FMLInitializationEvent event) {
-		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new CrystalControlDHDItemColor(), AunisItems.crystalControlDhd);
 		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageMysteriousItemColor(), AunisItems.pageMysteriousItem);
     	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageNotebookItemColor(), AunisItems.pageNotebookItem);
-		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.stargateMilkyWayMemberBlock);
+		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK);
     }
  
     public void postInit(FMLPostInitializationEvent event) {
@@ -71,7 +68,6 @@ public class ProxyClient implements IProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateOrlinBaseTile.class, new StargateOrlinRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, new DHDRenderer());
 		
-		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, specialRenderer);
 		ClientRegistry.bindTileEntitySpecialRenderer(TransportRingsTile.class, specialRenderer);
 		ClientRegistry.bindTileEntitySpecialRenderer(TRControllerTile.class, specialRenderer);
 	}
