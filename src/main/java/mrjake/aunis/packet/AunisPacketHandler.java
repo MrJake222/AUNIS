@@ -1,5 +1,6 @@
 package mrjake.aunis.packet;
 
+import mrjake.aunis.packet.SetOpenTabToServer.SetOpenTabServerHandler;
 import mrjake.aunis.packet.SoundPositionedPlayToClient.PlayPositionedSoundClientHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient.StateUpdateClientHandler;
 import mrjake.aunis.packet.StateUpdateRequestToServer.StateUpdateServerHandler;
@@ -30,6 +31,7 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(StateUpdateServerHandler.class, StateUpdateRequestToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(SaveRingsParametersServerHandler.class, SaveRingsParametersToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(TRControllerActivatedServerHandler.class, TRControllerActivatedToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(SetOpenTabServerHandler.class, SetOpenTabToServer.class, id, Side.SERVER); id++;
 
 		
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, StargateMotionToClient.class, id, Side.CLIENT); id++;

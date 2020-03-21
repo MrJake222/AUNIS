@@ -157,3 +157,4 @@ gui.dhd.no_fuel=No fuel
 
 gui.stargate.milky_way_address=Milky Way address
 gui.stargate.capacitors=Capacitors
+gui.stargate.energyBuffer=Energy buffer

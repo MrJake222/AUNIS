@@ -31,7 +31,8 @@ public enum EnumScheduledTask {
 	STARGATE_MANUAL_OPEN(21, -1),
 	STARGATE_LIGHTING_UPDATE_CLIENT(22, 5),
 	STARGATE_ORLIN_FAILED_SOUND(23, -1),
-	STARGATE_FAIL(24, -1);	
+	STARGATE_FAIL(24, -1),
+	STARGATE_GIVE_PAGE(25, -1);	
 	
 	public int id;
 	public int waitTicks;

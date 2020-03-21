@@ -8,6 +8,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.items.SlotItemHandler;
 
 public class Tab {
 	
@@ -24,8 +25,8 @@ public class Tab {
 	protected String tabTitle;
 	
 	// Background texture
-	private ResourceLocation bgTexLocation;
-	private int textureSize;
+	protected ResourceLocation bgTexLocation;
+	protected int textureSize;
 	private int bgTexX;
 	private int bgTexY;
 	
@@ -179,7 +180,7 @@ public class Tab {
 	// ------------------------------------------------------------------------------------------------
 	// Interaction
 	
-	public static void tabsInteract(List<Tab> tabs, int tabIndex) {
+	public static boolean tabsInteract(List<Tab> tabs, int tabIndex) {
 		Tab tab = tabs.get(tabIndex);
 		
 		// Tabs higher than clicked one
@@ -195,10 +196,13 @@ public class Tab {
 				tab2.hideTab();
 		}
 		
-		if (tab.isOpen())
+		if (tab.isOpen()) {
 			tab.closeTab();
-		else
+			return false;
+		} else {
 			tab.openTab();
+			return true;
+		}
 	}
 	
 	public static void updatePositions(List<Tab> tabs) {
@@ -318,6 +322,28 @@ public class Tab {
 		
 		public Tab build() {
 			return new Tab(this);
+		}
+	}
+	
+	
+	// ------------------------------------------------------------------------------------------------
+	// Tab slot
+		
+	public class SlotTab extends SlotItemHandler {
+		
+		public SlotTab(SlotItemHandler slot) {
+			super(slot.getItemHandler(), slot.getSlotIndex(), slot.xPos, slot.yPos);
+			this.slotNumber = slot.slotNumber;
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return isTabOpen && !animate;
+		}
+		
+		public void updatePos() {
+			this.xPos = currentOffsetX + 106;
+			this.yPos = defaultY + 87;
 		}
 	}
 }

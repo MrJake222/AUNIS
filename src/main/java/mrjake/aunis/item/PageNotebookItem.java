@@ -3,21 +3,13 @@ package mrjake.aunis.item;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.IRegistry;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -69,52 +61,6 @@ public class PageNotebookItem extends Item {
 				}
 			}
 		}
-	}
-	
-	@Override
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		if (!world.isRemote) {
-			Block block = world.getBlockState(pos).getBlock();
-			
-			if (block == AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) {
-				StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(pos);
-				NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
-				
-				if (compound == null)
-					compound = new NBTTagCompound();
-				else
-					compound = compound.copy();
-				
-				long serialized = EnumSymbol.toLong(gateTile.gateAddress);
-				compound.setLong("address", serialized);
-				
-				// TODO Restore 7th symbol
-//				if (gateTile.hasUpgrade())
-//					compound.setInteger("7th", gateTile.gateAddress.get(6).id);
-//				else
-//					compound.removeTag("7th");
-				
-				
-				String reg = world.getBiome(pos).getRegistryName().getPath();
-				compound.setInteger("color", getColorForBiome(reg));
-				
-				ItemStack stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
-				stack.setTagCompound(compound);
-				
-				ItemStack held = player.getHeldItem(hand);
-				held.shrink(1);
-				
-				if (held.isEmpty())				
-					player.setHeldItem(hand, stack);
-				
-				else {
-					player.setHeldItem(hand, held);
-					player.addItemStackToInventory(stack);
-				}
-			}
-		}
-	
-		return EnumActionResult.PASS;
 	}
 	
 	

@@ -2,6 +2,7 @@ package mrjake.aunis.gui.container;
 
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.util.ContainerHelper;
+import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.StargateClassicEnergyStorage;
@@ -26,9 +27,11 @@ import net.minecraftforge.items.SlotItemHandler;
 public class StargateContainer extends Container {
 
 	public StargateClassicBaseTile gateTile;
+	public int openTabId = -1;
 	
 	private BlockPos pos;
 	private int lastEnergyStored;
+	private int lastProgress;
 	
 	public StargateContainer(IInventory playerInventory, World world, int x, int y, int z) {
 		pos = new BlockPos(x, y, z);
@@ -46,6 +49,9 @@ public class StargateContainer extends Container {
 		for (int col=0; col<3; col++) {				
 			addSlotToContainer(new SlotItemHandler(itemHandler, col+4, 115+18*col, 40));
 		}
+
+		for (int i=0; i<3; i++)
+			addSlotToContainer(new SlotItemHandler(itemHandler, i+7, -22, 89+22*i));
 		
 		for (Slot slot : ContainerHelper.generatePlayerSlots(playerInventory, 86))
 			addSlotToContainer(slot);
@@ -57,19 +63,24 @@ public class StargateContainer extends Container {
 	}
 	
 	@Override
+	public void updateProgressBar(int id, int data) {		
+		gateTile.setPageProgress(data);
+	}
+	
+	@Override
     public ItemStack transferStackInSlot(EntityPlayer player, int index) {
 		ItemStack stack = getSlot(index).getStack();
 		
 		// Transfering from Stargate to player's inventory
-        if (index < 7) {
-        	if (!mergeItemStack(stack, 7, inventorySlots.size(), false)) {
+        if (index < 10) {
+        	if (!mergeItemStack(stack, 10, inventorySlots.size(), false)) {
         		return ItemStack.EMPTY;
         	}
         	
 			putStackInSlot(index, ItemStack.EMPTY);
         }
         
-		// Transfering from player's inventory to DHD
+		// Transfering from player's inventory to Stargate
         else {
         	// Capacitors
         	if (stack.getItem() == Item.getItemFromBlock(AunisBlocks.CAPACITOR_BLOCK)) {
@@ -86,9 +97,7 @@ public class StargateContainer extends Container {
         		}
         	}
         	
-        	else 
-        	
-        	if (StargateUpgradeEnum.contains(stack.getItem())) {
+        	else if (StargateUpgradeEnum.contains(stack.getItem())) {
         		for (int i=0; i<4; i++) {
         			if (!getSlot(i).getHasStack()) {
         				ItemStack stack1 = stack.copy();
@@ -100,6 +109,18 @@ public class StargateContainer extends Container {
         				return stack;
         			}
         		}
+        	}
+        	
+        	else if (stack.getItem() == AunisItems.pageNotebookItem && openTabId != -1) {        		
+    			if (!getSlot(7+openTabId).getHasStack()) {
+    				ItemStack stack1 = stack.copy();
+    				stack1.setCount(1);
+    				
+    				putStackInSlot(7+openTabId, stack1);
+    				stack.shrink(1);
+    				
+    				return ItemStack.EMPTY;
+    			}
         	}
         	
         	return ItemStack.EMPTY;
@@ -120,6 +141,16 @@ public class StargateContainer extends Container {
 					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_UPDATE, new StargateContainerGuiUpdate(energyStorage.getEnergyStoredInternally())), (EntityPlayerMP) listener);
 				}
 			}
+			
+			lastEnergyStored = energyStorage.getEnergyStoredInternally();
+		}
+		
+		if (lastProgress != gateTile.getPageProgress()) {
+			for (IContainerListener listener : listeners) {
+				listener.sendWindowProperty(this, 0, gateTile.getPageProgress());
+			}
+			
+			lastProgress = gateTile.getPageProgress();
 		}
 	}
 	

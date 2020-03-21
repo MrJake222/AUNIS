@@ -7,6 +7,7 @@ import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.container.StargateContainerGuiState;
 import mrjake.aunis.gui.container.StargateContainerGuiUpdate;
 import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.item.PageNotebookItem;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateClassicRendererState;
 import mrjake.aunis.stargate.EnumScheduledTask;
@@ -98,6 +99,64 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 
 		playSoundEvent(StargateSoundEventEnum.DIAL_FAILED, 0.3f);
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 53));
+	}
+	
+	
+	// ------------------------------------------------------------------------
+	// Loading and ticking
+	
+	@Override
+	public void update() {
+		super.update();
+		
+		if (!world.isRemote) {
+			if (givePageTask != null) {
+				if (givePageTask.update(world.getTotalWorldTime())) {
+					givePageTask = null;
+				}
+			}
+			
+			if (doPageProgress) {
+				if (world.getTotalWorldTime() % 2 == 0) {
+					pageProgress++;
+				
+					if (pageProgress > 18) {
+						pageProgress = 0;
+						doPageProgress = false;
+					}
+				}
+				
+				if (itemStackHandler.getStackInSlot(pageSlotId).isEmpty()) {
+					lockPage = false;
+					doPageProgress = false;
+					pageProgress = 0;
+					givePageTask = null;
+				}
+			}
+			
+			else {
+//				Aunis.info("lock: " + lockPage);
+					
+				if (lockPage && itemStackHandler.getStackInSlot(pageSlotId).isEmpty()) {
+					lockPage = false;
+				}
+				
+				if (!lockPage) {
+					for (int i=7; i<10; i++) {
+						if (!itemStackHandler.getStackInSlot(i).isEmpty()) {
+							doPageProgress = true;
+							lockPage = true;
+							pageSlotId = i;
+							givePageTask = new ScheduledTask(EnumScheduledTask.STARGATE_GIVE_PAGE, 36);
+							givePageTask.setTaskCreated(world.getTotalWorldTime());
+							givePageTask.setExecutor(this);
+							
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	
@@ -261,11 +320,48 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				markDirty();
 				break;
 				
+			case STARGATE_GIVE_PAGE:
+				NBTTagCompound compound = new NBTTagCompound();
+				
+				long serialized = EnumSymbol.toLong(gateAddress);
+				compound.setLong("address", serialized);
+				
+				if (hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE))
+					compound.setInteger("7th", gateAddress.get(6).id);
+				else
+					compound.removeTag("7th");
+				
+				String reg = world.getBiome(pos).getRegistryName().getPath();
+				compound.setInteger("color", PageNotebookItem.getColorForBiome(reg));
+				
+				ItemStack stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
+				stack.setTagCompound(compound);
+				itemStackHandler.setStackInSlot(pageSlotId, stack);
+				
+				break;
+				
 			default:
 				super.executeTask(scheduledTask, customData);
 		}
 	}
 	
+	
+	// -----------------------------------------------------------------------------
+	// Page conversion
+	
+	private short pageProgress = 0;
+	private int pageSlotId;
+	private boolean doPageProgress;
+	private ScheduledTask givePageTask;
+	private boolean lockPage;
+	
+	public short getPageProgress() {
+		return pageProgress;
+	}
+	
+	public void setPageProgress(int pageProgress) {
+		this.pageProgress = (short) pageProgress;
+	}
 	
 	// -----------------------------------------------------------------------------
 	// Item handler

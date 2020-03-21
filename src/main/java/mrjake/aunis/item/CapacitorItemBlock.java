@@ -29,12 +29,14 @@ public class CapacitorItemBlock extends ItemBlock {
 	
 	@Override
 	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
-		items.add(new ItemStack(this));
-		
-		ItemStack stack = new ItemStack(this);
-		StargateAbstractEnergyStorage energyStorage = (StargateAbstractEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null);
-		energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored());
-		items.add(stack);
+		if (isInCreativeTab(tab)) {
+			items.add(new ItemStack(this));
+			
+			ItemStack stack = new ItemStack(this);
+			StargateAbstractEnergyStorage energyStorage = (StargateAbstractEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null);
+			energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored());
+			items.add(stack);
+		}
 	}
 
 	@Override

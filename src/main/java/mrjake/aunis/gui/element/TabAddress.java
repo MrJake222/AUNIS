@@ -1,16 +1,17 @@
 package mrjake.aunis.gui.element;
 
 import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 
 public class TabAddress extends Tab {
 	
 	// Gate's address
-	private StargateAbstractBaseTile gateTile;
+	private StargateClassicBaseTile gateTile;
 	private int maxSymbols;
 	
 	protected TabAddress(TabAddressBuilder builder) {
@@ -36,6 +37,10 @@ public class TabAddress extends Tab {
 				SymbolCoords symbolCoords = getSymbolCoords(i, maxSymbols);
 				GuiHelper.drawTexturedRectWithShadow(symbolCoords.x, symbolCoords.y, 2, 2, 32);
 			}
+			
+			Minecraft.getMinecraft().getTextureManager().bindTexture(bgTexLocation);
+			int progress = gateTile.getPageProgress();
+			Gui.drawModalRectWithCustomSizedTexture(guiLeft+currentOffsetX+97, guiTop+defaultY+86+(18-progress), 0, 174+(18-progress), 6, progress, textureSize, textureSize);
 		}
 	}
 	
@@ -82,9 +87,9 @@ public class TabAddress extends Tab {
 	public static class TabAddressBuilder extends TabBuilder {
 		
 		// Gate's TileEntity reference
-		private StargateAbstractBaseTile gateTile;
+		private StargateClassicBaseTile gateTile;
 		
-		public TabAddressBuilder setGateTile(StargateAbstractBaseTile gateTile) {
+		public TabAddressBuilder setGateTile(StargateClassicBaseTile gateTile) {
 			this.gateTile = gateTile;
 			
 			return this;

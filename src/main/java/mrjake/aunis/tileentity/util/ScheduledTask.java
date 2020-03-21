@@ -143,8 +143,7 @@ public class ScheduledTask implements INBTSerializable<NBTTagCompound> {
 	 * Main waiting function. Call this in {@link ITickable#update()}.
 	 * 
 	 * @param worldTicks Usually {@link World#getTotalWorldTime()}.
-	 * 
-	 * If this {@link ScheduledTask} should be removed.
+	 * @return {@code True} if this {@link ScheduledTask} should be removed.
 	 */
 	public boolean update(long worldTicks) {
 		int waitTime = customWaitTime ? this.waitTime : scheduledTask.waitTicks;

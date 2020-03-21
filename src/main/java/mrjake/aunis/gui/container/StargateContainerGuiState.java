@@ -29,7 +29,7 @@ public class StargateContainerGuiState extends StargateAbstractGuiState {
 		
 		buf.writeLong(EnumSymbol.toLong(gateAddress));
 		
-		buf.writeBoolean(hasUpgrade);
+//		buf.writeBoolean(hasUpgrade);
 		buf.writeInt(gateAddress.get(6).id);
 		
 		buf.writeInt(maxEnergy);

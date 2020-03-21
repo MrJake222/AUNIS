@@ -2,12 +2,16 @@ package mrjake.aunis.gui.container;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.gui.element.Tab;
+import mrjake.aunis.gui.element.Tab.SlotTab;
 import mrjake.aunis.gui.element.TabAddress;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.SetOpenTabToServer;
 import mrjake.aunis.stargate.StargateClassicEnergyStorage;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile.StargateUpgradeEnum;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -15,8 +19,10 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.items.SlotItemHandler;
 
 public class StargateContainerGui extends GuiContainer {
 	
@@ -90,6 +96,10 @@ public class StargateContainerGui extends GuiContainer {
 		tabs.add(milkyWayAddressTab);
 		tabs.add(pegasusAddressTab);
 		tabs.add(universeAddressTab);
+		
+		container.inventorySlots.set(7, milkyWayAddressTab.new SlotTab((SlotItemHandler) container.getSlot(7)));
+		container.inventorySlots.set(8, pegasusAddressTab.new SlotTab((SlotItemHandler) container.getSlot(8)));
+		container.inventorySlots.set(9, universeAddressTab.new SlotTab((SlotItemHandler) container.getSlot(9)));
 	}
 
 	@Override
@@ -147,8 +157,12 @@ public class StargateContainerGui extends GuiContainer {
 			energyStored += energyStorage.getEnergyStored();
 			maxEnergyStored += energyStorage.getMaxEnergyStored();
 		}
+		
+		for (int i=7; i<10; i++)
+			((SlotTab) container.getSlot(i)).updatePos();
 				
 		super.drawScreen(mouseX, mouseY, partialTicks);
+		
 		renderHoveredToolTip(mouseX, mouseY);
 	}
 	
@@ -173,8 +187,8 @@ public class StargateContainerGui extends GuiContainer {
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		fontRenderer.drawString(I18n.format("gui.stargate.capacitors"), 112, 29, 4210752);
 				
-		String energy = String.format("%.2f", energyStored/(float)maxEnergyStored * 100) + " %";
-		fontRenderer.drawString(energy, 168-fontRenderer.getStringWidth(energy)+2, 71, 4210752);
+		String energyPercent = String.format("%.2f", energyStored/(float)maxEnergyStored * 100) + " %";
+		fontRenderer.drawString(energyPercent, 168-fontRenderer.getStringWidth(energyPercent)+2, 71, 4210752);
 
 		fontRenderer.drawString(I18n.format("gui.upgrades"), 7, 6, 4210752);
         fontRenderer.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
@@ -182,8 +196,19 @@ public class StargateContainerGui extends GuiContainer {
 		for (Tab tab : tabs) {
 			tab.renderFg(this, fontRenderer, mouseX, mouseY);
 		}
+		
+		String energy = String.format("%,d", energyStored);
+		String capacity = String.format("%,d", maxEnergyStored);
+		
+		if (isPointInRegion(10, 61, 156, 6, mouseX, mouseY)) {
+			List<String> power = Arrays.asList(
+					I18n.format("gui.stargate.energyBuffer"),
+					TextFormatting.GRAY + energy + " / " + capacity + " RF",
+					TextFormatting.GRAY + energyPercent);
+			drawHoveringText(power, mouseX-guiLeft, mouseY-guiTop);
+		}
 	}
-
+	
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
@@ -192,7 +217,12 @@ public class StargateContainerGui extends GuiContainer {
 			Tab tab = tabs.get(i);
 			
 			if (tab.isCursorOnTab(mouseX, mouseY)) {
-				Tab.tabsInteract(tabs, i);
+				if (Tab.tabsInteract(tabs, i))
+					container.openTabId = i;
+				else
+					container.openTabId = -1;
+				
+				AunisPacketHandler.INSTANCE.sendToServer(new SetOpenTabToServer(container.openTabId));
 				
 				break;
 			}
