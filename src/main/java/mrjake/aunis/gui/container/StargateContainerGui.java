@@ -13,6 +13,10 @@ import mrjake.aunis.gui.element.TabAddress;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.SetOpenTabToServer;
 import mrjake.aunis.stargate.StargateClassicEnergyStorage;
+import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
+import mrjake.aunis.stargate.network.SymbolPegasusEnum;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
+import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile.StargateUpgradeEnum;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -54,6 +58,7 @@ public class StargateContainerGui extends GuiContainer {
 				
 		milkyWayAddressTab = (TabAddress) TabAddress.builder()
 				.setGateTile(container.gateTile)
+				.setSymbolType(SymbolTypeEnum.MILKYWAY)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2)
 				.setOpenPosition(-128)
@@ -67,11 +72,12 @@ public class StargateContainerGui extends GuiContainer {
 		
 		pegasusAddressTab = (TabAddress) TabAddress.builder()
 				.setGateTile(container.gateTile)
+				.setSymbolType(SymbolTypeEnum.PEGASUS)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2+22)
 				.setOpenPosition(-128)
 				.setTabSize(128, 113)
-				.setTabTitle(I18n.format("gui.stargate.milky_way_address"))
+				.setTabTitle(I18n.format("gui.stargate.pegasus_address"))
 				.setTexture(BACKGROUND_TEXTURE, 512)
 				.setBackgroundTextureLocation(176, 0)
 				.setIconRenderPos(1, 7)
@@ -80,18 +86,17 @@ public class StargateContainerGui extends GuiContainer {
 		
 		universeAddressTab = (TabAddress) TabAddress.builder()
 				.setGateTile(container.gateTile)
+				.setSymbolType(SymbolTypeEnum.UNIVERSE)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2+22*2)
 				.setOpenPosition(-128)
 				.setTabSize(128, 113)
-				.setTabTitle(I18n.format("gui.stargate.milky_way_address"))
+				.setTabTitle(I18n.format("gui.stargate.universe_address"))
 				.setTexture(BACKGROUND_TEXTURE, 512)
 				.setBackgroundTextureLocation(176, 0)
 				.setIconRenderPos(1, 7)
 				.setIconSize(20, 18)
 				.setIconTextureLocation(128, 18*2).build();
-		
-		universeAddressTab.setMaxSymbols(7);
 		
 		tabs.add(milkyWayAddressTab);
 		tabs.add(pegasusAddressTab);
@@ -135,8 +140,9 @@ public class StargateContainerGui extends GuiContainer {
 			}
 		}
 		
-		milkyWayAddressTab.setMaxSymbols(hasAddressUpgrade ? 7 : 6);
-		pegasusAddressTab.setMaxSymbols(hasAddressUpgrade ? 7 : 6);
+		milkyWayAddressTab.setMaxSymbols(SymbolMilkyWayEnum.getMaxSymbolsDisplay(hasAddressUpgrade));
+		pegasusAddressTab.setMaxSymbols(SymbolPegasusEnum.getMaxSymbolsDisplay(hasAddressUpgrade));
+		universeAddressTab.setMaxSymbols(SymbolUniverseEnum.getMaxSymbolsDisplay(hasAddressUpgrade));
 		
 		milkyWayAddressTab.setVisible(hasMilkyWayUpgrade);
 		pegasusAddressTab.setVisible(hasAtlantisUpgrade);

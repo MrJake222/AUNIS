@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.renderer.BlockRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
@@ -23,16 +22,16 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 
-public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer<StargateAbstractBaseTile> {
+public abstract class StargateAbstractRenderer<S extends StargateAbstractRendererState> extends TileEntitySpecialRenderer<StargateAbstractBaseTile> {
 	
 	// ---------------------------------------------------------------------------------------
 	// Render
 	
 	@Override
 	public void render(StargateAbstractBaseTile te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-		StargateAbstractRendererState rendererState = te.getRendererStateClient();
+		@SuppressWarnings("unchecked")
+		S rendererState = (S) te.getRendererStateClient();
 		
 		if (rendererState != null) {		
 			GlStateManager.pushMatrix();
@@ -51,22 +50,13 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 					for (AunisAxisAlignedBB b : te.getLocalInnerBlockBoxes())
 						b.render(x, y, z);
 				}
-						
-				Vec3d vec = getRenderTranslation(rendererState);
-				double scale = getRenderScale(rendererState);
-				GlStateManager.translate(vec.x, vec.y, vec.z);			
-				GlStateManager.scale(scale, scale, scale);
+				
 	            GlStateManager.disableRescaleNormal();
 				
+	            applyTransformations(rendererState);
 				applyLightMap(rendererState, partialTicks);
-	//			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 				
-				renderRing(rendererState, partialTicks);
-				
-				GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
-				
-				renderGate();
-				renderChevrons(rendererState, partialTicks);
+				renderGate(rendererState, partialTicks);
 				
 				if (rendererState.doEventHorizonRender)
 					renderKawoosh(rendererState, partialTicks);
@@ -95,7 +85,7 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 		}
 	}
 	
-	protected boolean shouldRender(StargateAbstractRendererState rendererState) {
+	protected boolean shouldRender(S rendererState) {
 		IBlockState state = getWorld().getBlockState(rendererState.pos);
 		return state.getPropertyKeys().contains(AunisProps.RENDER_BLOCK) && !state.getValue(AunisProps.RENDER_BLOCK);
 	}
@@ -105,14 +95,10 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 	 */
 	protected abstract Map<BlockPos, IBlockState> getMemberBlockStates(EnumFacing facing);
 		
-	protected abstract void applyLightMap(StargateAbstractRendererState rendererState, double partialTicks);
-	protected abstract double getRenderScale(StargateAbstractRendererState rendererState);
-	protected abstract Vec3d getRenderTranslation(StargateAbstractRendererState rendererState);
+	protected abstract void applyLightMap(S rendererState, double partialTicks);
+	protected abstract void applyTransformations(S rendererState);
+	protected abstract void renderGate(S rendererState, double partialTicks);
 	
-	protected abstract void renderGate();
-	protected abstract void renderRing(StargateAbstractRendererState rendererState, double partialTicks);
-	protected abstract void renderChevrons(StargateAbstractRendererState rendererState, double partialTicks);	
-		
 	private static final float VORTEX_START = 5.275f;
 	private static final float SPEED_FACTOR = 6f;
 	
@@ -163,7 +149,8 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0, 0, 0.1);
 		
-		ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2.jpg"));
+//		ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2.jpg"));
+		rendererDispatcher.renderEngine.bindTexture(rendererState.getEventHorizonTexture());
 		
 		long kawooshStart = rendererState.gateWaitStart + 44;
 		float tick = (float) (getWorld().getTotalWorldTime() - kawooshStart + partialTicks);
@@ -315,8 +302,8 @@ public abstract class StargateAbstractRenderer extends TileEntitySpecialRenderer
 		if (rendererState.vortexState != null) {
 			if ( rendererState.vortexState == (EnumVortexState.STILL) || rendererState.vortexState == EnumVortexState.CLOSING ) {
 				
-				if (rendererState.horizonUnstable)
-					ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2_unstable.jpg"));
+//				if (rendererState.horizonUnstable)
+//					ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2_unstable.jpg"));
 				
 				if ( rendererState.vortexState == EnumVortexState.CLOSING )
 					renderEventHorizon(partialTicks, true, rendererState.whiteOverlayAlpha, false, 1.7f);

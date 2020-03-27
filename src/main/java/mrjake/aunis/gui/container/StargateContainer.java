@@ -106,7 +106,7 @@ public class StargateContainer extends Container {
         				putStackInSlot(i, stack1);
         				stack.shrink(1);
         				
-        				return stack;
+        				return ItemStack.EMPTY;
         			}
         		}
         	}
@@ -159,6 +159,6 @@ public class StargateContainer extends Container {
 		super.addListener(listener);
 		
 		if (listener instanceof EntityPlayerMP)
-			AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_STATE, new StargateContainerGuiState(gateTile.gateAddress, false, 0, 0, 0, 0)), (EntityPlayerMP) listener);
+			AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_STATE, gateTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) listener);
 	}
 }

@@ -3,13 +3,15 @@ package mrjake.aunis.item;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.network.StargateAddress;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.IRegistry;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -45,49 +47,58 @@ public class PageNotebookItem extends Item {
 		}
 		
 		else {			
-			NBTTagCompound compound = stack.getTagCompound();
-			if (compound != null) {
-				long serialized = compound.getLong("address");
-				List<Integer> address = EnumSymbol.fromLong(serialized);
-								
-				for (int id : address) {
-					tooltip.add(TextFormatting.ITALIC + "" + TextFormatting.AQUA + EnumSymbol.valueOf(id).localize());
-				}
+			if (stack.hasTagCompound()) {
+				NBTTagCompound compound = stack.getTagCompound();
 				
-				if (compound.hasKey("7th")) {
-		    		EnumSymbol seventh = EnumSymbol.valueOf(compound.getInteger("7th"));
-		    		
-					tooltip.add(TextFormatting.ITALIC + "" + TextFormatting.DARK_PURPLE + seventh.localize());
+				SymbolTypeEnum symbolType = SymbolTypeEnum.valueOf(compound.getInteger("symbolType"));
+				StargateAddress stargateAddress = new StargateAddress(compound.getCompoundTag("address"));
+				int maxSymbols = symbolType.getMaxSymbolsDisplay(compound.getBoolean("hasUpgrade"));
+								
+				for (int i=0; i<maxSymbols; i++) {
+					tooltip.add(TextFormatting.ITALIC + "" + (i > symbolType.minSymbols-1 ? TextFormatting.DARK_PURPLE : TextFormatting.AQUA) + stargateAddress.get(i).localize());
 				}
 			}
 		}
 	}
 	
-	
 	/**
 	 * Returns color from the Biome
 	 * 
-	 * @param reg - Registry path of the Biome
+	 * @param registryPath - Registry path of the Biome
 	 * @return color
 	 */
-	public static int getColorForBiome(String reg) {
+	public static int getColorForBiome(String registryPath) {
 		int color = 0x303000;
 		
-		if (reg.contains("ocean") || reg.contains("river")) color = 0x2131A0;
-		else if (reg.contains("plains")) color = 0x48703D;
-		else if (reg.contains("desert") || reg.contains("beach")) color = 0x9B9C6E;
-		else if (reg.contains("extreme_hills")) color = 0x736150;
-		else if (reg.contains("forest")) color = 0x507341;
-		else if (reg.contains("taiga")) color = 0x7BA9A9;
-		else if (reg.contains("swamp")) color = 0x6B7337;
-		else if (reg.contains("hell")) color = 0x962A0B;
-		else if (reg.contains("sky")) color = 0x67897A;
-		else if (reg.contains("ice")) color = 0x69B8C6;
-		else if (reg.contains("mushroom")) color = 0x544B4D;
-		else if (reg.contains("jungle")) color = 0x104004;
-		else if (reg.contains("savanna")) color = 0x66622D;
-		else if (reg.contains("mesa")) color = 0x804117;
+		if (registryPath.contains("ocean") || registryPath.contains("river")) color = 0x2131A0;
+		else if (registryPath.contains("plains")) color = 0x48703D;
+		else if (registryPath.contains("desert") || registryPath.contains("beach")) color = 0x9B9C6E;
+		else if (registryPath.contains("extreme_hills")) color = 0x736150;
+		else if (registryPath.contains("forest")) color = 0x507341;
+		else if (registryPath.contains("taiga")) color = 0x7BA9A9;
+		else if (registryPath.contains("swamp")) color = 0x6B7337;
+		else if (registryPath.contains("hell")) color = 0x962A0B;
+		else if (registryPath.contains("sky")) color = 0x67897A;
+		else if (registryPath.contains("ice")) color = 0x69B8C6;
+		else if (registryPath.contains("mushroom")) color = 0x544B4D;
+		else if (registryPath.contains("jungle")) color = 0x104004;
+		else if (registryPath.contains("savanna")) color = 0x66622D;
+		else if (registryPath.contains("mesa")) color = 0x804117;
 		
 		return color;
+	}
+	
+	public static String getRegistryPathFromWorld(World world, BlockPos pos) {
+		return world.getBiome(pos).getRegistryName().getPath();
+	}
+	
+	public static NBTTagCompound getCompoundFromAddress(StargateAddress address, boolean hasUpgrade, String registryPath) {
+		NBTTagCompound compound = new NBTTagCompound();
+		compound.setInteger("symbolType", address.getSymbolType().id);
+		compound.setTag("address", address.serializeNBT());
+		compound.setBoolean("hasUpgrade", hasUpgrade);
+		compound.setInteger("color", PageNotebookItem.getColorForBiome(registryPath));
+		
+		return compound;
 	}
 }

@@ -1,23 +1,24 @@
 package mrjake.aunis.gui.element;
 
-import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.util.ResourceLocation;
 
 public class TabAddress extends Tab {
 	
 	// Gate's address
 	private StargateClassicBaseTile gateTile;
+	private SymbolTypeEnum symbolType;
 	private int maxSymbols;
 	
 	protected TabAddress(TabAddressBuilder builder) {
 		super(builder);
 		
 		this.gateTile = builder.gateTile;
+		this.symbolType = builder.symbolType;
 		this.maxSymbols = 6;
 	}
 	
@@ -28,14 +29,18 @@ public class TabAddress extends Tab {
 	@Override
 	public void render(FontRenderer fontRenderer) {
 		super.render(fontRenderer);
-				
-		if (isVisible() && gateTile.gateAddress != null) {
+		
+		int shadow = 2;
+		
+		if (symbolType == SymbolTypeEnum.PEGASUS)
+			shadow = 1;
+		
+		if (isVisible() && gateTile.getStargateAddress(symbolType) != null) {
 			for (int i=0; i<maxSymbols; i++) {
-				EnumSymbol symbol = gateTile.gateAddress.get(i);
-				Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("aunis:textures/gui/symbol/" + symbol.iconFile));		
+				Minecraft.getMinecraft().getTextureManager().bindTexture(gateTile.getStargateAddress(symbolType).get(i).getIconResource());		
 				
-				SymbolCoords symbolCoords = getSymbolCoords(i, maxSymbols);
-				GuiHelper.drawTexturedRectWithShadow(symbolCoords.x, symbolCoords.y, 2, 2, 32);
+				SymbolCoords symbolCoords = getSymbolCoords(i);
+				GuiHelper.drawTexturedRectWithShadow(symbolCoords.x, symbolCoords.y, shadow, shadow, symbolType.iconWidht, symbolType.iconHeight);
 			}
 			
 			Minecraft.getMinecraft().getTextureManager().bindTexture(bgTexLocation);
@@ -48,23 +53,25 @@ public class TabAddress extends Tab {
 	public void renderFg(GuiScreen screen, FontRenderer fontRenderer, int mouseX, int mouseY) {
 		super.renderFg(screen, fontRenderer, mouseX, mouseY);
 		
-		if (isVisible() && isOpen()) {
-			if (gateTile.gateAddress != null) {
-				for (int i=0; i<maxSymbols; i++) {
-					SymbolCoords symbolCoords = getSymbolCoords(i, maxSymbols);
-					
-					if (GuiHelper.isPointInRegion(symbolCoords.x, symbolCoords.y, 32, 32, mouseX, mouseY)) {
-						EnumSymbol symbol = gateTile.gateAddress.get(i);
-						
-						screen.drawHoveringText(symbol.localize(), mouseX-guiLeft, mouseY-guiTop);
-					}
+		if (isVisible() && isOpen() && gateTile.getStargateAddress(symbolType) != null) {
+			for (int i=0; i<maxSymbols; i++) {
+				SymbolCoords symbolCoords = getSymbolCoords(i);
+				
+				if (GuiHelper.isPointInRegion(symbolCoords.x, symbolCoords.y, symbolType.iconWidht, symbolType.iconHeight, mouseX, mouseY)) {					
+					screen.drawHoveringText(gateTile.getStargateAddress(symbolType).get(i).localize(), mouseX-guiLeft, mouseY-guiTop);
 				}
 			}
 		}
 	}
 	
-	public SymbolCoords getSymbolCoords(int symbol, int maxSymbols) {		
-		return new SymbolCoords(guiLeft+currentOffsetX+29+31*(symbol%3), guiTop+defaultY+19+28*(symbol/3));
+	public SymbolCoords getSymbolCoords(int symbol) {
+		switch (symbolType) {
+			case UNIVERSE:
+				return new SymbolCoords(guiLeft+currentOffsetX+24+16*(symbol%6), guiTop+defaultY+20+45*(symbol/6));
+
+			default:
+				return new SymbolCoords(guiLeft+currentOffsetX+29+31*(symbol%3), guiTop+defaultY+20+28*(symbol/3));
+		}
 	}
 	
 	public static class SymbolCoords {
@@ -88,9 +95,16 @@ public class TabAddress extends Tab {
 		
 		// Gate's TileEntity reference
 		private StargateClassicBaseTile gateTile;
+		private SymbolTypeEnum symbolType;
 		
 		public TabAddressBuilder setGateTile(StargateClassicBaseTile gateTile) {
 			this.gateTile = gateTile;
+			
+			return this;
+		}
+		
+		public TabAddressBuilder setSymbolType(SymbolTypeEnum symbolType) {
+			this.symbolType = symbolType;
 			
 			return this;
 		}

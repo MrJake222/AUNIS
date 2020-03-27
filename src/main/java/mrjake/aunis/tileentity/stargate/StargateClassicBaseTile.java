@@ -1,22 +1,22 @@
 package mrjake.aunis.tileentity.stargate;
 
-import java.util.List;
-
 import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.container.StargateContainerGuiState;
 import mrjake.aunis.gui.container.StargateContainerGuiUpdate;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.PageNotebookItem;
-import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateClassicRendererState;
+import mrjake.aunis.renderer.stargate.StargateClassicRendererState.StargateClassicRendererStateBuilder;
+import mrjake.aunis.sound.StargateSoundEventEnum;
+import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
-import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
 import mrjake.aunis.stargate.StargateClassicEnergyStorage;
-import mrjake.aunis.stargate.StargateSoundEventEnum;
-import mrjake.aunis.stargate.StargateSoundPositionedEnum;
+import mrjake.aunis.stargate.network.StargatePos;
+import mrjake.aunis.stargate.network.SymbolInterface;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.State;
@@ -48,10 +48,14 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	
 	// ------------------------------------------------------------------------
 	// Stargate state
-		
+	
+	protected boolean isFinalActive;
+	
 	@Override
 	protected void disconnectGate() {
 		super.disconnectGate();
+		
+		isFinalActive = false;
 		
 		updateChevronLight();
 		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, dialedAddress.size(), isFinalActive);
@@ -61,8 +65,27 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	protected void failGate() {
 		super.failGate();
 		
+		isFinalActive = false;
+		
 		updateChevronLight();
 		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, dialedAddress.size(), isFinalActive);
+	}
+	
+	@Override
+	public void openGate(StargatePos targetGatePos, boolean isInitiating) {
+		super.openGate(targetGatePos, isInitiating);
+		
+		this.isFinalActive = true;
+	}
+	
+	@Override
+	public void incomingWormhole(int dialedAddressSize) {
+		super.incomingWormhole(dialedAddressSize);
+		
+		isFinalActive = true;
+		
+		playSoundEvent(StargateSoundEventEnum.INCOMING);
+		sendRenderingUpdate(EnumGateAction.LIGHT_UP_CHEVRONS, dialedAddressSize, true);
 	}
 	
 	@Override
@@ -76,29 +99,12 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	
 	// ------------------------------------------------------------------------
 	// Stargate Network
-	// TODO canAddSymbol
 	
 	@Override
-	protected void addSymbolToAddress(EnumSymbol symbol) {
+	protected void addSymbolToAddress(SymbolInterface symbol) {
 		super.addSymbolToAddress(symbol);
 		
 		updateChevronLight();
-	}
-	
-	@Override
-	public void incomingWormhole(List<EnumSymbol> incomingAddress, int dialedAddressSize) {
-		super.incomingWormhole(incomingAddress, dialedAddressSize);
-		
-		playSoundEvent(StargateSoundEventEnum.INCOMING, 0.5f);
-		sendRenderingUpdate(EnumGateAction.LIGHT_UP_CHEVRONS, dialedAddressSize, true);
-	}
-	
-	@Override
-	public void dialingFailed() {
-		super.dialingFailed();
-
-		playSoundEvent(StargateSoundEventEnum.DIAL_FAILED, 0.3f);
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 53));
 	}
 	
 	
@@ -171,7 +177,8 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		compound.setTag("itemHandler", itemStackHandler.serializeNBT());
-				
+		compound.setBoolean("isFinalActive", isFinalActive);
+
 		return super.writeToNBT(compound);
 	}
 	
@@ -184,6 +191,8 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		}
 				
 		updatePowerTier();
+		
+		isFinalActive = compound.getBoolean("isFinalActive");
 		
 		super.readFromNBT(compound);
 	}
@@ -206,16 +215,10 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	}
 	
 	@Override
-	protected StargateAbstractRendererState getRendererStateServer() {
-		return StargateClassicRendererState.builder()
+	protected StargateClassicRendererStateBuilder getRendererStateServer() {
+		return new StargateClassicRendererStateBuilder(super.getRendererStateServer())
 				.setActiveChevrons(dialedAddress.size())
-				.setFinalActive(isFinalActive)
-				.setStargateState(stargateState).build();
-	}
-	
-	@Override
-	protected StargateAbstractRendererState createRendererStateClient() {
-		return new StargateClassicRendererState();
+				.setFinalActive(isFinalActive);
 	}
 	
 	@Override
@@ -226,6 +229,20 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	
 	// -----------------------------------------------------------------
 	// States
+	
+	@Override
+	public State getState(StateTypeEnum stateType) {
+		switch (stateType) {
+			case GUI_STATE:
+				return new StargateContainerGuiState(gateAddressMap, false, 0, 0, 0, 0);
+				
+//			case GUI_UPDATE:
+//				return new StargateContainerGuiUpdate();
+				
+			default:
+				return super.getState(stateType);
+		}
+	}
 	
 	@Override
 	public State createState(StateTypeEnum stateType) {
@@ -282,8 +299,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		
 			case GUI_STATE:
 				StargateContainerGuiState guiState = (StargateContainerGuiState) state;
-				gateAddress = guiState.getGateAddress();
-				Aunis.info(this + ": Setting address to " + gateAddress);
+				gateAddressMap = guiState.gateAdddressMap;
 				
 				break;
 				
@@ -308,32 +324,27 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				stargateState = EnumStargateState.IDLE;
 				markDirty();
 				
-				playSoundEvent(StargateSoundEventEnum.CHEVRON_OPEN, 1.0f);
+				playSoundEvent(StargateSoundEventEnum.CHEVRON_OPEN);
 				sendRenderingUpdate(EnumGateAction.CHEVRON_ACTIVATE, -1, customData.getBoolean("final"));
 //				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(EnumGateAction.CHEVRON_ACTIVATE, -1, customData.getBoolean("final"))), targetPoint);
 				break;
 				
 			case STARGATE_SPIN_FINISHED:
 				playPositionedSound(StargateSoundPositionedEnum.GATE_RING_ROLL, false);
-				playSoundEvent(StargateSoundEventEnum.CHEVRON_SHUT, 1.0f);
+				playSoundEvent(StargateSoundEventEnum.CHEVRON_SHUT);
 				
 				markDirty();
 				break;
 				
 			case STARGATE_GIVE_PAGE:
-				NBTTagCompound compound = new NBTTagCompound();
-				
-				long serialized = EnumSymbol.toLong(gateAddress);
-				compound.setLong("address", serialized);
-				
-				if (hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE))
-					compound.setInteger("7th", gateAddress.get(6).id);
-				else
-					compound.removeTag("7th");
-				
-				String reg = world.getBiome(pos).getRegistryName().getPath();
-				compound.setInteger("color", PageNotebookItem.getColorForBiome(reg));
-				
+				SymbolTypeEnum symbolType = SymbolTypeEnum.valueOf(pageSlotId - 7);
+				Aunis.info("Giving Notebook page of address " + symbolType);
+
+				NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(
+						gateAddressMap.get(symbolType),
+						hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE),
+						PageNotebookItem.getRegistryPathFromWorld(world, pos));
+
 				ItemStack stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
 				stack.setTagCompound(compound);
 				itemStackHandler.setStackInSlot(pageSlotId, stack);

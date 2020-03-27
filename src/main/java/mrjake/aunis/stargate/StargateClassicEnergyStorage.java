@@ -61,8 +61,17 @@ public class StargateClassicEnergyStorage extends StargateAbstractEnergyStorage 
 	
 	@Override
 	public int extractEnergy(int maxExtract, boolean simulate) {
-		// TODO Auto-generated method stub
-		return super.extractEnergy(maxExtract, simulate);
+		int toExtract = maxExtract;
+		
+		for (IEnergyStorage storage : storages) {
+			if (toExtract == 0)
+				return maxExtract;
+			
+			toExtract -= storage.extractEnergy(toExtract, simulate);
+		}
+		
+		toExtract -= super.extractEnergy(toExtract, simulate);
+		return maxExtract - toExtract;
 	}
 	
 	public void setEnergyStoredInternally(int energy) {

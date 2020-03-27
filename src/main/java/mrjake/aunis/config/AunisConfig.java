@@ -60,23 +60,11 @@ public class AunisConfig {
 
 		@Name("Stargate instability threshold(seconds to close)")
 		@RangeInt(min=1)
-		public int instabilitySeconds = 10;
-
-		@Name("Power crystal buffer size")
-		@RangeInt(min=10000)
-		public int dhdCrystalEnergyStorage = 71280000;
-		
-		@Name("Power crystal max IO")
-		@RangeInt(min=10000)
-		public int dhdCrystalMaxEnergyTransfer = 26360;
+		public int instabilitySeconds = 20;
 		
 		@Name("Orlin's gate energy multiplier")
 		@RangeDouble(min=0)
 		public double stargateOrlinEnergyMul = 1.5;
-
-		@Name("Orlin's gate's internal buffer size")
-		@RangeInt(min=0)
-		public int stargateOrlinEnergyStorage = 12000000;
 	}
 	
 	public static class RingsConfig {
@@ -140,10 +128,6 @@ public class AunisConfig {
 		@Name("Min overworld XZ-coords generation")
 		@RangeInt(min=1, max=30000000)
 		public int minOverworldCoords = 15000;
-		
-		@Name("Chance of despawning Crystal")
-		@RangeDouble(min=0, max=1)
-		public double despawnCrystalChance = 0.05;
 		
 		@Name("Chance of despawning DHD")
 		@RangeDouble(min=0, max=1)

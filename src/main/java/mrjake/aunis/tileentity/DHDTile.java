@@ -15,7 +15,9 @@ import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.SoundEventEnum;
-import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.network.StargateAddressDynamic;
+import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.state.DHDActivateButtonState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
@@ -27,6 +29,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -35,6 +38,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidStack;
@@ -118,8 +122,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 					StargateAbstractBaseTile gateTile = getLinkedGate(world);
 					IEnergyStorage energyStorage = (IEnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
 					
-					if (energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored() >= AunisConfig.dhdConfig.energyPerNaquadah) {
-						
+					if (energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored() >= AunisConfig.dhdConfig.energyPerNaquadah) {						
 						// Has fuel
 						if (fluidHandler.drainInternal(1 * AunisConfig.dhdConfig.powerGenerationMultiplier, false) != null) {
 							fluidHandler.drainInternal(1 * AunisConfig.dhdConfig.powerGenerationMultiplier, true);
@@ -157,11 +160,11 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	// -----------------------------------------------------------------------------
 	// Symbol activation
 	
-	public void activateSymbol(EnumSymbol symbol) {	
-		if (symbol == EnumSymbol.BRB)
-			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS_BRB, 0.5f);
+	public void activateSymbol(SymbolMilkyWayEnum symbol) {	
+		if (symbol.brb())
+			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS_BRB);
 		else
-			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS, 0.5f);
+			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS);
 		
 		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(symbol)), targetPoint);
 	}
@@ -180,14 +183,26 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			case RENDERER_STATE:
 				if (isLinked()) {
 					StargateAbstractBaseTile gateTile = getLinkedGate(world);
-					List<Integer> symbols = EnumSymbol.toIntegerList(gateTile.dialedAddress);
 					
-					if (gateTile.getStargateState().initiating())
-						symbols.add(EnumSymbol.BRB.id);
-					else if (gateTile.getStargateState().engaged())
-						symbols = Arrays.asList(EnumSymbol.BRB.id);
+					StargateAddressDynamic address = new StargateAddressDynamic(SymbolTypeEnum.MILKYWAY);
+					address.addAll(gateTile.getDialedAddress());
+					boolean brbActive = false;
 					
-					return new DHDRendererState(symbols);
+					switch (gateTile.getStargateState()) {
+						case ENGAGED_INITIATING:
+							brbActive = true;
+							break;
+							
+						case ENGAGED:
+							address.clear();
+							brbActive = true;
+							break;
+							
+						default:
+							break;
+					}
+					
+					return new DHDRendererState(address, brbActive);
 				}
 				
 				return new DHDRendererState();
@@ -299,13 +314,15 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		}
 	}
 	
-	public boolean isUpgradeInstalled(DHDUpgradeEnum upgrade) {
+	public int upgradeInstalledCount(DHDUpgradeEnum upgrade) {
+		int count = 0;
+		
 		for (int slot=1; slot<5; slot++) {
 			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade.item)
-				return true;
+				count++;
 		}
 		
-		return false;
+		return count;
 	}
 	
 	// -----------------------------------------------------------------------------
@@ -338,9 +355,9 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 			return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
+		
 		else if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && (facing == null || facing == EnumFacing.DOWN))
 			return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(fluidHandler);
-
 		
 		return super.getCapability(capability, facing);	
 	}
@@ -354,7 +371,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		if (linkedGate != null)
 			compound.setLong("linkedGate", linkedGate.toLong());
 		
-		compound.setTag("inventory", itemStackHandler.serializeNBT());
+		compound.setTag("itemStackHandler", itemStackHandler.serializeNBT());
 		
 		NBTTagCompound fluidHandlerCompound = new NBTTagCompound();
 		fluidHandler.writeToNBT(fluidHandlerCompound);
@@ -365,17 +382,31 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
+		super.readFromNBT(compound);
+		
 		if (compound.hasKey("linkedGate"))
 			linkedGate = BlockPos.fromLong(compound.getLong("linkedGate"));
+		
+		itemStackHandler.deserializeNBT(compound.getCompoundTag("itemStackHandler"));
 		
 		if (compound.getBoolean("hasUpgrade") || compound.getBoolean("insertAnimation")) {
 			itemStackHandler.setStackInSlot(1, new ItemStack(AunisItems.crystalGlyphDhd));
 		}
 		
-		itemStackHandler.deserializeNBT(compound.getCompoundTag("inventory"));
 		fluidHandler.readFromNBT(compound.getCompoundTag("fluidHandler"));
-
-		super.readFromNBT(compound);
+		
+		if (compound.hasKey("inventory")) {				
+			NBTTagCompound inventoryTag = compound.getCompoundTag("inventory");
+			NBTTagList tagList = inventoryTag.getTagList("Items", Constants.NBT.TAG_COMPOUND);
+			
+			if (tagList.tagCount() > 0) {
+				itemStackHandler.setStackInSlot(0, new ItemStack(AunisItems.crystalControlDhd));
+				
+				int energy = tagList.getCompoundTagAt(0).getCompoundTag("ForgeCaps").getCompoundTag("Parent").getInteger("energy");
+				int fluidAmount = energy / AunisConfig.dhdConfig.energyPerNaquadah;
+				fluidHandler.fillInternal(new FluidStack(AunisFluids.moltenNaquadahRefined, fluidAmount), true);
+			}
+		}
 	}
 	
 	

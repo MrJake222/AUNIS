@@ -9,16 +9,21 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
-import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.fluid.AunisFluids;
+import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
+import mrjake.aunis.stargate.network.StargateAddress;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.worldgen.StargateGenerationHelper.Direction;
 import mrjake.aunis.worldgen.StargateGenerationHelper.DirectionResult;
 import mrjake.aunis.worldgen.StargateGenerationHelper.FreeSpace;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
@@ -29,6 +34,10 @@ import net.minecraft.world.gen.structure.template.ITemplateProcessor;
 import net.minecraft.world.gen.structure.template.PlacementSettings;
 import net.minecraft.world.gen.structure.template.Template;
 import net.minecraft.world.gen.structure.template.TemplateManager;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 /**
  * Handles generating the Stargate structure in the Nether.
@@ -68,7 +77,7 @@ public class StargateGeneratorNether {
 	 * @return
 	 */
 	@Nullable
-	public static List<EnumSymbol> place(WorldServer world, BlockPos posIn) {
+	public static StargateAddress place(WorldServer world, BlockPos posIn) {
 		BlockPos start = posIn;
 		BlockPos current = start;
 		int count = 0;
@@ -164,6 +173,7 @@ public class StargateGeneratorNether {
 						
 						EnumFacing facing = world.getBlockState(basePos).getValue(AunisProps.FACING_HORIZONTAL);
 						StargateMilkyWayMergeHelper.INSTANCE.updateMembersBasePos(world, datablock.getKey().down(), facing);
+						world.getTileEntity(basePos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(4, new ItemStack(AunisBlocks.CAPACITOR_BLOCK), false);
 						
 						break;
 						
@@ -171,18 +181,19 @@ public class StargateGeneratorNether {
 						dhdPos = datablock.getKey().down();
 						world.setBlockToAir(datablock.getKey());
 						
+						int fluid = AunisConfig.powerConfig.stargateEnergyStorage / AunisConfig.dhdConfig.energyPerNaquadah;
+						
+						world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.circuitControlCrystal), false);
+						((FluidTank) world.getTileEntity(dhdPos).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)).fillInternal(new FluidStack(AunisFluids.moltenNaquadahRefined, fluid), true);
+						
 						break;
 				}
 			}
-			
-			int power = (int) ((0.3 + (Math.random() * 0.6)) * AunisConfig.powerConfig.dhdCrystalEnergyStorage);
-			
-			StargateGenerationHelper.updateLinkedGate(world, basePos, dhdPos);
-			StargateGenerationHelper.spawnDhdCrystal(world, dhdPos, power);
-			
+						
+			StargateGenerationHelper.updateLinkedGate(world, basePos, dhdPos);			
 			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(basePos);
 			
-			return gateTile.gateAddress;
+			return gateTile.getStargateAddress(SymbolTypeEnum.MILKYWAY);
 		}
 		
 		return null;

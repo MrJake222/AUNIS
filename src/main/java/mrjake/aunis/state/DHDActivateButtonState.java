@@ -1,20 +1,20 @@
 package mrjake.aunis.state;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 
 public class DHDActivateButtonState extends State {
 	public DHDActivateButtonState() {}
 	
-	public EnumSymbol symbol;
+	public SymbolMilkyWayEnum symbol;
 	public boolean clearAll = false;
 
 	public DHDActivateButtonState(boolean clearAll) {
 		this.clearAll = clearAll;
 	}
 	
-	public DHDActivateButtonState(EnumSymbol symbol) {
-		this.symbol  = symbol;
+	public DHDActivateButtonState(SymbolMilkyWayEnum symbol) {
+		this.symbol = symbol;
 	}
 
 	@Override
@@ -22,7 +22,7 @@ public class DHDActivateButtonState extends State {
 		buf.writeBoolean(clearAll);
 		
 		if (!clearAll) {
-			buf.writeInt(symbol.id);
+			buf.writeInt(symbol.getId());
 		}
 	}
 
@@ -31,7 +31,7 @@ public class DHDActivateButtonState extends State {
 		clearAll = buf.readBoolean();
 		
 		if (!clearAll) {
-			symbol = EnumSymbol.valueOf(buf.readInt());
+			symbol = SymbolMilkyWayEnum.valueOf(buf.readInt());
 		}
 	}
 }

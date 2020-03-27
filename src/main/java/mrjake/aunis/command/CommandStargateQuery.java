@@ -1,17 +1,15 @@
 package mrjake.aunis.command;
 
-import java.util.List;
 import java.util.Map;
 
-import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.StargateNetwork;
-import mrjake.aunis.stargate.StargateNetwork.StargatePos;
+import mrjake.aunis.stargate.network.StargateAddress;
+import mrjake.aunis.stargate.network.StargateNetwork;
+import mrjake.aunis.stargate.network.StargatePos;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextFormatting;
 
 public class CommandStargateQuery extends CommandBase {
 
@@ -35,19 +33,18 @@ public class CommandStargateQuery extends CommandBase {
 			dimId = parseInt(args[0]);
 		}
 		
-		notifyCommandListener(sender, this, checkDim ? ("Stargates[dim="+dimId+"]: ") : "Stargates:");
-		Map<Long, StargatePos> stargates = StargateNetwork.get(sender.getEntityWorld()).queryStargates();
+		StargateNetwork network = StargateNetwork.get(sender.getEntityWorld());
 		
-		for (long serialized : stargates.keySet()) {
-			List<EnumSymbol> address = EnumSymbol.toSymbolList(EnumSymbol.fromLong(serialized));
-			StargatePos stargatePos = stargates.get(serialized);
-			BlockPos pos = stargatePos.getPos();
+		for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
+			Map<StargateAddress, StargatePos> map = network.getMap().get(symbolType);
 			
-			if (!checkDim || stargatePos.getDimension() == dimId) {
-				String addr = address.toString().replace("[", "").replace("]", "");
-				String posStr = "[" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ", dim="+stargatePos.getDimension()+"]";
+			notifyCommandListener(sender, this, symbolType + " map:");
+			for (StargateAddress address : map.keySet()) {
+				if (checkDim && network.getStargate(address).dimensionID != dimId)
+					continue;
 				
-				notifyCommandListener(sender, this, posStr + ": " + TextFormatting.AQUA + addr + ", " + TextFormatting.DARK_PURPLE + stargatePos.get7thSymbol().localize() + "\n");
+				notifyCommandListener(sender, this, " " + address.toString() + ": "+ address.hashCode());
+//				notifyCommandListener(sender, this, " " + map.get(address).toString());
 			}
 		}
 	}

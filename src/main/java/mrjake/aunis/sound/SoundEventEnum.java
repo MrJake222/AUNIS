@@ -11,41 +11,43 @@ public enum SoundEventEnum implements EnumKeyInterface<Integer> {
 	// ----------------------------------------------------------
 	// Stargate - General
 	
-	WORMHOLE_GO(0, "wormhole_go"),
-	WORMHOLE_FLICKER(1, "wormhole_flicker"),
+	WORMHOLE_GO(0, "wormhole_go", 1.0f),
+	WORMHOLE_FLICKER(1, "wormhole_flicker", 0.5f),
 	
 	
 	// ----------------------------------------------------------
 	// Stargate - Milky Way
 	
-	DHD_MILKYWAY_PRESS(10, "dhd_milkyway_press"),
-	DHD_MILKYWAY_PRESS_BRB(11, "dhd_milkyway_press_brb"),
+	DHD_MILKYWAY_PRESS(10, "dhd_milkyway_press", 0.5f),
+	DHD_MILKYWAY_PRESS_BRB(11, "dhd_milkyway_press_brb", 0.5f),
 	
-	GATE_MILKYWAY_OPEN(12, "gate_milkyway_open"), // not working
-	GATE_MILKYWAY_CLOSE(13, "gate_milkyway_close"),
-	GATE_MILKYWAY_DIAL_FAILED(14, "gate_milkyway_dial_fail"),
-	GATE_MILKYWAY_DIAL_FAILED_COMPUTER(15, "gate_milkyway_dial_fail_computer"),
-	GATE_MILKYWAY_INCOMING(16, "gate_milkyway_incoming"),
+	GATE_MILKYWAY_OPEN(12, "gate_milkyway_open", 0.3f),
+	GATE_MILKYWAY_CLOSE(13, "gate_milkyway_close", 0.3f),
+	GATE_MILKYWAY_DIAL_FAILED(14, "gate_milkyway_dial_fail", 0.3f),
+	GATE_MILKYWAY_DIAL_FAILED_COMPUTER(15, "gate_milkyway_dial_fail_computer", 1.5f),
+	GATE_MILKYWAY_INCOMING(16, "gate_milkyway_incoming", 0.5f),
 	
-	GATE_MILKYWAY_CHEVRON_SHUT(17, "gate_milkyway_chevron_shut"),
-	GATE_MILKYWAY_CHEVRON_OPEN(18, "gate_milkyway_chevron_open"),
-	GATE_ORLIN_DIAL(19, "gate_orlin_dial"),
+	GATE_MILKYWAY_CHEVRON_SHUT(17, "gate_milkyway_chevron_shut", 1.0f),
+	GATE_MILKYWAY_CHEVRON_OPEN(18, "gate_milkyway_chevron_open", 1.0f),
+	GATE_ORLIN_DIAL(19, "gate_orlin_dial", 1.0f),
 	
 	
 	// ----------------------------------------------------------
 	// Ring transporter
 	
-	RINGS_TRANSPORT(100, "rings_transport"),
-	RINGS_CONTROLLER_BUTTON(101, "rings_controller_button");
+	RINGS_TRANSPORT(100, "rings_transport", 0.8f),
+	RINGS_CONTROLLER_BUTTON(101, "rings_controller_button", 0.5f);
 	
 	
 	// ----------------------------------------------------------
 	
-	private int id;
+	public int id;
 	public SoundEvent soundEvent;
+	public float volume;
 	
-	SoundEventEnum(int id, String name) {
+	SoundEventEnum(int id, String name, float volume) {
 		this.id = id;
+		this.volume = volume;
 		this.soundEvent = createSoundEvent(name);
 	}
 	

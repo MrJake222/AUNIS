@@ -1,25 +1,25 @@
 package mrjake.aunis.gui.container;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.lwjgl.input.Mouse;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.network.StargateAddress;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.state.StargateAbstractGuiState;
 
 public class StargateContainerGuiState extends StargateAbstractGuiState {
 	public StargateContainerGuiState() {}
 	
-	private List<EnumSymbol> gateAddress;
-	public List<EnumSymbol> getGateAddress() { return gateAddress; }
+	public Map<SymbolTypeEnum, StargateAddress> gateAdddressMap;
+	public boolean hasUpgrade;
 	
-	private boolean hasUpgrade;
-	public boolean hasUpgrade() { return hasUpgrade; }
-	
-	public StargateContainerGuiState(List<EnumSymbol> gateAddress, boolean hasUpgrade, int energy, int maxEnergy, int transferedLastTick, float secondsToClose) {
+	public StargateContainerGuiState(Map<SymbolTypeEnum, StargateAddress> gateAdddressMap, boolean hasUpgrade, int energy, int maxEnergy, int transferedLastTick, float secondsToClose) {
 		super(energy, maxEnergy, transferedLastTick, secondsToClose);
 		
-		this.gateAddress = gateAddress;
+		this.gateAdddressMap = gateAdddressMap;
 		this.hasUpgrade = hasUpgrade;
 	}
 
@@ -27,10 +27,9 @@ public class StargateContainerGuiState extends StargateAbstractGuiState {
 	public void toBytes(ByteBuf buf) {
 		super.toBytes(buf);
 		
-		buf.writeLong(EnumSymbol.toLong(gateAddress));
-		
-//		buf.writeBoolean(hasUpgrade);
-		buf.writeInt(gateAddress.get(6).id);
+		for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
+			gateAdddressMap.get(symbolType).toBytes(buf);
+		}
 		
 		buf.writeInt(maxEnergy);
 	}
@@ -38,14 +37,14 @@ public class StargateContainerGuiState extends StargateAbstractGuiState {
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		super.fromBytes(buf);
+		Mouse.setGrabbed(false);
+		gateAdddressMap = new HashMap<>(3);
 		
-		gateAddress = new ArrayList<EnumSymbol>();
-		
-		for (int id : EnumSymbol.fromLong(buf.readLong())) {
-			gateAddress.add(EnumSymbol.valueOf(id));
+		for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
+			StargateAddress address = new StargateAddress(symbolType);
+			address.fromBytes(buf);
+			gateAdddressMap.put(symbolType, address);
 		}
-		
-		gateAddress.add(EnumSymbol.valueOf(buf.readInt()));
 		
 		maxEnergy = buf.readInt();
 	}

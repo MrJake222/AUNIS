@@ -20,7 +20,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -76,6 +78,22 @@ public class CapacitorBlock extends Block {
 	// ------------------------------------------------------------------------
 	// Block actions
 
+	@Override
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		
+		if (!world.isRemote && !player.isSneaking()) {
+			CapacitorTile gateTile = (CapacitorTile) world.getTileEntity(pos);
+			IEnergyStorage energyStorage = gateTile.getCapability(CapabilityEnergy.ENERGY, null);
+			
+			String energy = String.format("%,d", energyStorage.getEnergyStored());
+			String capacity = String.format("%,d", energyStorage.getMaxEnergyStored());
+			
+			player.sendMessage(new TextComponentTranslation("chat.orlins.energyStored", energy, capacity));
+		}
+				
+		return !player.isSneaking();
+	}
+	
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		EnumFacing facing = placer.getHorizontalFacing().getOpposite();

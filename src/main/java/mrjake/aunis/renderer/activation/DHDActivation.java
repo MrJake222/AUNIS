@@ -1,15 +1,11 @@
 package mrjake.aunis.renderer.activation;
 
-import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 
-public class DHDActivation extends Activation {
+public class DHDActivation extends Activation<SymbolMilkyWayEnum> {
 
-	public DHDActivation(int textureIndex, long stateChange, boolean dim) {
-		super(textureIndex, stateChange, dim);
-	}
-	
-	public DHDActivation(int textureIndex, long stateChange) {
-		super(textureIndex, stateChange);
+	public DHDActivation(SymbolMilkyWayEnum textureKey, long stateChange, boolean dim) {
+		super(textureKey, stateChange, dim);
 	}
 
 	@Override
@@ -19,6 +15,6 @@ public class DHDActivation extends Activation {
 	
 	@Override
 	protected int getTickMultiplier() {
-		return (textureIndex == EnumSymbol.BRB.id && !dim) ? 1 : 2;
+		return (textureKey == SymbolMilkyWayEnum.BRB && !dim) ? 1 : 2;
 	}
 }

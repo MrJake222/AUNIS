@@ -8,9 +8,10 @@ import org.lwjgl.util.vector.Vector3f;
 
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
+import mrjake.aunis.packet.stargate.DHDButtonClickedToServer;
 import mrjake.aunis.raycaster.util.Box;
 import mrjake.aunis.raycaster.util.Ray;
+import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -127,7 +128,7 @@ public class RaycasterDHD extends Raycaster {
 		if (button != -1) {
 			player.swingArm(EnumHand.MAIN_HAND);
 
-			AunisPacketHandler.INSTANCE.sendToServer( new StargateRenderingUpdatePacketToServer(button, pos) );
+			AunisPacketHandler.INSTANCE.sendToServer(new DHDButtonClickedToServer(pos, SymbolMilkyWayEnum.valueOf(button)));
 		}
 	}
 }

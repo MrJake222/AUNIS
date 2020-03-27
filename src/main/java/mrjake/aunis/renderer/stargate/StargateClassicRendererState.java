@@ -4,13 +4,13 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
-public class StargateClassicRendererState extends StargateAbstractRendererState {
+public abstract class StargateClassicRendererState extends StargateAbstractRendererState {
 	public StargateClassicRendererState() {}
 	
 	public StargateClassicRendererState(StargateClassicRendererStateBuilder builder) {
 		super(builder);
 		
-		this.chevronTextureList = new ChevronTextureList(builder.activeChevrons, builder.isFinalActive);
+		this.chevronTextureList = new ChevronTextureList(getChevronTextureBase(), builder.activeChevrons, builder.isFinalActive);
 	}
 	
 	@Override
@@ -19,6 +19,8 @@ public class StargateClassicRendererState extends StargateAbstractRendererState 
 		
 		return super.initClient(pos, facing);
 	}
+	
+	protected abstract String getChevronTextureBase();
 	
 	// Chevrons
 	// Saved
@@ -36,7 +38,7 @@ public class StargateClassicRendererState extends StargateAbstractRendererState 
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {			
-		chevronTextureList = new ChevronTextureList();
+		chevronTextureList = new ChevronTextureList(getChevronTextureBase());
 		chevronTextureList.fromBytes(buf);
 				
 		super.fromBytes(buf);
@@ -51,10 +53,15 @@ public class StargateClassicRendererState extends StargateAbstractRendererState 
 	}
 	
 	public static class StargateClassicRendererStateBuilder extends StargateAbstractRendererStateBuilder {
+		public StargateClassicRendererStateBuilder() {}
 		
 		// Chevrons
-		private int activeChevrons;
-		private boolean isFinalActive;
+		protected int activeChevrons;
+		protected boolean isFinalActive;
+		
+		public StargateClassicRendererStateBuilder(StargateAbstractRendererStateBuilder superBuilder) {
+			setStargateState(superBuilder.stargateState);
+		}
 		
 		public StargateClassicRendererStateBuilder setActiveChevrons(int activeChevrons) {
 			this.activeChevrons = activeChevrons;
@@ -64,11 +71,6 @@ public class StargateClassicRendererState extends StargateAbstractRendererState 
 		public StargateClassicRendererStateBuilder setFinalActive(boolean isFinalActive) {
 			this.isFinalActive = isFinalActive;
 			return this;
-		}
-		
-		@Override
-		public StargateClassicRendererState build() {
-			return new StargateClassicRendererState(this);
 		}
 	}
 }

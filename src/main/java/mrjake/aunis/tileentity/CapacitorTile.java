@@ -1,13 +1,35 @@
 package mrjake.aunis.tileentity;
 
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 
-public class CapacitorTile extends TileEntity {
+public class CapacitorTile extends TileEntity implements ITickable {
+	
+	// ------------------------------------------------------------------------
+	// Loading & ticking
+	
+	@Override
+	public void update() {
+		if (!world.isRemote) {
+			for (EnumFacing facing : EnumFacing.VALUES) {
+				TileEntity tile = world.getTileEntity(pos.offset(facing));
+				
+				if (tile != null && tile.hasCapability(CapabilityEnergy.ENERGY, facing.getOpposite())) {
+					int extracted = energyStorage.extractEnergy(AunisConfig.powerConfig.stargateMaxEnergyTransfer, true);
+					extracted = tile.getCapability(CapabilityEnergy.ENERGY, facing.getOpposite()).receiveEnergy(extracted, false);
+					
+					energyStorage.extractEnergy(extracted, false);
+				}
+			}
+		}
+	}
+	
 	
 	// ------------------------------------------------------------------------
 	// NBT

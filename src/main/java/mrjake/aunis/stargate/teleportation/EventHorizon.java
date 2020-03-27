@@ -11,7 +11,7 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToClient;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.SoundEventEnum;
-import mrjake.aunis.stargate.StargateNetwork.StargatePos;
+import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -56,13 +56,9 @@ public class EventHorizon {
 			int entityId = entity.getEntityId();
 			
 			if ( !scheduledTeleportMap.containsKey(entityId) ) {				
-				try {
-					World targetWorld = TeleportHelper.getWorld(targetGate.getDimension());
-					
-					BlockPos targetPos = targetGate.getPos();
-					
+				try {					
 					EnumFacing sourceFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
-					EnumFacing targetFacing = targetWorld.getBlockState(targetPos).getValue(AunisProps.FACING_HORIZONTAL);
+					EnumFacing targetFacing = targetGate.getBlockState().getValue(AunisProps.FACING_HORIZONTAL);
 					
 					float rotation = (float) Math.toRadians( EnumFacing.fromAngle(targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle()).getOpposite().getHorizontalAngle() );
 
@@ -82,7 +78,8 @@ public class EventHorizon {
 						}
 						
 						/*else {
-							// TODO Make custom message appear
+							// TODO Back side killing
+							// Make custom message appear
 							// entity.onKillCommand();
 						}*/
 					}
@@ -100,7 +97,7 @@ public class EventHorizon {
 	public void teleportEntity(int entityId) {
 		scheduledTeleportMap.get(entityId).teleport();
 		
-		AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.WORMHOLE_GO, 1.0f);
+		AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.WORMHOLE_GO);
 		scheduledTeleportMap.remove(entityId);
 	}
 	

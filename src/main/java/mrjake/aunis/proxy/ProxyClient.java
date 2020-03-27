@@ -7,14 +7,15 @@ import mrjake.aunis.fluid.AunisBlockFluid;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.PageNotebookItem;
+import mrjake.aunis.item.PageNotebookTEISR;
 import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
-import mrjake.aunis.item.renderer.PageNotebookTEISR;
 import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.SpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRenderer;
 import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
+import mrjake.aunis.renderer.stargate.StargateUniverseRenderer;
 import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.sound.AunisSoundHelperClient;
 import mrjake.aunis.tileentity.DHDTile;
@@ -22,6 +23,7 @@ import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.resources.I18n;
@@ -65,6 +67,7 @@ public class ProxyClient implements IProxy {
 		SpecialRenderer specialRenderer = new SpecialRenderer();
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateMilkyWayBaseTile.class, new StargateMilkyWayRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(StargateUniverseBaseTile.class, new StargateUniverseRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateOrlinBaseTile.class, new StargateOrlinRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, new DHDRenderer());
 		

@@ -7,26 +7,31 @@ import javax.annotation.Nullable;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
+import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
-import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRendererState;
+import mrjake.aunis.renderer.stargate.StargateMilkyWayRendererState.StargateMilkyWayRendererStateBuilder;
 import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.sound.SoundPositionedEnum;
-import mrjake.aunis.stargate.EnumGateState;
+import mrjake.aunis.sound.StargateSoundEventEnum;
+import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
-import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
+import mrjake.aunis.stargate.StargateClassicSpinHelper;
 import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
-import mrjake.aunis.stargate.StargateSoundEventEnum;
-import mrjake.aunis.stargate.StargateSoundPositionedEnum;
-import mrjake.aunis.stargate.StargateSpinHelper;
+import mrjake.aunis.stargate.StargateOpenResult;
+import mrjake.aunis.stargate.network.StargateNetwork;
+import mrjake.aunis.stargate.network.StargatePos;
+import mrjake.aunis.stargate.network.SymbolInterface;
+import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.StargateSpinState;
@@ -68,64 +73,97 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	}
 	
 	@Override
+	protected void addDialingFailedTask() {
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, stargateState.dialingComputer() ? 83 : 53));
+	}
+	
+	@Override
 	public void onBlockBroken() {
 		super.onBlockBroken();
 		
 		if (isLinked()) {
+			getLinkedDHD(world).clearSymbols();
 			getLinkedDHD(world).setLinkedGate(null);
 		}
 	}
 	
+	
+	// ------------------------------------------------------------------------
+	// Stargate connection
+	
+	@Override
+	public void openGate(StargatePos targetGatePos, boolean isInitiating) {
+		super.openGate(targetGatePos, isInitiating);
+		
+		if (isLinked()) {
+			getLinkedDHD(world).activateSymbol(SymbolMilkyWayEnum.BRB);
+		}
+	}	
+	
+	
 	// ------------------------------------------------------------------------
 	// Stargate Network
+	
+	@Override
+	public SymbolTypeEnum getSymbolType() {
+		return SymbolTypeEnum.MILKYWAY;
+	}
 	
 	@Override
 	protected AunisAxisAlignedBB getHorizonTeleportBox(boolean server) {
 		return getStargateSizeConfig(server).teleportBox;
 	}
 	
-	public void addSymbolToAddressDHD(EnumSymbol symbol) {		
+	public void addSymbolToAddressDHD(SymbolMilkyWayEnum symbol) {		
 		addSymbolToAddress(symbol);
 		stargateState = EnumStargateState.DIALING;
 		
-		int maxChevrons = getLinkedDHD(world).isUpgradeInstalled(DHDUpgradeEnum.CHEVRON_UPGRADE) ? 8 : 7;
 		NBTTagCompound taskData = new NBTTagCompound();
 		
-		if (dialedAddress.size() == maxChevrons || (dialedAddress.size() == 7 && symbol == EnumSymbol.ORIGIN)) {
+		if (stargateWillLock(symbol)) {
 			isFinalActive = true;
 			taskData.setBoolean("final", true);
 		}
 		
+		sendSignal(null, "stargate_dhd_chevron_engaged", new Object[] { dialedAddress.size(), isFinalActive, symbol.englishName });
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ACTIVATE_CHEVRON, 10, taskData));
-		
+				
 		markDirty();
 	}
 	
 	@Override
-	public boolean canAddSymbol(EnumSymbol symbol) {
-		if (dialedAddress.contains(symbol)) 
-			return false;
+	protected int getMaxChevrons() {
+		if (isLinked()) {
+			switch (getLinkedDHD(world).upgradeInstalledCount(DHDUpgradeEnum.CHEVRON_UPGRADE)) {
+				case 0: return 7;
+				case 1: return 8;
+				case 2: return 9;
+			}
+		}
 		
-		int maxSymbols = getLinkedDHD(world).isUpgradeInstalled(DHDUpgradeEnum.CHEVRON_UPGRADE) ? 8 : 7;
-		
-		if (dialedAddress.size() == maxSymbols)
-			return false;
-		
-		return true;
+		return 9;
 	}
 	
 	@Override
-	public void addSymbolToAddress(EnumSymbol symbol) {
+	public void addSymbolToAddress(SymbolInterface symbol) {
+		if (symbol.origin() && dialedAddress.equals(StargateNetwork.EARTH_ADDRESS) && !network.isStargateInNetwork(StargateNetwork.EARTH_ADDRESS)) {
+			dialedAddress.clear();
+			
+			for (int i=0; i<6; i++)
+				dialedAddress.addSymbol(network.getLastActivatedOrlins().get(i));
+		}
+		
 		super.addSymbolToAddress(symbol);
-				
+		Aunis.info("dialed: " + dialedAddress);
+
 		if (isLinked()) {
-			getLinkedDHD(world).activateSymbol(symbol);
+			getLinkedDHD(world).activateSymbol((SymbolMilkyWayEnum) symbol);
 		}
 	}
 	
 	@Override
-	public void incomingWormhole(List<EnumSymbol> incomingAddress, int dialedAddressSize) {
-		super.incomingWormhole(incomingAddress, dialedAddressSize);
+	public void incomingWormhole(int dialedAddressSize) {
+		super.incomingWormhole(dialedAddressSize);
 						
 		if (isLinked()) {
 			getLinkedDHD(world).clearSymbols();
@@ -200,8 +238,8 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		compound.setBoolean("isSpinning", isSpinning);
 		compound.setBoolean("locking", locking);
 		compound.setLong("spinStartTime", spinStartTime);
-		compound.setInteger("currentRingSymbol", currentRingSymbol.id);
-		compound.setInteger("targetRingSymbol", targetRingSymbol.id);
+		compound.setInteger("currentRingSymbol", currentRingSymbol.getId());
+		compound.setInteger("targetRingSymbol", targetRingSymbol.getId());
 		compound.setInteger("spinDirection", spinDirection.id);
 				
 		return super.writeToNBT(compound);
@@ -224,8 +262,8 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		isSpinning = compound.getBoolean("isSpinning");
 		locking = compound.getBoolean("locking");
 		spinStartTime = compound.getLong("spinStartTime");
-		currentRingSymbol = EnumSymbol.valueOf(compound.getInteger("currentRingSymbol"));
-		targetRingSymbol = EnumSymbol.valueOf(compound.getInteger("targetRingSymbol"));
+		currentRingSymbol = SymbolMilkyWayEnum.valueOf(compound.getInteger("currentRingSymbol"));
+		targetRingSymbol = SymbolMilkyWayEnum.valueOf(compound.getInteger("targetRingSymbol"));
 		spinDirection = EnumSpinDirection.valueOf(compound.getInteger("spinDirection"));
 		
 		super.readFromNBT(compound);
@@ -243,16 +281,16 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	private boolean isSpinning;
 	private boolean locking;
 	private long spinStartTime;
-	private EnumSymbol currentRingSymbol = EnumSymbol.ORIGIN;
-	private EnumSymbol targetRingSymbol = EnumSymbol.ORIGIN;
+	private SymbolInterface currentRingSymbol = SymbolMilkyWayEnum.ORIGIN;
+	private SymbolInterface targetRingSymbol = SymbolMilkyWayEnum.ORIGIN;
 	private EnumSpinDirection spinDirection = EnumSpinDirection.COUNTER_CLOCKWISE;
 	private Object ringSpinContext;
 	
-	public void addSymbolToAddressManual(EnumSymbol targetSymbol, @Nullable Object context) {
+	public void addSymbolToAddressManual(SymbolInterface targetSymbol, @Nullable Object context) {
 		targetRingSymbol = targetSymbol;
 		
 		boolean moveOnly = targetRingSymbol == currentRingSymbol;
-		locking = (dialedAddress.size() == 7) || (dialedAddress.size() == 6 && targetRingSymbol == EnumSymbol.ORIGIN);
+		locking = (dialedAddress.size() == 7) || (dialedAddress.size() == 6 && targetRingSymbol.origin());
 		
 		if (moveOnly) {
 			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, 0));
@@ -261,7 +299,13 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		else {
 			float distance = spinDirection.getDistance(currentRingSymbol, targetRingSymbol);
 			
-			if (distance < StargateSpinHelper.getMinimalDistance() || distance > 180) {
+//			if (distance < StargateClassicSpinHelper.getMinimalDistance() || distance > (360 - StargateClassicSpinHelper.getMinimalDistance())) {
+			if (distance < StargateClassicSpinHelper.getMinimalDistance()) {
+				spinDirection = spinDirection.opposite();
+				distance = spinDirection.getDistance(currentRingSymbol, targetRingSymbol);
+			}
+			
+			else if (distance > 180 && (360-distance) > StargateClassicSpinHelper.getMinimalDistance()) {
 				spinDirection = spinDirection.opposite();
 				distance = spinDirection.getDistance(currentRingSymbol, targetRingSymbol);
 			}
@@ -269,16 +313,16 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 			// Aunis.info("position: " + currentRingSymbol + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance + ", animEnd: " + StargateSpinHelper.getAnimationDuration(distance) + ", moveOnly: " + moveOnly + ", locking: " + locking);
 			
 			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPIN_STATE, new StargateSpinState(targetRingSymbol, spinDirection)), targetPoint);
-			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, StargateSpinHelper.getAnimationDuration(distance) - 5));
+			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, StargateClassicSpinHelper.getAnimationDuration(distance) - 5));
 			playPositionedSound(StargateSoundPositionedEnum.GATE_RING_ROLL, true);
 			
 			isSpinning = true;
 			spinStartTime = world.getTotalWorldTime();
-			stargateState = EnumStargateState.DIALING;
+			stargateState = EnumStargateState.DIALING_COMPUTER;
 			
 			ringSpinContext = context;
 			if (context != null)
-				sendSignal(context, "stargate_spin_start", new Object[] { dialedAddress.size(), locking, targetSymbol.englishName });
+				sendSignal(context, "stargate_spin_start", new Object[] { dialedAddress.size(), locking, targetSymbol.getEnglishName() });
 		}
 			
 		markDirty();
@@ -302,11 +346,10 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		switch (soundEnum) {
 			case OPEN: return SoundEventEnum.GATE_MILKYWAY_OPEN;
 			case CLOSE: return SoundEventEnum.GATE_MILKYWAY_CLOSE;
-			case DIAL_FAILED: return SoundEventEnum.GATE_MILKYWAY_DIAL_FAILED;
-			case DIAL_FAILED_COMPUTER: return SoundEventEnum.GATE_MILKYWAY_DIAL_FAILED_COMPUTER;
+			case DIAL_FAILED: return stargateState.dialingComputer() ? SoundEventEnum.GATE_MILKYWAY_DIAL_FAILED_COMPUTER : SoundEventEnum.GATE_MILKYWAY_DIAL_FAILED;
 			case INCOMING: return SoundEventEnum.GATE_MILKYWAY_INCOMING;
 			case CHEVRON_OPEN: return SoundEventEnum.GATE_MILKYWAY_CHEVRON_OPEN;
-			case CHEVRON_SHUT:return SoundEventEnum.GATE_MILKYWAY_CHEVRON_SHUT;
+			case CHEVRON_SHUT: return SoundEventEnum.GATE_MILKYWAY_CHEVRON_SHUT;
 		}
 		
 		return null;
@@ -380,17 +423,14 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	}
 		
 	@Override
-	protected StargateAbstractRendererState getRendererStateServer() {		
-		return StargateMilkyWayRendererState.builder()
+	protected StargateMilkyWayRendererStateBuilder getRendererStateServer() {		
+		return new StargateMilkyWayRendererStateBuilder(super.getRendererStateServer())
 				.setStargateSize(stargateSize)
-				.setCurrentRingSymbol(currentRingSymbol)
+				.setCurrentRingSymbol((SymbolMilkyWayEnum) currentRingSymbol)
 				.setSpinDirection(spinDirection)
 				.setSpinning(isSpinning)
-				.setTargetRingSymbol(targetRingSymbol)
-				.setSpinStartTime(spinStartTime)
-				.setActiveChevrons(dialedAddress.size())
-				.setFinalActive(isFinalActive)
-				.setStargateState(stargateState).build();
+				.setTargetRingSymbol((SymbolMilkyWayEnum) targetRingSymbol)
+				.setSpinStartTime(spinStartTime);
 	}
 	
 	@Override
@@ -443,7 +483,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				
 			case SPIN_STATE:
 				StargateSpinState spinState = (StargateSpinState) state;
-				getRendererStateClient().spinHelper.initRotation(world.getTotalWorldTime(), spinState.targetSymbol, spinState.direction);
+				getRendererStateClient().spinHelper.initRotation(world.getTotalWorldTime(), (SymbolMilkyWayEnum) spinState.targetSymbol, spinState.direction);
 				
 				break;
 				
@@ -469,14 +509,14 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				break;
 				
 			case STARGATE_CHEVRON_OPEN:
-				playSoundEvent(StargateSoundEventEnum.CHEVRON_OPEN, 1.0f);
+				playSoundEvent(StargateSoundEventEnum.CHEVRON_OPEN);
 				sendRenderingUpdate(EnumGateAction.CHEVRON_OPEN, 0, false);
 				
 				if (canAddSymbol(targetRingSymbol)) {
-					super.addSymbolToAddress(targetRingSymbol);
+					addSymbolToAddress(targetRingSymbol);
 					
 					if (locking) {
-						if (StargateRenderingUpdatePacketToServer.checkDialedAddress(world, this)) {
+						if (checkDialedAddress().ok()) {
 							addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_OPEN_SECOND, 8));
 						}
 						
@@ -494,7 +534,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				break;
 				
 			case STARGATE_CHEVRON_OPEN_SECOND:
-				playSoundEvent(StargateSoundEventEnum.CHEVRON_OPEN, 1.0f);
+				playSoundEvent(StargateSoundEventEnum.CHEVRON_OPEN);
 				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_LIGHT_UP, 4));
 				
 				break;
@@ -507,27 +547,24 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				
 				updateChevronLight();
 				
-				if (locking)
-					StargateRenderingUpdatePacketToServer.attemptLightUp(world, this);
-				
 				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_CLOSE, 14));
 
 				break;
 				
 			case STARGATE_CHEVRON_CLOSE:
-				playSoundEvent(StargateSoundEventEnum.CHEVRON_SHUT, 1.0f);
+				playSoundEvent(StargateSoundEventEnum.CHEVRON_SHUT);
 				sendRenderingUpdate(EnumGateAction.CHEVRON_CLOSE, 0, false);
-				sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), locking, targetRingSymbol.englishName });				
-
-				if (locking)
+				
+				if (locking) {
 					stargateState = EnumStargateState.IDLE;
-				else
+					sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), locking, targetRingSymbol.getEnglishName() });
+				} else
 					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_DIM, 6));
 				
 				break;
 				
 			case STARGATE_MANUAL_OPEN:
-				StargateRenderingUpdatePacketToServer.attemptOpen(world, this, getLinkedDHD(world), false);
+				attemptOpenDialed();
 				
 				break;
 				
@@ -535,14 +572,13 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				sendRenderingUpdate(EnumGateAction.CHEVRON_DIM, 0, false);
 				stargateState = EnumStargateState.IDLE;
 				
+				sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), locking, targetRingSymbol.getEnglishName() });
+				
 				break;
 				
 			case STARGATE_CHEVRON_FAIL:
 				sendRenderingUpdate(EnumGateAction.CHEVRON_CLOSE, 0, false);
-				playSoundEvent(StargateSoundEventEnum.DIAL_FAILED_COMPUTER, 1.50f);
-				
 				dialingFailed();
-				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 10));
 								
 				break;
 				
@@ -585,16 +621,16 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 			return new Object[] {null, "stargate_failure_busy", "Stargate is busy, state: " + stargateState.toString()};
 		}
 		
-		if (gateAddress.size() == 8) {
-			return new Object[] {null, "stargate_failure_full", "Already dialed 8 chevrons"};
+		if (dialedAddress.size() == 9) {
+			return new Object[] {null, "stargate_failure_full", "Already dialed 9 chevrons"};
 		}
 		
-		EnumSymbol targetSymbol = null;
+		SymbolMilkyWayEnum targetSymbol = null;
 		
 		if (args.isInteger(0))
-			targetSymbol = EnumSymbol.valueOf(args.checkInteger(0));
+			targetSymbol = SymbolMilkyWayEnum.valueOf(args.checkInteger(0));
 		else if (args.isString(0))
-			targetSymbol = EnumSymbol.forEnglishName(args.checkString(0));
+			targetSymbol = SymbolMilkyWayEnum.fromEnglishName(args.checkString(0));
 		
 		if (targetSymbol == null)
 			throw new IllegalArgumentException("bad argument #1 (symbol name/index invalid)");
@@ -617,9 +653,9 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 			return new Object[] { null, "stargate_failure_not_merged", "Stargate is not merged" };
 		
 		if (stargateState.idle()) {
-			EnumGateState gateState = StargateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
+			StargateOpenResult gateState = attemptOpenDialed();
 	
-			if (gateState == EnumGateState.OK) {
+			if (gateState.ok()) {
 				return new Object[] {"stargate_engage"};
 			}
 			
@@ -645,7 +681,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		
 		if (stargateState.engaged()) {
 			if (getStargateState().initiating()) {
-				StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+				attemptClose();
 				return new Object[] { "stargate_disengage" };
 			}
 			

@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.OBJLoader.Model;
+import mrjake.aunis.OBJLoader.ModelEnum;
 import mrjake.aunis.OBJLoader.ModelLoader;
-import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.particle.ParticleBlender;
 import mrjake.aunis.particle.ParticleBlender.RandomizeInterface;
@@ -20,10 +19,9 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class StargateOrlinRenderer extends StargateAbstractRenderer {
+public class StargateOrlinRenderer extends StargateAbstractRenderer<StargateAbstractRendererState> {
 	
 	public static final float GATE_SCALE = 0.43f;	
 	
@@ -31,13 +29,11 @@ public class StargateOrlinRenderer extends StargateAbstractRenderer {
 	// Render
 
 	@Override
-	protected void renderGate() {
-		Model orlinModel = ModelLoader.getModel(EnumModel.ORLIN_GATE);
-				
-		if (orlinModel != null) {			
-			EnumModel.ORLIN_GATE.bindTexture();
-			orlinModel.render();
-		}
+	protected void renderGate(StargateAbstractRendererState rendererState, double partialTicks) {
+		GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
+		
+		rendererDispatcher.renderEngine.bindTexture(ModelEnum.ORLIN_GATE.textureResource);
+		ModelLoader.getModel(ModelEnum.ORLIN_GATE).render();
 	}
 
 	@Override
@@ -54,20 +50,10 @@ public class StargateOrlinRenderer extends StargateAbstractRenderer {
 	protected void applyLightMap(StargateAbstractRendererState rendererState, double partialTicks) {}
 	
 	@Override
-	protected double getRenderScale(StargateAbstractRendererState rendererState) {
-		return GATE_SCALE;
+	protected void applyTransformations(StargateAbstractRendererState rendererState) {
+		GlStateManager.translate(0.5, 0, 0.5);			
+		GlStateManager.scale(GATE_SCALE, GATE_SCALE, GATE_SCALE);
 	}
-	
-	@Override
-	protected Vec3d getRenderTranslation(StargateAbstractRendererState rendererState) {
-		return new Vec3d(0.5, 0, 0.5);
-	}
-	
-	@Override
-	protected void renderRing(StargateAbstractRendererState rendererState, double partialTicks) {}
-
-	@Override
-	protected void renderChevrons(StargateAbstractRendererState rendererState, double partialTicks) {}
 	
 	@Override
 	protected void renderKawoosh(StargateAbstractRendererState rendererState, double partialTicks) {				
@@ -126,7 +112,7 @@ public class StargateOrlinRenderer extends StargateAbstractRenderer {
 		if (animTime < 4) {
 			
 			// Easing method, greater the animTime, lower the frequency of the sparks
-			if (world.getTotalWorldTime() % (animTime) == 0) {
+			if (animTime != 0 && world.getTotalWorldTime() % (animTime) == 0) {
 				SPARK_PARTICLES.get(((StargateOrlinRendererState) rendererState).sparkIndex).spawn(world, rendererState.pos, rendererState.horizontalRotation, false);
 			}
 		}

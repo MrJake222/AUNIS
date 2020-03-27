@@ -5,7 +5,7 @@ import java.util.Iterator;
 import javax.vecmath.Vector2f;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.stargate.StargateNetwork.StargatePos;
+import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.vector.Matrix2f;
@@ -141,7 +141,7 @@ public class TeleportHelper {
 		int sourceDim = world.provider.getDimension();
 		
 		StargateAbstractBaseTile sourceTile = (StargateAbstractBaseTile) world.getTileEntity(sourceGatePos);
-		StargateAbstractBaseTile targetTile = (StargateAbstractBaseTile) getWorld(targetGatePos.getDimension()).getTileEntity(targetGatePos.getPos());
+		StargateAbstractBaseTile targetTile = targetGatePos.getTileEntity();
 		
 		int flipAxis = 0;
 		
@@ -151,7 +151,7 @@ public class TeleportHelper {
 			flipAxis |= EnumFlipAxis.Z.mask;
 		
 		Vec3d pos = null;
-		BlockPos tPos = targetGatePos.getPos();
+		BlockPos tPos = targetGatePos.gatePos;
 		
 		if (sourceTile instanceof StargateOrlinBaseTile)
 			pos = new Vec3d(tPos.getX() + 0.5, tPos.getY() + 2.0, tPos.getZ() + 0.5);
@@ -165,7 +165,7 @@ public class TeleportHelper {
 		
 		Aunis.info("pos: " + pos);
 		
-		if (sourceDim == targetGatePos.getDimension()) {
+		if (sourceDim == targetGatePos.dimensionID) {
 			entity.rotationYaw = yaw;
 			entity.setPositionAndUpdate(pos.x, pos.y, pos.z);
 		}
@@ -176,14 +176,14 @@ public class TeleportHelper {
 				
 				boolean flying = player.capabilities.isFlying;
 				
-				transferPlayerToDimension(player, targetGatePos.getDimension(), pos, yaw);
+				transferPlayerToDimension(player, targetGatePos.dimensionID, pos, yaw);
 				
 				player.capabilities.isFlying = flying;
 				player.sendPlayerAbilities();
 			}
 			
 			else {
-				transferEntityToDimension(entity, sourceDim, targetGatePos.getDimension(), pos, yaw);
+				transferEntityToDimension(entity, sourceDim, targetGatePos.dimensionID, pos, yaw);
 			}
 		}
 		

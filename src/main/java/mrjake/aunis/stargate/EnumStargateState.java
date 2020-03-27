@@ -6,6 +6,7 @@ import java.util.Map;
 public enum EnumStargateState {
 	IDLE(0),
 	DIALING(1),
+	DIALING_COMPUTER(2),
 	ENGAGED(3),
 	ENGAGED_INITIATING(4),
 	UNSTABLE(5),
@@ -29,9 +30,9 @@ public enum EnumStargateState {
 		return this == ENGAGED_INITIATING;
 	}
 	
-//	public boolean dialingDhd() {
-//		return this == DHD_DIALING;
-//	}
+	public boolean dialingComputer() {
+		return this == DIALING_COMPUTER;
+	}
 	
 	private static Map<Integer, EnumStargateState> idMap = new HashMap<>();
 	static {

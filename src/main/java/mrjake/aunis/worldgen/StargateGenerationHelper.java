@@ -179,14 +179,4 @@ public class StargateGenerationHelper {
 			gateTile.setLinkedDHD(dhdPos);
 		}
 	}
-	
-	public static void spawnDhdCrystal(World world, BlockPos dhdPos, int power) {
-		// TODO Rework spawning crystals
-		
-//		ItemStack crystal = new ItemStack(AunisItems.crystalControlDhd);
-//		EnergyStorageUncapped uncapped = (EnergyStorageUncapped) crystal.getCapability(CapabilityEnergy.ENERGY, null);
-//		uncapped.setEnergyStored(power);
-//		
-//		((ItemStackHandler) world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)).setStackInSlot(0, crystal);
-	}
 }

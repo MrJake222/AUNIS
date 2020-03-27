@@ -44,13 +44,13 @@ public class GuiHelper {
         return pointX >= rectX - 1 && pointX < rectX + rectWidth + 1 && pointY >= rectY - 1 && pointY < rectY + rectHeight + 1;
     }
 	
-	public static void drawTexturedRectWithShadow(int x, int y, int xOffset, int yOffset, int size) {		
+	public static void drawTexturedRectWithShadow(int x, int y, int xOffset, int yOffset, int xSize, int ySize) {		
 		GlStateManager.enableBlend();
 		GlStateManager.color(1,1,1, 1);
-		Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, size, size, size, size);
+		Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, xSize, ySize, xSize, ySize);
 		
 		GlStateManager.color(1,1,1, 0.2f);
-		Gui.drawModalRectWithCustomSizedTexture(x+xOffset, y+yOffset, 0, 0, size, size, size, size);
+		Gui.drawModalRectWithCustomSizedTexture(x+xOffset, y+yOffset, 0, 0, xSize, ySize, xSize, ySize);
 		GlStateManager.disableBlend();
 	}
 }

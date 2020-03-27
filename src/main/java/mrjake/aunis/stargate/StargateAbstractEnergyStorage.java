@@ -9,13 +9,9 @@ import net.minecraftforge.energy.EnergyStorage;
 public class StargateAbstractEnergyStorage extends EnergyStorage implements INBTSerializable<NBTTagCompound> {
 
 	public StargateAbstractEnergyStorage() {
-		super(AunisConfig.powerConfig.stargateEnergyStorage/4, AunisConfig.powerConfig.stargateMaxEnergyTransfer);
+		super(AunisConfig.powerConfig.stargateEnergyStorage/4, AunisConfig.powerConfig.stargateMaxEnergyTransfer, 0);
 	}
 	
-//	public StargateAbstractEnergyStorage(int capacity) {
-//		super(capacity, AunisConfig.powerConfig.stargateMaxEnergyTransfer);
-//	}
-
 	@Override
 	public NBTTagCompound serializeNBT() {
 		NBTTagCompound tagCompound = new NBTTagCompound();
@@ -46,9 +42,6 @@ public class StargateAbstractEnergyStorage extends EnergyStorage implements INBT
 	
 	@Override
 	public int extractEnergy(int maxExtract, boolean simulate) {
-		if (!canExtract())
-			return 0;
-		
 		int energyExtracted = Math.min(energy, maxExtract);
 		
 		if (!simulate) {

@@ -4,12 +4,12 @@ import mrjake.aunis.packet.SetOpenTabToServer.SetOpenTabServerHandler;
 import mrjake.aunis.packet.SoundPositionedPlayToClient.PlayPositionedSoundClientHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient.StateUpdateClientHandler;
 import mrjake.aunis.packet.StateUpdateRequestToServer.StateUpdateServerHandler;
+import mrjake.aunis.packet.stargate.DHDButtonClickedToServer;
+import mrjake.aunis.packet.stargate.DHDButtonClickedToServer.DHDButtonClickedServerHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToClient;
 import mrjake.aunis.packet.stargate.StargateMotionToServer;
-import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
 import mrjake.aunis.packet.stargate.StargateMotionToClient.RetrieveMotionClientHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToServer.MotionServerHandler;
-import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer.GateRenderingUpdatePacketToServerHandler;
 import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer;
 import mrjake.aunis.packet.transportrings.SaveRingsParametersToServer.SaveRingsParametersServerHandler;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient;
@@ -26,7 +26,7 @@ public class AunisPacketHandler {
 	private static int id = 0;
 	
 	public static void registerPackets() {		
-		INSTANCE.registerMessage(GateRenderingUpdatePacketToServerHandler.class, StargateRenderingUpdatePacketToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(DHDButtonClickedServerHandler.class, DHDButtonClickedToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(MotionServerHandler.class, StargateMotionToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(StateUpdateServerHandler.class, StateUpdateRequestToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(SaveRingsParametersServerHandler.class, SaveRingsParametersToServer.class, id, Side.SERVER); id++;
