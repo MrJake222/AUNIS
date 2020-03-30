@@ -111,7 +111,7 @@ public class StargateContainer extends Container {
         		}
         	}
         	
-        	else if (stack.getItem() == AunisItems.pageNotebookItem && openTabId != -1) {        		
+        	else if ((stack.getItem() == AunisItems.pageNotebookItem && openTabId != -1) || (stack.getItem() == AunisItems.UNIVERSE_DIALER && openTabId == 2)) {        		
     			if (!getSlot(7+openTabId).getHasStack()) {
     				ItemStack stack1 = stack.copy();
     				stack1.setCount(1);

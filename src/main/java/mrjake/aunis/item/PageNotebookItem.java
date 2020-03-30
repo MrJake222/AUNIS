@@ -3,6 +3,7 @@ package mrjake.aunis.item;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.item.renderer.PageNotebookBakedModel;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import net.minecraft.client.renderer.block.model.IBakedModel;

@@ -1,5 +1,11 @@
 package mrjake.aunis.packet;
 
+import mrjake.aunis.item.dialer.UniverseDialerAddressChangeToServer;
+import mrjake.aunis.item.dialer.UniverseDialerAddressChangeToServer.UniverseDialerAddressChangeServerHandler;
+import mrjake.aunis.item.dialer.UniverseDialerAddressRemoveToServer;
+import mrjake.aunis.item.dialer.UniverseDialerAddressRemoveToServer.UniverseDialerAddressRemoveServerHandler;
+import mrjake.aunis.item.dialer.UniverseDialerModeChangeToServer;
+import mrjake.aunis.item.dialer.UniverseDialerModeChangeToServer.UniverseDialerModeChangeServerHandler;
 import mrjake.aunis.packet.SetOpenTabToServer.SetOpenTabServerHandler;
 import mrjake.aunis.packet.SoundPositionedPlayToClient.PlayPositionedSoundClientHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient.StateUpdateClientHandler;
@@ -32,6 +38,9 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(SaveRingsParametersServerHandler.class, SaveRingsParametersToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(TRControllerActivatedServerHandler.class, TRControllerActivatedToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(SetOpenTabServerHandler.class, SetOpenTabToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(UniverseDialerModeChangeServerHandler.class, UniverseDialerModeChangeToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(UniverseDialerAddressChangeServerHandler.class, UniverseDialerAddressChangeToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(UniverseDialerAddressRemoveServerHandler.class, UniverseDialerAddressRemoveToServer.class, id, Side.SERVER); id++;
 
 		
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, StargateMotionToClient.class, id, Side.CLIENT); id++;

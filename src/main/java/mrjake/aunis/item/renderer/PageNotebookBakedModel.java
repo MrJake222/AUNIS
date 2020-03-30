@@ -1,4 +1,4 @@
-package mrjake.aunis.item;
+package mrjake.aunis.item.renderer;
 
 import java.util.List;
 

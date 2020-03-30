@@ -13,4 +13,8 @@ public class ModelLoader {
 		
 		return LOADED_MODELS.get(modelEnum);
 	}
+
+	public static void reloadModels() {
+		LOADED_MODELS.clear();
+	}
 }

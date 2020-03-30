@@ -1,5 +1,6 @@
 package mrjake.aunis.item;
 
+import mrjake.aunis.item.dialer.UniverseDialerItem;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -64,6 +65,7 @@ public class AunisItems {
 	
 	public static PageNotebookItem pageNotebookItem = new PageNotebookItem();
 	public static PageMysteriousItem pageMysteriousItem = new PageMysteriousItem();
+	public static final UniverseDialerItem UNIVERSE_DIALER = new UniverseDialerItem();
 	
 	private static Item[] items = {
 		analyzerAncient,
@@ -97,7 +99,8 @@ public class AunisItems {
 		holderCrystal,
 		
 		dhdBrb,
-		pageMysteriousItem
+		pageMysteriousItem,
+		UNIVERSE_DIALER
 	};
 	
 	@SubscribeEvent

@@ -63,6 +63,7 @@ public enum ModelEnum {
 	// --------------------------------------------------------------------------------------------
 	// Universe
 	
+	UNIVERSE_DIALER_MODEL("universe/universe_dialer.obj", "universe/universe_dialer.png"),
 	UNIVERSE_GATE_MODEL("universe/universe_gate.obj", "universe/universe_gate.png"),
 	UNIVERSE_CHEVRON_MODEL("universe/universe_chevron.obj", "universe/universe_chevron.png"),
 	UGLYPH1("universe/04.obj", "universe_chevron.png"),

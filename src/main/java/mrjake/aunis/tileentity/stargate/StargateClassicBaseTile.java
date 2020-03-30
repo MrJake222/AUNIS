@@ -29,10 +29,12 @@ import mrjake.aunis.util.ItemHandlerHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -338,16 +340,27 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				
 			case STARGATE_GIVE_PAGE:
 				SymbolTypeEnum symbolType = SymbolTypeEnum.valueOf(pageSlotId - 7);
-				Aunis.info("Giving Notebook page of address " + symbolType);
-
-				NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(
-						gateAddressMap.get(symbolType),
-						hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE),
-						PageNotebookItem.getRegistryPathFromWorld(world, pos));
-
-				ItemStack stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
-				stack.setTagCompound(compound);
-				itemStackHandler.setStackInSlot(pageSlotId, stack);
+				ItemStack stack = itemStackHandler.getStackInSlot(pageSlotId);
+				
+				if (stack.getItem() == AunisItems.UNIVERSE_DIALER) {
+					NBTTagList saved = stack.getTagCompound().getTagList("saved", NBT.TAG_COMPOUND);
+					NBTTagCompound compound = gateAddressMap.get(symbolType).serializeNBT();
+					compound.setBoolean("hasUpgrade", hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE));
+					saved.appendTag(compound);
+				}
+				
+				else {
+					Aunis.info("Giving Notebook page of address " + symbolType);
+	
+					NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(
+							gateAddressMap.get(symbolType),
+							hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE),
+							PageNotebookItem.getRegistryPathFromWorld(world, pos));
+	
+					stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
+					stack.setTagCompound(compound);
+					itemStackHandler.setStackInSlot(pageSlotId, stack);
+				}
 				
 				break;
 				
@@ -397,8 +410,10 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 					
 				case 7:
 				case 8:
-				case 9:
 					return item == AunisItems.pageNotebookItem;
+					
+				case 9:
+					return item == AunisItems.pageNotebookItem || item == AunisItems.UNIVERSE_DIALER;
 					
 				default:
 					return true;

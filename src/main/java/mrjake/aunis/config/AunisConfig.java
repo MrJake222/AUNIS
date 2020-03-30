@@ -39,6 +39,13 @@ public class AunisConfig {
 		@Name("Orlin's gate max open count")
 		@RangeInt(min=0)
 		public int stargateOrlinMaxOpenCount = 2;
+		
+		@Name("Universe dialer max horizontal reach radius")
+		@RangeInt(min=0, max=64)
+		public int universeDialerReach = 10;
+
+		@Name("Universe dialer nearby radius")
+		public int universeGateNearbyReach = 1024;
 	}
 	
 	public static class PowerConfig {

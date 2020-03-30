@@ -19,5 +19,6 @@ public class ModelBakeHandler {
 		
 		AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.registerCustomModel(registry);
 		AunisItems.pageNotebookItem.registerCustomModel(registry);
+		AunisItems.UNIVERSE_DIALER.registerCustomModel(registry);
 	}
 }

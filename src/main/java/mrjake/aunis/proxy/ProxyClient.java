@@ -1,15 +1,19 @@
 package mrjake.aunis.proxy;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.OBJLoader.ModelReloadListener;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.GrassBlockColor;
 import mrjake.aunis.fluid.AunisBlockFluid;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.PageNotebookItem;
-import mrjake.aunis.item.PageNotebookTEISR;
 import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
+import mrjake.aunis.item.dialer.ChangeEvent;
+import mrjake.aunis.item.dialer.UniverseDialerItem;
+import mrjake.aunis.item.renderer.PageNotebookTEISR;
+import mrjake.aunis.item.renderer.UniverseDialerTEISR;
 import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.SpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
@@ -27,6 +31,7 @@ import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -43,8 +48,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class ProxyClient implements IProxy {
 	public void preInit(FMLPreInitializationEvent event) {
 		registerRenderers();
-		
 		registerFluidRenderers();
+		
+		ChangeEvent.registerKeybindings();
 	}
 
 	public void init(FMLInitializationEvent event) {
@@ -54,7 +60,7 @@ public class ProxyClient implements IProxy {
     }
  
     public void postInit(FMLPostInitializationEvent event) {
- 
+		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ModelReloadListener());
     }
 
 	public String localize(String unlocalized, Object... args) {
@@ -91,6 +97,9 @@ public class ProxyClient implements IProxy {
 	public void setTileEntityItemStackRenderer(Item item) {
 		if (item.getRegistryName().equals(new ResourceLocation(Aunis.ModID, PageNotebookItem.ITEM_NAME)))
 			item.setTileEntityItemStackRenderer(new PageNotebookTEISR());
+		
+		else if (item.getRegistryName().equals(new ResourceLocation(Aunis.ModID, UniverseDialerItem.ITEM_NAME)))
+			item.setTileEntityItemStackRenderer(new UniverseDialerTEISR());
 	}
 
 	@Override
