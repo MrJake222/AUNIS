@@ -49,13 +49,13 @@ public class UniverseDialerAddressChangeToServer implements IMessage {
 					NBTTagCompound compound = stack.getTagCompound();
 					UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
 					
-					byte selected = compound.getByte("addressSelected");
-					int addressCount = compound.getTagList(mode.tagName, NBT.TAG_COMPOUND).tagCount();
+					byte selected = compound.getByte("selected");
+					int addressCount = compound.getTagList(mode.tagListName, NBT.TAG_COMPOUND).tagCount();
 					
 					if (message.offset < 0 && selected < addressCount-1)
-						compound.setByte("addressSelected", (byte) (selected+1));
+						compound.setByte("selected", (byte) (selected+1));
 					else if(message.offset > 0 && selected > 0)
-						compound.setByte("addressSelected", (byte) (selected-1));
+						compound.setByte("selected", (byte) (selected-1));
 					
 					stack.setTagCompound(compound);
 				}

@@ -14,19 +14,23 @@ public class UniverseDialerModeChangeToServer implements IMessage {
 	public UniverseDialerModeChangeToServer() {}
 	
 	private EnumHand hand;
+	private byte offset;
 		
-	public UniverseDialerModeChangeToServer(EnumHand hand) {
+	public UniverseDialerModeChangeToServer(EnumHand hand, byte offset) {
 		this.hand = hand;
+		this.offset = offset;
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(hand == EnumHand.MAIN_HAND ? 0 : 1);
+		buf.writeByte(offset);
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		hand = buf.readInt() == 0 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+		offset = buf.readByte();
 	}
 	
 	
@@ -41,14 +45,17 @@ public class UniverseDialerModeChangeToServer implements IMessage {
 				
 				if (stack.getItem() == AunisItems.UNIVERSE_DIALER && stack.hasTagCompound()) {
 					NBTTagCompound compound = stack.getTagCompound();
+					UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
 					
-					if (compound.hasKey("linkedGate")) {
-						byte id = UniverseDialerMode.valueOf(compound.getByte("mode")).other().id;
-						compound.setByte("mode", id);
-						compound.setByte("addressSelected", (byte) 0);
-						
-						stack.setTagCompound(compound);
-					}
+					if (message.offset < 0)
+						mode = mode.next();
+					else if(message.offset > 0)
+						mode = mode.prev();
+					
+					compound.setByte("mode", mode.id);
+					compound.setByte("selected", (byte) 0);
+					
+					stack.setTagCompound(compound);
 				}
 			});
 			

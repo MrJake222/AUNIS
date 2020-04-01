@@ -5,9 +5,11 @@ import org.lwjgl.opengl.GL11;
 import mrjake.aunis.OBJLoader.ModelEnum;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.item.dialer.UniverseDialerMode;
+import mrjake.aunis.item.dialer.UniverseDialerOCMessage;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
+import mrjake.aunis.transportrings.TransportRings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
@@ -66,40 +68,57 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		
 		GlStateManager.enableBlend();
 		
+		// ---------------------------------------------------------------------------------------------
+		// List rendering
 		
+		NBTTagCompound compound = stack.getTagCompound();
+		UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
 		
-		if (stack.hasTagCompound()) {
-			NBTTagCompound compound = stack.getTagCompound();
+		drawStringWithShadow(-0.47f, 0.916f, mode.localize(), true);
+		drawStringWithShadow(0.22f, 0.916f, mode.next().localize(), false);
+		
+		if (mode.linkable && !compound.hasKey(mode.tagPosName)) {
+			drawStringWithShadow(0.22f, 0.71f, I18n.format("item.aunis.universe_dialer.not_linked"), false);
+		}
 			
-			if (compound.hasKey("linkedGate")) {				
-				UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
-				drawStringWithShadow(-0.47f, 0.916f, UniverseDialerMode.NEARBY.localize(), mode == UniverseDialerMode.NEARBY);
-				drawStringWithShadow(0.22f, 0.916f, UniverseDialerMode.MEMORY.localize(), mode == UniverseDialerMode.MEMORY);
-
-				int activeAddress = compound.getByte("addressSelected");
-				NBTTagList addressList = compound.getTagList(mode.tagName, NBT.TAG_COMPOUND);
-				
-				for (int offset=-1; offset<=1; offset++) {
-					int index = activeAddress + offset;
-					if (index >= 0 && index < addressList.tagCount()) {
-						
-						NBTTagCompound addressCompound = (NBTTagCompound) addressList.getCompoundTagAt(index);
-						StargateAddress address = new StargateAddress(addressCompound);
-						boolean active = offset == 0;
-						int symbolCount = SymbolUniverseEnum.getMaxSymbolsDisplay(addressCompound.getBoolean("hasUpgrade")); 
-								
-						drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
-						
-						for (int i=0; i<symbolCount; i++)
-							renderSymbol(offset, i, address.get(i), active, symbolCount == 8);
-						
-						renderSymbol(offset, symbolCount, SymbolUniverseEnum.getOrigin(), active, symbolCount == 8);
+		else {
+			int selected = compound.getByte("selected");
+			NBTTagList tagList = compound.getTagList(mode.tagListName, NBT.TAG_COMPOUND);
+			
+			for (int offset=-1; offset<=1; offset++) {
+				int index = selected + offset;
+				if (index >= 0 && index < tagList.tagCount()) {
+					
+					boolean active = offset == 0;					
+					NBTTagCompound entryCompound = (NBTTagCompound) tagList.getCompoundTagAt(index);
+					
+					switch (mode) {
+						case MEMORY:
+						case NEARBY:
+							drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
+							StargateAddress address = new StargateAddress(entryCompound);
+							int symbolCount = SymbolUniverseEnum.getMaxSymbolsDisplay(entryCompound.getBoolean("hasUpgrade")); 
+							
+							for (int i=0; i<symbolCount; i++)
+								renderSymbol(offset, i, address.get(i), active, symbolCount == 8);
+							
+							renderSymbol(offset, symbolCount, SymbolUniverseEnum.getOrigin(), active, symbolCount == 8);
+							break;
+							
+						case RINGS:
+							TransportRings rings = new TransportRings(entryCompound);
+							drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, rings.getAddress() + ".", active);
+							drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, rings.getName(), active);
+							break;
+							
+						case OC:
+							UniverseDialerOCMessage message = new UniverseDialerOCMessage(entryCompound);
+							drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
+							drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, message.name, active);
+							break;
 					}
 				}
 			}
-			
-			else
-				drawStringWithShadow(0.05f, 0.91f, I18n.format("item.aunis.universe_dialer.not_linked"), false);
 		}
 		
 		GlStateManager.popMatrix();

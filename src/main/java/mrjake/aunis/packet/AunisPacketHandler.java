@@ -8,6 +8,8 @@ import mrjake.aunis.item.dialer.UniverseDialerAddressRemoveToServer;
 import mrjake.aunis.item.dialer.UniverseDialerAddressRemoveToServer.UniverseDialerAddressRemoveServerHandler;
 import mrjake.aunis.item.dialer.UniverseDialerModeChangeToServer;
 import mrjake.aunis.item.dialer.UniverseDialerModeChangeToServer.UniverseDialerModeChangeServerHandler;
+import mrjake.aunis.item.dialer.UniverseDialerOCProgramToServer.UniverseDialerOCProgramServerHandler;
+import mrjake.aunis.item.dialer.UniverseDialerOCProgramToServer;
 import mrjake.aunis.packet.SetOpenTabToServer.SetOpenTabServerHandler;
 import mrjake.aunis.packet.SoundPositionedPlayToClient.PlayPositionedSoundClientHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient.StateUpdateClientHandler;
@@ -44,6 +46,7 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(UniverseDialerAddressChangeServerHandler.class, UniverseDialerAddressChangeToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(UniverseDialerAddressRemoveServerHandler.class, UniverseDialerAddressRemoveToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(UniverseDialerAbortServerHandler.class, UniverseDialerAbortToSever.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(UniverseDialerOCProgramServerHandler.class, UniverseDialerOCProgramToServer.class, id, Side.SERVER); id++;
 
 		
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, StargateMotionToClient.class, id, Side.CLIENT); id++;

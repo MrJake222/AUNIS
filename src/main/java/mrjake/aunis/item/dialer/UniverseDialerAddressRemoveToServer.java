@@ -46,12 +46,17 @@ public class UniverseDialerAddressRemoveToServer implements IMessage {
 					NBTTagCompound compound = stack.getTagCompound();
 					UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
 
-					if (mode == UniverseDialerMode.MEMORY) {
-						NBTTagList addressList = compound.getTagList("saved", NBT.TAG_COMPOUND);
-						byte selected = compound.getByte("addressSelected");
-						
-						addressList.removeTag(selected);					
-						stack.setTagCompound(compound);
+					switch (mode) {
+						case MEMORY:
+						case OC:
+							NBTTagList addressList = compound.getTagList(mode.tagListName, NBT.TAG_COMPOUND);
+							byte selected = compound.getByte("selected");
+							
+							if (selected < addressList.tagCount())
+								addressList.removeTag(selected);					
+							
+						default:
+							break;
 					}
 				}
 			});

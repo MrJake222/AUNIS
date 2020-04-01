@@ -75,6 +75,14 @@ public class TransportRings {
 	}
 	
 	/**
+	 * NBT version of the constructor.
+	 * @param compound {@link NBTTagCompound} read from NBT.
+	 */
+	public TransportRings(NBTTagCompound compound) {
+		deserializeNBT(compound);
+	}
+	
+	/**
 	 * Called internally
 	 */
 	private TransportRings(int address, String name, BlockPos pos, boolean isClone) {

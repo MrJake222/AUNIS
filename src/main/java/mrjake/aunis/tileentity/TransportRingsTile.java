@@ -495,7 +495,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			ringsMap.clear();
 			
 			for (int i=0; i<len; i++) {
-				TransportRings rings = new TransportRings(null).deserializeNBT(compound.getCompoundTag("ringsMap" + i));
+				TransportRings rings = new TransportRings(compound.getCompoundTag("ringsMap" + i));
 				
 				ringsMap.put(rings.getAddress(), rings);
 			}
