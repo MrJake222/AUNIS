@@ -6,6 +6,7 @@ import mrjake.aunis.OBJLoader.ModelEnum;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.item.dialer.UniverseDialerMode;
 import mrjake.aunis.stargate.network.StargateAddress;
+import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -85,12 +86,14 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 						NBTTagCompound addressCompound = (NBTTagCompound) addressList.getCompoundTagAt(index);
 						StargateAddress address = new StargateAddress(addressCompound);
 						boolean active = offset == 0;
-						int symbolCount = addressCompound.getBoolean("hasUpgrade") ? 9 : 7; 
+						int symbolCount = SymbolUniverseEnum.getMaxSymbolsDisplay(addressCompound.getBoolean("hasUpgrade")); 
 								
 						drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
 						
 						for (int i=0; i<symbolCount; i++)
-							renderSymbol(offset, i, (SymbolUniverseEnum) address.get(i), active, symbolCount == 9);
+							renderSymbol(offset, i, address.get(i), active, symbolCount == 8);
+						
+						renderSymbol(offset, symbolCount, SymbolUniverseEnum.getOrigin(), active, symbolCount == 8);
 					}
 				}
 			}
@@ -120,7 +123,7 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		GlStateManager.popMatrix();
 	}
 	
-	private static void renderSymbol(int row, int col, SymbolUniverseEnum symbol, boolean isActive, boolean is9Chevron) {
+	private static void renderSymbol(int row, int col, SymbolInterface symbol, boolean isActive, boolean is9Chevron) {
 		float x = col * 0.09f - 0.05f;
 		float y = -row * 0.32f - 0.16f;
 		float scale = 0.7f;
@@ -132,7 +135,7 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		
 		GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_ADD);
 		
-		Minecraft.getMinecraft().getTextureManager().bindTexture(symbol.iconResource);
+		Minecraft.getMinecraft().getTextureManager().bindTexture(symbol.getIconResource());
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableBlend();
 		GL11.glBegin(GL11.GL_QUADS);

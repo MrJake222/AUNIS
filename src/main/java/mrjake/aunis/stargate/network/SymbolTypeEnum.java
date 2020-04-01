@@ -7,20 +7,16 @@ import mrjake.aunis.util.EnumKeyInterface;
 import mrjake.aunis.util.EnumKeyMap;
 
 public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
-	MILKYWAY(0, 6, 8, 32, 32),
-	PEGASUS (1, 6, 8, 28, 28),
-	UNIVERSE(2, 6, 9, 20, 42);
+	MILKYWAY(0, 32, 32),
+	PEGASUS (1, 28, 28),
+	UNIVERSE(2, 20, 42);
 	
 	public int id;
-	public int minSymbols;
-	public int maxSymbols;
 	public int iconWidht;
 	public int iconHeight;
 
-	private SymbolTypeEnum(int id, int minSymbols, int maxSymbols, int iconWidht, int iconHeight) {
+	private SymbolTypeEnum(int id, int iconWidht, int iconHeight) {
 		this.id = id;
-		this.minSymbols = minSymbols;
-		this.maxSymbols = maxSymbols;
 		this.iconWidht = iconWidht;
 		this.iconHeight = iconHeight;
 	}
@@ -125,7 +121,13 @@ public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
 				return SymbolPegasusEnum.fromEnglishName(englishName);
 				
 			case UNIVERSE:
-				return SymbolUniverseEnum.valueOf(englishName.toUpperCase());
+				try {
+					return SymbolUniverseEnum.valueOf(englishName.toUpperCase());
+				}
+				
+				catch (IllegalArgumentException ex) {
+					return null;
+				}
 		}
 		
 		return null;
@@ -159,6 +161,22 @@ public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
 		}
 		
 		return 0;
+	}
+	
+
+	public SymbolInterface getTopSymbol() {
+		switch (this) {
+			case MILKYWAY:
+				return SymbolMilkyWayEnum.getTopSymbol();
+				
+			case PEGASUS:
+				return SymbolPegasusEnum.getTopSymbol();
+				
+			case UNIVERSE:
+				return SymbolUniverseEnum.getTopSymbol();
+		}
+		
+		return null;
 	}
 	
 	public boolean hasOrigin() {

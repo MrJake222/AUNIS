@@ -33,6 +33,15 @@ public enum SoundEventEnum implements EnumKeyInterface<Integer> {
 	
 	
 	// ----------------------------------------------------------
+	// Stargate - Universe
+	GATE_UNIVERSE_DIAL_START(70, "gate_universe_dial_start", 1.0f),
+	GATE_UNIVERSE_CHEVRON_LOCK(71, "gate_universe_chevron_lock", 1.0f),
+	GATE_UNIVERSE_CHEVRON_TOP_LOCK(72, "gate_universe_chevron_top_lock", 1.0f),
+	GATE_UNIVERSE_DIAL_FAILED(73, "gate_universe_fail", 1.0f),
+	GATE_UNIVERSE_OPEN(74, "gate_universe_open", 1.0f),
+	GATE_UNIVERSE_CLOSE(75, "gate_universe_close", 1.0f),
+	
+	// ----------------------------------------------------------
 	// Ring transporter
 	
 	RINGS_TRANSPORT(100, "rings_transport", 0.8f),

@@ -34,6 +34,10 @@ public enum EnumStargateState {
 		return this == DIALING_COMPUTER;
 	}
 	
+	public boolean dialing() {
+		return this == DIALING || this == DIALING_COMPUTER;
+	}
+	
 	private static Map<Integer, EnumStargateState> idMap = new HashMap<>();
 	static {
 		for (EnumStargateState state : values())

@@ -8,17 +8,18 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 
 public enum SoundPositionedEnum {
-	MILKYWAY_RING_ROLL(0, new ResourceLocation(Aunis.ModID, "gate_milkyway_ring_roll"), SoundCategory.AMBIENT, false),
-	WORMHOLE_LOOP(1, new ResourceLocation(Aunis.ModID, "wormhole_loop"), SoundCategory.AMBIENT, true);
+	MILKYWAY_RING_ROLL(0, "gate_milkyway_ring_roll", SoundCategory.AMBIENT, false),
+	WORMHOLE_LOOP(1, "wormhole_loop", SoundCategory.AMBIENT, true),
+	UNIVERSE_RING_ROLL(2, "gate_universe_roll", SoundCategory.AMBIENT, false);
 	
 	public int id;
 	public ResourceLocation resourceLocation;
 	public SoundCategory soundCategory;
 	public boolean repeat;
 	
-	SoundPositionedEnum(int id, ResourceLocation resourceLocation, SoundCategory soundCategory, boolean repeat) {
+	SoundPositionedEnum(int id, String name, SoundCategory soundCategory, boolean repeat) {
 		this.id = id;
-		this.resourceLocation = resourceLocation;
+		this.resourceLocation = new ResourceLocation(Aunis.ModID, name);
 		this.soundCategory = soundCategory;
 		this.repeat = repeat;
 	}

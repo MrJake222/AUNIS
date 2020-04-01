@@ -1,5 +1,7 @@
 package mrjake.aunis.packet;
 
+import mrjake.aunis.item.dialer.UniverseDialerAbortToSever;
+import mrjake.aunis.item.dialer.UniverseDialerAbortToSever.UniverseDialerAbortServerHandler;
 import mrjake.aunis.item.dialer.UniverseDialerAddressChangeToServer;
 import mrjake.aunis.item.dialer.UniverseDialerAddressChangeToServer.UniverseDialerAddressChangeServerHandler;
 import mrjake.aunis.item.dialer.UniverseDialerAddressRemoveToServer;
@@ -41,6 +43,7 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(UniverseDialerModeChangeServerHandler.class, UniverseDialerModeChangeToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(UniverseDialerAddressChangeServerHandler.class, UniverseDialerAddressChangeToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(UniverseDialerAddressRemoveServerHandler.class, UniverseDialerAddressRemoveToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(UniverseDialerAbortServerHandler.class, UniverseDialerAbortToSever.class, id, Side.SERVER); id++;
 
 		
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, StargateMotionToClient.class, id, Side.CLIENT); id++;

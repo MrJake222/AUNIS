@@ -95,7 +95,9 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 				}
 			}
 			
-			if (symbolType.hasOrigin())
+			if (symbolType == SymbolTypeEnum.UNIVERSE)
+				renderSymbol(0.26f, 0.74f, 0.095f, 0.2f, symbolType.getOrigin());
+			else
 				renderSymbol(0.21f, 0.74f, 0.2f, 0.2f, symbolType.getOrigin());
 	    }
 	    

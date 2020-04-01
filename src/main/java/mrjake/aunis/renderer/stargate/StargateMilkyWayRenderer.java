@@ -82,10 +82,10 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 	
 	private void renderRing(StargateMilkyWayRendererState rendererState, double partialTicks) {
 		GlStateManager.pushMatrix();
-		float angularRotation = rendererState.spinHelper.currentSymbol.angle;
+		float angularRotation = rendererState.spinHelper.currentSymbol.getAngle();
 		
 		if (rendererState.spinHelper.isSpinning)
-			angularRotation += ((StargateMilkyWayRendererState) rendererState).spinHelper.apply(getWorld().getTotalWorldTime() + partialTicks);
+			angularRotation += rendererState.spinHelper.apply(getWorld().getTotalWorldTime() + partialTicks);
 		
 		if (rendererState.horizontalRotation == 90 || rendererState.horizontalRotation == 0)
 			angularRotation *= -1;
@@ -172,8 +172,11 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 		}
 		
 		else {
-			ChevronLight.render();	
 			ChevronMoving.render();
+			
+//			GlStateManager.disableLighting();
+			ChevronLight.render();	
+			GlStateManager.enableLighting();
 		}			
 		
 		rendererDispatcher.renderEngine.bindTexture(ModelEnum.MILKYWAY_CHEVRON_FRAME.textureResource);

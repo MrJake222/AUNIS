@@ -15,24 +15,15 @@ public class StargateAddressDynamic extends StargateAddress {
 	}
 	
 	@Override
-	protected int getMinSymbols() {
-		return Math.min(address.size(), symbolType.minSymbols);
-	}
-	
-	@Override
-	protected int getMaxSymbols() {
-		return Math.min(addressSize, getMaxSymbolsAbsolute());
-	}
-	
-	private int getMaxSymbolsAbsolute() {
-		return symbolType == SymbolTypeEnum.UNIVERSE ? symbolType.maxSymbols : symbolType.maxSymbols+1;
+	protected int getSavedSymbols() {
+		return Math.min(addressSize, 9);
 	}
 	
 	// ---------------------------------------------------------------------------------
 	// Address
 		
 	public void addSymbol(SymbolInterface symbol) {		
-		if (address.size() == getMaxSymbolsAbsolute()) {
+		if (address.size() == 9) {
 			Aunis.logger.error("Tried to add symbol to already full address");
 			return;
 		}
@@ -42,7 +33,7 @@ public class StargateAddressDynamic extends StargateAddress {
 	}
 	
 	public void addAll(StargateAddress stargateAddress) {
-		if (address.size()+stargateAddress.address.size() > getMaxSymbolsAbsolute()) {
+		if (address.size()+stargateAddress.address.size() > 9) {
 			Aunis.logger.error("Tried to add symbols to already populated address");
 			return;
 		}

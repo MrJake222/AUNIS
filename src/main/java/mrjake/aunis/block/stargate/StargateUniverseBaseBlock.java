@@ -79,6 +79,7 @@ public class StargateUniverseBaseBlock extends Block {
 			gateTile.updateFacing(facing, true);
 			// TODO Update merging
 //			gateTile.updateMergeState(StargateMilkyWayMergeHelper.INSTANCE.checkBlocks(world, pos, facing), facing);
+			gateTile.updateMergeState(true, facing);
 		}
 	}
 	

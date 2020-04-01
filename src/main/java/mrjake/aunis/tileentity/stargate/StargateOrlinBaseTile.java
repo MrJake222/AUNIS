@@ -57,12 +57,13 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	public void dialingFailed() {
 		super.dialingFailed();
 		
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_FAILED_SOUND, 30));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAILED_SOUND, 30));
 	}
 	
 	@Override
-	protected void addDialingFailedTask() {
+	protected void addFailedTaskAndPlaySound() {
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 83));
+		playSoundEvent(StargateSoundEventEnum.DIAL_FAILED);
 	}
 	
 	@Override
@@ -84,7 +85,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		}
 		
 		if (isBroken())
-			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_FAILED_SOUND, 5));
+			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAILED_SOUND, 5));
 	}
 	
 	@Override
@@ -303,7 +304,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 				
 				break;
 				
-			case STARGATE_ORLIN_FAILED_SOUND:
+			case STARGATE_FAILED_SOUND:
 				playSoundEvent(StargateSoundEventEnum.DIAL_FAILED);
 				
 				break;

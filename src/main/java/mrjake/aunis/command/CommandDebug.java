@@ -1,6 +1,5 @@
 package mrjake.aunis.command;
 
-import mrjake.aunis.stargate.StargateClassicEnergyStorage;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -10,7 +9,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.energy.CapabilityEnergy;
 
 public class CommandDebug extends CommandBase {
 
@@ -34,18 +32,21 @@ public class CommandDebug extends CommandBase {
 			TileEntity tileEntity = world.getTileEntity(rayTraceResult.getBlockPos());
 			
 			if (tileEntity instanceof StargateClassicBaseTile) {
-//				StargateClassicBaseTile gateTile = (StargateClassicBaseTile) tileEntity;
+				StargateClassicBaseTile gateTile = (StargateClassicBaseTile) tileEntity;
 				
-				StargateClassicEnergyStorage energyStorage = (StargateClassicEnergyStorage) tileEntity.getCapability(CapabilityEnergy.ENERGY, null);
+//				gateTile.attemptOpenDialed();
+				gateTile.dialingFailed();
 				
-				if (args.length == 0)
-					notifyCommandListener(player, this, energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + " = " + (energyStorage.getEnergyStored()/(double)energyStorage.getMaxEnergyStored()*100));
-				
-				else {
-					int percent = Integer.valueOf(args[0]);
-					
-					energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored()/100*percent);
-				}
+//				StargateClassicEnergyStorage energyStorage = (StargateClassicEnergyStorage) tileEntity.getCapability(CapabilityEnergy.ENERGY, null);
+//				
+//				if (args.length == 0)
+//					notifyCommandListener(player, this, energyStorage.getEnergyStored() + " / " + energyStorage.getMaxEnergyStored() + " = " + (energyStorage.getEnergyStored()/(double)energyStorage.getMaxEnergyStored()*100));
+//				
+//				else {
+//					int percent = Integer.valueOf(args[0]);
+//					
+//					energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored()/100*percent);
+//				}
 			}
 		}
 	}

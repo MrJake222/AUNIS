@@ -181,9 +181,9 @@ public class StargateGeneratorNether {
 						dhdPos = datablock.getKey().down();
 						world.setBlockToAir(datablock.getKey());
 						
-						int fluid = AunisConfig.powerConfig.stargateEnergyStorage / AunisConfig.dhdConfig.energyPerNaquadah;
+						int fluid = (int) (6000 + Math.random() * 3000);
 						
-						world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.circuitControlCrystal), false);
+						world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.crystalControlDhd), false);
 						((FluidTank) world.getTileEntity(dhdPos).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)).fillInternal(new FluidStack(AunisFluids.moltenNaquadahRefined, fluid), true);
 						
 						break;

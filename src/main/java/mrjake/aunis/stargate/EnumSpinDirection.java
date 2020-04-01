@@ -30,10 +30,12 @@ public enum EnumSpinDirection {
 		else
 			indexDiff = targetRingSymbol.getAngleIndex() - currentRingSymbol.getAngleIndex();
 		
-		if (indexDiff < 0)
-			indexDiff += 39;
+		float angle = indexDiff * currentRingSymbol.getSymbolType().getAnglePerGlyph();
 		
-		return indexDiff * currentRingSymbol.getSymbolType().getAnglePerGlyph();
+		if (angle < 0)
+			angle += 360;
+		
+		return angle;
 	}
 	
 	public static EnumSpinDirection valueOf(int id) {

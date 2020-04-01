@@ -7,6 +7,7 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.stargate.network.SymbolInterface;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.util.math.MathFunction;
 import mrjake.aunis.util.math.MathFunctionLinear;
 import mrjake.aunis.util.math.MathFunctionQuadratic;
@@ -17,19 +18,21 @@ import mrjake.aunis.util.math.MathRange;
  * 
  * @author MrJake222
  */
-public abstract class StargateClassicSpinHelper<E extends SymbolInterface> {
+public class StargateClassicSpinHelper {
 	public StargateClassicSpinHelper() {}
 	
 	public static final float A_ANGLE_PER_TICK = 2;
 	public static final float U_SPEEDUP_TIME = 25;
 	public static final float S_STOP_TIME = 35;
 	
+	public SymbolTypeEnum symbolType;
+	
 	public boolean isSpinning;
-	public E currentSymbol;
+	public SymbolInterface currentSymbol;
 	public EnumSpinDirection direction = EnumSpinDirection.CLOCKWISE;
 	
 	private long spinStartTime;
-	private E targetSymbol;
+	private SymbolInterface targetSymbol;
 	private float targetRotationOffset;
 	
 	/**
@@ -65,7 +68,8 @@ public abstract class StargateClassicSpinHelper<E extends SymbolInterface> {
 	 */
 	private Map<MathRange, MathFunction> phases = new HashMap<MathRange, MathFunction>(3);
 	
-	public StargateClassicSpinHelper(E currentSymbol, EnumSpinDirection spinDirection, boolean isSpinning, E targetRingSymbol, long spinStartTime) {
+	public StargateClassicSpinHelper(SymbolTypeEnum symbolType, SymbolInterface currentSymbol, EnumSpinDirection spinDirection, boolean isSpinning, SymbolInterface targetRingSymbol, long spinStartTime) {
+		this.symbolType = symbolType;
 		this.currentSymbol = currentSymbol;
 		this.direction = spinDirection;
 		this.isSpinning = isSpinning;
@@ -73,7 +77,7 @@ public abstract class StargateClassicSpinHelper<E extends SymbolInterface> {
 		this.spinStartTime = spinStartTime;
 	}	
 	
-	public void initRotation(long totalWorldTime, E targetSymbol, EnumSpinDirection direction) {
+	public void initRotation(long totalWorldTime, SymbolInterface targetSymbol, EnumSpinDirection direction) {
 		float distance = direction.getDistance(currentSymbol, targetSymbol);
 		
 		phases.clear();
@@ -117,6 +121,8 @@ public abstract class StargateClassicSpinHelper<E extends SymbolInterface> {
 	}
 
 	public void toBytes(ByteBuf buf) {
+		buf.writeInt(symbolType.id);
+		
 		buf.writeBoolean(isSpinning);
 		buf.writeInt(currentSymbol.getId());
 		buf.writeInt(direction.id);
@@ -126,17 +132,17 @@ public abstract class StargateClassicSpinHelper<E extends SymbolInterface> {
 	}
 
 	public void fromBytes(ByteBuf buf) {
+		symbolType = SymbolTypeEnum.valueOf(buf.readInt());
+		
 		isSpinning = buf.readBoolean();
-		currentSymbol = valueOf(buf.readInt());
+		currentSymbol = symbolType.valueOfSymbol(buf.readInt());
 		direction = EnumSpinDirection.valueOf(buf.readInt());
 		
 		spinStartTime = buf.readLong();
-		targetSymbol = valueOf(buf.readInt());
+		targetSymbol = symbolType.valueOfSymbol(buf.readInt());
 		
 		if (isSpinning) {
 			initRotation(spinStartTime, targetSymbol, direction);
 		}		
 	}
-	
-	protected abstract E valueOf(int id);
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import mrjake.aunis.OBJLoader.ModelEnum;
 import mrjake.aunis.OBJLoader.ModelLoader;
+import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
@@ -35,40 +36,40 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 
 	@Override
 	protected void renderGate(StargateUniverseRendererState rendererState, double partialTicks) {
+		float angularRotation = rendererState.spinHelper.currentSymbol.getAngle();
+		
+		if (rendererState.spinHelper.isSpinning)
+			angularRotation += rendererState.spinHelper.apply(getWorld().getTotalWorldTime() + partialTicks);
+		
 		GlStateManager.rotate(rendererState.horizontalRotation - 90, 1, 0, 0);
+		GlStateManager.rotate((float) angularRotation + 0.6f, 0, 1, 0);
 		renderChevrons(rendererState, partialTicks);
+					
+		rendererDispatcher.renderEngine.bindTexture(ModelEnum.UNIVERSE_GATE_MODEL.textureResource);
+		ModelLoader.getModel(ModelEnum.UNIVERSE_GATE_MODEL).render();
 		
-//		ModelLoader.loadModel(EnumModel.UNIVERSE_GATE_MODEL);
-//		OBJModel gateModel = ModelLoader.getModel(EnumModel.UNIVERSE_GATE_MODEL);
-//		OBJModel glyphModel = ModelLoader.getModel(EnumModel.UGLYPH1);
+		GlStateManager.disableTexture2D();
+		GlStateManager.disableLighting();
+		for (SymbolUniverseEnum symbol : SymbolUniverseEnum.values()) {
+			if (symbol.model != null) {
+				float color = rendererState.getSymbolColor(symbol) + 0.25f;
+				
+				GlStateManager.color(color, color, color);
+				ModelLoader.getModel(symbol.model).render();
+			}
+		}
+		GlStateManager.enableTexture2D();
 		
-//		ModelLoader.loadModel(EnumModel.UGLYPH1);
-		
-//		if (gateModel != null && glyphModel != null) {			
-			rendererDispatcher.renderEngine.bindTexture(ModelEnum.UNIVERSE_GATE_MODEL.textureResource);
-			ModelLoader.getModel(ModelEnum.UNIVERSE_GATE_MODEL).render();
-						
-//			for (int i=0; i<45; i++) {
-//				GlStateManager.pushMatrix();
-////				GlStateManager.rotate((360/45f)*i, 0, 1, 0);
-////				ModelLoader.bindTexture(i%10 == 0 ? "stargate/chevron/universe_chevron10.png" : "stargate/chevron/universe_chevron0.png");
-//				GlStateManager.disableTexture2D();
-//				float color = 0.4f;
-//				GlStateManager.color(color, color, color, 1);
-//				glyphModel.render();
-//				GlStateManager.enableTexture2D();
-//				GlStateManager.popMatrix();
-//			}
-//		}
+		rendererState.iterate(getWorld(), partialTicks);
 	}
 	
 	@Override
-	protected void renderEventHorizon(double partialTicks, boolean white, Float alpha, boolean backOnly, float mul) {
-		GlStateManager.translate(0, -0.05, 0);
+	protected void renderKawoosh(StargateAbstractRendererState rendererState, double partialTicks) {
+		GlStateManager.translate(0, 0.04, 0);
 		GlStateManager.rotate(90, 1, 0, 0);
 		GlStateManager.scale(0.9, 0.9, 0.9);
 		
-		super.renderEventHorizon(partialTicks, white, alpha, backOnly, mul);
+		super.renderKawoosh(rendererState, partialTicks);
 	}
 	
 	
@@ -77,26 +78,12 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 	
 	@Override
 	protected void renderChevron(StargateUniverseRendererState rendererState, double partialTicks, ChevronEnum chevron) {
-//		OBJModel chevronModel = ModelLoader.getModel(EnumModel.UNIVERSE_CHEVRON_MODEL);
+		GlStateManager.pushMatrix();
 		
-//		ModelLoader.loadModel(EnumModel.UNIVERSE_CHEVRON_MODEL);
+		GlStateManager.rotate(-chevron.rotation, 0, 1, 0);
+		rendererDispatcher.renderEngine.bindTexture(rendererState.chevronTextureList.get(chevron));
+		ModelLoader.getModel(ModelEnum.UNIVERSE_CHEVRON_MODEL).render();
 		
-//		if (chevronModel != null) {
-			GlStateManager.pushMatrix();
-			
-//			int angularPosition = ;
-//			int angularPosition = 0;
-			GlStateManager.rotate(-chevron.rotation, 0, 1, 0);
-			
-//			ModelLoader.bindTexture(rendererState.chevronTextureList.get(index));
-//			ModelLoader.bindTexture(index%2 == 0 ? "stargate/chevron/universe_chevron10.png" : "stargate/chevron/universe_chevron0.png");
-//			ModelLoader.bindTexture("stargate/chevron/universe_chevron10.png");
-//			chevronModel.render();
-//			Mouse.setGrabbed(false);
-			rendererDispatcher.renderEngine.bindTexture(rendererState.chevronTextureList.get(chevron));
-			ModelLoader.getModel(ModelEnum.UNIVERSE_CHEVRON_MODEL).render();
-			
-			GlStateManager.popMatrix();
-//		}
+		GlStateManager.popMatrix();
 	}
 }

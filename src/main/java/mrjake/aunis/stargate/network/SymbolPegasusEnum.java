@@ -65,6 +65,11 @@ public enum SymbolPegasusEnum implements SymbolInterface {
 	}
 
 	@Override
+	public float getAngle() {
+		return id;
+	}
+	
+	@Override
 	public int getAngleIndex() {
 		return id;
 	}
@@ -143,6 +148,10 @@ public enum SymbolPegasusEnum implements SymbolInterface {
 
 	public static float getAnglePerGlyph() {
 		return 0;
+	}
+	
+	public static SymbolInterface getTopSymbol() {
+		return SUBIDO;
 	}
 	
 	private static final Map<Integer, SymbolPegasusEnum> ID_MAP = new HashMap<>();

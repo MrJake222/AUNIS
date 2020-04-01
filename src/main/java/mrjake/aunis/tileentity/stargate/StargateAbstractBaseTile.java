@@ -263,10 +263,17 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			return false;
 		
 		boolean areDimensionsEqual = world.provider.getDimension() == targetGatePos.dimensionID;
+		StargateAbstractBaseTile targetGateTile = targetGatePos.getTileEntity();
 		
-		if ((world.provider.getDimensionType() != DimensionType.NETHER || targetGatePos.dimensionID != 0) && (world.provider.getDimensionType() != DimensionType.OVERWORLD || targetGatePos.dimensionID != -1))
-			if (dialedAddress.size() < getSymbolType().getMinimalSymbolCountTo(targetGatePos.symbolType, areDimensionsEqual))
-				return false;
+//		Aunis.info("FROM: " + world.provider.getDimensionType() + ", TO: " + targetGateTile.getWorld().provider.getDimensionType());
+		
+		if ((world.provider.getDimensionType() == DimensionType.NETHER && targetGateTile.getWorld().provider.getDimensionType() == DimensionType.OVERWORLD) || 
+			(world.provider.getDimensionType() == DimensionType.OVERWORLD && targetGateTile.getWorld().provider.getDimensionType() == DimensionType.NETHER)) {
+			areDimensionsEqual = true;
+		}
+		
+		if (dialedAddress.size() < getSymbolType().getMinimalSymbolCountTo(targetGateTile.getSymbolType(), areDimensionsEqual))
+			return false;
 		
 		int additional = dialedAddress.size() - 7;
 		
@@ -380,7 +387,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			StargatePos targetGatePos = network.getStargate(dialedAddress);
 			
 			if (canDial(targetGatePos) && hasEnergyToDial(targetGatePos)) {
-				targetGatePos.getTileEntity().incomingWormhole(dialedAddress.size());
+				int size = dialedAddress.size();
+				if (size == 6) size++;
+				
+				targetGatePos.getTileEntity().incomingWormhole(size);
 			}
 		}
 	}
@@ -397,6 +407,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		sendSignal(null, "stargate_incoming_wormhole", new Object[] { dialedAddressSize });
 	}
 	
+	protected int getOpenSoundDelay() {
+		return EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks;
+	}
+	
 	/**
 	 * Called on BRB press. Initializes renderer's state
 	 * 
@@ -410,7 +424,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		sendRenderingUpdate(EnumGateAction.OPEN_GATE, 0, false);
 		
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_OPEN_SOUND));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_OPEN_SOUND, getOpenSoundDelay()));
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_LIGHT_BLOCK, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 19 + getTicksPerHorizonSegment(true)));
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_HORIZON_WIDEN, EnumScheduledTask.STARGATE_OPEN_SOUND.waitTicks + 23 + getTicksPerHorizonSegment(true))); // 1.3s of the sound to the kill
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ENGAGE));
@@ -461,16 +475,15 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		sendSignal(null, "stargate_failed", new Object[] {});
 		horizonFlashTask = null;
 		
-		addDialingFailedTask();
-		playSoundEvent(StargateSoundEventEnum.DIAL_FAILED);
-		
+		addFailedTaskAndPlaySound();		
 		stargateState = EnumStargateState.FAILING;
 		
 		markDirty();
 	}
 	
-	protected void addDialingFailedTask() {
+	protected void addFailedTaskAndPlaySound() {
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 53));
+		playSoundEvent(StargateSoundEventEnum.DIAL_FAILED);
 	}
 	
 	
@@ -1147,7 +1160,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				break;
 		
 			default:
-				throw new UnsupportedOperationException("EnumScheduledTask."+scheduledTask.name()+" not implemented on "+this.getClass().getName());
+				break;
 		}
 	}
 	

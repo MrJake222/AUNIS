@@ -88,7 +88,12 @@ public enum SymbolMilkyWayEnum implements SymbolInterface {
 	public int getId() {
 		return id;
 	}
-		
+	
+	@Override
+	public float getAngle() {
+		return angle;
+	}
+	
 	@Override
 	public int getAngleIndex() {
 		return angleIndex;
@@ -163,6 +168,10 @@ public enum SymbolMilkyWayEnum implements SymbolInterface {
 
 	public static float getAnglePerGlyph() {
 		return ANGLE_PER_GLYPH;
+	}
+	
+	public static SymbolInterface getTopSymbol() {
+		return ORIGIN;
 	}
 	
 	private static final Map<Integer, SymbolMilkyWayEnum> ID_MAP = new HashMap<>();

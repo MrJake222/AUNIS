@@ -65,7 +65,7 @@ public abstract class Activation<K> {
 	 * 
 	 * @return Max activation stage.
 	 */
-	protected abstract int getMaxStage();
+	protected abstract float getMaxStage();
 	
 	/**
 	 * Get tick multiplier for given {@link Activation#textureIndex}.
@@ -73,7 +73,7 @@ public abstract class Activation<K> {
 	 * @param textureIndex Texture index.
 	 * @return Tick multiplier.
 	 */
-	protected abstract int getTickMultiplier();
+	protected abstract float getTickMultiplier();
 	
 	/**
 	 * Mark this {@link Activation} inactive.
@@ -117,7 +117,7 @@ public abstract class Activation<K> {
 	 * {@link ActivationState} containing texture of the {@link Activation#textureIndex} and removal state.
 	 */
 	public ActivationState activate(long worldTicks, double partialTicks) {
-		int stage = (int) ((worldTicks - stateChange + partialTicks) * getTickMultiplier());
+		double stage = (worldTicks - stateChange + partialTicks) * getTickMultiplier();
 				
 		if (stage >= 0) {
 			
@@ -125,7 +125,7 @@ public abstract class Activation<K> {
 				if (dim)
 					stage = getMaxStage() - stage;
 								
-				state.stage = stage;
+				state.stage = (float) stage;
 			}
 				
 			else {			
@@ -145,10 +145,10 @@ public abstract class Activation<K> {
 	protected void onActivated() {}
 
 	public static class ActivationState {
-		public int stage;
+		public float stage;
 		public boolean remove = false;
 		
-		public ActivationState(int stage) {
+		public ActivationState(float stage) {
 			this.stage = stage;
 		}
 	}
@@ -159,7 +159,7 @@ public abstract class Activation<K> {
 	 * @author MrJake222
 	 */
 	public static interface IActivationCallback<K> {
-		public void run(K textureKey, int stage);
+		public void run(K textureKey, float stage);
 	}
 	
 	/**

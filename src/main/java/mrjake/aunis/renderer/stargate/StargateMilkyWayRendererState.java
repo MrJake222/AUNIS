@@ -3,10 +3,6 @@ package mrjake.aunis.renderer.stargate;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
-import mrjake.aunis.stargate.EnumSpinDirection;
-import mrjake.aunis.stargate.StargateClassicSpinHelper;
-import mrjake.aunis.stargate.StargateMilkyWaySpinHelper;
-import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 
 public class StargateMilkyWayRendererState extends StargateClassicRendererState {
 	public StargateMilkyWayRendererState() {}
@@ -15,7 +11,6 @@ public class StargateMilkyWayRendererState extends StargateClassicRendererState 
 		super(builder);
 		
 		this.stargateSize = builder.stargateSize;
-		this.spinHelper = new StargateMilkyWaySpinHelper(builder.currentRingSymbol, builder.spinDirection, builder.isSpinning, builder.targetRingSymbol, builder.spinStartTime);
 	}
 		
 	// Gate
@@ -43,15 +38,10 @@ public class StargateMilkyWayRendererState extends StargateClassicRendererState 
 	protected String getChevronTextureBase() {
 		return "textures/tesr/milkyway/chevron";
 	}
-	
-	// Ring		
-	// Saved
-	public StargateClassicSpinHelper<SymbolMilkyWayEnum> spinHelper;
 		
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(stargateSize.id);
-		spinHelper.toBytes(buf);
 		
 		super.toBytes(buf);
 	}
@@ -59,9 +49,6 @@ public class StargateMilkyWayRendererState extends StargateClassicRendererState 
 	@Override
 	public void fromBytes(ByteBuf buf) {	
 		stargateSize = StargateSizeEnum.fromId(buf.readInt());
-		
-		spinHelper = new StargateMilkyWaySpinHelper();
-		spinHelper.fromBytes(buf);
 				
 		super.fromBytes(buf);
 	}
@@ -78,45 +65,21 @@ public class StargateMilkyWayRendererState extends StargateClassicRendererState 
 		public StargateMilkyWayRendererStateBuilder() {}
 		
 		private StargateSizeEnum stargateSize;
-		private SymbolMilkyWayEnum currentRingSymbol;
-		private EnumSpinDirection spinDirection; 
-		private boolean isSpinning;
-		private SymbolMilkyWayEnum targetRingSymbol;
-		private long spinStartTime;
 		
 		public StargateMilkyWayRendererStateBuilder(StargateClassicRendererStateBuilder superBuilder) {
 			super(superBuilder);
+			setSymbolType(superBuilder.symbolType);
 			setActiveChevrons(superBuilder.activeChevrons);
 			setFinalActive(superBuilder.isFinalActive);
+			setCurrentRingSymbol(superBuilder.currentRingSymbol);
+			setSpinDirection(superBuilder.spinDirection);
+			setSpinning(superBuilder.isSpinning);
+			setTargetRingSymbol(superBuilder.targetRingSymbol);
+			setSpinStartTime(superBuilder.spinStartTime);
 		}
 		
 		public StargateMilkyWayRendererStateBuilder setStargateSize(StargateSizeEnum stargateSize) {
 			this.stargateSize = stargateSize;
-			return this;
-		}
-		
-		public StargateMilkyWayRendererStateBuilder setCurrentRingSymbol(SymbolMilkyWayEnum currentRingSymbol) {
-			this.currentRingSymbol = currentRingSymbol;
-			return this;
-		}
-		
-		public StargateMilkyWayRendererStateBuilder setSpinDirection(EnumSpinDirection spinDirection) {
-			this.spinDirection = spinDirection;
-			return this;
-		}
-		
-		public StargateMilkyWayRendererStateBuilder setSpinning(boolean isSpinning) {
-			this.isSpinning = isSpinning;
-			return this;
-		}
-		
-		public StargateMilkyWayRendererStateBuilder setTargetRingSymbol(SymbolMilkyWayEnum targetRingSymbol) {
-			this.targetRingSymbol = targetRingSymbol;
-			return this;
-		}
-		
-		public StargateMilkyWayRendererStateBuilder setSpinStartTime(long spinStartTime) {
-			this.spinStartTime = spinStartTime;
 			return this;
 		}
 

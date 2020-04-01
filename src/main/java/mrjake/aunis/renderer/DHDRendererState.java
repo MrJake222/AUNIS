@@ -84,7 +84,7 @@ public class DHDRendererState extends State {
 	
 	public void iterate(World world, double partialTicks) {
 		Activation.iterate(activationList, world.getTotalWorldTime(), partialTicks, (index, stage) -> {
-			BUTTON_STATE_MAP.put(index, stage);
+			BUTTON_STATE_MAP.put(index, Math.round(stage));
 		});
 	}
 	

@@ -181,10 +181,11 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case RENDERER_STATE:
+				StargateAddressDynamic address = new StargateAddressDynamic(SymbolTypeEnum.MILKYWAY);
+				
 				if (isLinked()) {
 					StargateAbstractBaseTile gateTile = getLinkedGate(world);
 					
-					StargateAddressDynamic address = new StargateAddressDynamic(SymbolTypeEnum.MILKYWAY);
 					address.addAll(gateTile.getDialedAddress());
 					boolean brbActive = false;
 					
@@ -205,7 +206,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 					return new DHDRendererState(address, brbActive);
 				}
 				
-				return new DHDRendererState();
+				return new DHDRendererState(address, false);
 				
 			default:
 				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());

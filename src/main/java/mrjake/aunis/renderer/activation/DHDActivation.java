@@ -9,12 +9,12 @@ public class DHDActivation extends Activation<SymbolMilkyWayEnum> {
 	}
 
 	@Override
-	protected int getMaxStage() {
+	protected float getMaxStage() {
 		return 5;
 	}
 	
 	@Override
-	protected int getTickMultiplier() {
+	protected float getTickMultiplier() {
 		return (textureKey == SymbolMilkyWayEnum.BRB && !dim) ? 1 : 2;
 	}
 }

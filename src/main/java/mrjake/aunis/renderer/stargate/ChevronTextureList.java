@@ -94,7 +94,7 @@ public class ChevronTextureList {
 	
 	public void iterate(World world, double partialTicks) {
 		Activation.iterate(activationList, world.getTotalWorldTime(), partialTicks, (index, stage) -> {
-			CHEVRON_STATE_MAP.put(index, stage);
+			CHEVRON_STATE_MAP.put(index, Math.round(stage));
 		});
 	}
 	

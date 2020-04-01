@@ -30,6 +30,7 @@ public class ChangeEvent {
 	private static final KeyBinding ADDRESS_UP = new KeyBinding("config.aunis.universe_dialer.address_up", 0, "Aunis");
 	private static final KeyBinding ADDRESS_DOWN = new KeyBinding("config.aunis.universe_dialer.address_down", 0, "Aunis");
 	private static final KeyBinding ADDRESS_REMOVE = new KeyBinding("config.aunis.universe_dialer.address_remove", Keyboard.KEY_DELETE, "Aunis");
+	private static final KeyBinding ABORT = new KeyBinding("config.aunis.universe_dialer.abort", Keyboard.KEY_K, "Aunis");
 	
 	@SubscribeEvent
 	public static void onMouseEvent(MouseEvent event) {
@@ -74,6 +75,10 @@ public class ChangeEvent {
 			else if (ADDRESS_REMOVE.isPressed()) {
 				AunisPacketHandler.INSTANCE.sendToServer(new UniverseDialerAddressRemoveToServer(hand));
 			}
+			
+			else if (ABORT.isPressed()) {
+				AunisPacketHandler.INSTANCE.sendToServer(new UniverseDialerAbortToSever(hand));
+			}
 		}
 	}
 	
@@ -100,5 +105,6 @@ public class ChangeEvent {
 		ClientRegistry.registerKeyBinding(ADDRESS_UP);
 		ClientRegistry.registerKeyBinding(ADDRESS_DOWN);
 		ClientRegistry.registerKeyBinding(ADDRESS_REMOVE);
+		ClientRegistry.registerKeyBinding(ABORT);
 	}
 }

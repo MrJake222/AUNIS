@@ -1,23 +1,34 @@
 package mrjake.aunis.tileentity.stargate;
 
+import javax.annotation.Nullable;
+
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.container.StargateContainerGuiState;
 import mrjake.aunis.gui.container.StargateContainerGuiUpdate;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.PageNotebookItem;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.renderer.stargate.StargateClassicRendererState;
 import mrjake.aunis.renderer.stargate.StargateClassicRendererState.StargateClassicRendererStateBuilder;
 import mrjake.aunis.sound.StargateSoundEventEnum;
 import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
+import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
 import mrjake.aunis.stargate.StargateClassicEnergyStorage;
+import mrjake.aunis.stargate.StargateClassicSpinHelper;
+import mrjake.aunis.stargate.StargateOpenResult;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.state.StargateRendererActionState;
+import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
@@ -36,6 +47,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -180,6 +192,13 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		compound.setTag("itemHandler", itemStackHandler.serializeNBT());
 		compound.setBoolean("isFinalActive", isFinalActive);
+		
+		compound.setBoolean("isSpinning", isSpinning);
+		compound.setBoolean("locking", locking);
+		compound.setLong("spinStartTime", spinStartTime);
+		compound.setInteger("currentRingSymbol", currentRingSymbol.getId());
+		compound.setInteger("targetRingSymbol", targetRingSymbol.getId());
+		compound.setInteger("spinDirection", spinDirection.id);
 
 		return super.writeToNBT(compound);
 	}
@@ -193,8 +212,14 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		}
 				
 		updatePowerTier();
-		
 		isFinalActive = compound.getBoolean("isFinalActive");
+		
+		isSpinning = compound.getBoolean("isSpinning");
+		locking = compound.getBoolean("locking");
+		spinStartTime = compound.getLong("spinStartTime");
+		currentRingSymbol = getSymbolType().valueOfSymbol(compound.getInteger("currentRingSymbol"));
+		targetRingSymbol = getSymbolType().valueOfSymbol(compound.getInteger("targetRingSymbol"));
+		spinDirection = EnumSpinDirection.valueOf(compound.getInteger("spinDirection"));
 		
 		super.readFromNBT(compound);
 	}
@@ -219,8 +244,14 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	@Override
 	protected StargateClassicRendererStateBuilder getRendererStateServer() {
 		return new StargateClassicRendererStateBuilder(super.getRendererStateServer())
+				.setSymbolType(getSymbolType())
 				.setActiveChevrons(dialedAddress.size())
-				.setFinalActive(isFinalActive);
+				.setFinalActive(isFinalActive)
+				.setCurrentRingSymbol(currentRingSymbol)
+				.setSpinDirection(spinDirection)
+				.setSpinning(isSpinning)
+				.setTargetRingSymbol(targetRingSymbol)
+				.setSpinStartTime(spinStartTime);
 	}
 	
 	@Override
@@ -254,6 +285,9 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				
 			case GUI_UPDATE:
 				return new StargateContainerGuiUpdate();
+				
+			case SPIN_STATE:
+				return new StargateSpinState();
 				
 			default:
 				return super.createState(stateType);
@@ -293,7 +327,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 						break;
 						
 					default:
-						super.setState(stateType, gateActionState);
 						break;
 				}
 				
@@ -310,9 +343,17 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				
 				break;
 				
+			case SPIN_STATE:
+				StargateSpinState spinState = (StargateSpinState) state;
+				getRendererStateClient().spinHelper.initRotation(world.getTotalWorldTime(), spinState.targetSymbol, spinState.direction);
+				
+				break;
+				
 			default:
-				super.setState(stateType, state);
+				break;
 		}
+		
+		super.setState(stateType, state);
 	}
 
 	
@@ -332,6 +373,9 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				break;
 				
 			case STARGATE_SPIN_FINISHED:
+				isSpinning = false;
+				currentRingSymbol = targetRingSymbol;
+				
 				playPositionedSound(StargateSoundPositionedEnum.GATE_RING_ROLL, false);
 				playSoundEvent(StargateSoundEventEnum.CHEVRON_SHUT);
 				
@@ -367,6 +411,58 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			default:
 				super.executeTask(scheduledTask, customData);
 		}
+	}
+	
+
+	// ------------------------------------------------------------------------
+	// Ring spinning
+	
+	protected boolean isSpinning;
+	protected boolean locking;
+	protected long spinStartTime;
+	protected SymbolInterface currentRingSymbol = getSymbolType().getTopSymbol();
+	protected SymbolInterface targetRingSymbol = getSymbolType().getTopSymbol();
+	protected EnumSpinDirection spinDirection = EnumSpinDirection.COUNTER_CLOCKWISE;
+	protected Object ringSpinContext;
+	
+	public void addSymbolToAddressManual(SymbolInterface targetSymbol, @Nullable Object context) {
+		targetRingSymbol = targetSymbol;
+		
+		boolean moveOnly = targetRingSymbol == currentRingSymbol;
+		locking = (dialedAddress.size() == 7) || (dialedAddress.size() == 6 && targetRingSymbol.origin());
+		
+		if (moveOnly) {
+			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, 0));
+		}
+		
+		else {
+			float distance = spinDirection.getDistance(currentRingSymbol, targetRingSymbol);
+			
+			if (distance < StargateClassicSpinHelper.getMinimalDistance()) {
+				spinDirection = spinDirection.opposite();
+				distance = spinDirection.getDistance(currentRingSymbol, targetRingSymbol);
+			}
+			
+			else if (distance > 180 && (360-distance) > StargateClassicSpinHelper.getMinimalDistance()) {
+				spinDirection = spinDirection.opposite();
+				distance = spinDirection.getDistance(currentRingSymbol, targetRingSymbol);
+			}
+			
+			// Aunis.info("position: " + currentRingSymbol + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance + ", animEnd: " + StargateSpinHelper.getAnimationDuration(distance) + ", moveOnly: " + moveOnly + ", locking: " + locking);
+			
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPIN_STATE, new StargateSpinState(targetRingSymbol, spinDirection)), targetPoint);
+			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, StargateClassicSpinHelper.getAnimationDuration(distance) - 5));
+			playPositionedSound(StargateSoundPositionedEnum.GATE_RING_ROLL, true);
+			
+			isSpinning = true;
+			spinStartTime = world.getTotalWorldTime();
+			
+			ringSpinContext = context;
+			if (context != null)
+				sendSignal(context, "stargate_spin_start", new Object[] { dialedAddress.size(), locking, targetSymbol.getEnglishName() });
+		}
+			
+		markDirty();
 	}
 	
 	
@@ -550,5 +646,93 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
 		
 		return super.getCapability(capability, facing);	
+	}
+	
+	
+	// -----------------------------------------------------------------
+	// OpenComputers methods
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback(doc = "function(symbolName:string) -- Spins the ring to the given symbol and engages/locks it")
+	public Object[] engageSymbol(Context context, Arguments args) {
+		if (!isMerged())
+			return new Object[] { null, "stargate_failure_not_merged", "Stargate is not merged" };
+		
+		if (!stargateState.idle()) {
+			return new Object[] {null, "stargate_failure_busy", "Stargate is busy, state: " + stargateState.toString()};
+		}
+		
+		if (dialedAddress.size() == 9) {
+			return new Object[] {null, "stargate_failure_full", "Already dialed 9 chevrons"};
+		}
+		
+		SymbolInterface targetSymbol = null;
+		
+		if (args.isInteger(0))
+			targetSymbol = getSymbolType().valueOfSymbol(args.checkInteger(0));
+		else if (args.isString(0))
+			targetSymbol = getSymbolType().fromEnglishName(args.checkString(0));
+		
+		if (targetSymbol == null)
+			throw new IllegalArgumentException("bad argument #1 (symbol name/index invalid)");
+		
+//		if (canAddSymbol(targetSymbol)) {
+//			return new Object[] {null, "stargate_failure_add", "Dialed address contains this symbol already"};
+//		}
+		
+		addSymbolToAddressManual(targetSymbol, context);
+		
+		markDirty();
+		
+		return new Object[] {"stargate_spin"};
+	}
+
+	@Optional.Method(modid = "opencomputers")
+	@Callback(doc = "function() -- Tries to open the gate")
+	public Object[] engageGate(Context context, Arguments args) {
+		if (!isMerged())
+			return new Object[] { null, "stargate_failure_not_merged", "Stargate is not merged" };
+		
+		if (stargateState.idle()) {
+			StargateOpenResult gateState = attemptOpenDialed();
+	
+			if (gateState.ok()) {
+				return new Object[] {"stargate_engage"};
+			}
+			
+			else {
+				stargateState = EnumStargateState.IDLE;
+				markDirty();
+				dialingFailed();
+				
+				sendSignal(null, "stargate_failed", new Object[] {});
+				return new Object[] {null, "stargate_failure_opening", "Stargate failed to open", gateState.toString()};
+			}
+		}
+		
+		else {
+			return new Object[] {null, "stargate_failure_busy", "Stargate is busy", stargateState.toString()};
+		}
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback(doc = "function() -- Tries to close the gate")
+	public Object[] disengageGate(Context context, Arguments args) {
+		if (!isMerged())
+			return new Object[] { null, "stargate_failure_not_merged", "Stargate is not merged" };
+		
+		if (stargateState.engaged()) {
+			if (getStargateState().initiating()) {
+				attemptClose();
+				return new Object[] { "stargate_disengage" };
+			}
+			
+			else
+				return new Object[] {null, "stargate_failure_wrong_end", "Unable to close the gate on this end"};
+		}
+		
+		else {
+			return new Object[] {null, "stargate_failure_not_open", "The gate is closed"};
+		}
 	}
 }

@@ -9,12 +9,12 @@ public class StargateActivation extends Activation<ChevronEnum> {
 	}
 
 	@Override
-	protected int getMaxStage() {
+	protected float getMaxStage() {
 		return 10;
 	}
 	
 	@Override
-	protected int getTickMultiplier() {
+	protected float getTickMultiplier() {
 		return 3;
 	}
 }

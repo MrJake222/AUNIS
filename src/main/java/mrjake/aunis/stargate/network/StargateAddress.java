@@ -20,19 +20,16 @@ public class StargateAddress implements INBTSerializable<NBTTagCompound> {
 		deserializeNBT(compound);
 	}
 	
-	protected int getMinSymbols() {
-		return symbolType.minSymbols;
+	protected int getSavedSymbols() {
+		return 8;
 	}
 	
-	protected int getMaxSymbols() {
-		return symbolType.maxSymbols;
-	}
 	
 	// ---------------------------------------------------------------------------------
 	// Address
 	
 	protected SymbolTypeEnum symbolType;
-	protected List<SymbolInterface> address = new ArrayList<>(9);
+	protected List<SymbolInterface> address = new ArrayList<>(8);
 	
 	public SymbolTypeEnum getSymbolType() {
 		return symbolType;
@@ -48,7 +45,7 @@ public class StargateAddress implements INBTSerializable<NBTTagCompound> {
 			return this;
 		}
 		
-		while (address.size() < symbolType.maxSymbols) {
+		while (address.size() < 8) {
 			SymbolInterface symbol = symbolType.getRandomSymbol(random);
 
 			if (!address.contains(symbol))
@@ -72,7 +69,7 @@ public class StargateAddress implements INBTSerializable<NBTTagCompound> {
 	 * @return
 	 */
 	public List<SymbolInterface> getAdditional() {
-		return address.subList(getMinSymbols(), getMaxSymbols());
+		return address.subList(6, 8);
 	}
 	
 	public boolean hasAddress() {
@@ -89,7 +86,7 @@ public class StargateAddress implements INBTSerializable<NBTTagCompound> {
 		
 		compound.setInteger("symbolType", symbolType.id);
 
-		for (int i=0; i<getMaxSymbols(); i++)
+		for (int i=0; i<getSavedSymbols(); i++)
 			compound.setInteger("symbol"+i, address.get(i).getId());
 		
 		return compound;
@@ -104,14 +101,14 @@ public class StargateAddress implements INBTSerializable<NBTTagCompound> {
 		
 		symbolType = SymbolTypeEnum.valueOf(compound.getInteger("symbolType"));
 		
-		for (int i=0; i<getMaxSymbols(); i++)
+		for (int i=0; i<getSavedSymbols(); i++)
 			address.add(symbolType.valueOfSymbol(compound.getInteger("symbol"+i)));
 	}
 	
 	public void toBytes(ByteBuf buf) {
 		buf.writeByte(symbolType.id);
 		
-		for (int i=0; i<getMaxSymbols(); i++)
+		for (int i=0; i<getSavedSymbols(); i++)
 			buf.writeByte(address.get(i).getId());
 	}
 	
@@ -123,7 +120,7 @@ public class StargateAddress implements INBTSerializable<NBTTagCompound> {
 		
 		symbolType = SymbolTypeEnum.valueOf(buf.readByte());
 		
-		for (int i=0; i<getMaxSymbols(); i++)
+		for (int i=0; i<getSavedSymbols(); i++)
 			address.add(symbolType.valueOfSymbol(buf.readByte()));
 	}	
 

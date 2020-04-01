@@ -56,7 +56,7 @@ public class PageNotebookItem extends Item {
 				int maxSymbols = symbolType.getMaxSymbolsDisplay(compound.getBoolean("hasUpgrade"));
 								
 				for (int i=0; i<maxSymbols; i++) {
-					tooltip.add(TextFormatting.ITALIC + "" + (i > symbolType.minSymbols-1 ? TextFormatting.DARK_PURPLE : TextFormatting.AQUA) + stargateAddress.get(i).localize());
+					tooltip.add(TextFormatting.ITALIC + "" + (i > 5 ? TextFormatting.DARK_PURPLE : TextFormatting.AQUA) + stargateAddress.get(i).localize());
 				}
 			}
 		}

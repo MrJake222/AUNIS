@@ -42,14 +42,14 @@ public class CommandStargateSetAddress extends CommandBase {
 		try {
 			SymbolTypeEnum symbolType = SymbolTypeEnum.valueOf(args[0].toUpperCase());
 			
-			if (args.length != symbolType.maxSymbols+1) {
+			if (args.length != 9) {
 				notifyCommandListener(sender, this, TextFormatting.RED + new TextComponentTranslation("commands.sgsetaddress.wrongaddress").getFormattedText());
 				return;
 			}
 			
 			StargateAddressDynamic stargateAddress = new StargateAddressDynamic(symbolType);
 					
-			for (int i=0; i<symbolType.maxSymbols; i++) {
+			for (int i=0; i<8; i++) {
 				SymbolInterface symbol = symbolType.fromEnglishName(args[i+1].replace("-", " "));
 				
 				if (symbol == null) {

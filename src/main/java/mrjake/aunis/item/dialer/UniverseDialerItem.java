@@ -11,6 +11,9 @@ import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
+import mrjake.aunis.stargate.network.SymbolUniverseEnum;
+import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
@@ -21,10 +24,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants.NBT;
 
@@ -89,10 +95,10 @@ public class UniverseDialerItem extends Item {
 			BlockPos pos = entity.getPosition();
 			
 			if (compound.hasKey("linkedGate")) {
+				BlockPos gatePos = BlockPos.fromLong(compound.getLong("linkedGate"));
 				int squared = AunisConfig.stargateConfig.universeDialerReach * AunisConfig.stargateConfig.universeDialerReach * 2;
 				
-				if (BlockPos.fromLong(compound.getLong("linkedGate")).distanceSq(pos) > squared) {
-//					compound.setByte("mode", UniverseDialerMode.MEMORY.id);
+				if (world.getBlockState(gatePos).getBlock() != AunisBlocks.STARGATE_UNIVERSE_BASE_BLOCK || gatePos.distanceSq(pos) > squared) {
 					compound.removeTag("linkedGate");
 					compound.removeTag("nearby");
 				}
@@ -118,6 +124,9 @@ public class UniverseDialerItem extends Item {
 							if (stargatePos.gatePos.equals(gatePos))
 								continue;
 							
+							if (stargatePos.getTileEntity() instanceof StargateOrlinBaseTile)
+								continue;
+							
 							nearbyList.appendTag(entry.getKey().serializeNBT());
 						}
 						
@@ -129,5 +138,44 @@ public class UniverseDialerItem extends Item {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+		if (!world.isRemote) {
+			NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
+			
+			if (compound.hasKey("linkedGate")) {
+				UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
+				int activeAddress = compound.getByte("addressSelected");
+				
+				BlockPos pos = BlockPos.fromLong(compound.getLong("linkedGate"));
+				StargateUniverseBaseTile gateTile = (StargateUniverseBaseTile) world.getTileEntity(pos);
+				
+				switch (gateTile.getStargateState()) {
+					case IDLE:
+						NBTTagCompound addressCompound = compound.getTagList(mode.tagName, NBT.TAG_COMPOUND).getCompoundTagAt(activeAddress);
+						int maxSymbols = SymbolUniverseEnum.getMaxSymbolsDisplay(addressCompound.getBoolean("hasUpgrade"));
+						
+						gateTile.dial(new StargateAddress(addressCompound), maxSymbols);
+						break;
+					
+					case ENGAGED_INITIATING:
+						gateTile.attemptClose();
+						break;
+					
+					case ENGAGED:
+						player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.incoming_wormhole_warn"), true);
+						break;
+						
+					default:
+						player.sendStatusMessage(new TextComponentTranslation("item.aunis.universe_dialer.gate_busy"), true);
+						Aunis.info("state: " + gateTile.getStargateState());
+						break;
+				}
+			}
+		}
+		
+		return super.onItemRightClick(world, player, hand);
 	}
 }

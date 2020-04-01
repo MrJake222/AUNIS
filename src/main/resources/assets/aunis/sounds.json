@@ -138,9 +138,65 @@
   
   "gate_orlin_dial": {
     "category": "ambient",
-    "subtitle": "aunis.subtitle.chevron_open",
+    "subtitle": "aunis.subtitle.gate_orlin_dial",
     "sounds": [
       "aunis:gate/orlin/gate_orlin_dial"
+    ]
+  },
+  
+  "gate_universe_dial_start": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.gate_universe_dial_start",
+    "sounds": [
+      "aunis:gate/universe/gate_universe_dial_start"
+    ]
+  },
+  
+  "gate_universe_roll": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.gate_universe_roll",
+    "sounds": [
+      "aunis:gate/universe/gate_universe_roll"
+    ]
+  },
+  
+  "gate_universe_chevron_lock": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.gate_universe_chevron_lock",
+    "sounds": [
+      "aunis:gate/universe/gate_universe_chevron_lock"
+    ]
+  },
+  
+  "gate_universe_fail": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.gate_universe_fail",
+    "sounds": [
+      "aunis:gate/universe/gate_universe_fail"
+    ]
+  },
+  
+  "gate_universe_chevron_top_lock": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.gate_universe_chevron_top_lock",
+    "sounds": [
+      "aunis:gate/universe/gate_universe_chevron_top_lock"
+    ]
+  },
+  
+  "gate_universe_open": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.gate_universe_open",
+    "sounds": [
+      "aunis:gate/universe/gate_universe_open"
+    ]
+  },
+  
+  "gate_universe_close": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.gate_universe_close",
+    "sounds": [
+      "aunis:gate/universe/gate_universe_close"
     ]
   }
 }
