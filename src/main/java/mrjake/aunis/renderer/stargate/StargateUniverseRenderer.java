@@ -1,24 +1,13 @@
 package mrjake.aunis.renderer.stargate;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import mrjake.aunis.OBJLoader.ModelEnum;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 
 public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUniverseRendererState> {
 
 	private static final float GATE_DIAMETER = 8.67415f;
-	
-	@Override
-	protected Map<BlockPos, IBlockState> getMemberBlockStates(EnumFacing facing) {
-		return new HashMap<BlockPos, IBlockState>();
-	}
 
 	@Override
 	protected void applyLightMap(StargateUniverseRendererState rendererState, double partialTicks) {

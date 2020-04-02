@@ -161,13 +161,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	// Merging
 	
 	@Override
-	protected void unmergeGate() {}
-	
-	@Override
-	protected void mergeGate() {}
-	
-	@Override
-	protected StargateAbstractMergeHelper getMergeHelper() {
+	public StargateAbstractMergeHelper getMergeHelper() {
 		return StargateOrlinMergeHelper.INSTANCE;
 	}
 		
@@ -328,7 +322,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	
 	@Override
 	protected StargateEnergyRequired getEnergyRequiredToDial(StargatePos targetGatePos) {
-		return super.getEnergyRequiredToDial(targetGatePos).mul(AunisConfig.powerConfig.stargateOrlinEnergyMul);
+		return super.getEnergyRequiredToDial(targetGatePos).mul(AunisConfig.powerConfig.stargateOrlinEnergyMul).cap(AunisConfig.powerConfig.stargateEnergyStorage/4 - 1000000);
 	}
 	
 //	@Override

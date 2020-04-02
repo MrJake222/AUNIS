@@ -1,9 +1,7 @@
 {
 	"forge_marker": 1,
 	
-	"defaults": {
-		"model": "aunis:crystal_infuser_block"
-	},
+	"defaults": {},
 	
 	"variants": {
 		"normal": [{}],

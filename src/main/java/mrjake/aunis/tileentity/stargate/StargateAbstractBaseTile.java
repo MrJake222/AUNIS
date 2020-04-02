@@ -449,6 +449,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 //		Aunis.info("closeGate init=" + isInitiating + ", targetGatePos: " + targetGatePos);
 		
 		stargateState = EnumStargateState.UNSTABLE;
+		energySecondsToClose = 0;
 		
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 62));
 		sendSignal(null, "stargate_close", new Object[] {});
@@ -589,8 +590,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			if (stargateState.initiating()) {
 				eventHorizon.scheduleTeleportation(targetGatePos);
 			}
-//						
-//			// Not initiating
+			
+			// Not initiating
 			if (stargateState == EnumStargateState.ENGAGED && AunisConfig.autoCloseConfig.autocloseEnabled) {
 				if (getAutoCloseManager().shouldClose(targetGatePos)) {
 					targetGatePos.getTileEntity().attemptClose();
@@ -659,8 +660,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				energySecondsToClose = energyStored/(float)keepAliveEnergyPerTick / 20f;
 				
 				if (energySecondsToClose >= 1) {
-//					int threshold = keepAliveEnergyPerTick*20 * AunisConfig.powerConfig.instabilitySeconds;
-
 					/*
 					 * If energy can sustain connection for less than AunisConfig.powerConfig.instabilitySeconds seconds
 					 * Start flickering
@@ -692,13 +691,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				}
 			}
 			
-//			energyTransferedLastTick = energyStorage.getEnergyStored() - energyStoredLastTick;
-//			energyStoredLastTick = energyStorage.getEnergyStored();
-//			
-//			if (stargateState.initiating())
-//				energySecondsToClose = (float)(energyStorage.getEnergyStored()) / keepAliveCostPerTick / 20;
-//			else
-//				energySecondsToClose = 0;
+			energyTransferedLastTick = getEnergyStorage().getEnergyStored() - energyStoredLastTick;
+			energyStoredLastTick = getEnergyStorage().getEnergyStored();
 		}
 	}
 	
@@ -870,18 +864,18 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * Function called when {@link this#updateMergeState(boolean, IBlockState)} is
 	 * called with {@code true} parameter(multiblock valid).
 	 */
-	protected abstract void mergeGate();
+	protected void mergeGate() {}
 	
 	/**
 	 * Function called when {@link this#updateMergeState(boolean, IBlockState)} is
 	 * called with {@code false} parameter(multiblock not valid).
 	 */
-	protected abstract void unmergeGate();
+	protected void unmergeGate() {}
 	
 	/**
 	 * @return Appropriate merge helper
 	 */
-	protected abstract StargateAbstractMergeHelper getMergeHelper();
+	public abstract StargateAbstractMergeHelper getMergeHelper();
 	
 	/**
 	 * Checks gate's merge state
@@ -1168,51 +1162,20 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	// -----------------------------------------------------------------
 	// Power system
 	
-//	private int openCost = 0;
 	private int keepAliveEnergyPerTick = 0;
-//	private int energyStoredLastTick = 0;
-//	protected int energyTransferedLastTick = 0;
+	private int energyStoredLastTick = 0;
+	protected int energyTransferedLastTick = 0;
 	protected float energySecondsToClose = 0;
 	
+	public int getEnergyTransferedLastTick() {
+		return energyTransferedLastTick;
+	}
+	
+	public float getEnergySecondsToClose() {
+		return energySecondsToClose;
+	}
+	
 	protected abstract StargateAbstractEnergyStorage getEnergyStorage();
-	
-//	protected int getMaxEnergyStorage() {
-//		return AunisConfig.powerConfig.stargateEnergyStorage;
-//	}
-//	
-//	protected boolean canReceiveEnergy() {
-//		return true;
-//	}
-	
-//	protected EnergyStorageUncapped energyStorage = new EnergyStorageUncapped(getMaxEnergyStorage(), AunisConfig.powerConfig.stargateMaxEnergyTransfer) {
-//		
-//		@Override
-//		protected void onEnergyChanged() {			
-//			markDirty();
-//		};
-//		
-//		@Override
-//		public boolean canReceive() {
-//			return canReceiveEnergy();
-//		};
-//	};
-	
-	/**
-	 * Unifies energy consumption methods
-	 * The order is as follows:
-	 *   - Gate internal buffer
-	 *   - DHD Crystal
-	 *   
-	 * @param minEnergy - minimal energy 
-	 * @return First IEnergyStorage that has enough energy, CAN BE NULL if no source can provide such energy
-	 */
-//	@Nullable
-//	protected IEnergyStorage getEnergyStorage(int minEnergy) {
-//		if (energyStorage.getEnergyStored() >= minEnergy)
-//			return energyStorage;
-//		
-//		return null;
-//	}
 	
 	protected StargateEnergyRequired getEnergyRequiredToDial(StargatePos targetGatePos) {
 		BlockPos sPos = pos;

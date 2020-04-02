@@ -56,7 +56,8 @@ public class ProxyClient implements IProxy {
 	public void init(FMLInitializationEvent event) {
 		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageMysteriousItemColor(), AunisItems.pageMysteriousItem);
     	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageNotebookItemColor(), AunisItems.pageNotebookItem);
-		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK);
+    	Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK);
+		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK);
     }
  
     public void postInit(FMLPostInitializationEvent event) {

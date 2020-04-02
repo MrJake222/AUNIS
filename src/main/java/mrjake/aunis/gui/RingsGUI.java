@@ -17,7 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
-public class RingsGUI extends GuiBase { // TODO Rework Rings' GUI to containers
+public class RingsGUI extends GuiBase {
 	
 	private BlockPos pos;
 	public TransportRingsGuiState state;

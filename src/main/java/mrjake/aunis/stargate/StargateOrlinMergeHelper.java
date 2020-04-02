@@ -10,6 +10,7 @@ import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.util.EnumFacing;
@@ -61,6 +62,11 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 	@Override
 	public boolean matchMember(IBlockState state) {
 		return MEMBER_MATCHER.apply(state);
+	}
+	
+	@Override
+	public Block getMemberBlock() {
+		return AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK;
 	}
 	
 	@Override

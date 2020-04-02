@@ -26,4 +26,8 @@ public class StargateEnergyRequired {
 	public StargateEnergyRequired add(StargateEnergyRequired add) {
 		return new StargateEnergyRequired(energyToOpen+add.energyToOpen, keepAlive+add.keepAlive);
 	}
+
+	public StargateEnergyRequired cap(int max) {
+		return new StargateEnergyRequired(Math.max(energyToOpen, max), keepAlive);
+	}
 }

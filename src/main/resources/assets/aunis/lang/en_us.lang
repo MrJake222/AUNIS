@@ -26,7 +26,9 @@ tile.aunis.capacitor_block.name=Capacitor Bank
 tile.aunis.stargate_orlin_base_block.name=Stargate Base (Orlin)
 tile.aunis.stargate_orlin_member_block.name=Stargate Ring (Orlin)
 
-tile.aunis.crystal_infuser_block.name=Crystal Infuser
+tile.aunis.stargate_universe_base_block.name=Stargate Base (Universe)
+tile.aunis.stargate_universe_chevron_block.name=Stargate Chevron (Universe)
+tile.aunis.stargate_universe_ring_block.name=Stargate Ring (Universe)
 
 item.aunis.crystal_fragment.name=Crystal Seed
 item.aunis.crystal_blank.name=Blank Crystal
@@ -237,7 +239,7 @@ gui.stargate.energyBuffer=Energy buffer
 
 chat.orlins.energyStored=Energy stored: %s / %s RF
 
-item.aunis.universe_dialer.name=Remote control
+item.aunis.universe_dialer.name=Universe Dialer
 item.aunis.universe_dialer.not_linked=Not linked
 item.aunis.universe_dialer.gate_busy=Gate is busy
 item.aunis.universe_dialer.mode_scan=Nearby

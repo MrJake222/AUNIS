@@ -7,6 +7,7 @@ import mrjake.aunis.item.AunisItems;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -75,7 +76,9 @@ public class UniverseDialerOCProgramToServer implements IMessage {
 					NBTTagCompound compound = stack.getTagCompound();
 					UniverseDialerOCMessage ocMessage = new UniverseDialerOCMessage(message.name, message.address, message.port, message.data);
 					
-					compound.getTagList(UniverseDialerMode.OC.tagListName, NBT.TAG_COMPOUND).appendTag(ocMessage.serializeNBT());
+					NBTTagList ocList = compound.getTagList(UniverseDialerMode.OC.tagListName, NBT.TAG_COMPOUND);
+					ocList.appendTag(ocMessage.serializeNBT());
+					compound.setTag(UniverseDialerMode.OC.tagListName, ocList);
 				}
 			});
 			

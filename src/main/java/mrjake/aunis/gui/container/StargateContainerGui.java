@@ -203,14 +203,33 @@ public class StargateContainerGui extends GuiContainer {
 			tab.renderFg(this, fontRenderer, mouseX, mouseY);
 		}
 		
-		String energy = String.format("%,d", energyStored);
-		String capacity = String.format("%,d", maxEnergyStored);
+		int transferred = container.gateTile.getEnergyTransferedLastTick();
+		TextFormatting transferredFormatting = TextFormatting.GRAY;
+		String transferredSign = "";
+		
+		if (transferred > 0) {
+			transferredFormatting = TextFormatting.GREEN;
+			transferredSign = "+";
+		} else if (transferred < 0) {
+			transferredFormatting = TextFormatting.RED;
+		}
+		
+		float toClose = container.gateTile.getEnergySecondsToClose();
+		TextFormatting toCloseFormatting = TextFormatting.GRAY;
+		
+		if (toClose > 0) {
+			if (toClose < AunisConfig.powerConfig.instabilitySeconds)
+				toCloseFormatting = TextFormatting.DARK_RED;
+			else
+				toCloseFormatting = TextFormatting.GREEN;
+		}
 		
 		if (isPointInRegion(10, 61, 156, 6, mouseX, mouseY)) {
 			List<String> power = Arrays.asList(
 					I18n.format("gui.stargate.energyBuffer"),
-					TextFormatting.GRAY + energy + " / " + capacity + " RF",
-					TextFormatting.GRAY + energyPercent);
+					TextFormatting.GRAY + String.format("%,d / %,d RF", energyStored, maxEnergyStored),
+					transferredFormatting + transferredSign + String.format("%,d RF/t", transferred),
+					toCloseFormatting + String.format("%.2f s", toClose));
 			drawHoveringText(power, mouseX-guiLeft, mouseY-guiTop);
 		}
 	}

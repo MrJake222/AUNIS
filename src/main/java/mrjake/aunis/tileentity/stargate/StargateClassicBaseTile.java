@@ -71,7 +71,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		
 		isFinalActive = false;
 		
-		updateChevronLight();
+		updateChevronLight(0);
 		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, dialedAddress.size(), isFinalActive);
 	}
 	
@@ -81,7 +81,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		
 		isFinalActive = false;
 		
-		updateChevronLight();
+		updateChevronLight(0);
 		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, dialedAddress.size(), isFinalActive);
 	}
 	
@@ -108,17 +108,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		
 		playPositionedSound(StargateSoundPositionedEnum.GATE_RING_ROLL, false);
 		ItemHandlerHelper.dropInventoryItems(world, pos, itemStackHandler);
-	}
-	
-	
-	// ------------------------------------------------------------------------
-	// Stargate Network
-	
-	@Override
-	protected void addSymbolToAddress(SymbolInterface symbol) {
-		super.addSymbolToAddress(symbol);
-		
-		updateChevronLight();
 	}
 	
 	
@@ -228,15 +217,13 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	// ------------------------------------------------------------------------
 	// Rendering
 	
-	protected void updateChevronLight() {
+	protected void updateChevronLight(int lightUp) {
 		for (int i=0; i<9; i++) {
 			BlockPos chevPos = getMergeHelper().getChevronBlocks().get(i);
 			
-			if (getMergeHelper().matchBase(world.getBlockState(chevPos))) {
-				// TODO Change MemberTiles...
-				StargateMilkyWayMemberTile memberTile = (StargateMilkyWayMemberTile) world.getTileEntity(chevPos.rotate(FacingToRotation.get(facing)).add(pos));
-				
-				memberTile.setLitUp(dialedAddress.size() > i);
+			if (getMergeHelper().matchMember(world.getBlockState(chevPos))) {
+				StargateClassicMemberTile memberTile = (StargateClassicMemberTile) world.getTileEntity(chevPos.rotate(FacingToRotation.get(facing)).add(pos));
+				memberTile.setLitUp(lightUp > i);
 			}
 		}
 	}
@@ -267,10 +254,10 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case GUI_STATE:
-				return new StargateContainerGuiState(gateAddressMap, false, 0, 0, 0, 0);
+				return new StargateContainerGuiState(gateAddressMap);
 				
-//			case GUI_UPDATE:
-//				return new StargateContainerGuiUpdate();
+			case GUI_UPDATE:
+				return new StargateContainerGuiUpdate(energyStorage.getEnergyStoredInternally(), energyTransferedLastTick, energySecondsToClose);
 				
 			default:
 				return super.getState(stateType);
@@ -339,7 +326,10 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				break;
 				
 			case GUI_UPDATE:
-				energyStorage.setEnergyStoredInternally(((StargateContainerGuiUpdate) state).energyStored);
+				StargateContainerGuiUpdate guiUpdate = (StargateContainerGuiUpdate) state;
+				energyStorage.setEnergyStoredInternally(guiUpdate.energyStored);
+				energyTransferedLastTick = guiUpdate.transferedLastTick;
+				energySecondsToClose = guiUpdate.secondsToClose;
 				
 				break;
 				

@@ -1,13 +1,13 @@
 package mrjake.aunis.block.stargate;
 
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
-import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
+import mrjake.aunis.stargate.StargateUniverseMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateClassicMemberTile;
-import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
+import mrjake.aunis.tileentity.stargate.StargateUniverseMemberTile;
 
-public class StargateMilkyWayMemberBlock extends StargateClassicMemberBlock {
+public class StargateUniverseMemberBlock extends StargateClassicMemberBlock {
 
-	public static final String BLOCK_NAME = "stargate_milkyway_member_block";
+	public static final String BLOCK_NAME = "stargate_universe_member_block";
 
 	@Override
 	protected String getBlockName() {
@@ -16,12 +16,12 @@ public class StargateMilkyWayMemberBlock extends StargateClassicMemberBlock {
 
 	@Override
 	protected StargateClassicMemberTile getTileEntity() {
-		return new StargateMilkyWayMemberTile();
+		return new StargateUniverseMemberTile();
 	}
 
 	@Override
 	protected StargateAbstractMergeHelper getMergeHelper() {
-		return StargateMilkyWayMergeHelper.INSTANCE;
+		return StargateUniverseMergeHelper.INSTANCE;
 	}
 
 	

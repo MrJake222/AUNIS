@@ -12,6 +12,7 @@ import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -50,6 +51,11 @@ public abstract class StargateAbstractMergeHelper {
 	 * @return True if the {@link IBlockState} represents the Member block, false otherwise.
 	 */
 	public abstract boolean matchMember(IBlockState state);
+	
+	/**
+	 * @return Member block.
+	 */
+	public abstract Block getMemberBlock();
 	
 	/**
 	 * Method searches for a {@link StargateMilkyWayBaseBlock} within {@link this#BASE_SEARCH_BOX}

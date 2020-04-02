@@ -1,4 +1,4 @@
-package mrjake.aunis.block;
+package mrjake.aunis.block.stargate;
 
 import java.util.List;
 
@@ -14,12 +14,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.property.IExtendedBlockState;
 
-public class StargateMilkyWayMemberBlockBakedModel implements IBakedModel {
+public class StargateClassicMemberBlockBakedModel implements IBakedModel {
 
 	private final Block defaultBlock;
 	private final IBakedModel defaultModel;
 	
-	public StargateMilkyWayMemberBlockBakedModel(Block defaultBlock, IBakedModel defaultModel) {
+	public StargateClassicMemberBlockBakedModel(Block defaultBlock, IBakedModel defaultModel) {
 		this.defaultBlock = defaultBlock;
 		this.defaultModel = defaultModel;
 	}

@@ -8,13 +8,12 @@ import java.util.Map;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.ModelEnum;
 import mrjake.aunis.OBJLoader.ModelLoader;
-import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.particle.ParticleBlender;
 import mrjake.aunis.particle.ParticleBlender.RandomizeInterface;
 import mrjake.aunis.particle.ParticleBlender.SimpleVector;
 import mrjake.aunis.particle.ParticleBlenderSmoke;
 import mrjake.aunis.particle.ParticleBlenderSparks;
-import mrjake.aunis.stargate.StargateOrlinMergeHelper;
+import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
@@ -37,11 +36,11 @@ public class StargateOrlinRenderer extends StargateAbstractRenderer<StargateAbst
 	}
 
 	@Override
-	protected Map<BlockPos, IBlockState> getMemberBlockStates(EnumFacing facing) {
+	protected Map<BlockPos, IBlockState> getMemberBlockStates(StargateAbstractMergeHelper mergeHelper, EnumFacing facing) {
 		Map<BlockPos, IBlockState> map = new HashMap<BlockPos, IBlockState>();
 		
-		for (BlockPos pos : StargateOrlinMergeHelper.INSTANCE.getRingBlocks())
-			map.put(pos, AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK.getDefaultState().withProperty(AunisProps.ORLIN_VARIANT, facing));
+		for (BlockPos pos : mergeHelper.getRingBlocks())
+			map.put(pos, mergeHelper.getMemberBlock().getDefaultState().withProperty(AunisProps.ORLIN_VARIANT, facing));
 		
 		return map;
 	}

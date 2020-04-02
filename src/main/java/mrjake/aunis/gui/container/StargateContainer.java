@@ -31,6 +31,8 @@ public class StargateContainer extends Container {
 	
 	private BlockPos pos;
 	private int lastEnergyStored;
+	private int energyTransferedLastTick;
+	private float lastEnergySecondsToClose;
 	private int lastProgress;
 	
 	public StargateContainer(IInventory playerInventory, World world, int x, int y, int z) {
@@ -135,14 +137,16 @@ public class StargateContainer extends Container {
 		
 		StargateClassicEnergyStorage energyStorage = (StargateClassicEnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
 		
-		if (lastEnergyStored != energyStorage.getEnergyStoredInternally()) {
+		if (lastEnergyStored != energyStorage.getEnergyStoredInternally() || lastEnergySecondsToClose != gateTile.getEnergySecondsToClose() || energyTransferedLastTick != gateTile.getEnergyTransferedLastTick()) {
 			for (IContainerListener listener : listeners) {
 				if (listener instanceof EntityPlayerMP) {
-					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_UPDATE, new StargateContainerGuiUpdate(energyStorage.getEnergyStoredInternally())), (EntityPlayerMP) listener);
+					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_UPDATE, gateTile.getState(StateTypeEnum.GUI_UPDATE)), (EntityPlayerMP) listener);
 				}
 			}
 			
 			lastEnergyStored = energyStorage.getEnergyStoredInternally();
+			energyTransferedLastTick = gateTile.getEnergyTransferedLastTick();
+			lastEnergySecondsToClose = gateTile.getEnergySecondsToClose();
 		}
 		
 		if (lastProgress != gateTile.getPageProgress()) {

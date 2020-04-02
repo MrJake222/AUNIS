@@ -5,6 +5,7 @@ import java.util.List;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -19,9 +20,11 @@ import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
-import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
+import mrjake.aunis.stargate.StargateEnergyRequired;
+import mrjake.aunis.stargate.StargateUniverseMergeHelper;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.StargateAddressDynamic;
+import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
@@ -274,6 +277,11 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 		return SymbolTypeEnum.UNIVERSE;
 	}
 	
+	@Override
+	protected StargateEnergyRequired getEnergyRequiredToDial(StargatePos targetGatePos) {
+		return super.getEnergyRequiredToDial(targetGatePos).mul(AunisConfig.powerConfig.stargateUniverseEnergyMul);
+	}
+	
 	
 	// --------------------------------------------------------------------------------
 	// Teleportation
@@ -333,22 +341,10 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 	
 	// --------------------------------------------------------------------------------
 	// Merging
-	
-	@Override
-	protected void mergeGate() {
-		// TODO Auto-generated method stub UNIVERSE
-		
-	}
 
 	@Override
-	protected void unmergeGate() {
-		// TODO Auto-generated method stub UNIVERSE
-		
-	}
-
-	@Override
-	protected StargateAbstractMergeHelper getMergeHelper() {
-		return StargateMilkyWayMergeHelper.INSTANCE;
+	public StargateAbstractMergeHelper getMergeHelper() {
+		return StargateUniverseMergeHelper.INSTANCE;
 	}
 
 	

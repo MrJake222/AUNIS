@@ -9,8 +9,10 @@ import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.block.stargate.StargateOrlinBaseBlock;
 import mrjake.aunis.block.stargate.StargateOrlinMemberBlock;
 import mrjake.aunis.block.stargate.StargateUniverseBaseBlock;
+import mrjake.aunis.block.stargate.StargateUniverseMemberBlock;
 import mrjake.aunis.item.CapacitorItemBlock;
 import mrjake.aunis.item.StargateMilkyWayMemberItemBlock;
+import mrjake.aunis.item.StargateUniverseMemberItemBlock;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.CapacitorTile;
 import mrjake.aunis.tileentity.DHDTile;
@@ -21,6 +23,7 @@ import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateUniverseMemberTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -54,6 +57,7 @@ public class AunisBlocks {
 		
 	// -----------------------------------------------------------------------------
 	public static final StargateMilkyWayMemberBlock STARGATE_MILKY_WAY_MEMBER_BLOCK = new StargateMilkyWayMemberBlock();
+	public static final StargateUniverseMemberBlock STARGATE_UNIVERSE_MEMBER_BLOCK = new StargateUniverseMemberBlock();
 	public static final CapacitorBlock CAPACITOR_BLOCK = new CapacitorBlock();
 	
 	
@@ -79,6 +83,7 @@ public class AunisBlocks {
 		
 		registry.registerAll(blocks);
 		registry.register(STARGATE_MILKY_WAY_MEMBER_BLOCK);
+		registry.register(STARGATE_UNIVERSE_MEMBER_BLOCK);
 		registry.register(CAPACITOR_BLOCK);
 		
 		GameRegistry.registerTileEntity(StargateMilkyWayBaseTile.class, AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK.getRegistryName());
@@ -86,6 +91,7 @@ public class AunisBlocks {
 		GameRegistry.registerTileEntity(StargateOrlinBaseTile.class, AunisBlocks.STARGATE_ORLIN_BASE_BLOCK.getRegistryName());
 		
 		GameRegistry.registerTileEntity(StargateMilkyWayMemberTile.class, AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(StargateUniverseMemberTile.class, AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK.getRegistryName());
 		GameRegistry.registerTileEntity(StargateOrlinMemberTile.class, AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK.getRegistryName());
 		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.DHD_BLOCK.getRegistryName());
 		GameRegistry.registerTileEntity(TransportRingsTile.class, AunisBlocks.TRANSPORT_RINGS_BLOCK.getRegistryName());
@@ -101,6 +107,7 @@ public class AunisBlocks {
 			registry.register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
 		
 		registry.register(new StargateMilkyWayMemberItemBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK));		
+		registry.register(new StargateUniverseMemberItemBlock(STARGATE_UNIVERSE_MEMBER_BLOCK));		
 		registry.register(new CapacitorItemBlock(CAPACITOR_BLOCK));
 	}
 	
@@ -115,6 +122,8 @@ public class AunisBlocks {
 		
 		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK), ringMeta, new ModelResourceLocation("aunis:stargate_milkyway_ring_block"));
 		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK), chevronMeta, new ModelResourceLocation("aunis:stargate_milkyway_chevron_block"));
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_UNIVERSE_MEMBER_BLOCK), ringMeta, new ModelResourceLocation("aunis:stargate_universe_ring_block"));
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_UNIVERSE_MEMBER_BLOCK), chevronMeta, new ModelResourceLocation("aunis:stargate_universe_chevron_block"));
 		
 		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(CAPACITOR_BLOCK), 0, new ModelResourceLocation(CAPACITOR_BLOCK.getRegistryName(), "inventory"));
 	}

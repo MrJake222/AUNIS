@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
@@ -78,7 +77,6 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		}
 	}
 	
-	
 	// ------------------------------------------------------------------------
 	// Stargate connection
 	
@@ -145,7 +143,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		}
 		
 		super.addSymbolToAddress(symbol);
-		Aunis.info("dialed: " + dialedAddress);
+		updateChevronLight(dialedAddress.size());
 
 		if (isLinked()) {
 			getLinkedDHD(world).activateSymbol((SymbolMilkyWayEnum) symbol);
@@ -193,7 +191,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	}
 	
 	@Override
-	protected StargateAbstractMergeHelper getMergeHelper() {
+	public StargateAbstractMergeHelper getMergeHelper() {
 		return StargateMilkyWayMergeHelper.INSTANCE;
 	}
 
@@ -461,7 +459,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				else
 					sendRenderingUpdate(EnumGateAction.CHEVRON_ACTIVATE_BOTH, 0, false);
 				
-				updateChevronLight();
+//				updateChevronLight(); // TODO Check light update OC
 				
 				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_CLOSE, 14));
 

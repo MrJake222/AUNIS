@@ -10,6 +10,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.renderer.BlockRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
+import mrjake.aunis.stargate.StargateAbstractMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
@@ -71,7 +72,7 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 				
 				Minecraft.getMinecraft().entityRenderer.disableLightmap();
 				
-				for (Map.Entry<BlockPos, IBlockState> entry : getMemberBlockStates(rendererState.facing).entrySet()) {				
+				for (Map.Entry<BlockPos, IBlockState> entry : getMemberBlockStates(te.getMergeHelper(), rendererState.facing).entrySet()) {				
 					BlockPos pos = entry.getKey().rotate(FacingToRotation.get(rendererState.facing));
 					
 					BlockRenderer.render(getWorld(), pos, entry.getValue());
@@ -91,9 +92,10 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 	}
 	
 	/**
+	 * @param mergeHelper Merge helper instance.
 	 * @return {@link Map} of {@link BlockPos} to {@link IBlockState} for rendering of the ghost blocks.
 	 */
-	protected abstract Map<BlockPos, IBlockState> getMemberBlockStates(EnumFacing facing);
+	protected abstract Map<BlockPos, IBlockState> getMemberBlockStates(StargateAbstractMergeHelper mergeHelper, EnumFacing facing);
 		
 	protected abstract void applyLightMap(S rendererState, double partialTicks);
 	protected abstract void applyTransformations(S rendererState);

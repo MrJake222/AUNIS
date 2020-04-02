@@ -14,6 +14,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 public class DHDButtonClickedToServer extends PositionedPacket {
 	public DHDButtonClickedToServer() {}
@@ -48,6 +49,11 @@ public class DHDButtonClickedToServer extends PositionedPacket {
 			
 			world.addScheduledTask(() -> {
 				DHDTile dhdTile = (DHDTile) world.getTileEntity(message.pos);
+				
+				if (dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).getStackInSlot(0).isEmpty()) {
+					player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.no_crystal_warn"), true);
+					return;
+				}
 				
 				if (!dhdTile.isLinked()) {
 					player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.not_linked_warn"), true);

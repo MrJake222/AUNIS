@@ -71,7 +71,11 @@ public class AunisConfig {
 		
 		@Name("Orlin's gate energy multiplier")
 		@RangeDouble(min=0)
-		public double stargateOrlinEnergyMul = 1.5;
+		public double stargateOrlinEnergyMul = 2.0;
+		
+		@Name("Universe gate energy multiplier")
+		@RangeDouble(min=0)
+		public double stargateUniverseEnergyMul = 1.5;
 	}
 	
 	public static class RingsConfig {
