@@ -6,12 +6,14 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.datafixer.StargateNetworkReader18;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.common.util.Constants.NBT;
 
 public class StargateNetwork extends WorldSavedData {
 
@@ -115,7 +117,10 @@ public class StargateNetwork extends WorldSavedData {
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
-		NBTTagList stargateTagList = compound.getTagList("stargates", 10); // 10 for NBTTagCompound list
+		if (compound.hasKey("size"))
+			StargateNetworkReader18.readOldMap(compound, this);
+		
+		NBTTagList stargateTagList = compound.getTagList("stargates", NBT.TAG_COMPOUND);
 		
 		for (NBTBase baseTag : stargateTagList) {
 			NBTTagCompound stargateCompound = (NBTTagCompound) baseTag;
