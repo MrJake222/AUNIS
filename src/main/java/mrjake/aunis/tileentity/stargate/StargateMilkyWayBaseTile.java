@@ -67,15 +67,6 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		playSoundEvent(StargateSoundEventEnum.DIAL_FAILED);
 	}
 	
-	@Override
-	public void onBlockBroken() {
-		super.onBlockBroken();
-		
-		if (isLinked()) {
-			getLinkedDHD(world).clearSymbols();
-			getLinkedDHD(world).setLinkedGate(null);
-		}
-	}
 	
 	// ------------------------------------------------------------------------
 	// Stargate connection
@@ -106,16 +97,13 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	public void addSymbolToAddressDHD(SymbolMilkyWayEnum symbol) {		
 		addSymbolToAddress(symbol);
 		stargateState = EnumStargateState.DIALING;
-		
-		NBTTagCompound taskData = new NBTTagCompound();
-		
+				
 		if (stargateWillLock(symbol)) {
 			isFinalActive = true;
-			taskData.setBoolean("final", true);
 		}
 		
 		sendSignal(null, "stargate_dhd_chevron_engaged", new Object[] { dialedAddress.size(), isFinalActive, symbol.englishName });
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ACTIVATE_CHEVRON, 10, taskData));
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ACTIVATE_CHEVRON, 10));
 				
 		markDirty();
 	}
@@ -135,7 +123,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	
 	@Override
 	public void addSymbolToAddress(SymbolInterface symbol) {
-		if (symbol.origin() && dialedAddress.equals(StargateNetwork.EARTH_ADDRESS) && !network.isStargateInNetwork(StargateNetwork.EARTH_ADDRESS)) {
+		if (symbol.origin() && getSymbolType().validateDialedAddress(dialedAddress) && dialedAddress.equals(StargateNetwork.EARTH_ADDRESS) && !network.isStargateInNetwork(StargateNetwork.EARTH_ADDRESS)) {
 			dialedAddress.clear();
 			
 			for (int i=0; i<6; i++)
@@ -143,7 +131,6 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		}
 		
 		super.addSymbolToAddress(symbol);
-		updateChevronLight(dialedAddress.size());
 
 		if (isLinked()) {
 			getLinkedDHD(world).activateSymbol((SymbolMilkyWayEnum) symbol);
@@ -171,15 +158,19 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	// Merging
 	
 	@Override
-	protected void unmergeGate() {
+	public void onGateBroken() {
+		super.onGateBroken();
+		
 		if (isLinked()) {
+			getLinkedDHD(world).clearSymbols();
 			getLinkedDHD(world).setLinkedGate(null);
 			setLinkedDHD(null);
 		}
 	}
 	
 	@Override
-	protected void mergeGate() {
+	protected void onGateMerged() {
+		super.onGateMerged();
 		BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.DHD_BLOCK);
 		
 		if (closestDhd != null) {
@@ -187,6 +178,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 			
 			dhdTile.setLinkedGate(pos);
 			setLinkedDHD(closestDhd);
+			markDirty();
 		}
 	}
 	
@@ -417,6 +409,16 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	@Override
 	public void executeTask(EnumScheduledTask scheduledTask, NBTTagCompound customData) {
 		switch (scheduledTask) {
+			case STARGATE_ACTIVATE_CHEVRON:
+				stargateState = EnumStargateState.IDLE;
+				markDirty();
+				
+				playSoundEvent(StargateSoundEventEnum.CHEVRON_OPEN);
+				sendRenderingUpdate(EnumGateAction.CHEVRON_ACTIVATE, -1, isFinalActive);
+				updateChevronLight(dialedAddress.size(), isFinalActive);
+	//			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(EnumGateAction.CHEVRON_ACTIVATE, -1, customData.getBoolean("final"))), targetPoint);
+				break;
+		
 			case STARGATE_SPIN_FINISHED:				
 				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_OPEN, 11));
 				
@@ -459,7 +461,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				else
 					sendRenderingUpdate(EnumGateAction.CHEVRON_ACTIVATE_BOTH, 0, false);
 				
-//				updateChevronLight(); // TODO Check light update OC
+				updateChevronLight(dialedAddress.size(), isFinalActive);
 				
 				addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_CLOSE, 14));
 

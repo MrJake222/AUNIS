@@ -10,12 +10,19 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootEntry;
+import net.minecraft.world.storage.loot.LootEntryTable;
+import net.minecraft.world.storage.loot.LootPool;
+import net.minecraft.world.storage.loot.RandomValueRange;
+import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.common.config.Config.Type;
 import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
@@ -92,5 +99,15 @@ public class AunisEventHandler {
 				}
 			}
 		}
-    }	
+    }
+	
+	@SubscribeEvent
+	public static void onLootTableLoad(LootTableLoadEvent event) {
+	    if (event.getName().toString().equals("minecraft:chests/end_city_treasure")) {
+	    	LootEntry entry = new LootEntryTable(new ResourceLocation(Aunis.ModID, "end_city_treasure"), 1, 0, new LootCondition[] {}, "universe_dialer");  
+	    	LootPool pool = new LootPool(new LootEntry[] {entry}, new LootCondition[] {}, new RandomValueRange(1), new RandomValueRange(0), "univese_dialer_pool");
+	    	
+	    	event.getTable().addPool(pool);
+	    }
+	}
 }

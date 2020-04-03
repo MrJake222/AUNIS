@@ -74,7 +74,8 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 		IBlockState state = blockAccess.getBlockState(pos);
 		
 		return MEMBER_MATCHER.apply(state) &&
-				state.getValue(AunisProps.ORLIN_VARIANT) == facing;
+				state.getValue(AunisProps.ORLIN_VARIANT) == facing &&
+				!((StargateOrlinMemberTile) blockAccess.getTileEntity(pos)).isBroken();
 	}
 
 	@Override

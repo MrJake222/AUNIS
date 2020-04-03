@@ -116,7 +116,7 @@ public class StargateOrlinMemberBlock extends Block {
 				
 		if (gateTile.isBroken()) {
 			drops.add(new ItemStack(Items.IRON_INGOT, 1 + rand.nextInt(2)));
-			drops.add(new ItemStack(Items.REDSTONE, 1 + rand.nextInt(2)));
+			drops.add(new ItemStack(Items.REDSTONE, 2 + rand.nextInt(3)));
 		}
 			
 		else {

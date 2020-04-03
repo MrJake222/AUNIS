@@ -7,10 +7,10 @@ import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.state.StargateCamoState;
-import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StargateLightState;
 import mrjake.aunis.state.State;
+import mrjake.aunis.state.StateProviderInterface;
+import mrjake.aunis.state.StateTypeEnum;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.state.IBlockState;
@@ -19,7 +19,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
@@ -36,33 +35,19 @@ import net.minecraftforge.items.ItemStackHandler;
  * 
  * @author MrJake
  */
-public class StargateClassicMemberTile extends TileEntity implements ITickable, StateProviderInterface {
+public class StargateClassicMemberTile extends TileEntity implements StateProviderInterface {
 	
-	boolean firstTick = true;
-	private boolean waitForClear = false;
-	private long clearWaitStarted;
+	private TargetPoint targetPoint;
 	
 	@Override
-	public void update() {
-
-		if (firstTick) {
-			firstTick = false;
-			
-			if (world.isRemote) {				
-				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.CAMO_STATE));
-				AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.LIGHT_STATE));
-			}
+	public void onLoad() {
+		if (!world.isRemote) {
+			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 		}
 		
-		
-		if (!world.isRemote) {
-			if (waitForClear) {
-				if (world.getTotalWorldTime() - clearWaitStarted >= 40) {
-					waitForClear = false;
-					
-					syncLightUp();
-				}
-			}
+		else {
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.CAMO_STATE));
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.LIGHT_STATE));
 		}
 	}
 	
@@ -82,26 +67,19 @@ public class StargateClassicMemberTile extends TileEntity implements ITickable, 
 	private boolean isLitUp;
 	
 	public void syncLightUp() {
-		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.LIGHT_STATE, getState(StateTypeEnum.LIGHT_STATE)), point);
+//		Aunis.info("Syncing light state for chevron");
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.LIGHT_STATE, getState(StateTypeEnum.LIGHT_STATE)), targetPoint);
 	}
 	
 	public void setLitUp(boolean isLitUp) {
+		boolean sync = isLitUp != this.isLitUp;
+		
 		this.isLitUp = isLitUp;
-
-		
-		if (isLitUp)
-			syncLightUp();
-		
-		else {
-			clearWaitStarted = world.getTotalWorldTime();
-			waitForClear = true;
-		}
-		
-//		world.notifyLightSet(pos);
-//		world.setBlockState(pos, world.getBlockState(pos).withProperty(AunisProps.LIT_UP, isLitUp), 3);
-		
 		markDirty();
+
+		if (sync) {
+			syncLightUp();
+		}
 	}
 	
 	public boolean isLitUp(IBlockState state) {

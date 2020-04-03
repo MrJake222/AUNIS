@@ -58,6 +58,7 @@ public class AunisBlocks {
 	// -----------------------------------------------------------------------------
 	public static final StargateMilkyWayMemberBlock STARGATE_MILKY_WAY_MEMBER_BLOCK = new StargateMilkyWayMemberBlock();
 	public static final StargateUniverseMemberBlock STARGATE_UNIVERSE_MEMBER_BLOCK = new StargateUniverseMemberBlock();
+	public static final CapacitorBlockEmpty CAPACITOR_BLOCK_EMPTY = new CapacitorBlockEmpty();
 	public static final CapacitorBlock CAPACITOR_BLOCK = new CapacitorBlock();
 	
 	
@@ -74,7 +75,9 @@ public class AunisBlocks {
 		
 		TRANSPORT_RINGS_BLOCK,
 		TR_CONTROLLER_BLOCK,
-		INVISIBLE_BLOCK
+		INVISIBLE_BLOCK,
+		
+		CAPACITOR_BLOCK_EMPTY
 	};
 		
 	@SubscribeEvent

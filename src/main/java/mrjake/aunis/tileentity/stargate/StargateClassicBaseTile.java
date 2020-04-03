@@ -28,8 +28,8 @@ import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.state.StargateRendererActionState;
-import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
+import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.util.ScheduledTask;
@@ -71,7 +71,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		
 		isFinalActive = false;
 		
-		updateChevronLight(0);
+		updateChevronLight(0, false);
 		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, dialedAddress.size(), isFinalActive);
 	}
 	
@@ -81,7 +81,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		
 		isFinalActive = false;
 		
-		updateChevronLight(0);
+		updateChevronLight(0, false);
 		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, dialedAddress.size(), isFinalActive);
 	}
 	
@@ -97,15 +97,20 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		super.incomingWormhole(dialedAddressSize);
 		
 		isFinalActive = true;
+		updateChevronLight(dialedAddressSize, isFinalActive);
 		
 		playSoundEvent(StargateSoundEventEnum.INCOMING);
 		sendRenderingUpdate(EnumGateAction.LIGHT_UP_CHEVRONS, dialedAddressSize, true);
 	}
 	
 	@Override
-	public void onBlockBroken() {
-		super.onBlockBroken();
-		
+	public void onGateBroken() {
+		super.onGateBroken();
+		updateChevronLight(0, false);
+		isSpinning = false;
+		currentRingSymbol = getSymbolType().getTopSymbol();
+		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPIN_STATE, new StargateSpinState(currentRingSymbol, spinDirection, true)), targetPoint);
+
 		playPositionedSound(StargateSoundPositionedEnum.GATE_RING_ROLL, false);
 		ItemHandlerHelper.dropInventoryItems(world, pos, itemStackHandler);
 	}
@@ -217,13 +222,18 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	// ------------------------------------------------------------------------
 	// Rendering
 	
-	protected void updateChevronLight(int lightUp) {
+	protected void updateChevronLight(int lightUp, boolean isFinalActive) {
+//		Aunis.info("Updating chevron light to: " + lightUp);
+		
+		if (isFinalActive)
+			lightUp--;
+		
 		for (int i=0; i<9; i++) {
-			BlockPos chevPos = getMergeHelper().getChevronBlocks().get(i);
+			BlockPos chevPos = getMergeHelper().getChevronBlocks().get(i).rotate(FacingToRotation.get(facing)).add(pos);
 			
 			if (getMergeHelper().matchMember(world.getBlockState(chevPos))) {
-				StargateClassicMemberTile memberTile = (StargateClassicMemberTile) world.getTileEntity(chevPos.rotate(FacingToRotation.get(facing)).add(pos));
-				memberTile.setLitUp(lightUp > i);
+				StargateClassicMemberTile memberTile = (StargateClassicMemberTile) world.getTileEntity(chevPos);
+				memberTile.setLitUp(i==8 ? isFinalActive : lightUp > i);
 			}
 		}
 	}
@@ -334,8 +344,14 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				break;
 				
 			case SPIN_STATE:
-				StargateSpinState spinState = (StargateSpinState) state;
-				getRendererStateClient().spinHelper.initRotation(world.getTotalWorldTime(), spinState.targetSymbol, spinState.direction);
+				StargateSpinState spinState = (StargateSpinState) state;				
+				if (spinState.setOnly) {
+					getRendererStateClient().spinHelper.isSpinning = false;
+					getRendererStateClient().spinHelper.currentSymbol = spinState.targetSymbol;
+				} 
+				
+				else	
+					getRendererStateClient().spinHelper.initRotation(world.getTotalWorldTime(), spinState.targetSymbol, spinState.direction);
 				
 				break;
 				
@@ -352,16 +368,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	
 	@Override
 	public void executeTask(EnumScheduledTask scheduledTask, NBTTagCompound customData) {
-		switch (scheduledTask) {
-			case STARGATE_ACTIVATE_CHEVRON:
-				stargateState = EnumStargateState.IDLE;
-				markDirty();
-				
-				playSoundEvent(StargateSoundEventEnum.CHEVRON_OPEN);
-				sendRenderingUpdate(EnumGateAction.CHEVRON_ACTIVATE, -1, customData.getBoolean("final"));
-//				AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(EnumGateAction.CHEVRON_ACTIVATE, -1, customData.getBoolean("final"))), targetPoint);
-				break;
-				
+		switch (scheduledTask) {				
 			case STARGATE_SPIN_FINISHED:
 				isSpinning = false;
 				currentRingSymbol = targetRingSymbol;
@@ -440,7 +447,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			
 			// Aunis.info("position: " + currentRingSymbol + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance + ", animEnd: " + StargateSpinHelper.getAnimationDuration(distance) + ", moveOnly: " + moveOnly + ", locking: " + locking);
 			
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPIN_STATE, new StargateSpinState(targetRingSymbol, spinDirection)), targetPoint);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPIN_STATE, new StargateSpinState(targetRingSymbol, spinDirection, false)), targetPoint);
 			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, StargateClassicSpinHelper.getAnimationDuration(distance) - 5));
 			playPositionedSound(StargateSoundPositionedEnum.GATE_RING_ROLL, true);
 			

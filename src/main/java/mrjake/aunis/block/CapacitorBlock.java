@@ -70,9 +70,9 @@ public class CapacitorBlock extends Block {
 	
 	@Override
 	public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
-		StargateAbstractEnergyStorage capacitorEnergyStorage = (StargateAbstractEnergyStorage) world.getTileEntity(pos).getCapability(CapabilityEnergy.ENERGY, null);
+		CapacitorTile capTile = (CapacitorTile) world.getTileEntity(pos);
 		
-		return state.withProperty(AunisProps.LEVEL, Math.round(capacitorEnergyStorage.getEnergyStored() / (float)capacitorEnergyStorage.getMaxEnergyStored() * 10));
+		return state.withProperty(AunisProps.LEVEL, capTile.getPowerLevel());
 	}
 	
 	// ------------------------------------------------------------------------

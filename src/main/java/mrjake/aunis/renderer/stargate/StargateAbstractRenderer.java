@@ -75,7 +75,8 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 				for (Map.Entry<BlockPos, IBlockState> entry : getMemberBlockStates(te.getMergeHelper(), rendererState.facing).entrySet()) {				
 					BlockPos pos = entry.getKey().rotate(FacingToRotation.get(rendererState.facing));
 					
-					BlockRenderer.render(getWorld(), pos, entry.getValue());
+					if (getWorld().isAirBlock(pos.add(rendererState.pos)))
+						BlockRenderer.render(getWorld(), pos, entry.getValue());
 				}
 				
 				Minecraft.getMinecraft().entityRenderer.enableLightmap();

@@ -41,6 +41,7 @@ public class AunisItems {
 	 * Diffrent Naquadah(main Stargate building material) stages of purity
 	 */
 	public static Item naquadahShard = ItemHelper.createGenericItem("naquadah_shard");
+	public static Item naquadahAlloyRaw = ItemHelper.createGenericItem("naquadah_alloy_raw");
 	public static Item naquadahAlloy = ItemHelper.createGenericItem("naquadah_alloy");
 	
 	/**
@@ -58,6 +59,7 @@ public class AunisItems {
 	public static Item circuitControlNaquadah = ItemHelper.createGenericItem("circuit_control_naquadah");
 		
 	public static Item stargateRingFragment = ItemHelper.createGenericItem("stargate_ring_fragment");
+	public static Item universeRingFragment = ItemHelper.createGenericItem("universe_ring_fragment");
 	public static Item trRingFragment = ItemHelper.createGenericItem("transportrings_ring_fragment");
 	public static Item holderCrystal = ItemHelper.createGenericItem("holder_crystal");
 	
@@ -82,6 +84,7 @@ public class AunisItems {
 		
 		naquadahShard,
 		naquadahAlloy,
+		naquadahAlloyRaw,
 		
 		crystalSeed,
 		crystalBlue,
@@ -95,6 +98,7 @@ public class AunisItems {
 		circuitControlNaquadah,
 		
 		stargateRingFragment,
+		universeRingFragment,
 		trRingFragment,
 		holderCrystal,
 		

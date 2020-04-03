@@ -1,6 +1,7 @@
 package mrjake.aunis.command;
 
-import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -31,11 +32,19 @@ public class CommandDebug extends CommandBase {
 		if (rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK) {
 			TileEntity tileEntity = world.getTileEntity(rayTraceResult.getBlockPos());
 			
-			if (tileEntity instanceof StargateClassicBaseTile) {
-				StargateClassicBaseTile gateTile = (StargateClassicBaseTile) tileEntity;
+			if (tileEntity instanceof StargateOrlinBaseTile) {
+				StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) tileEntity;
+				
+				notifyCommandListener(player, this, "isBroken: " + gateTile.isBroken());
+			}
+			
+			else if (tileEntity instanceof StargateOrlinMemberTile) {
+				StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) tileEntity;
+				
+				notifyCommandListener(player, this, "isBroken: " + memberTile.isBroken());
 				
 //				gateTile.attemptOpenDialed();
-				gateTile.dialingFailed();
+//				gateTile.dialingFailed();
 				
 //				StargateClassicEnergyStorage energyStorage = (StargateClassicEnergyStorage) tileEntity.getCapability(CapabilityEnergy.ENERGY, null);
 //				

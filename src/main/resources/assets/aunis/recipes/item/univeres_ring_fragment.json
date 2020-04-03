@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"NNN",
+		"   ",
+		"NNN"
+	],
+	
+	"key": {
+		"N": {
+			"item": "aunis:naquadah_alloy_raw"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:universe_ring_fragment",
+		"count": 4,
+		"data": 0
+	}
+}

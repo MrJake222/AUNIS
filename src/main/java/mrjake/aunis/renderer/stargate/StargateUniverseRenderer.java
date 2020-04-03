@@ -10,11 +10,6 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 	private static final float GATE_DIAMETER = 8.67415f;
 
 	@Override
-	protected void applyLightMap(StargateUniverseRendererState rendererState, double partialTicks) {
-		
-	}
-
-	@Override
 	protected void applyTransformations(StargateUniverseRendererState rendererState) {
 		float scale = 0.90f;
 		GlStateManager.scale(scale, scale, scale);

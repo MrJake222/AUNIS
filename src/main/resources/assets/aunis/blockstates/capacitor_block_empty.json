@@ -1,0 +1,18 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "aunis:capacitor_block_empty"
+	},
+	"variants": {
+		"normal": [{}],
+		
+		"inventory": [{}],
+		
+		"facing": {
+			"south": { "y": 180 },
+			"west": { "y": 270 },
+			"north": {},
+			"east": { "y": 90 }
+		}
+	}
+}

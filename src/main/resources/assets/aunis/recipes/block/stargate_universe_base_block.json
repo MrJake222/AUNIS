@@ -1,22 +1,26 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"NHN",
-		"NIE",
+		"FFF",
+		"BIE",
 		"NRN"
 	],
 	
 	"key": {
-		"H": {
-			"item": "aunis:holder_crystal"
+		"F": {
+			"item": "aunis:universe_ring_fragment"
 		},
-		
+
 		"N": {
-			"item": "aunis:naquadah_alloy"
+			"item": "aunis:naquadah_alloy_raw"
 		},
 		
 		"I": {
 			"item": "aunis:circuit_control_naquadah"
+		},
+		
+		"B": {
+			"item": "aunis:crystal_blue"
 		},
 		
 		"E": {
@@ -29,7 +33,7 @@
 	},
 	
 	"result": {
-		"item": "aunis:crystal_infuser_block",
+		"item": "aunis:stargate_universe_base_block",
 		"count": 1,
 		"data": 0
 	}

@@ -3,41 +3,17 @@ package mrjake.aunis.renderer.stargate;
 import mrjake.aunis.OBJLoader.ModelEnum;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.OBJLoader.OBJModel;
-import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
-import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.math.MathFunction;
 import mrjake.aunis.util.math.MathFunctionImpl;
 import mrjake.aunis.util.math.MathRange;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.EnumSkyBlock;
 
 public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMilkyWayRendererState> {
 	
 	private static final Vec3d RING_LOC = new Vec3d(0.0, -0.122333, -0.000597);
 	private static final float GATE_DIAMETER = 10.1815f;
-	
-	@Override
-	protected void applyLightMap(StargateMilkyWayRendererState rendererState, double partialTicks) {
-		final int chevronCount = 6;
-		int skyLight = 0;
-		int blockLight = 0;
-		
-		for (int i=0; i<chevronCount; i++) {
-			BlockPos blockPos = StargateMilkyWayMergeHelper.INSTANCE.getChevronBlocks().get(i).rotate(FacingToRotation.get(rendererState.facing)).add(rendererState.pos);
-			
-			skyLight += getWorld().getLightFor(EnumSkyBlock.SKY, blockPos);
-			blockLight += getWorld().getLightFor(EnumSkyBlock.BLOCK, blockPos);
-		}
-		
-		skyLight /= chevronCount;
-		blockLight /= chevronCount;
-		
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, blockLight * 16, skyLight * 16);
-	}
 	
 	@Override
 	protected void applyTransformations(StargateMilkyWayRendererState rendererState) {

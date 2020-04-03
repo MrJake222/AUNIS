@@ -1,0 +1,35 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"NGN",
+		"RYR",
+		"NEN"
+	],
+	
+	"key": {
+		"R": {
+			"item": "aunis:universe_ring_fragment"
+		},
+		
+		"G": {
+			"item": "minecraft:glass"
+		},
+		
+		"N": {
+			"item": "aunis:naquadah_alloy_raw"
+		},
+		
+		"Y": {
+			"item": "aunis:crystal_yellow"
+		},
+		
+		"E": {
+			"item": "aunis:crystal_ender"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:stargate_universe_member_block",
+		"data": 14
+	}
+}

@@ -128,7 +128,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	public void onBlockBroken() {
-//		updateTargetGate();
+		for (StargateAddress address : gateAddressMap.values())
+			network.removeStargate(address);
+	}
+	
+	protected void onGateBroken() {
 		world.setBlockToAir(getGateCenterPos());
 		
 		if (stargateState.initiating()) {
@@ -139,13 +143,19 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			targetGatePos.getTileEntity().attemptClose();
 		}
 		
-		updateMergeState(false, facing);
-		for (StargateAddress address : gateAddressMap.values())
-			network.removeStargate(address);
+		dialedAddress.clear();
+		targetGatePos = null;
+		scheduledTasks.clear();
+		stargateState = EnumStargateState.IDLE;
+		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, 0, false);
 		
 		ForgeChunkManager.unforceChunk(chunkLoadingTicket, new ChunkPos(pos));
 		AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.WORMHOLE_LOOP, false);
+		
+		markDirty();
 	}
+	
+	protected void onGateMerged() {}
 	
 	public boolean canAcceptConnectionFrom(StargatePos targetGatePos) {
 		return stargateState.idle();
@@ -337,7 +347,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		if (dialedAddress.size() == getMaxChevrons())
 			return true;
 		
-		if (symbol.origin())
+		if (dialedAddress.size() >= 7 && symbol.origin())
 			return true;
 		
 		return false;
@@ -861,18 +871,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	/**
-	 * Function called when {@link this#updateMergeState(boolean, IBlockState)} is
-	 * called with {@code true} parameter(multiblock valid).
-	 */
-	protected void mergeGate() {}
-	
-	/**
-	 * Function called when {@link this#updateMergeState(boolean, IBlockState)} is
-	 * called with {@code false} parameter(multiblock not valid).
-	 */
-	protected void unmergeGate() {}
-	
-	/**
 	 * @return Appropriate merge helper
 	 */
 	public abstract StargateAbstractMergeHelper getMergeHelper();
@@ -883,11 +881,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * @param shouldBeMerged - True if gate's multiblock structure is valid
 	 * @param facing Facing of the base block.
 	 */
-	public final void updateMergeState(boolean shouldBeMerged, EnumFacing facing) {		
-		this.isMerged = shouldBeMerged;
-		
+	public final void updateMergeState(boolean shouldBeMerged, EnumFacing facing) {
 		if (!shouldBeMerged) {
-			unmergeGate();
+			if (isMerged)
+				onGateBroken();
 			
 			if (stargateState.engaged()) {
 				targetGatePos.getTileEntity().closeGate();
@@ -895,9 +892,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		}
 		
 		else {
-			mergeGate();
+			onGateMerged();
 		}
 		
+		this.isMerged = shouldBeMerged;
 		IBlockState actualState = world.getBlockState(pos);
 		
 		// When the block is destroyed, there will be air in this place and we cannot set it's block state
@@ -1254,16 +1252,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		if (targetGatePos != null)
 			compound.setTag("targetGatePos", targetGatePos.serializeNBT());
-//		compound.setInteger("dialedAddressLength", dialedAddress.size());
-//		
-//		for (int i=0; i<dialedAddress.size(); i++) {
-//			compound.setInteger("dialedSymbol"+i, dialedAddress.get(i).id);
-//		}
 			
 		compound.setBoolean("isMerged", isMerged);
 		compound.setTag("autoCloseManager", getAutoCloseManager().serializeNBT());
 		
-//		compound.setInteger("openCost", openCost);
 		compound.setInteger("keepAliveCostPerTick", keepAliveEnergyPerTick);
 		
 		if (stargateState != null)
@@ -1293,25 +1285,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				gateAddressMap.put(symbolType, new StargateAddress(compound.getCompoundTag("address_" + symbolType)));
 		}
 		
-//		if (compound.hasKey("symbol0")) {					
-//			for (int i=0; i<7; i++) {
-//				int id = compound.getInteger("symbol"+i);
-//				gateAddress.add( EnumSymbol.valueOf(id) );
-//			}
-//		}
-		
 		dialedAddress.deserializeNBT(compound.getCompoundTag("dialedAddress"));
 		
 		if (compound.hasKey("targetGatePos"))
 			targetGatePos = new StargatePos(getSymbolType(), compound.getCompoundTag("targetGatePos"));
 		
-//		dialedAddress.clear();
-//		int dialedAddressLength = compound.getInteger("dialedAddressLength");
-//		
-//		for (int i=0; i<dialedAddressLength; i++) {
-//			dialedAddress.add( EnumSymbol.valueOf(compound.getInteger("dialedSymbol"+i)) );
-//		}
-//		
 		isMerged = compound.getBoolean("isMerged");
 		getAutoCloseManager().deserializeNBT(compound.getCompoundTag("autoCloseManager"));
 		

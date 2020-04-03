@@ -12,13 +12,13 @@ import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import mrjake.aunis.tileentity.TransportRingsTile;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import mrjake.aunis.transportrings.TransportRings;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -28,7 +28,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.IRegistry;
@@ -45,6 +44,7 @@ public class UniverseDialerItem extends Item {
 		setTranslationKey(Aunis.ModID + "." + ITEM_NAME);
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
+		setMaxStackSize(1);
 		Aunis.proxy.setTileEntityItemStackRenderer(this);
 	}
 	
@@ -57,15 +57,6 @@ public class UniverseDialerItem extends Item {
 		return compound;
 	}
 	
-	@Override
-	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
-		if (isInCreativeTab(tab)) {
-			ItemStack stack = new ItemStack(this);
-			stack.setTagCompound(initNbt());
-			items.add(stack);
-		}
-	}
-	
 	public void registerCustomModel(IRegistry<ModelResourceLocation, IBakedModel> registry) {
 		ModelResourceLocation modelResourceLocation = new ModelResourceLocation(getRegistryName(), "inventory");
 		
@@ -76,23 +67,23 @@ public class UniverseDialerItem extends Item {
 	}
 	
 	@Override
-	public void onCreated(ItemStack stack, World world, EntityPlayer player) {
-		stack.setTagCompound(initNbt());
-	}
-	
-	@Override
 	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
 		return oldStack.getItem() != newStack.getItem();
 	}
 	
 	@Override
 	public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag flagIn) {
-		tooltip.add("Saved gates: " + stack.getTagCompound().getTagList("saved", NBT.TAG_COMPOUND).tagCount());
+		if (stack.hasTagCompound()) {
+			tooltip.add("Saved gates: " + stack.getTagCompound().getTagList("saved", NBT.TAG_COMPOUND).tagCount());
+		}
 	}
 	
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
-		if (world.getTotalWorldTime() % 20 == 0 && isSelected && !world.isRemote && stack.hasTagCompound()) {
+		if (!stack.hasTagCompound())
+			stack.setTagCompound(initNbt());
+		
+		if (world.getTotalWorldTime() % 20 == 0 && isSelected && !world.isRemote) {
 			NBTTagCompound compound = stack.getTagCompound();
 			BlockPos pos = entity.getPosition();
 			
@@ -131,7 +122,12 @@ public class UniverseDialerItem extends Item {
 										if (stargatePos.gatePos.equals(targetPos))
 											continue;
 										
-										if (stargatePos.getTileEntity() instanceof StargateOrlinBaseTile)
+										StargateAbstractBaseTile gateTile = stargatePos.getTileEntity();
+										
+										if (!gateTile.isMerged())
+											continue;
+										
+										if (gateTile instanceof StargateOrlinBaseTile)
 											continue;
 										
 										nearbyList.appendTag(entry.getKey().serializeNBT());
@@ -177,9 +173,14 @@ public class UniverseDialerItem extends Item {
 
 			if (mode.linkable && !compound.hasKey(mode.tagPosName))
 				return super.onItemRightClick(world, player, hand);
-			
+						
 			BlockPos linkedPos = BlockPos.fromLong(compound.getLong(mode.tagPosName));
-			NBTTagCompound selectedCompound = compound.getTagList(mode.tagListName, NBT.TAG_COMPOUND).getCompoundTagAt(selected);
+			NBTTagList tagList = compound.getTagList(mode.tagListName, NBT.TAG_COMPOUND);
+			
+			if (selected >= tagList.tagCount())
+				return super.onItemRightClick(world, player, hand);
+				
+			NBTTagCompound selectedCompound = tagList.getCompoundTagAt(selected);
 
 			switch (mode) {
 				case MEMORY:
@@ -206,9 +207,12 @@ public class UniverseDialerItem extends Item {
 							break;
 					}
 					
+					break;
+					
 				case RINGS:
 					TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(linkedPos);
 					ringsTile.attemptTransportTo((EntityPlayerMP) player, new TransportRings(selectedCompound).getAddress());
+					break;
 					
 				case OC:
 					UniverseDialerOCMessage message = new UniverseDialerOCMessage(selectedCompound);					

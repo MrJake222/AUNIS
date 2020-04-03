@@ -71,51 +71,53 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		// ---------------------------------------------------------------------------------------------
 		// List rendering
 		
-		NBTTagCompound compound = stack.getTagCompound();
-		UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
-		
-		drawStringWithShadow(-0.47f, 0.916f, mode.localize(), true);
-		drawStringWithShadow(0.22f, 0.916f, mode.next().localize(), false);
-		
-		if (mode.linkable && !compound.hasKey(mode.tagPosName)) {
-			drawStringWithShadow(0.22f, 0.71f, I18n.format("item.aunis.universe_dialer.not_linked"), false);
-		}
+		if (stack.hasTagCompound()) {		
+			NBTTagCompound compound = stack.getTagCompound();
+			UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
 			
-		else {
-			int selected = compound.getByte("selected");
-			NBTTagList tagList = compound.getTagList(mode.tagListName, NBT.TAG_COMPOUND);
+			drawStringWithShadow(-0.47f, 0.916f, mode.localize(), true);
+			drawStringWithShadow(0.22f, 0.916f, mode.next().localize(), false);
 			
-			for (int offset=-1; offset<=1; offset++) {
-				int index = selected + offset;
-				if (index >= 0 && index < tagList.tagCount()) {
-					
-					boolean active = offset == 0;					
-					NBTTagCompound entryCompound = (NBTTagCompound) tagList.getCompoundTagAt(index);
-					
-					switch (mode) {
-						case MEMORY:
-						case NEARBY:
-							drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
-							StargateAddress address = new StargateAddress(entryCompound);
-							int symbolCount = SymbolUniverseEnum.getMaxSymbolsDisplay(entryCompound.getBoolean("hasUpgrade")); 
-							
-							for (int i=0; i<symbolCount; i++)
-								renderSymbol(offset, i, address.get(i), active, symbolCount == 8);
-							
-							renderSymbol(offset, symbolCount, SymbolUniverseEnum.getOrigin(), active, symbolCount == 8);
-							break;
-							
-						case RINGS:
-							TransportRings rings = new TransportRings(entryCompound);
-							drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, rings.getAddress() + ".", active);
-							drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, rings.getName(), active);
-							break;
-							
-						case OC:
-							UniverseDialerOCMessage message = new UniverseDialerOCMessage(entryCompound);
-							drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
-							drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, message.name, active);
-							break;
+			if (mode.linkable && !compound.hasKey(mode.tagPosName)) {
+				drawStringWithShadow(0.22f, 0.71f, I18n.format("item.aunis.universe_dialer.not_linked"), false);
+			}
+				
+			else {
+				int selected = compound.getByte("selected");
+				NBTTagList tagList = compound.getTagList(mode.tagListName, NBT.TAG_COMPOUND);
+				
+				for (int offset=-1; offset<=1; offset++) {
+					int index = selected + offset;
+					if (index >= 0 && index < tagList.tagCount()) {
+						
+						boolean active = offset == 0;					
+						NBTTagCompound entryCompound = (NBTTagCompound) tagList.getCompoundTagAt(index);
+						
+						switch (mode) {
+							case MEMORY:
+							case NEARBY:
+								drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
+								StargateAddress address = new StargateAddress(entryCompound);
+								int symbolCount = SymbolUniverseEnum.getMaxSymbolsDisplay(entryCompound.getBoolean("hasUpgrade")); 
+								
+								for (int i=0; i<symbolCount; i++)
+									renderSymbol(offset, i, address.get(i), active, symbolCount == 8);
+								
+								renderSymbol(offset, symbolCount, SymbolUniverseEnum.getOrigin(), active, symbolCount == 8);
+								break;
+								
+							case RINGS:
+								TransportRings rings = new TransportRings(entryCompound);
+								drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, rings.getAddress() + ".", active);
+								drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, rings.getName(), active);
+								break;
+								
+							case OC:
+								UniverseDialerOCMessage message = new UniverseDialerOCMessage(entryCompound);
+								drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
+								drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, message.name, active);
+								break;
+						}
 					}
 				}
 			}

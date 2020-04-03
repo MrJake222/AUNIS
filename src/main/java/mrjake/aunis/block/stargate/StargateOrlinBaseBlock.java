@@ -135,8 +135,7 @@ public class StargateOrlinBaseBlock extends Block {
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		if (!world.isRemote) {
 			StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
-			
-			gateTile.onBlockBroken();
+			gateTile.updateMergeState(false, state.getValue(AunisProps.FACING_HORIZONTAL));
 		}
 	}
 	
@@ -147,8 +146,7 @@ public class StargateOrlinBaseBlock extends Block {
 		Random rand = new Random();
 				
 		if (gateTile.isBroken()) {
-			drops.add(new ItemStack(Items.IRON_INGOT, 2 + rand.nextInt(2)));
-			drops.add(new ItemStack(Items.REDSTONE, 1 + rand.nextInt(2)));
+			drops.add(new ItemStack(Items.IRON_INGOT, 2 + rand.nextInt(3)));
 		}
 			
 		else {

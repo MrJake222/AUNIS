@@ -27,7 +27,7 @@ public class NaquadahOreBlock extends Block {
 		setSoundType(SoundType.STONE); 
 		setCreativeTab(Aunis.aunisCreativeTab);
 		
-		setHardness(1.5f);
+		setHardness(4.5f);
 		setHarvestLevel("pickaxe", 3);
 	}
 	

@@ -6,11 +6,34 @@ import java.util.Map;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.StargateAbstractMergeHelper;
+import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
+import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
 
 public abstract class StargateClassicRenderer<S extends StargateClassicRendererState> extends StargateAbstractRenderer<S> {
+	
+	@Override
+	protected void applyLightMap(StargateClassicRendererState rendererState, double partialTicks) {
+		final int chevronCount = 6;
+		int skyLight = 0;
+		int blockLight = 0;
+		
+		for (int i=0; i<chevronCount; i++) {
+			BlockPos blockPos = StargateMilkyWayMergeHelper.INSTANCE.getChevronBlocks().get(i).rotate(FacingToRotation.get(rendererState.facing)).add(rendererState.pos);
+			
+			skyLight += getWorld().getLightFor(EnumSkyBlock.SKY, blockPos);
+			blockLight += getWorld().getLightFor(EnumSkyBlock.BLOCK, blockPos);
+		}
+		
+		skyLight /= chevronCount;
+		blockLight /= chevronCount;
+		
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, blockLight * 16, skyLight * 16);
+	}
 	
 	@Override
 	protected Map<BlockPos, IBlockState> getMemberBlockStates(StargateAbstractMergeHelper mergeHelper, EnumFacing facing) {

@@ -1,5 +1,7 @@
 package mrjake.aunis.block.stargate;
 
+import javax.annotation.Nullable;
+
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.gui.GuiIdEnum;
@@ -91,11 +93,24 @@ public abstract class StargateClassicBaseBlock extends Block {
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		if (!world.isRemote) {
 			StargateClassicBaseTile gateTile = (StargateClassicBaseTile) world.getTileEntity(pos);
+			gateTile.updateMergeState(false, state.getValue(AunisProps.FACING_HORIZONTAL));
 			gateTile.onBlockBroken();
 		}
 		
 		super.breakBlock(world, pos, state);
 	}
+	
+	@Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        if (willHarvest) return true; //If it will harvest, delay deletion of the block until after getDrops
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+	
+    @Override
+    public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack tool) {
+        super.harvestBlock(world, player, pos, state, te, tool);
+        world.setBlockToAir(pos);
+    }
 	
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
