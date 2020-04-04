@@ -10,6 +10,7 @@ import mrjake.aunis.raycaster.util.Box;
 import mrjake.aunis.raycaster.util.DHDVertex;
 import mrjake.aunis.raycaster.util.Ray;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -21,16 +22,16 @@ public abstract class Raycaster {
 	protected abstract Vector3f getTranslation(World world, BlockPos pos);
 
 	protected abstract void check(World world, BlockPos pos, EntityPlayer player, int x, int i);
-	protected abstract void brbCheck(List<Ray> brbRayList, Vec3d lookVec, EntityPlayer player, BlockPos pos);
+	protected abstract boolean brbCheck(List<Ray> brbRayList, Vec3d lookVec, EntityPlayer player, BlockPos pos, EnumHand hand);
 	
-	public void onActivated(World world, BlockPos pos, EntityPlayer player, float rotation) {		
+	public boolean onActivated(World world, BlockPos pos, EntityPlayer player, float rotation, EnumHand hand) {		
 		// Last common function, x=a, y=b
 		Ray lastRay = null;
 		Ray firstRay = null;
 		List<Ray> brbRayList = new ArrayList<Ray>();
 		Vec3d lookVec = player.getLookVec();
 				
-		boolean breakLoop = false;
+		boolean found = false;
 		
 		for (int x=1; x<=getVertices().size()/getRayGroupCount(); x++) {
 		//for (int x=1; x<=1; x++) {
@@ -63,39 +64,28 @@ public abstract class Raycaster {
 				Box box = new Box(currentRay, lastRay, transverseRays.get(i), transverseRays.get(i+1), i);
 				
 				if (box.checkForPointInBox( new Vector2f( (float)lookVec.x, (float)lookVec.z ) )) {
-//					button = x-1;
+//					int button = x-1;
 //					if (i>0)
 //						button += 19;
 //					
-//					Aunis.info("i:"+i+" x:"+x);
+//					Aunis.info("i:"+i+" x:"+x+" btn:"+button);
 					
 					check(world, pos, player, x, i);
 					
-					breakLoop = true;
+					found = true;
 					break;
 				}
 			}
 			
-			if (breakLoop)
+			if (found)
 				break;
 			
 			lastRay = currentRay;
 		}
 		
-		brbCheck(brbRayList, lookVec, player, pos);
+		found |= brbCheck(brbRayList, lookVec, player, pos, hand);
 		
-//		if (button == -1) {				
-//			Box box = new Box( brbRayList );
-//			if (box.checkForPointInBox( new Vector2f( (float)lookVec.x, (float)lookVec.z ) )) {
-//				button = 38;
-//			}
-//		}
-		
-//		if (button != -1) {
-//			player.swingArm(EnumHand.MAIN_HAND);
-//
-//			AunisPacketHandler.INSTANCE.sendToServer( new GateRenderingUpdatePacketToServer(button, pos) );
-//		}
+		return found;
 	}
 	
 	private Vector2f getTransposed(Vector3f v, float rotation, World world, BlockPos pos, EntityPlayer player) {

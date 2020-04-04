@@ -11,14 +11,14 @@ import net.minecraft.util.math.BlockPos;
 
 public class AunisSoundHelperClient {
 
-	private static Map<BlockPos, Map<AunisPositionedSoundEnum, PositionedSoundRecord>> positionedSoundRecordsMap = new HashMap<>();
+	private static Map<BlockPos, Map<SoundPositionedEnum, PositionedSoundRecord>> positionedSoundRecordsMap = new HashMap<>();
 	
-	private static PositionedSoundRecord getSoundRecord(AunisPositionedSoundEnum soundEnum, BlockPos pos) {
+	private static PositionedSoundRecord getSoundRecord(SoundPositionedEnum soundEnum, BlockPos pos) {
 		return new PositionedSoundRecord(soundEnum.resourceLocation, soundEnum.soundCategory, 0.5f, 1.0f, soundEnum.repeat, 0, AttenuationType.LINEAR, pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f);
 	}
 	
-	public static void playPositionedSoundClientSide(BlockPos pos, AunisPositionedSoundEnum soundEnum, boolean play) {
-		Map<AunisPositionedSoundEnum, PositionedSoundRecord> soundRecordsMap = positionedSoundRecordsMap.get(pos);
+	public static void playPositionedSoundClientSide(BlockPos pos, SoundPositionedEnum soundEnum, boolean play) {
+		Map<SoundPositionedEnum, PositionedSoundRecord> soundRecordsMap = positionedSoundRecordsMap.get(pos);
 		
 		if (soundRecordsMap == null) {
 			soundRecordsMap = new HashMap<>();

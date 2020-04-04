@@ -1,7 +1,6 @@
 package mrjake.aunis.block;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.state.StateTypeEnum;
@@ -46,8 +45,8 @@ private static final String blockName = "transportrings_block";
 		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {			
-			if (player.getHeldItem(hand).getItem() == AunisItems.analyzerAncient)
-				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_STATE, ringsTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
+//			if (player.getHeldItem(hand).getItem() == AunisItems.analyzerAncient)
+			AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_STATE, ringsTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
 		}
 		
 		return true;
@@ -59,7 +58,7 @@ private static final String blockName = "transportrings_block";
 		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {			
-			BlockPos closestController = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.trControllerBlock);
+			BlockPos closestController = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.TR_CONTROLLER_BLOCK);
 			
 			if (closestController != null) {
 				TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(closestController);

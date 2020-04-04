@@ -1,10 +1,9 @@
 package mrjake.aunis.command;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.StargateNetwork;
+import mrjake.aunis.stargate.network.StargateAddressDynamic;
+import mrjake.aunis.stargate.network.StargateNetwork;
+import mrjake.aunis.stargate.network.SymbolInterface;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -13,6 +12,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 public class CommandStargateSetAddress extends CommandBase {
@@ -33,41 +34,61 @@ public class CommandStargateSetAddress extends CommandBase {
 		EntityPlayerMP player = (EntityPlayerMP) sender;
 		RayTraceResult rayTraceResult = player.rayTrace(8, 0);
 		
-		if (args.length != 7) {
-			notifyCommandListener(sender, this, "commands.sgsetaddress.wrongaddress");
+		if (args.length < 1) {
+			notifyCommandListener(sender, this, TextFormatting.RED + new TextComponentTranslation("commands.sgsetaddress.noaddressspace").getFormattedText());
 			return;
 		}
 		
-		List<EnumSymbol> newAddress = new ArrayList<EnumSymbol>(7);
-		
-		for (int i=0; i<7; i++) {
-			EnumSymbol symbol = EnumSymbol.forEnglishName(args[i].replace("-", " "));
+		try {
+			SymbolTypeEnum symbolType = SymbolTypeEnum.valueOf(args[0].toUpperCase());
 			
-			if (symbol == null) {
-				notifyCommandListener(sender, this, "commands.sgsetaddress.wrongsymbol", i+1);
+			if (args.length != 9) {
+				notifyCommandListener(sender, this, TextFormatting.RED + new TextComponentTranslation("commands.sgsetaddress.wrongaddress").getFormattedText());
 				return;
 			}
 			
-			newAddress.add(symbol);
-		}
-		
-		if (StargateNetwork.get(world).checkForStargate(newAddress)) {
-			notifyCommandListener(sender, this, "commands.sgsetaddress.exists");
-			return;
-		}
-		
-		if (rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK) {
-			TileEntity tileEntity = world.getTileEntity(rayTraceResult.getBlockPos());
-			
-			if (tileEntity instanceof StargateAbstractBaseTile) {
-				StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) tileEntity;
+			StargateAddressDynamic stargateAddress = new StargateAddressDynamic(symbolType);
+					
+			for (int i=0; i<8; i++) {
+				SymbolInterface symbol = symbolType.fromEnglishName(args[i+1].replace("-", " "));
 				
-				gateTile.setGateAddress(newAddress);
-				notifyCommandListener(sender, this, "commands.sgsetaddress.success", gateTile.getPos().toString(), newAddress.toString());
+				if (symbol == null) {
+					notifyCommandListener(sender, this, TextFormatting.RED + new TextComponentTranslation("commands.sgsetaddress.wrongsymbol").getFormattedText(), i+1);
+					return;
+				}
+				
+				stargateAddress.addSymbol(symbol);
 			}
 			
-			else
-				notifyCommandListener(sender, this, "commands.sgsetaddress.notstargate");
+			if (StargateNetwork.get(world).isStargateInNetwork(stargateAddress)) {
+				notifyCommandListener(sender, this, TextFormatting.RED + new TextComponentTranslation("commands.sgsetaddress.exists").getFormattedText());
+				return;
+			}
+			
+			if (rayTraceResult.typeOfHit == RayTraceResult.Type.BLOCK) {
+				TileEntity tileEntity = world.getTileEntity(rayTraceResult.getBlockPos());
+				
+				if (tileEntity instanceof StargateAbstractBaseTile) {
+					StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) tileEntity;
+					
+					gateTile.setGateAddress(symbolType, stargateAddress.toImmutable());
+					notifyCommandListener(sender, this, "commands.sgsetaddress.success", gateTile.getPos().toString(), stargateAddress.toString());
+				}
+				
+				else
+					notifyCommandListener(sender, this, TextFormatting.RED + new TextComponentTranslation("commands.sgsetaddress.notstargate").getFormattedText());
+			}
+		}
+		
+		catch (IllegalArgumentException e) {
+			notifyCommandListener(sender, this, TextFormatting.RED + new TextComponentTranslation("commands.sgsetaddress.wrongaddressspace").getFormattedText());
+			
+			String types = "";
+			for (SymbolTypeEnum symbolType : SymbolTypeEnum.values())
+				types += symbolType + ", ";
+			
+			notifyCommandListener(sender, this, TextFormatting.RED + types);
+			return;
 		}
 	}
 

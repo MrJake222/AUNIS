@@ -1,0 +1,28 @@
+{
+	"parent": "block/cube_all",
+	"textures": {
+		"fluid": "aunis:fluids/silicon_molten_red_still",
+		"normal": "aunis:blocks/naquadah_block",
+		"particle": "aunis:blocks/naquadah_block"
+	},
+    "elements": [
+        {   "from": [ 0, 0, 0 ],
+            "to": [ 16, 16, 16 ],
+            "faces": {
+                "down":  { "texture": "#normal", "cullface": "down" },
+                "up":    { "texture": "#normal", "cullface": "up" },
+                "north": { "texture": "#fluid", "cullface": "north" },
+                "south": { "texture": "#normal", "cullface": "south" },
+                "west":  { "texture": "#normal", "cullface": "west" },
+                "east":  { "texture": "#normal", "cullface": "east" }
+            }
+        },
+        
+        {   "from": [ 0, 0, 0 ],
+            "to": [ 16, 16, 16 ],
+            "faces": {
+                "north": { "texture": "#overlay_front", "cullface": "north" }
+            }
+        }
+    ]	
+}

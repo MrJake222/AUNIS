@@ -1,0 +1,32 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		" R ",
+		"BCE",
+		"   "
+	],
+	
+	"key": {
+		"C": {
+			"item": "aunis:circuit_control_crystal"
+		},
+		
+		"B": {
+			"item": "aunis:crystal_blue"
+		},
+
+		"E": {
+			"item": "aunis:crystal_ender"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:crystal_glyph_milkyway",
+		"count": 1,
+		"data": 0
+	}
+}

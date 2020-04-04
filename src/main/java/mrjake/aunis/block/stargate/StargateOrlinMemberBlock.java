@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.stargate.StargateOrlinMergeHelper;
+import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
@@ -116,7 +116,7 @@ public class StargateOrlinMemberBlock extends Block {
 				
 		if (gateTile.isBroken()) {
 			drops.add(new ItemStack(Items.IRON_INGOT, 1 + rand.nextInt(2)));
-			drops.add(new ItemStack(Items.REDSTONE, 1 + rand.nextInt(2)));
+			drops.add(new ItemStack(Items.REDSTONE, 2 + rand.nextInt(3)));
 		}
 			
 		else {

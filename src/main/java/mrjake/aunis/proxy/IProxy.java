@@ -1,7 +1,7 @@
 package mrjake.aunis.proxy;
 
-import mrjake.aunis.sound.AunisPositionedSoundEnum;
-import mrjake.aunis.state.StargateAbstractRendererState;
+import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
+import mrjake.aunis.sound.SoundPositionedEnum;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
@@ -24,5 +24,5 @@ public interface IProxy {
 	public void addScheduledTaskClientSide(Runnable runnable);
 	
 	public void orlinRendererSpawnParticles(World world, StargateAbstractRendererState rendererState);
-	public void playPositionedSoundClientSide(BlockPos pos, AunisPositionedSoundEnum soundEnum, boolean play);
+	public void playPositionedSoundClientSide(BlockPos pos, SoundPositionedEnum soundEnum, boolean play);
 }

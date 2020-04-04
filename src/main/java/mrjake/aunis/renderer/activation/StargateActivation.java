@@ -1,22 +1,20 @@
 package mrjake.aunis.renderer.activation;
 
-public class StargateActivation extends Activation {
+import mrjake.aunis.renderer.stargate.ChevronEnum;
 
-	public StargateActivation(int textureIndex, long stateChange, boolean dim) {
-		super(textureIndex, stateChange, dim);
-	}
-	
-	public StargateActivation(int textureIndex, long stateChange) {
-		super(textureIndex, stateChange);
+public class StargateActivation extends Activation<ChevronEnum> {
+
+	public StargateActivation(ChevronEnum textureKey, long stateChange, boolean dim) {
+		super(textureKey, stateChange, dim);
 	}
 
 	@Override
-	protected int getMaxStage() {
+	protected float getMaxStage() {
 		return 10;
 	}
 	
 	@Override
-	protected int getTickMultiplier() {
+	protected float getTickMultiplier() {
 		return 3;
 	}
 }

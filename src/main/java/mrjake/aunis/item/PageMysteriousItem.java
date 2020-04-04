@@ -3,7 +3,6 @@ package mrjake.aunis.item;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.stargate.EnumSymbol;
 import mrjake.aunis.worldgen.StargateGenerator;
 import mrjake.aunis.worldgen.StargateGenerator.GeneratedStargate;
 import net.minecraft.client.util.ITooltipFlag;
@@ -37,18 +36,11 @@ public class PageMysteriousItem extends Item {
 		
 		if (!world.isRemote) {
 			GeneratedStargate stargate = StargateGenerator.generateStargate(world);
-//			List<EnumSymbol> address = stargate.address;
-		
+			
 			if (stargate != null) {
-				NBTTagCompound compound = new NBTTagCompound();
+				NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(stargate.address, false, stargate.path);
 				
-				long serialized = EnumSymbol.toLong(stargate.address);
-				compound.setLong("address", serialized);
-				compound.setInteger("7th", stargate.address.get(6).id);
-				
-				compound.setInteger("color", PageNotebookItem.getColorForBiome(stargate.path));
-				
-				ItemStack stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
+				ItemStack stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
 				stack.setTagCompound(compound);
 				
 				ItemStack held = player.getHeldItem(hand);

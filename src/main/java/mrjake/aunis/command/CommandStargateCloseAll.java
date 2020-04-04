@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
-import mrjake.aunis.stargate.StargateNetwork;
-import mrjake.aunis.stargate.StargateNetwork.StargatePos;
+import mrjake.aunis.Aunis;
+import mrjake.aunis.stargate.network.StargateAddress;
+import mrjake.aunis.stargate.network.StargateNetwork;
+import mrjake.aunis.stargate.network.StargatePos;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class CommandStargateCloseAll extends CommandBase {
 	
@@ -74,38 +73,40 @@ public class CommandStargateCloseAll extends CommandBase {
 		if (args.length == 0) 		
 			notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
 		
-		Map<Long, StargatePos> stargates = StargateNetwork.get(sender.getEntityWorld()).queryStargates();
+		StargateNetwork network = StargateNetwork.get(sender.getEntityWorld());
+		
 		int closed = 0;
 		
-		List<Long> toBeRemoved = new ArrayList<Long>();
+		List<StargateAddress> toBeRemoved = new ArrayList<StargateAddress>();
 		
-		for (long serialized : stargates.keySet()) {
-			StargatePos stargatePos = stargates.get(serialized);
-			World world = stargatePos.getWorld();
+		for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
+			Map<StargateAddress, StargatePos> map = network.getMap().get(symbolType);
 			
-			if (limitWorld && world.provider.getDimension() != worldId)
-				continue;
-			
-			BlockPos pos = stargatePos.getPos();
-			
-			TileEntity tileEntity = world.getTileEntity(pos);
-			
-			if (tileEntity instanceof StargateAbstractBaseTile) {
-				StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) tileEntity;
+			for (StargateAddress address : map.keySet()) {
+				StargatePos stargatePos = network.getStargate(address);
 				
-				if (gateTile.getStargateState().initiating() || (force && gateTile.getStargateState().engaged())) {
-					StargateRenderingUpdatePacketToServer.closeGatePacket(gateTile, false);
-					closed++;
+				if (limitWorld && stargatePos.dimensionID != worldId)
+					continue;
+								
+				StargateAbstractBaseTile gateTile = stargatePos.getTileEntity();
+				
+				if (gateTile != null) {					
+					if (gateTile.getStargateState().initiating() || (force && gateTile.getStargateState().engaged())) {
+						gateTile.attemptClose();
+						closed++;
+					}
 				}
-			}
-			
-			else {
-				toBeRemoved.add(serialized);
+				
+				else {
+					toBeRemoved.add(address);
+				}
 			}
 		}
 		
-		for (long remove : toBeRemoved)
-			StargateNetwork.get(sender.getEntityWorld()).removeStargate(remove);
+		for (StargateAddress address : toBeRemoved) {
+			network.removeStargate(address);
+			Aunis.info("Removing address " + address);
+		}
 		
 		notifyCommandListener(sender, this, "Closed " + closed + " gates.");
 	}

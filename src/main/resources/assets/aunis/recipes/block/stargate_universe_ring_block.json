@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		" N ",
+		"RCR",
+		" N "
+	],
+	
+	"key": {
+		"N": {
+			"item": "aunis:naquadah_alloy_raw"
+		},
+		
+		"C": {
+			"item": "aunis:crystal_red"
+		},
+		
+		"R": {
+			"item": "aunis:universe_ring_fragment"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:stargate_universe_member_block",
+		"data": 6
+	}
+}

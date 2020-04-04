@@ -6,28 +6,30 @@ import java.util.List;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
-import mrjake.aunis.gui.StargateOrlinGui;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
-import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
+import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
+import mrjake.aunis.renderer.stargate.StargateOrlinRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.sound.SoundEventEnum;
+import mrjake.aunis.sound.SoundPositionedEnum;
+import mrjake.aunis.sound.StargateSoundEventEnum;
+import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
-import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.StargateAbstractMergeHelper;
-import mrjake.aunis.stargate.StargateEnergyRequired;
-import mrjake.aunis.stargate.StargateNetwork;
-import mrjake.aunis.stargate.StargateOrlinMergeHelper;
-import mrjake.aunis.state.StargateAbstractGuiState;
-import mrjake.aunis.state.StargateAbstractRendererState;
-import mrjake.aunis.state.StargateOrlinRendererState;
+import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
+import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
+import mrjake.aunis.stargate.network.StargateNetwork;
+import mrjake.aunis.stargate.network.StargatePos;
+import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
+import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
+import mrjake.aunis.stargate.power.StargateEnergyRequired;
 import mrjake.aunis.state.StargateOrlinSparkState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -47,21 +49,29 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	}
 	
 	@Override
-	public void dialingFailed() {
-		super.dialingFailed();
-		
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_FAILED_SOUND, 30));
-		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 83));
+	public SymbolTypeEnum getSymbolType() {
+		return SymbolTypeEnum.MILKYWAY;
 	}
 	
 	@Override
-	public void openGate(boolean initiating, List<EnumSymbol> incomingAddress, boolean eightChevronDial) {
-		super.openGate(initiating, incomingAddress, eightChevronDial);
+	public void dialingFailed() {
+		super.dialingFailed();
 		
-		markDirty();
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAILED_SOUND, 30));
+	}
+	
+	@Override
+	protected void addFailedTaskAndPlaySound() {
+		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 83));
+		playSoundEvent(StargateSoundEventEnum.DIAL_FAILED);
+	}
+	
+	@Override
+	public void openGate(StargatePos targetGatePos, boolean isInitiating) {
+		super.openGate(targetGatePos, isInitiating);
 		
 		if (world.provider.getDimensionType() == DimensionType.OVERWORLD)
-			StargateNetwork.get(world).setLastActivatedOrlinAddress(gateAddress);
+			StargateNetwork.get(world).setLastActivatedOrlins(gateAddressMap.get(SymbolTypeEnum.MILKYWAY));
 	}
 	
 	@Override
@@ -75,12 +85,22 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		}
 		
 		if (isBroken())
-			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_FAILED_SOUND, 5));
+			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAILED_SOUND, 5));
 	}
 	
 	@Override
-	public boolean canAcceptConnectionFrom(StargateAbstractBaseTile gateTile) {
-		return super.canAcceptConnectionFrom(gateTile) && gateTile.getWorld().provider.getDimensionType() == DimensionType.NETHER && !isBroken();
+	public boolean canAcceptConnectionFrom(StargatePos targetGatePos) {
+		return super.canAcceptConnectionFrom(targetGatePos) && targetGatePos.dimensionID == DimensionType.NETHER.getId() && !isBroken();
+	}
+	
+	public void updateNetherAddress() {
+		dialedAddress.clear();
+		dialedAddress.addAll(network.getNetherGate());
+		dialedAddress.addSymbol(SymbolMilkyWayEnum.ORIGIN);
+	}
+	
+	public boolean hasEnergyToDial() {
+		return hasEnergyToDial(network.getStargate(dialedAddress));
 	}
 	
 	// ------------------------------------------------------------------------
@@ -114,22 +134,28 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 			isPowered = power;
 						
 			if (isPowered && stargateState.idle() && !isBroken()) {
-				if (StargateRenderingUpdatePacketToServer.checkDialedAddress(world, this)) {
-					stargateState = EnumStargateState.DIALING;
-					
-					startSparks();
-					AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_ORLIN_DIAL, 1.0f);
-					
-					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_OPEN));
-				}
-				
-				else {
-					Aunis.info("wrong dialed address");
+				switch (checkDialedAddress()) {
+					case OK:
+						stargateState = EnumStargateState.DIALING;
+						
+						startSparks();
+						AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.GATE_ORLIN_DIAL);
+						
+						addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_OPEN));
+						break;
+						
+					case ADDRESS_MALFORMED:
+						Aunis.logger.error("Orlin's gate - wrong dialed address");
+						break;
+						
+					case NOT_ENOUGH_POWER:
+						Aunis.info("Orlin's gate - Not enough power");
+						break;
 				}
 			}
 			
 			else if (!isPowered && stargateState.initiating()) {
-				StargateRenderingUpdatePacketToServer.closeGatePacket(this, false);
+				attemptClose();
 			}
 			
 			markDirty();
@@ -141,13 +167,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	// Merging
 	
 	@Override
-	protected void unmergeGate() {}
-	
-	@Override
-	protected void mergeGate() {}
-	
-	@Override
-	protected StargateAbstractMergeHelper getMergeHelper() {
+	public StargateAbstractMergeHelper getMergeHelper() {
 		return StargateOrlinMergeHelper.INSTANCE;
 	}
 		
@@ -179,10 +199,11 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		return new AunisAxisAlignedBB(-1.0, 0.6, -0.15, 1.0, 2.7, -0.05);
 	}
 	
-	@Override
-	protected StargateAbstractRendererState getRendererStateServer() {
-		return new StargateOrlinRendererState(stargateState);
-	}
+//	@Override
+//	protected StargateAbstractRendererState getRendererStateServer() {
+//		return StargateAbstractRendererState.builder()
+//				.setStargateState(stargateState).build();
+//	}
 	
 	@Override
 	protected StargateAbstractRendererState createRendererStateClient() {
@@ -196,29 +217,30 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	
 	
 	// ------------------------------------------------------------------------
-	// States
+	// Sounds
 	
 	@Override
-	public State getState(StateTypeEnum stateType) {
-		switch (stateType) {
-			case GUI_STATE:
-				return new StargateAbstractGuiState(energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored(), energyTransferedLastTick, energySecondsToClose);
-		
-			case SPARK_STATE:
-				return null;
-				// Shouldn't be done this way
-				
-			default:
-				return super.getState(stateType);
+	protected SoundPositionedEnum getPositionedSound(StargateSoundPositionedEnum soundEnum) {
+		return null;
+	}
+
+	@Override
+	protected SoundEventEnum getSoundEvent(StargateSoundEventEnum soundEnum) {
+		switch (soundEnum) {
+			case OPEN: return SoundEventEnum.GATE_MILKYWAY_OPEN;
+			case CLOSE: return SoundEventEnum.GATE_MILKYWAY_CLOSE;
+			case DIAL_FAILED: return SoundEventEnum.GATE_MILKYWAY_DIAL_FAILED;
+			default: return null;
 		}
 	}
+	
+	
+	// ------------------------------------------------------------------------
+	// States
 
 	@Override
 	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
-			case GUI_STATE:
-				return new StargateAbstractGuiState();
-		
 			case SPARK_STATE:
 				return new StargateOrlinSparkState();
 				
@@ -226,25 +248,11 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 				return super.createState(stateType);
 		}
 	}
-
-	private StargateOrlinGui stargateGui;
 	
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
-			case GUI_STATE:
-				if (stargateGui == null || !stargateGui.isOpen) {
-					stargateGui = new StargateOrlinGui(pos, (StargateAbstractGuiState) state);
-					Minecraft.getMinecraft().displayGuiScreen(stargateGui);
-				}
-				
-				else {
-					stargateGui.state = (StargateAbstractGuiState) state;
-				}
-				
-				break;
-		
 			case SPARK_STATE:
 				StargateOrlinSparkState sparkState = (StargateOrlinSparkState) state;
 				getRendererStateClient().sparkFrom(sparkState.sparkIndex, sparkState.spartStart);
@@ -261,7 +269,6 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	// ------------------------------------------------------------------------
 	// Sparks
 	
-	
 	private int sparkIndex;
 	
 	public void startSparks() {
@@ -270,6 +277,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_SPARK, 5));
 	}
 	
+	
 	// ------------------------------------------------------------------------
 	// Scheduled tasks
 	
@@ -277,9 +285,13 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	public void executeTask(EnumScheduledTask scheduledTask, NBTTagCompound customData) {
 		switch (scheduledTask) {
 			case STARGATE_ORLIN_OPEN:
-				StargateRenderingUpdatePacketToServer.attemptLightUp(world, this);
-				StargateRenderingUpdatePacketToServer.attemptOpen(world, this, null, false);
+				StargatePos targetGatePos = network.getStargate(dialedAddress);
 				
+				if (hasEnergyToDial(targetGatePos)) {
+					targetGatePos.getTileEntity().incomingWormhole(dialedAddress.size());
+				}
+				
+				attemptOpenDialed();
 				break;
 				
 			case STARGATE_ORLIN_SPARK:				
@@ -292,8 +304,8 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 				
 				break;
 				
-			case STARGATE_ORLIN_FAILED_SOUND:
-				AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.GATE_DIAL_FAILED, 0.3f);
+			case STARGATE_FAILED_SOUND:
+				playSoundEvent(StargateSoundEventEnum.DIAL_FAILED);
 				
 				break;
 				
@@ -307,20 +319,27 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	// ------------------------------------------------------------------------
 	// Power
 	
+	private StargateAbstractEnergyStorage energyStorate = new StargateAbstractEnergyStorage();
+	
 	@Override
-	protected StargateEnergyRequired getRequiredEnergyToDial(int distance, DimensionType targetDimensionType) {
-		return super.getRequiredEnergyToDial(distance, targetDimensionType).mul(AunisConfig.powerConfig.stargateOrlinEnergyMul);
+	protected StargateAbstractEnergyStorage getEnergyStorage() {
+		return energyStorate;
 	}
 	
 	@Override
-	protected int getMaxEnergyStorage() {
-		return AunisConfig.powerConfig.stargateOrlinEnergyStorage;
+	protected StargateEnergyRequired getEnergyRequiredToDial(StargatePos targetGatePos) {
+		return super.getEnergyRequiredToDial(targetGatePos).mul(AunisConfig.powerConfig.stargateOrlinEnergyMul).cap(AunisConfig.powerConfig.stargateEnergyStorage/4 - 1000000);
 	}
 	
-	@Override
-	protected boolean canReceiveEnergy() {
-		return !isBroken();
-	}
+//	@Override
+//	protected int getMaxEnergyStorage() {
+//		return AunisConfig.powerConfig.stargateOrlinEnergyStorage;
+//	}
+//	
+//	@Override
+//	protected boolean canReceiveEnergy() {
+//		return !isBroken();
+//	}
 	
 	// ------------------------------------------------------------------------
 	// NBT

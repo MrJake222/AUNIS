@@ -57,6 +57,9 @@ public class StateUpdatePacketToClient extends PositionedPacket {
 				StateProviderInterface te = (StateProviderInterface) world.getTileEntity(message.pos);
 				
 				try {
+					if (te == null)
+						return;
+					
 					State state = te.createState(message.stateType);
 					
 					if (state != null) {

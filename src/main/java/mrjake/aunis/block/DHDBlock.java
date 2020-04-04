@@ -4,11 +4,11 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import mrjake.aunis.upgrade.ITileEntityUpgradeable;
-import mrjake.aunis.upgrade.UpgradeHelper;
+import mrjake.aunis.util.AunisAxisAlignedBB;
+import mrjake.aunis.util.ItemHandlerHelper;
 import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -17,9 +17,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
@@ -30,18 +27,18 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class DHDBlock extends Block {
 	
-	private static final String blockName = "dhd_block";
+	public static final String BLOCK_NAME = "dhd_block";
 	
 	public DHDBlock() {		
 		super(Material.IRON);
 		
-		setRegistryName(Aunis.ModID + ":" + blockName);
-		setTranslationKey(Aunis.ModID + "." + blockName);
+		setRegistryName(Aunis.ModID + ":" + BLOCK_NAME);
+		setTranslationKey(Aunis.ModID + "." + BLOCK_NAME);
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -82,7 +79,7 @@ public class DHDBlock extends Block {
 			world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, facing), 3);
 			
 			DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
-			BlockPos closestGate = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.stargateMilkyWayBaseBlock);
+			BlockPos closestGate = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK);
 			
 			if (closestGate != null) {
 				StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(closestGate);
@@ -93,58 +90,15 @@ public class DHDBlock extends Block {
 		}
 	}
 	
-	/*
-	 * Maybe not-so-late-future:
-	 * TODO Rewrite upgrade system using GUIs not some stupid lazy-ass sides ;)
-	 */
 	@Override
-	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		ItemStack itemStack = playerIn.getHeldItemMainhand();
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		EnumFacing dhdFacingOpposite = EnumFacing.byHorizontalIndex( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
 		
-		if (!worldIn.isRemote) {
-			if (hand == EnumHand.MAIN_HAND) {
-				EnumFacing dhdFacingOpposite = EnumFacing.byHorizontalIndex( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
-								
-				// Back side of block
-				if (facing == dhdFacingOpposite) {
-					DHDTile dhdTile = (DHDTile) worldIn.getTileEntity(pos);
-					ItemStackHandler itemStackHandler = (ItemStackHandler) dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-					
-					ItemStack slotItemStack = itemStackHandler.getStackInSlot(0);
-					ItemStack heldItemStack = playerIn.getHeldItem(hand);
-					
-					if (slotItemStack.isEmpty()) {
-						if (heldItemStack.getItem() == AunisItems.crystalControlDhd) {
-							// Insert the crystal
-							
-							ItemStack remainder = itemStackHandler.insertItem(0, heldItemStack, false);
-							playerIn.setHeldItem(hand, remainder);
-						}
-						
-						else {
-							ITileEntityUpgradeable upgradeable = (ITileEntityUpgradeable) worldIn.getTileEntity(pos);
-							
-							return UpgradeHelper.upgradeInteract((EntityPlayerMP) playerIn, upgradeable, itemStack);
-						}
-					}
-					
-					else {
-						if (heldItemStack.isEmpty())
-							playerIn.setHeldItem(hand, slotItemStack);
-						else
-							playerIn.addItemStackToInventory(slotItemStack);
-						
-						itemStackHandler.setStackInSlot(0, ItemStack.EMPTY);
-					}
-				}
-			}
-		}
-		
-		// Client side
-		else {
-			return	itemStack.getItem() == AunisItems.crystalGlyphDhd || 
-					itemStack.getItem() == AunisItems.crystalControlDhd ||
-					itemStack.getItem() == Items.AIR;
+		if (facing == dhdFacingOpposite && !player.isSneaking()) {
+			if (!FluidUtil.interactWithFluidHandler(player, hand, world, pos, null))
+				player.openGui(Aunis.instance, GuiIdEnum.GUI_DHD.id, world, pos.getX(), pos.getY(), pos.getZ());
+			
+			return true;
 		}
 		
 		return false;
@@ -160,18 +114,7 @@ public class DHDBlock extends Block {
 			if (gateTile != null)
 				gateTile.setLinkedDHD(null);
 			
-			// Supports upgrades
-			if (dhdTile instanceof ITileEntityUpgradeable) {			
-				if (dhdTile.hasUpgrade() || dhdTile.getUpgradeRendererState().doInsertAnimation) {
-					InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(AunisItems.crystalGlyphDhd));
-				}
-			}
-			
-			ItemStack crystalItemStack = dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).extractItem(0, 1, false);
-			
-			if (!crystalItemStack.isEmpty()) {				
-				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), crystalItemStack);
-			}
+			ItemHandlerHelper.dropInventoryItems(world, pos, dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
 		}
 		
 		super.breakBlock(world, pos, state);
@@ -209,13 +152,23 @@ public class DHDBlock extends Block {
 	}
 	
 	@Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        return new AxisAlignedBB(0.25, 0, 0.25, 0.75, 1, 0.75);
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos) {		
+		int rotation = (int) (state.getValue(AunisProps.ROTATION_HORIZONTAL)*22.5f);
+		
+		if (rotation % 90 == 0)
+			return new AunisAxisAlignedBB(-0.5, 0, -0.25, 0.5, 1, 0.25).rotate(rotation).offset(0.5, 0, 0.5);
+		else
+			return new AunisAxisAlignedBB(0.25, 0, 0.25, 0.75, 1, 0.75);
     }
 
     @Nullable
     @Override
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos) {
-    	return new AxisAlignedBB(0.25, 0, 0.25, 0.75, 1, 0.75);
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos) {
+    	int rotation = (int) (state.getValue(AunisProps.ROTATION_HORIZONTAL)*22.5f);
+		
+		if (rotation % 90 == 0)
+			return new AunisAxisAlignedBB(-0.5, 0, -0.25, 0.5, 1, 0.25).rotate(rotation).offset(0.5, 0, 0.5);
+		else
+			return new AunisAxisAlignedBB(0.25, 0, 0.25, 0.75, 1, 0.75);
     }
 }

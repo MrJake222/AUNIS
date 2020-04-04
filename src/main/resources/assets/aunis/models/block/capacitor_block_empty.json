@@ -1,0 +1,32 @@
+{
+	"parent": "block/cube_all",
+	"textures": {
+		"normal": "aunis:blocks/naquadah_block",
+		"particle": "aunis:blocks/naquadah_block",
+		"overlay_front": "aunis:blocks/capacitor_block_front_10"
+	},
+    "elements": [
+        {   "from": [ 0, 0, 0 ],
+            "to": [ 16, 16, 16 ],
+            "faces": {
+                "down":  { "texture": "#normal", "cullface": "down" },
+                "up":    { "texture": "#normal", "cullface": "up" },
+                "north": { "texture": "#overlay_front", "cullface": "north" },
+                "south": { "texture": "#normal", "cullface": "south" },
+                "west":  { "texture": "#normal", "cullface": "west" },
+                "east":  { "texture": "#normal", "cullface": "east" }
+            }
+        },
+        
+        {   "to": [ 0, 0, 0 ],
+            "from": [ 16, 16, 16 ],
+            "faces": {
+                "down":  { "texture": "#normal" },
+                "up":    { "texture": "#normal" },
+                "north": { "texture": "#normal" },
+                "west":  { "texture": "#normal" },
+                "east":  { "texture": "#normal" }
+            }
+        }
+    ]	
+}

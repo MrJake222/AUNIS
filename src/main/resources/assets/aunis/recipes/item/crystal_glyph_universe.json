@@ -1,0 +1,32 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		" R ",
+		"YCW",
+		"   "
+	],
+	
+	"key": {
+		"C": {
+			"item": "aunis:circuit_control_naquadah"
+		},
+		
+		"Y": {
+			"item": "aunis:crystal_yellow"
+		},
+
+		"W": {
+			"item": "aunis:crystal_white"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:crystal_glyph_universe",
+		"count": 1,
+		"data": 0
+	}
+}

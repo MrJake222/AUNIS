@@ -2,6 +2,7 @@ package mrjake.aunis;
 
 import java.util.Arrays;
 
+import mrjake.aunis.block.CapacitorBlock;
 import mrjake.aunis.block.InvisibleBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.block.stargate.StargateOrlinMemberBlock;
@@ -63,4 +64,9 @@ public class AunisProps {
 	 * {@link InvisibleBlock} uses it to determine it's collisions boxes.
 	 */
 	public static final PropertyBool HAS_COLLISIONS = PropertyBool.create("collisions");
+	
+	/**
+	 * Used by {@link CapacitorBlock} to display energy level.
+	 */
+	public static final PropertyInteger LEVEL = PropertyInteger.create("level", 0, 10);
 }

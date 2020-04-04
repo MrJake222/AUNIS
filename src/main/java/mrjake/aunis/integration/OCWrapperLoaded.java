@@ -5,7 +5,10 @@ import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.machine.Machine;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.Packet;
 import li.cil.oc.api.network.Visibility;
+import mrjake.aunis.item.dialer.UniverseDialerWirelessEndpoint;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 
 public class OCWrapperLoaded implements OCWrapperInterface {
@@ -39,5 +42,20 @@ public class OCWrapperLoaded implements OCWrapperInterface {
 	@Override
 	public void joinOrCreateNetwork(TileEntity tileEntity) {
 		Network.joinOrCreateNetwork(tileEntity);
+	}
+	
+	@Override
+	public boolean isModLoaded() {
+		return true;
+	}
+	
+	@Override
+	public void sendWirelessPacketPlayer(EntityPlayer player, String address, short port, Object[] data) {
+		UniverseDialerWirelessEndpoint endpoint = new UniverseDialerWirelessEndpoint(player);
+		Packet packet = Network.newPacket("unv-dialer-"+player.getName(), address, port, data);
+		
+//		Network.joinWirelessNetwork(endpoint);
+		Network.sendWirelessPacket(endpoint, 10, packet);
+//		Network.leaveWirelessNetwork(endpoint);
 	}
 }

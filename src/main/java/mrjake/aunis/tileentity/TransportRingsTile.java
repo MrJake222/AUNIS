@@ -17,7 +17,7 @@ import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.packet.transportrings.StartPlayerFadeOutToClient;
 import mrjake.aunis.renderer.transportrings.TransportRingsRenderer;
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
+import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
@@ -195,11 +195,11 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RINGS_START_ANIMATION, new TransportRingsStartAnimationRequest(rendererState.animationStart)), point);
 		
-		AunisSoundHelper.playSoundEvent(world, pos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
-		AunisSoundHelper.playSoundEvent(world, targetRingsPos, EnumAunisSoundEvent.RINGS_TRANSPORT, 0.8f);
+		AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.RINGS_TRANSPORT);
+		AunisSoundHelper.playSoundEvent(world, targetRingsPos, SoundEventEnum.RINGS_TRANSPORT);
 		
 		for (EntityPlayerMP player : world.getEntitiesWithinAABB(EntityPlayerMP.class, globalTeleportBox)) {
-			AunisSoundHelper.playSoundToPlayer(player, EnumAunisSoundEvent.RINGS_TRANSPORT, targetRingsPos, 0.8f);
+			AunisSoundHelper.playSoundToPlayer(player, SoundEventEnum.RINGS_TRANSPORT, targetRingsPos);
 		}
 	}
 
@@ -281,7 +281,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	}
 	
 	private void setBarrierBlocks(boolean set, boolean passable) {
-		IBlockState invBlockState = AunisBlocks.invisibleBlock.getDefaultState();
+		IBlockState invBlockState = AunisBlocks.INVISIBLE_BLOCK.getDefaultState();
 		
 		if (passable)
 			invBlockState = invBlockState.withProperty(AunisProps.HAS_COLLISIONS, false);
@@ -294,7 +294,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 					if (set)
 						world.setBlockState(newPos, invBlockState, 3);
 					else {
-						if (world.getBlockState(newPos).getBlock() == AunisBlocks.invisibleBlock)
+						if (world.getBlockState(newPos).getBlock() == AunisBlocks.INVISIBLE_BLOCK)
 							world.setBlockToAir(newPos);
 					}
 				}
@@ -394,7 +394,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
 		
 		for (BlockPos newRingsPos : BlockPos.getAllInBoxMutable(new BlockPos(x-radius, y-vertical, z-radius), new BlockPos(x+radius, y+vertical, z+radius))) {
-			if (world.getBlockState(newRingsPos).getBlock() == AunisBlocks.transportRingsBlock && !pos.equals(newRingsPos)) {
+			if (world.getBlockState(newRingsPos).getBlock() == AunisBlocks.TRANSPORT_RINGS_BLOCK && !pos.equals(newRingsPos)) {
 				
 				TransportRingsTile newRingsTile = (TransportRingsTile) world.getTileEntity(newRingsPos);	
 				ringsTilesInRange.add(newRingsTile);
@@ -495,7 +495,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			ringsMap.clear();
 			
 			for (int i=0; i<len; i++) {
-				TransportRings rings = new TransportRings(null).deserializeNBT(compound.getCompoundTag("ringsMap" + i));
+				TransportRings rings = new TransportRings(compound.getCompoundTag("ringsMap" + i));
 				
 				ringsMap.put(rings.getAddress(), rings);
 			}

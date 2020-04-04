@@ -1,8 +1,7 @@
 package mrjake.aunis.stargate;
 
 import mrjake.aunis.config.AunisConfig;
-import mrjake.aunis.packet.stargate.StargateRenderingUpdatePacketToServer;
-import mrjake.aunis.stargate.StargateNetwork.StargatePos;
+import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -35,11 +34,13 @@ public class AutoCloseManager implements INBTSerializable<NBTTagCompound> {
 	/**
 	 * AutoClose update function (on server) (engaged) (receiving gate).
 	 * Scan for load status of the source gate every 20 ticks (1 second).
+	 * @param {@link StargatePos} of the initiating gate.
+	 * @return {@code True} if the gate should be closed, false otherwise.
 	 */
-	public void update(StargatePos sourceStargatePos) {
+	public boolean shouldClose(StargatePos sourceStargatePos) {
 		if (gateTile.getWorld().getTotalWorldTime() % 20 == 0) {			
 			World sourceWorld = sourceStargatePos.getWorld();
-			BlockPos sourcePos = sourceStargatePos.getPos();
+			BlockPos sourcePos = sourceStargatePos.gatePos;
 			
 			boolean sourceLoaded = sourceWorld.isBlockLoaded(sourcePos);
 			
@@ -48,7 +49,7 @@ public class AutoCloseManager implements INBTSerializable<NBTTagCompound> {
 					
 					AxisAlignedBB scanBox = new AxisAlignedBB(sourcePos.add(new Vec3i(-10, -5, -10)), sourcePos.add(new Vec3i(10, 5, 10)));
 					int playerCount = sourceWorld.getEntitiesWithinAABB(EntityPlayerMP.class, scanBox, player -> !player.isDead).size();
-					
+
 					if (playerCount == 0)
 						secondsPassed++;
 					else
@@ -59,11 +60,13 @@ public class AutoCloseManager implements INBTSerializable<NBTTagCompound> {
 					secondsPassed++;
 				}
 			}
-								
+			
 			if (secondsPassed >= AunisConfig.autoCloseConfig.secondsToAutoclose) {
-				StargateRenderingUpdatePacketToServer.closeGatePacket(gateTile, false);
+				return true;
 			}
-		}			
+		}
+		
+		return false;
 	}
 
 	

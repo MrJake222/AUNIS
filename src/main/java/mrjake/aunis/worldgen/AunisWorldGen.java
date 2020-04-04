@@ -25,7 +25,7 @@ public class AunisWorldGen implements IWorldGenerator {
 		
 		switch(world.provider.getDimensionType()) {
 			case NETHER:
-				runGenerator(AunisBlocks.naquadahOreBlock.getDefaultState(), 8, 16, 0, 256, BlockMatcher.forBlock(Blocks.NETHERRACK), world, rand, chunkX, chunkZ);
+				runGenerator(AunisBlocks.ORE_NAQUADAH_BLOCK.getDefaultState(), 8, 16, 0, 256, BlockMatcher.forBlock(Blocks.NETHERRACK), world, rand, chunkX, chunkZ);
 				break;
 				
 			default:

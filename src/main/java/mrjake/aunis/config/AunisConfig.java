@@ -1,6 +1,7 @@
 package mrjake.aunis.config;
 
 import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
 import net.minecraftforge.common.config.Config.RangeDouble;
 import net.minecraftforge.common.config.Config.RangeInt;
@@ -38,6 +39,13 @@ public class AunisConfig {
 		@Name("Orlin's gate max open count")
 		@RangeInt(min=0)
 		public int stargateOrlinMaxOpenCount = 2;
+		
+		@Name("Universe dialer max horizontal reach radius")
+		@RangeInt(min=0, max=64)
+		public int universeDialerReach = 10;
+
+		@Name("Universe dialer nearby radius")
+		public int universeGateNearbyReach = 1024;
 	}
 	
 	public static class PowerConfig {
@@ -59,23 +67,15 @@ public class AunisConfig {
 
 		@Name("Stargate instability threshold(seconds to close)")
 		@RangeInt(min=1)
-		public int instabilitySeconds = 10;
-
-		@Name("Power crystal buffer size")
-		@RangeInt(min=10000)
-		public int dhdCrystalEnergyStorage = 71280000;
-		
-		@Name("Power crystal max IO")
-		@RangeInt(min=10000)
-		public int dhdCrystalMaxEnergyTransfer = 26360;
+		public int instabilitySeconds = 20;
 		
 		@Name("Orlin's gate energy multiplier")
 		@RangeDouble(min=0)
-		public double stargateOrlinEnergyMul = 1.5;
-
-		@Name("Orlin's gate's internal buffer size")
-		@RangeInt(min=0)
-		public int stargateOrlinEnergyStorage = 7128000;
+		public double stargateOrlinEnergyMul = 2.0;
+		
+		@Name("Universe gate energy multiplier")
+		@RangeDouble(min=0)
+		public double stargateUniverseEnergyMul = 1.5;
 	}
 	
 	public static class RingsConfig {
@@ -99,6 +99,22 @@ public class AunisConfig {
 		@Name("DHD range's radius vertical")
 		@RangeInt(min=1)
 		public int rangeVertical = 5;
+		
+		@Name("DHD's max fluid capacity")
+		@RangeInt(min=1)
+		public int fluidCapacity = 60000;
+
+		@Name("Energy per 1mB Naquadah")
+		@RangeInt(min=1)
+		public int energyPerNaquadah = 10240;
+
+		@Name("Generation multiplier")
+		@RangeInt(min=1)
+		@Comment({
+			"Energy per 1mB is multiplied by this",
+			"Consumed mB/t is equal to this"
+		})
+		public int powerGenerationMultiplier = 1;
 	}
 	
 	public static class DebugConfig {
@@ -123,10 +139,6 @@ public class AunisConfig {
 		@Name("Min overworld XZ-coords generation")
 		@RangeInt(min=1, max=30000000)
 		public int minOverworldCoords = 15000;
-		
-		@Name("Chance of despawning Crystal")
-		@RangeDouble(min=0, max=1)
-		public double despawnCrystalChance = 0.05;
 		
 		@Name("Chance of despawning DHD")
 		@RangeDouble(min=0, max=1)

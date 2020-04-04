@@ -17,7 +17,9 @@ public class ModelBakeHandler {
 	public static void onModelBakeEvent(ModelBakeEvent event) {		
 		IRegistry<ModelResourceLocation, IBakedModel> registry = event.getModelRegistry();
 		
-		AunisBlocks.stargateMilkyWayMemberBlock.registerCustomModel(registry);
-		AunisItems.pageNotebookItem.registerCustomModel(registry);
+		AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.registerCustomModel(registry);
+		AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK.registerCustomModel(registry);
+		AunisItems.PAGE_NOTEBOOK_ITEM.registerCustomModel(registry);
+		AunisItems.UNIVERSE_DIALER.registerCustomModel(registry);
 	}
 }

@@ -6,13 +6,8 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.StateUpdatePacketToClient;
-import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.StargateNetwork;
-import mrjake.aunis.stargate.StargateOrlinMergeHelper;
-import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
+import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.worldgen.StargateGeneratorNether;
 import net.minecraft.block.Block;
@@ -22,7 +17,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -33,9 +27,13 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 
 public class StargateOrlinBaseBlock extends Block {
 	
@@ -88,20 +86,19 @@ public class StargateOrlinBaseBlock extends Block {
 	
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		ItemStack heldItemStack = player.getHeldItem(hand);
-		Item heldItem = heldItemStack.getItem();
 		
-		if (!world.isRemote) {
+		if (!world.isRemote && !player.isSneaking()) {
 			StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
+			IEnergyStorage energyStorage = gateTile.getCapability(CapabilityEnergy.ENERGY, null);
 			
-			if (heldItem == AunisItems.analyzerAncient) {
-				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_STATE, gateTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
-				
-				return true;
-			}
+			String energy = String.format("%,d", energyStorage.getEnergyStored());
+			String capacity = String.format("%,d", energyStorage.getMaxEnergyStored());
+			boolean hasEnergy = gateTile.hasEnergyToDial();
+			
+			player.sendMessage(new TextComponentTranslation("chat.orlins.energyStored", (hasEnergy ? TextFormatting.GREEN : TextFormatting.RED) + energy, capacity));
 		}
 				
-		return heldItem == AunisItems.analyzerAncient;
+		return !player.isSneaking();
 	}
 	
 	@Override
@@ -123,15 +120,13 @@ public class StargateOrlinBaseBlock extends Block {
 			if (world.provider.getDimensionType() == DimensionType.OVERWORLD) {
 				StargateNetwork network = StargateNetwork.get(world);
 				
-				if (!network.isNetherGateGenerated()) {
+				if (!network.hasNetherGate()) {
 					network.setNetherGate(StargateGeneratorNether.place(world.getMinecraftServer().getWorld(DimensionType.NETHER.getId()), new BlockPos(pos.getX()/8, 32, pos.getZ()/8)));
 				}
 				
-				gateTile.dialedAddress.clear();
-				gateTile.dialedAddress.addAll(network.getNetherAddress());
-				gateTile.dialedAddress.add(EnumSymbol.ORIGIN);
+				gateTile.updateNetherAddress();
 				
-				Aunis.info("nether address: " + gateTile.dialedAddress);
+				Aunis.info("nether address: " + network.getNetherGate());
 			}
 		}
 	}
@@ -140,8 +135,7 @@ public class StargateOrlinBaseBlock extends Block {
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		if (!world.isRemote) {
 			StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
-			
-			gateTile.onBlockBroken();
+			gateTile.updateMergeState(false, state.getValue(AunisProps.FACING_HORIZONTAL));
 		}
 	}
 	
@@ -152,8 +146,7 @@ public class StargateOrlinBaseBlock extends Block {
 		Random rand = new Random();
 				
 		if (gateTile.isBroken()) {
-			drops.add(new ItemStack(Items.IRON_INGOT, 2 + rand.nextInt(2)));
-			drops.add(new ItemStack(Items.REDSTONE, 1 + rand.nextInt(2)));
+			drops.add(new ItemStack(Items.IRON_INGOT, 2 + rand.nextInt(3)));
 		}
 			
 		else {

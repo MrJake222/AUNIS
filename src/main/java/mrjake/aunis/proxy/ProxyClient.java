@@ -1,31 +1,37 @@
 package mrjake.aunis.proxy;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.OBJLoader.ModelReloadListener;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.GrassBlockColor;
+import mrjake.aunis.block.stargate.StargateClassicMemberBlockColor;
 import mrjake.aunis.fluid.AunisBlockFluid;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.PageNotebookItem;
-import mrjake.aunis.item.color.CrystalControlDHDItemColor;
 import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
+import mrjake.aunis.item.dialer.ChangeEvent;
+import mrjake.aunis.item.dialer.UniverseDialerItem;
 import mrjake.aunis.item.renderer.PageNotebookTEISR;
+import mrjake.aunis.item.renderer.UniverseDialerTEISR;
+import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.SpecialRenderer;
+import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRenderer;
 import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
-import mrjake.aunis.sound.AunisPositionedSoundEnum;
+import mrjake.aunis.renderer.stargate.StargateUniverseRenderer;
 import mrjake.aunis.sound.AunisSoundHelperClient;
-import mrjake.aunis.state.StargateAbstractRendererState;
-import mrjake.aunis.tileentity.CrystalInfuserTile;
+import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -42,19 +48,22 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class ProxyClient implements IProxy {
 	public void preInit(FMLPreInitializationEvent event) {
 		registerRenderers();
-		
 		registerFluidRenderers();
+		
+		ChangeEvent.registerKeybindings();
 	}
 
-	public void init(FMLInitializationEvent event) {
-		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new CrystalControlDHDItemColor(), AunisItems.crystalControlDhd);
-		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageMysteriousItemColor(), AunisItems.pageMysteriousItem);
-    	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageNotebookItemColor(), AunisItems.pageNotebookItem);
-		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.stargateMilkyWayMemberBlock);
+	public void init(FMLInitializationEvent event) {		
+		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageMysteriousItemColor(), AunisItems.PAGE_MYSTERIOUS_ITEM);
+    	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageNotebookItemColor(), AunisItems.PAGE_NOTEBOOK_ITEM);
+    	
+    	Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new StargateClassicMemberBlockColor(),
+    			AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK,
+    			AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK);
     }
  
     public void postInit(FMLPostInitializationEvent event) {
- 
+		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ModelReloadListener());
     }
 
 	public String localize(String unlocalized, Object... args) {
@@ -67,10 +76,10 @@ public class ProxyClient implements IProxy {
 		SpecialRenderer specialRenderer = new SpecialRenderer();
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateMilkyWayBaseTile.class, new StargateMilkyWayRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(StargateUniverseBaseTile.class, new StargateUniverseRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateOrlinBaseTile.class, new StargateOrlinRenderer());
-		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, specialRenderer);
+		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, new DHDRenderer());
 		
-		ClientRegistry.bindTileEntitySpecialRenderer(CrystalInfuserTile.class, specialRenderer);
 		ClientRegistry.bindTileEntitySpecialRenderer(TransportRingsTile.class, specialRenderer);
 		ClientRegistry.bindTileEntitySpecialRenderer(TRControllerTile.class, specialRenderer);
 	}
@@ -91,6 +100,9 @@ public class ProxyClient implements IProxy {
 	public void setTileEntityItemStackRenderer(Item item) {
 		if (item.getRegistryName().equals(new ResourceLocation(Aunis.ModID, PageNotebookItem.ITEM_NAME)))
 			item.setTileEntityItemStackRenderer(new PageNotebookTEISR());
+		
+		else if (item.getRegistryName().equals(new ResourceLocation(Aunis.ModID, UniverseDialerItem.ITEM_NAME)))
+			item.setTileEntityItemStackRenderer(new UniverseDialerTEISR());
 	}
 
 	@Override
@@ -109,7 +121,7 @@ public class ProxyClient implements IProxy {
 	}
 	
 	@Override
-	public void playPositionedSoundClientSide(BlockPos pos, AunisPositionedSoundEnum soundEnum, boolean play) {
+	public void playPositionedSoundClientSide(BlockPos pos, SoundPositionedEnum soundEnum, boolean play) {
 		AunisSoundHelperClient.playPositionedSoundClientSide(pos, soundEnum, play);
 	}
 }

@@ -4,11 +4,7 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.raycaster.RaycasterRingsController;
-import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.util.LinkingHelper;
@@ -19,7 +15,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
@@ -95,7 +90,7 @@ public class TRControllerBlock extends Block {
 		TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {			
-			BlockPos closestRings = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.transportRingsBlock);
+			BlockPos closestRings = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.TRANSPORT_RINGS_BLOCK);
 			
 			if (closestRings != null) {
 				TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(closestRings);
@@ -119,25 +114,22 @@ public class TRControllerBlock extends Block {
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {		
 		
-		TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(pos);
+//		TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(pos);
+//		ItemStack heldItemStack = player.getHeldItem(hand);
+//		
+//		if (heldItemStack.getItem() == AunisItems.analyzerAncient) {
+//			if (!world.isRemote) {
+//				TransportRingsTile ringsTile = controllerTile.getLinkedRingsTile(world);
+//				
+//				if (ringsTile != null) {
+//					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(ringsTile.getPos(), StateTypeEnum.GUI_STATE, ringsTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
+//				}				
+//			}
+//		}
 		
-		ItemStack heldItemStack = player.getHeldItem(hand);
-			
-		if (heldItemStack.getItem() == AunisItems.analyzerAncient) {
-			if (!world.isRemote) {
-				TransportRingsTile ringsTile = controllerTile.getLinkedRingsTile(world);
-				
-				if (ringsTile != null) {
-					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(ringsTile.getPos(), StateTypeEnum.GUI_STATE, ringsTile.getState(StateTypeEnum.GUI_STATE)), (EntityPlayerMP) player);
-				}				
-			}
-		}
-		
-		else {
-			if (world.isRemote) {
-				if (hand == EnumHand.MAIN_HAND)
-					RaycasterRingsController.INSTANCE.onActivated(world, pos, player);
-			}
+		if (world.isRemote) {
+			if (hand == EnumHand.MAIN_HAND)
+				RaycasterRingsController.INSTANCE.onActivated(world, pos, player);
 		}
 		
 		return false;

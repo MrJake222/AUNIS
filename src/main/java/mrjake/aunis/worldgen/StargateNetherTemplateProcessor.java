@@ -1,7 +1,7 @@
 package mrjake.aunis.worldgen;
 
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
+import mrjake.aunis.stargate.merging.StargateMilkyWayMergeHelper;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -15,7 +15,7 @@ public class StargateNetherTemplateProcessor implements ITemplateProcessor {
 	public BlockInfo processBlock(World world, BlockPos pos, BlockInfo blockInfoIn) {
 		if (StargateMilkyWayMergeHelper.BASE_MATCHER.apply(blockInfoIn.blockState) ||
 			StargateMilkyWayMergeHelper.MEMBER_MATCHER.apply(blockInfoIn.blockState) ||
-			blockInfoIn.blockState == AunisBlocks.dhdBlock)
+			blockInfoIn.blockState == AunisBlocks.DHD_BLOCK)
 			return blockInfoIn;
 		
 		if ((blockInfoIn.blockState.getBlock() == Blocks.NETHERRACK || blockInfoIn.blockState.getBlock() == Blocks.QUARTZ_ORE) && world.isAirBlock(pos.down()))

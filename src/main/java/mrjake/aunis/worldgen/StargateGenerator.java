@@ -1,15 +1,19 @@
 package mrjake.aunis.worldgen;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
-import mrjake.aunis.stargate.EnumSymbol;
-import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
+import mrjake.aunis.fluid.AunisFluids;
+import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.stargate.merging.StargateMilkyWayMergeHelper;
+import mrjake.aunis.stargate.network.StargateAddress;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -24,6 +28,10 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.structure.template.PlacementSettings;
 import net.minecraft.world.gen.structure.template.Template;
 import net.minecraft.world.gen.structure.template.TemplateManager;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 public class StargateGenerator {
 	
@@ -176,9 +184,8 @@ public class StargateGenerator {
 				if (name.equals("base")) {
 					gatePos = dataPos.add(0, -3, 0);
 					
-//					world.setBlockState(gatePos, world.getBlockState(gatePos).withProperty(AunisProps.FACING_HORIZONTAL, facing));
-//					MergeHelper.updateChevRingRotation(world, gatePos, facing);
-					// TODO Check updateChevRingRotation for Mysterious Page
+					world.getTileEntity(gatePos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(4, new ItemStack(AunisBlocks.CAPACITOR_BLOCK), false);
+					
 					StargateMilkyWayMergeHelper.INSTANCE.updateMembersBasePos(world, gatePos, facing);
 					
 					world.setBlockToAir(dataPos);
@@ -193,21 +200,10 @@ public class StargateGenerator {
 					}
 					
 					else {
-//						IBlockState dhdState = world.getBlockState(dhdPos);
-//						int horizontalRotation = dhdState.getValue(AunisProps.ROTATION_HORIZONTAL);
-//						horizontalRotation = rotation.rotate(horizontalRotation, 16);
+						int fluid = AunisConfig.powerConfig.stargateEnergyStorage / AunisConfig.dhdConfig.energyPerNaquadah;
 						
-//						world.setBlockState(dhdPos, dhdState.withProperty(AunisProps.ROTATION_HORIZONTAL, horizontalRotation));
-						
-						if (rand.nextFloat() < AunisConfig.mysteriousConfig.despawnCrystalChance) {							
-//							Aunis.info("despawning crystal");
-						}
-						
-						else {
-							int power = (int) ((0.3 + (rand.nextFloat() * 0.6)) * AunisConfig.powerConfig.dhdCrystalEnergyStorage);
-							
-							StargateGenerationHelper.spawnDhdCrystal(world, dhdPos, power);
-						}
+						world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.CIRCUIT_CONTROL_CRYSTAL), false);
+						((FluidTank) world.getTileEntity(dhdPos).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)).fillInternal(new FluidStack(AunisFluids.moltenNaquadahRefined, fluid), true);
 					}
 					
 					world.setBlockToAir(dataPos);
@@ -216,8 +212,8 @@ public class StargateGenerator {
 			
 			StargateGenerationHelper.updateLinkedGate(world, gatePos, dhdPos);
 			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(gatePos);
-			
-			return new GeneratedStargate(gateTile.gateAddress, biome.getRegistryName().getPath());
+						
+			return new GeneratedStargate(gateTile.getStargateAddress(SymbolTypeEnum.MILKYWAY), biome.getRegistryName().getPath());
 		}
 		
 		else {
@@ -229,10 +225,10 @@ public class StargateGenerator {
 	
 	public static class GeneratedStargate {
 
-		public List<EnumSymbol> address;
+		public StargateAddress address;
 		public String path;
 		
-		public GeneratedStargate(List<EnumSymbol> address, String path) {
+		public GeneratedStargate(StargateAddress address, String path) {
 			this.address = address;
 			this.path = path;
 		}

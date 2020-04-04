@@ -3,8 +3,8 @@ package mrjake.aunis.stargate.teleportation;
 import javax.vecmath.Vector2f;
 
 import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisSoundEvent;
-import mrjake.aunis.stargate.StargateNetwork.StargatePos;
+import mrjake.aunis.sound.SoundEventEnum;
+import mrjake.aunis.stargate.network.StargatePos;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 
@@ -33,7 +33,7 @@ public class TeleportPacket {
 	public void teleport() {
 		TeleportHelper.teleportEntity(entity, sourceGatePos, targetGatePos, rotation, motionVector);
 		
-		AunisSoundHelper.playSoundEvent(targetGatePos.getWorld(), targetGatePos.getPos(), EnumAunisSoundEvent.WORMHOLE_GO, 1.0f);
+		AunisSoundHelper.playSoundEvent(targetGatePos.getWorld(), targetGatePos.gatePos, SoundEventEnum.WORMHOLE_GO);
 	}
 
 	public TeleportPacket setMotion(Vector2f motion) {

@@ -7,11 +7,12 @@ import org.apache.logging.log4j.Logger;
 import mrjake.aunis.command.AunisCommands;
 import mrjake.aunis.datafixer.TileNamesFixer;
 import mrjake.aunis.fluid.AunisFluids;
+import mrjake.aunis.gui.AunisGuiHandler;
 import mrjake.aunis.integration.OCWrapperInterface;
 import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
-import mrjake.aunis.stargate.DimensionPowerMap;
+import mrjake.aunis.stargate.power.DimensionPowerMap;
 import mrjake.aunis.worldgen.AunisWorldGen;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraftforge.common.util.CompoundDataFixer;
@@ -28,6 +29,7 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion, dependencies = "required-after:cofhcore@[4.6.0,);after:opencomputers" )
@@ -81,6 +83,7 @@ public class Aunis {
     public void init(FMLInitializationEvent event) {
     	GameRegistry.registerWorldGenerator(new AunisWorldGen(), 0);
     	ThermalIntegration.registerRecipes();
+    	NetworkRegistry.INSTANCE.registerGuiHandler(instance, new AunisGuiHandler());
     	
     	// ----------------------------------------------------------------------------------------------------------------
     	// OpenComputers
