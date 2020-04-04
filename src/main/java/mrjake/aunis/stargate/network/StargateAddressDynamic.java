@@ -1,5 +1,7 @@
 package mrjake.aunis.stargate.network;
 
+import java.util.List;
+
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import net.minecraft.nbt.NBTTagCompound;
@@ -40,6 +42,16 @@ public class StargateAddressDynamic extends StargateAddress {
 		
 		address.addAll(stargateAddress.address);
 		addressSize += stargateAddress.address.size();
+	}
+	
+	public void addAll(List<SymbolInterface> stargateAddress) {
+		if (address.size()+stargateAddress.size() > 9) {
+			Aunis.logger.error("Tried to add symbols to already populated address");
+			return;
+		}
+		
+		address.addAll(stargateAddress);
+		addressSize += stargateAddress.size();
 	}	
 
 	public void addOrigin() {

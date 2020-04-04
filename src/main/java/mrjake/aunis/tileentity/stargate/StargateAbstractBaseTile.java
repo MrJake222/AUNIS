@@ -228,7 +228,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			openGate(targetGatePos, true);
 			targetTile.openGate(gatePosMap.get(targetGatePos.symbolType), false);
 			targetTile.dialedAddress.clear();
-			targetTile.dialedAddress.addAll(gateAddressMap.get(targetGatePos.symbolType));
+			targetTile.dialedAddress.addAll(gateAddressMap.get(targetGatePos.symbolType).subList(0, dialedAddress.size()-1));
 			targetTile.dialedAddress.addOrigin();
 		}
 			

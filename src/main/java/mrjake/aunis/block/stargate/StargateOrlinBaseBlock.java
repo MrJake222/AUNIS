@@ -136,6 +136,7 @@ public class StargateOrlinBaseBlock extends Block {
 		if (!world.isRemote) {
 			StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
 			gateTile.updateMergeState(false, state.getValue(AunisProps.FACING_HORIZONTAL));
+			gateTile.onBlockBroken();
 		}
 	}
 	

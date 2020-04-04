@@ -64,6 +64,10 @@ public class StargateAddress implements INBTSerializable<NBTTagCompound> {
 		return address.get(pos);
 	}
 	
+	public List<SymbolInterface> subList(int start, int end) {
+		return address.subList(start, end);
+	}
+	
 	/**
 	 * Get 7th and 8th symbols, as they're not saved by this implementation.
 	 * @return

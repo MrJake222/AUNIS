@@ -121,11 +121,9 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	
 	@Override
 	public void addSymbolToAddress(SymbolInterface symbol) {
-		if (symbol.origin() && getSymbolType().validateDialedAddress(dialedAddress) && dialedAddress.equals(StargateNetwork.EARTH_ADDRESS) && !network.isStargateInNetwork(StargateNetwork.EARTH_ADDRESS)) {
+		if (symbol.origin() && dialedAddress.size() >= 6 && dialedAddress.equals(StargateNetwork.EARTH_ADDRESS) && !network.isStargateInNetwork(StargateNetwork.EARTH_ADDRESS)) {
 			dialedAddress.clear();
-			
-			for (int i=0; i<6; i++)
-				dialedAddress.addSymbol(network.getLastActivatedOrlins().get(i));
+			dialedAddress.addAll(network.getLastActivatedOrlins().subList(0, 6));
 		}
 		
 		super.addSymbolToAddress(symbol);
