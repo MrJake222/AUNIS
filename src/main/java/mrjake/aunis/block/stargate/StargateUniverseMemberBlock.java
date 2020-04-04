@@ -1,7 +1,7 @@
 package mrjake.aunis.block.stargate;
 
-import mrjake.aunis.stargate.StargateAbstractMergeHelper;
-import mrjake.aunis.stargate.StargateUniverseMergeHelper;
+import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
+import mrjake.aunis.stargate.merging.StargateUniverseMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateClassicMemberTile;
 import mrjake.aunis.tileentity.stargate.StargateUniverseMemberTile;
 

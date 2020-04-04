@@ -10,7 +10,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.renderer.BlockRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
-import mrjake.aunis.stargate.StargateAbstractMergeHelper;
+import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;

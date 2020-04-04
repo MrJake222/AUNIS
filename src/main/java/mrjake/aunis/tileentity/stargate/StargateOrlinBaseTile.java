@@ -17,14 +17,14 @@ import mrjake.aunis.sound.StargateSoundEventEnum;
 import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
-import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
-import mrjake.aunis.stargate.StargateAbstractMergeHelper;
-import mrjake.aunis.stargate.StargateEnergyRequired;
-import mrjake.aunis.stargate.StargateOrlinMergeHelper;
+import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
+import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
+import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
+import mrjake.aunis.stargate.power.StargateEnergyRequired;
 import mrjake.aunis.state.StargateOrlinSparkState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
@@ -134,17 +134,23 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 			isPowered = power;
 						
 			if (isPowered && stargateState.idle() && !isBroken()) {
-				if (checkDialedAddress().ok()) {
-					stargateState = EnumStargateState.DIALING;
-					
-					startSparks();
-					AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.GATE_ORLIN_DIAL);
-					
-					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_OPEN));
-				}
-				
-				else {
-					Aunis.info("wrong dialed address");
+				switch (checkDialedAddress()) {
+					case OK:
+						stargateState = EnumStargateState.DIALING;
+						
+						startSparks();
+						AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.GATE_ORLIN_DIAL);
+						
+						addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_OPEN));
+						break;
+						
+					case ADDRESS_MALFORMED:
+						Aunis.logger.error("Orlin's gate - wrong dialed address");
+						break;
+						
+					case NOT_ENOUGH_POWER:
+						Aunis.info("Orlin's gate - Not enough power");
+						break;
 				}
 			}
 			

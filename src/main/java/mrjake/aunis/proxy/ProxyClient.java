@@ -3,7 +3,7 @@ package mrjake.aunis.proxy;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.OBJLoader.ModelReloadListener;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.GrassBlockColor;
+import mrjake.aunis.block.stargate.StargateClassicMemberBlockColor;
 import mrjake.aunis.fluid.AunisBlockFluid;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
@@ -20,8 +20,8 @@ import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRenderer;
 import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
 import mrjake.aunis.renderer.stargate.StargateUniverseRenderer;
-import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.sound.AunisSoundHelperClient;
+import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
@@ -53,11 +53,13 @@ public class ProxyClient implements IProxy {
 		ChangeEvent.registerKeybindings();
 	}
 
-	public void init(FMLInitializationEvent event) {
-		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageMysteriousItemColor(), AunisItems.pageMysteriousItem);
-    	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageNotebookItemColor(), AunisItems.pageNotebookItem);
-    	Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK);
-		Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new GrassBlockColor(), AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK);
+	public void init(FMLInitializationEvent event) {		
+		Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageMysteriousItemColor(), AunisItems.PAGE_MYSTERIOUS_ITEM);
+    	Minecraft.getMinecraft().getItemColors().registerItemColorHandler(new PageNotebookItemColor(), AunisItems.PAGE_NOTEBOOK_ITEM);
+    	
+    	Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(new StargateClassicMemberBlockColor(),
+    			AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK,
+    			AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK);
     }
  
     public void postInit(FMLPostInitializationEvent event) {

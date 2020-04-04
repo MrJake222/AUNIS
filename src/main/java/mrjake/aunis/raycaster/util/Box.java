@@ -54,7 +54,15 @@ public class Box {
 			}
 			
 		}
-				
+		
+//		if (intersects%2 > 0) {
+//			Aunis.info(String.format("(%f,%f)", p.x, p.y));
+//			Aunis.info(String.format("y=%fx+%f", a, b));
+//			
+//			for (Ray ray : rays)
+//				Aunis.info(ray.toString());
+//		}
+		
 		return (intersects%2 > 0);		
 	}
 }

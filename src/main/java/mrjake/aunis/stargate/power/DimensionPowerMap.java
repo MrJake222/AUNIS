@@ -1,4 +1,4 @@
-package mrjake.aunis.stargate;
+package mrjake.aunis.stargate.power;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,8 +35,16 @@ public class DimensionPowerMap {
 	private static Map<DimensionType, StargateEnergyRequired> DIMENSION_POWER_OFFSET_MAP;
 		
 	public static StargateEnergyRequired getCost(DimensionType from, DimensionType to) {
-		int energyToOpen = Math.abs(DIMENSION_POWER_OFFSET_MAP.get(from).energyToOpen - DIMENSION_POWER_OFFSET_MAP.get(to).energyToOpen);
-		int keepAlive = Math.abs(DIMENSION_POWER_OFFSET_MAP.get(from).keepAlive - DIMENSION_POWER_OFFSET_MAP.get(to).keepAlive);
+		StargateEnergyRequired reqFrom = DIMENSION_POWER_OFFSET_MAP.get(from);
+		StargateEnergyRequired reqTo = DIMENSION_POWER_OFFSET_MAP.get(to);
+		
+		if (reqFrom == null || reqTo == null) {
+			Aunis.logger.error("Tried to get a cost of a non-existing dimension. This is a bug.");
+			return new StargateEnergyRequired(0, 0);
+		}
+		
+		int energyToOpen = Math.abs(reqFrom.energyToOpen - reqTo.energyToOpen);
+		int keepAlive = Math.abs(reqFrom.keepAlive - reqTo.keepAlive);
 		
 		return new StargateEnergyRequired(energyToOpen, keepAlive);
 	}
@@ -76,6 +84,10 @@ public class DimensionPowerMap {
 		
 		for (DimensionType dimType : DimensionManager.getRegisteredDimensions().keySet()) {
 			if (!DIMENSION_POWER_OFFSET_MAP.containsKey(dimType)) {
+				// Biomes O' Plenty Nether fix
+				if (dimType.getName().equals("Nether"))
+					dimType = DimensionType.NETHER;
+				
 				if (DEFAULTS_MAP.containsKey(dimType.getName()))
 					DIMENSION_POWER_OFFSET_MAP.put(dimType, DEFAULTS_MAP.get(dimType.getName()));
 				else

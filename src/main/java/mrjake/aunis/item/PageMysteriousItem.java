@@ -40,7 +40,7 @@ public class PageMysteriousItem extends Item {
 			if (stargate != null) {
 				NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(stargate.address, false, stargate.path);
 				
-				ItemStack stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
+				ItemStack stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
 				stack.setTagCompound(compound);
 				
 				ItemStack held = player.getHeldItem(hand);

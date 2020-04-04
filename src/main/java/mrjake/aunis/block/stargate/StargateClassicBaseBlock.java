@@ -118,7 +118,7 @@ public abstract class StargateClassicBaseBlock extends Block {
 			player.openGui(Aunis.instance, GuiIdEnum.GUI_STARGATE.id, world, pos.getX(), pos.getY(), pos.getZ());
 			return true;
 		}
-		
+				
 		return false;
 	}
 

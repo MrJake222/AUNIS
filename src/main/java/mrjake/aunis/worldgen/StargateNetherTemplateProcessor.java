@@ -1,7 +1,7 @@
 package mrjake.aunis.worldgen;
 
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.stargate.StargateMilkyWayMergeHelper;
+import mrjake.aunis.stargate.merging.StargateMilkyWayMergeHelper;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;

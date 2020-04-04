@@ -1,4 +1,4 @@
-package mrjake.aunis.stargate;
+package mrjake.aunis.stargate.power;
 
 import mrjake.aunis.config.AunisConfig;
 import net.minecraft.nbt.NBTTagCompound;

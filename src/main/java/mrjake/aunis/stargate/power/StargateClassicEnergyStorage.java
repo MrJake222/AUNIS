@@ -1,4 +1,4 @@
-package mrjake.aunis.stargate;
+package mrjake.aunis.stargate.power;
 
 import java.util.ArrayList;
 import java.util.List;

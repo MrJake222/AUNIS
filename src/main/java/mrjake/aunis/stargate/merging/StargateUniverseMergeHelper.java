@@ -1,4 +1,4 @@
-package mrjake.aunis.stargate;
+package mrjake.aunis.stargate.merging;
 
 import java.util.Arrays;
 import java.util.List;

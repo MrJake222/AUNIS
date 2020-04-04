@@ -32,28 +32,28 @@ public class ThermalIntegration {
 
 		
 		// Crystals
-		ThermalExpansionHelper.addCompactorRecipe(10000, new ItemStack(Items.QUARTZ, 3), new ItemStack(AunisItems.crystalSeed));
+		ThermalExpansionHelper.addCompactorRecipe(10000, new ItemStack(Items.QUARTZ, 3), new ItemStack(AunisItems.CRYSTAL_SEED));
 		
-		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.crystalSeed), new ItemStack(AunisItems.crystalRed), new FluidStack(AunisFluids.moltenSiliconRed, 1000), false);
-		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.crystalSeed), new ItemStack(AunisItems.crystalBlue), new FluidStack(AunisFluids.moltenSiliconBlue, 1000), false);
-		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.crystalSeed), new ItemStack(AunisItems.crystalEnder), new FluidStack(AunisFluids.moltenSiliconEnder, 1000), false);
-		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.crystalSeed), new ItemStack(AunisItems.crystalYellow), new FluidStack(AunisFluids.moltenSiliconYellow, 1000), false);
-		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.crystalSeed), new ItemStack(AunisItems.crystalWhite), new FluidStack(AunisFluids.moltenSiliconWhite, 1000), false);
+		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.CRYSTAL_SEED), new ItemStack(AunisItems.CRYSTAL_RED), new FluidStack(AunisFluids.moltenSiliconRed, 1000), false);
+		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.CRYSTAL_SEED), new ItemStack(AunisItems.CRYSTAL_BLUE), new FluidStack(AunisFluids.moltenSiliconBlue, 1000), false);
+		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.CRYSTAL_SEED), new ItemStack(AunisItems.CRYSTAL_ENDER), new FluidStack(AunisFluids.moltenSiliconEnder, 1000), false);
+		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.CRYSTAL_SEED), new ItemStack(AunisItems.CRYSTAL_YELLOW), new FluidStack(AunisFluids.moltenSiliconYellow, 1000), false);
+		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.CRYSTAL_SEED), new ItemStack(AunisItems.CRYSTAL_WHITE), new FluidStack(AunisFluids.moltenSiliconWhite, 1000), false);
 		
 		
 		// Naquadah
 		ThermalExpansionHelper.addCrucibleRecipe(25000, new ItemStack(AunisBlocks.ORE_NAQUADAH_BLOCK), new FluidStack(AunisFluids.moltenNaquadahRaw, 6800));
-		ThermalExpansionHelper.addCrucibleRecipe(2500, new ItemStack(AunisItems.naquadahShard), new FluidStack(AunisFluids.moltenNaquadahRaw, 500));
+		ThermalExpansionHelper.addCrucibleRecipe(2500, new ItemStack(AunisItems.NAQUADAH_SHARD), new FluidStack(AunisFluids.moltenNaquadahRaw, 500));
 		ThermalExpansionHelper.addRefineryRecipe(2500, new FluidStack(AunisFluids.moltenNaquadahRaw, 300), new FluidStack(AunisFluids.moltenNaquadahRefined, 200), ItemStack.EMPTY);
-		ThermalExpansionHelper.addTransposerFill(2500, new ItemStack(Items.IRON_INGOT), new ItemStack(AunisItems.naquadahAlloyRaw, 2), new FluidStack(AunisFluids.moltenNaquadahRaw, 1000), true);
-		ThermalExpansionHelper.addTransposerFill(2500, new ItemStack(Items.IRON_INGOT), new ItemStack(AunisItems.naquadahAlloy, 2), new FluidStack(AunisFluids.moltenNaquadahRefined, 1000), true);
+		ThermalExpansionHelper.addTransposerFill(2500, new ItemStack(Items.IRON_INGOT), new ItemStack(AunisItems.NAQUADAH_ALLOY_RAW, 2), new FluidStack(AunisFluids.moltenNaquadahRaw, 1000), true);
+		ThermalExpansionHelper.addTransposerFill(2500, new ItemStack(Items.IRON_INGOT), new ItemStack(AunisItems.NAQUADAH_ALLOY, 2), new FluidStack(AunisFluids.moltenNaquadahRefined, 1000), true);
 		
-		ThermalExpansionHelper.addCrucibleRecipe(2500, new ItemStack(AunisItems.naquadahAlloy), new FluidStack(AunisFluids.moltenNaquadahAlloy, 1000));
+		ThermalExpansionHelper.addCrucibleRecipe(2500, new ItemStack(AunisItems.NAQUADAH_ALLOY), new FluidStack(AunisFluids.moltenNaquadahAlloy, 1000));
 
 		
 		// Circuits
-		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.circuitControlBase), new ItemStack(AunisItems.circuitControlCrystal), new FluidStack(AunisFluids.moltenSiliconWhite, 1000), false);
-		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.circuitControlBase), new ItemStack(AunisItems.circuitControlNaquadah), new FluidStack(AunisFluids.moltenNaquadahAlloy, 1000), false);
+		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.CIRCUIT_CONTROL_BASE), new ItemStack(AunisItems.CIRCUIT_CONTROL_CRYSTAL), new FluidStack(AunisFluids.moltenSiliconWhite, 1000), false);
+		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.CIRCUIT_CONTROL_BASE), new ItemStack(AunisItems.CIRCUIT_CONTROL_NAQUADAH), new FluidStack(AunisFluids.moltenNaquadahAlloy, 1000), false);
 	
 		// Capacitor
 		ThermalExpansionHelper.addTransposerFill(80000, new ItemStack(AunisBlocks.CAPACITOR_BLOCK_EMPTY), new ItemStack(AunisBlocks.CAPACITOR_BLOCK), new FluidStack(AunisFluids.moltenSiliconRed, 8000), false);

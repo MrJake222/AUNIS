@@ -268,7 +268,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	// Item handler
 	
 	public static final List<Item> SUPPORTED_UPGRADES = Arrays.asList(
-			AunisItems.crystalGlyphDhd);
+			AunisItems.CRYSTAL_GLYPH_DHD);
 	
 	private ItemStackHandler itemStackHandler = new ItemStackHandler(5) {
 		
@@ -278,7 +278,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			
 			switch (slot) {
 				case 0:
-					return item == AunisItems.crystalControlDhd;
+					return item == AunisItems.CRYSTAL_CONTROL_DHD;
 				
 				case 1:
 				case 2:
@@ -305,7 +305,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	};
 	
 	public static enum DHDUpgradeEnum {
-		CHEVRON_UPGRADE(AunisItems.crystalGlyphDhd);
+		CHEVRON_UPGRADE(AunisItems.CRYSTAL_GLYPH_DHD);
 		
 		public Item item;
 
@@ -391,7 +391,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		itemStackHandler.deserializeNBT(compound.getCompoundTag("itemStackHandler"));
 		
 		if (compound.getBoolean("hasUpgrade") || compound.getBoolean("insertAnimation")) {
-			itemStackHandler.setStackInSlot(1, new ItemStack(AunisItems.crystalGlyphDhd));
+			itemStackHandler.setStackInSlot(1, new ItemStack(AunisItems.CRYSTAL_GLYPH_DHD));
 		}
 		
 		fluidHandler.readFromNBT(compound.getCompoundTag("fluidHandler"));
@@ -401,7 +401,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			NBTTagList tagList = inventoryTag.getTagList("Items", Constants.NBT.TAG_COMPOUND);
 			
 			if (tagList.tagCount() > 0) {
-				itemStackHandler.setStackInSlot(0, new ItemStack(AunisItems.crystalControlDhd));
+				itemStackHandler.setStackInSlot(0, new ItemStack(AunisItems.CRYSTAL_CONTROL_DHD));
 				
 				int energy = tagList.getCompoundTagAt(0).getCompoundTag("ForgeCaps").getCompoundTag("Parent").getInteger("energy");
 				int fluidAmount = energy / AunisConfig.dhdConfig.energyPerNaquadah;

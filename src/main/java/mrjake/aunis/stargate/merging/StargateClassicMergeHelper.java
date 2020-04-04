@@ -1,10 +1,11 @@
-package mrjake.aunis.stargate;
+package mrjake.aunis.stargate.merging;
 
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateClassicMemberTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;

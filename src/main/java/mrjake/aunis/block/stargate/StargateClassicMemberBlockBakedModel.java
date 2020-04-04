@@ -2,6 +2,7 @@ package mrjake.aunis.block.stargate;
 
 import java.util.List;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -34,8 +35,15 @@ public class StargateClassicMemberBlockBakedModel implements IBakedModel {
 			if (camoBlockState != null && camoBlockState.getBlock() != Blocks.AIR && camoBlockState.getBlock() != defaultBlock) {
 		        IBakedModel camoBlockModel = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(camoBlockState);
 		        
-		        if (camoBlockModel != defaultModel)
-		        	return camoBlockModel.getQuads(state, side, rand);
+		        if (camoBlockModel != defaultModel) {
+		        	try {
+		        		return camoBlockModel.getQuads(state, side, rand);
+		        	}
+		        	
+		        	catch (IllegalArgumentException e) {
+						Aunis.logger.error("Unsupported block as camo");
+					}
+		        }
 			}
 		}
 		

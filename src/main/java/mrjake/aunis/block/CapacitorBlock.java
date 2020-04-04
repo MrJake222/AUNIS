@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
+import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
 import mrjake.aunis.tileentity.CapacitorTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;

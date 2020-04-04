@@ -70,7 +70,7 @@ public class DHDContainer extends Container {
         
 		// Transfering from player's inventory to DHD
         else {
-        	if (stack.getItem() == AunisItems.crystalControlDhd) {
+        	if (stack.getItem() == AunisItems.CRYSTAL_CONTROL_DHD) {
         		if (!slotCrystal.getHasStack()) {
         			slotCrystal.putStack(stack.copy());
         			stack.shrink(1);

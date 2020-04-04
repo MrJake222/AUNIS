@@ -5,7 +5,7 @@ import mrjake.aunis.gui.util.ContainerHelper;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
-import mrjake.aunis.stargate.StargateClassicEnergyStorage;
+import mrjake.aunis.stargate.power.StargateClassicEnergyStorage;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile.StargateUpgradeEnum;
@@ -113,7 +113,7 @@ public class StargateContainer extends Container {
         		}
         	}
         	
-        	else if ((stack.getItem() == AunisItems.pageNotebookItem && openTabId != -1) || (stack.getItem() == AunisItems.UNIVERSE_DIALER && openTabId == 2)) {        		
+        	else if ((stack.getItem() == AunisItems.PAGE_NOTEBOOK_ITEM && openTabId != -1) || (stack.getItem() == AunisItems.UNIVERSE_DIALER && openTabId == 2)) {        		
     			if (!getSlot(7+openTabId).getHasStack()) {
     				ItemStack stack1 = stack.copy();
     				stack1.setCount(1);

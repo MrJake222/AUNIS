@@ -3,13 +3,11 @@ package mrjake.aunis.event;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.raycaster.RaycasterDHD;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -28,7 +26,6 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBloc
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -75,29 +72,34 @@ public class AunisEventHandler {
 		EntityPlayer player = event.getEntityPlayer();
 		World world = player.getEntityWorld();
 		
-		if (player.isSneaking()) {
-			if (event instanceof RightClickBlock && world.getBlockState(event.getPos()).getBlock() == AunisBlocks.DHD_BLOCK) {
-				((RightClickBlock) event).setUseBlock(Result.ALLOW);
-			}
-		}
-		
-		else {
-			EnumHand hand = event.getHand();
-			ItemStack heldItemStack = player.getHeldItem(hand);
+		if (!player.isSneaking()) {
+			BlockPos pos = player.getPosition();
+			EnumFacing playerFacing = EnumFacing.getDirectionFromEntityLiving(pos, player).getOpposite();
 			
-			if (world.isRemote && hand == EnumHand.MAIN_HAND && heldItemStack.getItem() != AunisItems.analyzerAncient) {
-				BlockPos pos = player.getPosition();
-							
-				Iterable<BlockPos> blocks = BlockPos.getAllInBox(pos.add(-1,-1,-1), pos.add(1,1,1));
+			if (playerFacing != EnumFacing.UP && playerFacing != EnumFacing.DOWN) { 
+				EnumFacing left = playerFacing.rotateYCCW();
+				EnumFacing right = playerFacing.rotateY();
+				
+//				Aunis.info(playerFacing + ": left="+left+", right="+right);
+				
+				Iterable<BlockPos> blocks = BlockPos.getAllInBox(pos.offset(left).down(), pos.offset(right, 2).up().offset(playerFacing));
 				
 				for (BlockPos activatedBlock : blocks) {
 					Block block = world.getBlockState(activatedBlock).getBlock();
-
-					if (block == AunisBlocks.DHD_BLOCK) {
-						RaycasterDHD.INSTANCE.onActivated(world, activatedBlock, player);
+	
+					/*
+					 * This only activates the DHD block, on both sides and
+					 * cancels the event. A packet is sent to the server by onActivated
+					 * only on main hand click.
+					 */
+					if (block == AunisBlocks.DHD_BLOCK && RaycasterDHD.INSTANCE.onActivated(world, activatedBlock, player, event.getHand())) {
+						event.setCanceled(true);
 					}
 				}
 			}
+			
+			else
+				Aunis.logger.warn("Facing down when activating DHD");
 		}
     }
 	

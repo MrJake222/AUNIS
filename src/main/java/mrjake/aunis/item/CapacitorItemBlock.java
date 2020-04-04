@@ -4,7 +4,7 @@ import java.util.List;
 
 import mrjake.aunis.block.CapacitorBlock;
 import mrjake.aunis.capability.CapacitorCapabilityProvider;
-import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
+import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;

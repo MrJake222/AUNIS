@@ -11,99 +11,84 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @EventBusSubscriber
 public class AunisItems {
-	/**
-	 * Provides basic analyzing info
-	 */
-	public static Item analyzerAncient = ItemHelper.createGenericItem("analyzer_ancient");
 	
 	/**
 	 * DHD power/control crystal
 	 */
-	public static Item crystalControlDhd = ItemHelper.createGenericItem("crystal_control_dhd");
+	public static final Item CRYSTAL_CONTROL_DHD = ItemHelper.createGenericItem("crystal_control_dhd");
 	
 	/**
-	 * These allow for dialing 8th glyph(cross dimension travel)
+	 * These allow for dialing 8th glyph(cross dimension travel) and show different address spaces
 	 */
-	public static Item crystalGlyphDhd = ItemHelper.createGenericItem("crystal_glyph_dhd");
-//	public static Item crystalGlyphEmpty = ItemHelper.createGenericItem("crystal_glyph_empty");
-	public static Item crystalGlyphStargate = ItemHelper.createGenericItem("crystal_glyph_stargate");
-	public static Item crystalGlyphMilkyWay = ItemHelper.createGenericItem("crystal_glyph_milkyway");
-	public static Item crystalGlyphPegasus = ItemHelper.createGenericItem("crystal_glyph_pegasus");
-	public static Item crystalGlyphUniverse = ItemHelper.createGenericItem("crystal_glyph_universe");
-	
-	/**
-	 * Used for fast dialing the gate
-	 * To be removed in final edition
-	 */
-	public static Item dialerFast = ItemHelper.createGenericItem("dialer_fast");
+	public static final Item CRYSTAL_GLYPH_DHD = ItemHelper.createGenericItem("crystal_glyph_dhd");
+	public static final Item CRYSTAL_GLYPH_STARGATE = ItemHelper.createGenericItem("crystal_glyph_stargate");
+	public static final Item CRYSTAL_GLYPH_MILKYWAY = ItemHelper.createGenericItem("crystal_glyph_milkyway");
+	public static final Item CRYSTAL_GLYPH_PEGASUS = ItemHelper.createGenericItem("crystal_glyph_pegasus");
+	public static final Item CRYSTAL_GLYPH_UNIVERSE = ItemHelper.createGenericItem("crystal_glyph_universe");
 	
 	/**
 	 * Diffrent Naquadah(main Stargate building material) stages of purity
 	 */
-	public static Item naquadahShard = ItemHelper.createGenericItem("naquadah_shard");
-	public static Item naquadahAlloyRaw = ItemHelper.createGenericItem("naquadah_alloy_raw");
-	public static Item naquadahAlloy = ItemHelper.createGenericItem("naquadah_alloy");
+	public static final Item NAQUADAH_SHARD = ItemHelper.createGenericItem("naquadah_shard");
+	public static final Item NAQUADAH_ALLOY_RAW = ItemHelper.createGenericItem("naquadah_alloy_raw");
+	public static final Item NAQUADAH_ALLOY = ItemHelper.createGenericItem("naquadah_alloy");
 	
 	/**
 	 * Crafting items
 	 */
-	public static Item crystalSeed = ItemHelper.createGenericItem("crystal_fragment");
-	public static Item crystalBlue = ItemHelper.createGenericItem("crystal_blue");
-	public static Item crystalRed = ItemHelper.createGenericItem("crystal_red");
-	public static Item crystalEnder = ItemHelper.createGenericItem("crystal_ender");
-	public static Item crystalYellow = ItemHelper.createGenericItem("crystal_yellow");
-	public static Item crystalWhite = ItemHelper.createGenericItem("crystal_white");
+	public static final Item CRYSTAL_SEED = ItemHelper.createGenericItem("crystal_fragment");
+	public static final Item CRYSTAL_BLUE = ItemHelper.createGenericItem("crystal_blue");
+	public static final Item CRYSTAL_RED = ItemHelper.createGenericItem("crystal_red");
+	public static final Item CRYSTAL_ENDER = ItemHelper.createGenericItem("crystal_ender");
+	public static final Item CRYSTAL_YELLOW = ItemHelper.createGenericItem("crystal_yellow");
+	public static final Item CRYSTAL_WHITE = ItemHelper.createGenericItem("crystal_white");
 	
-	public static Item circuitControlBase = ItemHelper.createGenericItem("circuit_control_base");
-	public static Item circuitControlCrystal = ItemHelper.createGenericItem("circuit_control_crystal");
-	public static Item circuitControlNaquadah = ItemHelper.createGenericItem("circuit_control_naquadah");
+	public static final Item CIRCUIT_CONTROL_BASE = ItemHelper.createGenericItem("circuit_control_base");
+	public static final Item CIRCUIT_CONTROL_CRYSTAL = ItemHelper.createGenericItem("circuit_control_crystal");
+	public static final Item CIRCUIT_CONTROL_NAQUADAH = ItemHelper.createGenericItem("circuit_control_naquadah");
 		
-	public static Item stargateRingFragment = ItemHelper.createGenericItem("stargate_ring_fragment");
-	public static Item universeRingFragment = ItemHelper.createGenericItem("universe_ring_fragment");
-	public static Item trRingFragment = ItemHelper.createGenericItem("transportrings_ring_fragment");
-	public static Item holderCrystal = ItemHelper.createGenericItem("holder_crystal");
+	public static final Item STARGATE_RING_FRAGMENT = ItemHelper.createGenericItem("stargate_ring_fragment");
+	public static final Item UNIVERSE_RING_FRAGMENT = ItemHelper.createGenericItem("universe_ring_fragment");
+	public static final Item TR_RING_FRAGMENT = ItemHelper.createGenericItem("transportrings_ring_fragment");
+	public static final Item HOLDER_CRYSTAL = ItemHelper.createGenericItem("holder_crystal");
 	
-	public static Item dhdBrb = ItemHelper.createGenericItem("dhd_brb");
+	public static final Item DHD_BRB = ItemHelper.createGenericItem("dhd_brb");
 	
-	public static PageNotebookItem pageNotebookItem = new PageNotebookItem();
-	public static PageMysteriousItem pageMysteriousItem = new PageMysteriousItem();
+	public static final PageNotebookItem PAGE_NOTEBOOK_ITEM = new PageNotebookItem();
+	public static final PageMysteriousItem PAGE_MYSTERIOUS_ITEM = new PageMysteriousItem();
 	public static final UniverseDialerItem UNIVERSE_DIALER = new UniverseDialerItem();
 	
-	private static Item[] items = {
-		analyzerAncient,
+	private static Item[] items = {		
+		CRYSTAL_CONTROL_DHD,
 		
-		crystalControlDhd,
+		CRYSTAL_GLYPH_DHD,
+		CRYSTAL_GLYPH_STARGATE,
+		CRYSTAL_GLYPH_MILKYWAY,
+		CRYSTAL_GLYPH_PEGASUS,
+		CRYSTAL_GLYPH_UNIVERSE,
+				
+		NAQUADAH_SHARD,
+		NAQUADAH_ALLOY,
+		NAQUADAH_ALLOY_RAW,
 		
-		crystalGlyphDhd,
-		crystalGlyphStargate,
-		crystalGlyphMilkyWay,
-		crystalGlyphPegasus,
-		crystalGlyphUniverse,
+		CRYSTAL_SEED,
+		CRYSTAL_BLUE,
+		CRYSTAL_RED,
+		CRYSTAL_ENDER,
+		CRYSTAL_YELLOW,
+		CRYSTAL_WHITE,
 		
-		dialerFast,
+		CIRCUIT_CONTROL_BASE,
+		CIRCUIT_CONTROL_CRYSTAL,
+		CIRCUIT_CONTROL_NAQUADAH,
 		
-		naquadahShard,
-		naquadahAlloy,
-		naquadahAlloyRaw,
+		STARGATE_RING_FRAGMENT,
+		UNIVERSE_RING_FRAGMENT,
+		TR_RING_FRAGMENT,
+		HOLDER_CRYSTAL,
 		
-		crystalSeed,
-		crystalBlue,
-		crystalRed,
-		crystalEnder,
-		crystalYellow,
-		crystalWhite,
-		
-		circuitControlBase,
-		circuitControlCrystal,
-		circuitControlNaquadah,
-		
-		stargateRingFragment,
-		universeRingFragment,
-		trRingFragment,
-		holderCrystal,
-		
-		dhdBrb,
-		pageMysteriousItem,
+		DHD_BRB,
+		PAGE_MYSTERIOUS_ITEM,
 		UNIVERSE_DIALER
 	};
 	
@@ -113,7 +98,7 @@ public class AunisItems {
 			event.getRegistry().register(item);
 		}
 		
-		event.getRegistry().register(pageNotebookItem);
+		event.getRegistry().register(PAGE_NOTEBOOK_ITEM);
 	}
 	
 	@SubscribeEvent
@@ -122,8 +107,8 @@ public class AunisItems {
 			ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
 		}
 		
-		ModelLoader.setCustomModelResourceLocation(pageNotebookItem, 0, new ModelResourceLocation(pageNotebookItem.getRegistryName() + "_empty", "inventory"));
-		ModelLoader.setCustomModelResourceLocation(pageNotebookItem, 1, new ModelResourceLocation(pageNotebookItem.getRegistryName() + "_filled", "inventory"));
+		ModelLoader.setCustomModelResourceLocation(PAGE_NOTEBOOK_ITEM, 0, new ModelResourceLocation(PAGE_NOTEBOOK_ITEM.getRegistryName() + "_empty", "inventory"));
+		ModelLoader.setCustomModelResourceLocation(PAGE_NOTEBOOK_ITEM, 1, new ModelResourceLocation(PAGE_NOTEBOOK_ITEM.getRegistryName() + "_filled", "inventory"));
 
 	}
 }

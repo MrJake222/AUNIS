@@ -94,11 +94,11 @@ public class RaycasterDHD extends Raycaster {
 	
 	private int button;
 	
-	public void onActivated(World world, BlockPos pos, EntityPlayer player) {
+	public boolean onActivated(World world, BlockPos pos, EntityPlayer player, EnumHand hand) {
 		float rotation = world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
 		button = -1;
 		
-		super.onActivated(world, pos, player, rotation);
+		return super.onActivated(world, pos, player, rotation, hand);
 	}
 	
 	private static final Vector3f TRANSLATION = new Vector3f(0.5f, 0, 0.5f); 
@@ -117,7 +117,7 @@ public class RaycasterDHD extends Raycaster {
 	}
 	
 	@Override
-	protected void brbCheck(List<Ray> brbRayList, Vec3d lookVec, EntityPlayer player, BlockPos pos) {
+	protected boolean brbCheck(List<Ray> brbRayList, Vec3d lookVec, EntityPlayer player, BlockPos pos, EnumHand hand) {
 		if (button == -1) {				
 			Box box = new Box( brbRayList );
 			if (box.checkForPointInBox( new Vector2f( (float)lookVec.x, (float)lookVec.z ) )) {
@@ -125,10 +125,15 @@ public class RaycasterDHD extends Raycaster {
 			}
 		}
 		
-		if (button != -1) {
-			player.swingArm(EnumHand.MAIN_HAND);
+		if (button != -1 && hand == EnumHand.MAIN_HAND) {
+			player.swingArm(hand);
 
-			AunisPacketHandler.INSTANCE.sendToServer(new DHDButtonClickedToServer(pos, SymbolMilkyWayEnum.valueOf(button)));
+			if (player.getEntityWorld().isRemote)
+				AunisPacketHandler.INSTANCE.sendToServer(new DHDButtonClickedToServer(pos, SymbolMilkyWayEnum.valueOf(button)));
+			
+			return true;
 		}
+		
+		return false;
 	}
 }

@@ -12,7 +12,7 @@ import mrjake.aunis.integration.OCWrapperInterface;
 import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
-import mrjake.aunis.stargate.DimensionPowerMap;
+import mrjake.aunis.stargate.power.DimensionPowerMap;
 import mrjake.aunis.worldgen.AunisWorldGen;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraftforge.common.util.CompoundDataFixer;

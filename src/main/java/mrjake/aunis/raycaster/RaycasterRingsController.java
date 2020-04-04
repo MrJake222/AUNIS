@@ -56,7 +56,7 @@ public class RaycasterRingsController extends Raycaster {
 		EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 		float rotation = TRControllerRenderer.getRotation(facing);
 		
-		super.onActivated(world, pos, player, rotation);
+		super.onActivated(world, pos, player, rotation, EnumHand.MAIN_HAND);
 	}
 	
 	@Override
@@ -79,5 +79,5 @@ public class RaycasterRingsController extends Raycaster {
 	}
 	
 	@Override
-	protected void brbCheck(List<Ray> brbRayList, Vec3d lookVec, EntityPlayer player, BlockPos pos) {}
+	protected boolean brbCheck(List<Ray> brbRayList, Vec3d lookVec, EntityPlayer player, BlockPos pos, EnumHand hand) { return false; }
 }

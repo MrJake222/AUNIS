@@ -20,13 +20,13 @@ import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
-import mrjake.aunis.stargate.StargateAbstractEnergyStorage;
-import mrjake.aunis.stargate.StargateClassicEnergyStorage;
 import mrjake.aunis.stargate.StargateClassicSpinHelper;
 import mrjake.aunis.stargate.StargateOpenResult;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
+import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
+import mrjake.aunis.stargate.power.StargateClassicEnergyStorage;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.StargateSpinState;
@@ -202,7 +202,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		itemStackHandler.deserializeNBT(compound.getCompoundTag("itemHandler"));
 		
 		if (compound.getBoolean("hasUpgrade")) {
-			itemStackHandler.setStackInSlot(0, new ItemStack(AunisItems.crystalGlyphStargate));
+			itemStackHandler.setStackInSlot(0, new ItemStack(AunisItems.CRYSTAL_GLYPH_STARGATE));
 		}
 				
 		updatePowerTier();
@@ -398,7 +398,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 							hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE),
 							PageNotebookItem.getRegistryPathFromWorld(world, pos));
 	
-					stack = new ItemStack(AunisItems.pageNotebookItem, 1, 1);
+					stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
 					stack.setTagCompound(compound);
 					itemStackHandler.setStackInSlot(pageSlotId, stack);
 				}
@@ -503,10 +503,10 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 					
 				case 7:
 				case 8:
-					return item == AunisItems.pageNotebookItem;
+					return item == AunisItems.PAGE_NOTEBOOK_ITEM;
 					
 				case 9:
-					return item == AunisItems.pageNotebookItem || item == AunisItems.UNIVERSE_DIALER;
+					return item == AunisItems.PAGE_NOTEBOOK_ITEM || item == AunisItems.UNIVERSE_DIALER;
 					
 				default:
 					return true;
@@ -538,10 +538,10 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	};
 	
 	public static enum StargateUpgradeEnum implements EnumKeyInterface<Item> {
-		MILKYWAY_GLYPHS(AunisItems.crystalGlyphMilkyWay),
-		PEGASUS_GLYPHS(AunisItems.crystalGlyphPegasus),
-		UNIVERSE_GLYPHS(AunisItems.crystalGlyphUniverse),
-		CHEVRON_UPGRADE(AunisItems.crystalGlyphStargate);
+		MILKYWAY_GLYPHS(AunisItems.CRYSTAL_GLYPH_MILKYWAY),
+		PEGASUS_GLYPHS(AunisItems.CRYSTAL_GLYPH_PEGASUS),
+		UNIVERSE_GLYPHS(AunisItems.CRYSTAL_GLYPH_UNIVERSE),
+		CHEVRON_UPGRADE(AunisItems.CRYSTAL_GLYPH_STARGATE);
 		
 		public Item item;
 
