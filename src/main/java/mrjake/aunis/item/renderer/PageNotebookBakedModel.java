@@ -67,7 +67,7 @@ public class PageNotebookBakedModel implements IBakedModel {
 
 	@Override
 	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
-		if (cameraTransformType == TransformType.FIRST_PERSON_LEFT_HAND || cameraTransformType == TransformType.FIRST_PERSON_RIGHT_HAND) {
+		if (cameraTransformType == TransformType.FIRST_PERSON_LEFT_HAND || cameraTransformType == TransformType.FIRST_PERSON_RIGHT_HAND || cameraTransformType == TransformType.FIXED) {
 			lastTransform = cameraTransformType;
 			
 			return IBakedModel.super.handlePerspective(cameraTransformType);
