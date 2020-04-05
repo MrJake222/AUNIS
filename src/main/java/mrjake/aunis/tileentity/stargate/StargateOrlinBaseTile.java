@@ -17,6 +17,7 @@ import mrjake.aunis.sound.StargateSoundEventEnum;
 import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
+import mrjake.aunis.stargate.StargateClosedReasonEnum;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.stargate.network.StargateNetwork;
@@ -157,7 +158,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 			}
 			
 			else if (!isPowered && stargateState.initiating()) {
-				attemptClose();
+				attemptClose(StargateClosedReasonEnum.REQUESTED);
 			}
 			
 			markDirty();

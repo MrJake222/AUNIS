@@ -3,6 +3,7 @@ package mrjake.aunis.packet.stargate;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.stargate.EnumStargateState;
+import mrjake.aunis.stargate.StargateClosedReasonEnum;
 import mrjake.aunis.stargate.StargateOpenResult;
 import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 import mrjake.aunis.tileentity.DHDTile;
@@ -67,7 +68,7 @@ public class DHDButtonClickedToServer extends PositionedPacket {
 					// Gate is open, BRB was press, possible closure attempt
 					
 					if (gateState.initiating())
-						gateTile.attemptClose();
+						gateTile.attemptClose(StargateClosedReasonEnum.REQUESTED);
 					else
 						player.sendStatusMessage(new TextComponentTranslation("tile.aunis.dhd_block.incoming_wormhole_warn"), true);
 				}

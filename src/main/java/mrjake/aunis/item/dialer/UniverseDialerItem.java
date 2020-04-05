@@ -6,6 +6,7 @@ import java.util.Map;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.renderer.UniverseDialerBakedModel;
+import mrjake.aunis.stargate.StargateClosedReasonEnum;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.stargate.network.StargatePos;
@@ -194,7 +195,7 @@ public class UniverseDialerItem extends Item {
 							break;
 						
 						case ENGAGED_INITIATING:
-							gateTile.attemptClose();
+							gateTile.attemptClose(StargateClosedReasonEnum.REQUESTED);
 							break;
 						
 						case ENGAGED:

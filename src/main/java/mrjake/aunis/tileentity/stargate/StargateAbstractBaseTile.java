@@ -34,6 +34,7 @@ import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.AutoCloseManager;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
+import mrjake.aunis.stargate.StargateClosedReasonEnum;
 import mrjake.aunis.stargate.StargateOpenResult;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.network.StargateAddress;
@@ -136,11 +137,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		world.setBlockToAir(getGateCenterPos());
 		
 		if (stargateState.initiating()) {
-			attemptClose();
+			attemptClose(StargateClosedReasonEnum.CONNECTION_LOST);
 		}
 		
 		else if (stargateState.engaged()) {
-			targetGatePos.getTileEntity().attemptClose();
+			targetGatePos.getTileEntity().attemptClose(StargateClosedReasonEnum.CONNECTION_LOST);
 		}
 		
 		dialedAddress.clear();
@@ -293,11 +294,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		return true;
 	}
 	
-	public void attemptClose() {
+	public void attemptClose(StargateClosedReasonEnum reason) {
 		if (targetGatePos != null)
-			targetGatePos.getTileEntity().closeGate();
+			targetGatePos.getTileEntity().closeGate(reason);
 		
-		closeGate();
+		closeGate(reason);
 	}
 	
 	// ------------------------------------------------------------------------
@@ -450,17 +451,17 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	/**
 	 * Called either on pressing BRB on open gate or close command from a computer.
 	 */
-	public void closeGate() {
+	public void closeGate(StargateClosedReasonEnum reason) {
 //		Aunis.info("closeGate init=" + isInitiating + ", targetGatePos: " + targetGatePos);
 		
 		stargateState = EnumStargateState.UNSTABLE;
 		energySecondsToClose = 0;
 		
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CLOSE, 62));
-		sendSignal(null, "stargate_close", new Object[] {});
 		
 		playSoundEvent(StargateSoundEventEnum.CLOSE);
 		sendRenderingUpdate(EnumGateAction.CLOSE_GATE, 0, false);
+		sendSignal(null, "stargate_close", new Object[] { reason.toString().toLowerCase() });
 		AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.WORMHOLE_LOOP, false);
 		
 		if (isInitiating) {
@@ -593,7 +594,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		if (!world.isRemote) {
 			if (stargateState.engaged() && targetGatePos == null) {
 				Aunis.logger.error("A stargateState indicates the Gate should be open, but targetGatePos is null. This is a bug. Closing gate...");
-				attemptClose();
+				attemptClose(StargateClosedReasonEnum.CONNECTION_LOST);
 			}
 			
 			// Event horizon teleportation			
@@ -604,7 +605,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			// Not initiating
 			if (stargateState == EnumStargateState.ENGAGED && AunisConfig.autoCloseConfig.autocloseEnabled) {
 				if (getAutoCloseManager().shouldClose(targetGatePos)) {
-					targetGatePos.getTileEntity().attemptClose();
+					targetGatePos.getTileEntity().attemptClose(StargateClosedReasonEnum.REQUESTED);
 				}
 			}
 			
@@ -697,7 +698,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				}
 				
 				else {
-					attemptClose();
+					attemptClose(StargateClosedReasonEnum.OUT_OF_POWER);
 				}
 			}
 			
@@ -887,7 +888,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				onGateBroken();
 			
 			if (stargateState.engaged()) {
-				targetGatePos.getTileEntity().closeGate();
+				targetGatePos.getTileEntity().closeGate(StargateClosedReasonEnum.CONNECTION_LOST);
 			}
 		}
 		

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.stargate.StargateClosedReasonEnum;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.stargate.network.StargatePos;
@@ -92,7 +93,7 @@ public class CommandStargateCloseAll extends CommandBase {
 				
 				if (gateTile != null) {					
 					if (gateTile.getStargateState().initiating() || (force && gateTile.getStargateState().engaged())) {
-						gateTile.attemptClose();
+						gateTile.attemptClose(StargateClosedReasonEnum.COMMAND);
 						closed++;
 					}
 				}

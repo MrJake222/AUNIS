@@ -21,6 +21,7 @@ import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.StargateClassicSpinHelper;
+import mrjake.aunis.stargate.StargateClosedReasonEnum;
 import mrjake.aunis.stargate.StargateOpenResult;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolInterface;
@@ -716,7 +717,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		
 		if (stargateState.engaged()) {
 			if (getStargateState().initiating()) {
-				attemptClose();
+				attemptClose(StargateClosedReasonEnum.REQUESTED);
 				return new Object[] { "stargate_disengage" };
 			}
 			
