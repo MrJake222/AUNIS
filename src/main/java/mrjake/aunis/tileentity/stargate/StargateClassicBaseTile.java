@@ -188,7 +188,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		compound.setBoolean("isFinalActive", isFinalActive);
 		
 		compound.setBoolean("isSpinning", isSpinning);
-		compound.setBoolean("locking", locking);
 		compound.setLong("spinStartTime", spinStartTime);
 		compound.setInteger("currentRingSymbol", currentRingSymbol.getId());
 		compound.setInteger("targetRingSymbol", targetRingSymbol.getId());
@@ -209,7 +208,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		isFinalActive = compound.getBoolean("isFinalActive");
 		
 		isSpinning = compound.getBoolean("isSpinning");
-		locking = compound.getBoolean("locking");
 		spinStartTime = compound.getLong("spinStartTime");
 		currentRingSymbol = getSymbolType().valueOfSymbol(compound.getInteger("currentRingSymbol"));
 		targetRingSymbol = getSymbolType().valueOfSymbol(compound.getInteger("targetRingSymbol"));
@@ -415,7 +413,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	// Ring spinning
 	
 	protected boolean isSpinning;
-	protected boolean locking;
 	protected long spinStartTime;
 	protected SymbolInterface currentRingSymbol = getSymbolType().getTopSymbol();
 	protected SymbolInterface targetRingSymbol = getSymbolType().getTopSymbol();
@@ -426,7 +423,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		targetRingSymbol = targetSymbol;
 		
 		boolean moveOnly = targetRingSymbol == currentRingSymbol;
-		locking = (dialedAddress.size() == 7) || (dialedAddress.size() == 6 && targetRingSymbol.origin());
 		
 		if (moveOnly) {
 			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, 0));
@@ -456,7 +452,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			
 			ringSpinContext = context;
 			if (context != null)
-				sendSignal(context, "stargate_spin_start", new Object[] { dialedAddress.size(), locking, targetSymbol.getEnglishName() });
+				sendSignal(context, "stargate_spin_start", new Object[] { dialedAddress.size(), stargateWillLock(targetRingSymbol), targetSymbol.getEnglishName() });
 		}
 			
 		markDirty();

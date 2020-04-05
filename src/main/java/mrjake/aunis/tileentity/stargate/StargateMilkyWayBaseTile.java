@@ -426,7 +426,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				if (canAddSymbol(targetRingSymbol)) {
 					addSymbolToAddress(targetRingSymbol);
 					
-					if (locking) {
+					if (stargateWillLock(targetRingSymbol)) {
 						if (checkDialedAddress().ok()) {
 							addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_OPEN_SECOND, 8));
 						}
@@ -451,7 +451,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				break;
 				
 			case STARGATE_CHEVRON_LIGHT_UP:
-				if (locking)
+				if (stargateWillLock(targetRingSymbol))
 					sendRenderingUpdate(EnumGateAction.CHEVRON_ACTIVATE, 0, true);
 				else
 					sendRenderingUpdate(EnumGateAction.CHEVRON_ACTIVATE_BOTH, 0, false);
@@ -466,9 +466,9 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				playSoundEvent(StargateSoundEventEnum.CHEVRON_SHUT);
 				sendRenderingUpdate(EnumGateAction.CHEVRON_CLOSE, 0, false);
 				
-				if (locking) {
+				if (stargateWillLock(targetRingSymbol)) {
 					stargateState = EnumStargateState.IDLE;
-					sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), locking, targetRingSymbol.getEnglishName() });
+					sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), true, targetRingSymbol.getEnglishName() });
 				} else
 					addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_DIM, 6));
 				
@@ -483,7 +483,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				sendRenderingUpdate(EnumGateAction.CHEVRON_DIM, 0, false);
 				stargateState = EnumStargateState.IDLE;
 				
-				sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), locking, targetRingSymbol.getEnglishName() });
+				sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), false, targetRingSymbol.getEnglishName() });
 				
 				break;
 				
