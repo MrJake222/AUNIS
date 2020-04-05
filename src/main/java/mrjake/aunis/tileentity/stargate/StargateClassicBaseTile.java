@@ -426,7 +426,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		targetRingSymbol = targetSymbol;
 		
 		boolean moveOnly = targetRingSymbol == currentRingSymbol;
-		locking = (dialedAddress.size() == 7) || (dialedAddress.size() == 6 && targetRingSymbol.origin());
+		locking = (dialedAddress.size() == 7 && targetRingSymbol.origin()) || dialedAddress.size() == 8 && targetRingSymbol.origin()) || (dialedAddress.size() == 6 && targetRingSymbol.origin());
 		
 		if (moveOnly) {
 			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, 0));
