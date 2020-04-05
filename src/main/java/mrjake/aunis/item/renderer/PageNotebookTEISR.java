@@ -24,10 +24,10 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 		Minecraft.getMinecraft().getTextureManager().bindTexture(symbol.getIconResource());		
 		GL11.glBegin(GL11.GL_QUADS);
 		
-		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(0.04f + x, 0.79f - y, 0.01f);
-		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(0.04f + x + w, 0.79f - y, 0.01f);
-		GL11.glTexCoord2f(0, 0); GL11.glVertex3f(0.04f + x + w, 0.79f - y + h, 0.01f); // 0.2
-		GL11.glTexCoord2f(1, 0); GL11.glVertex3f(0.04f + x, 0.79f - y + h, 0.01f);
+		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(0.04f + x, 0.79f - y, 0.01f);
+		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(0.04f + x + w, 0.79f - y, 0.01f);
+		GL11.glTexCoord2f(1, 0); GL11.glVertex3f(0.04f + x + w, 0.79f - y + h, 0.01f); // 0.2
+		GL11.glTexCoord2f(0, 0); GL11.glVertex3f(0.04f + x, 0.79f - y + h, 0.01f);
 		
 	    GL11.glEnd();
 	    
@@ -37,10 +37,10 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 		x += symbol.getSymbolType() == SymbolTypeEnum.PEGASUS ?  0.008f : 0.01f;
 		y += symbol.getSymbolType() == SymbolTypeEnum.PEGASUS ?  0.008f : 0.01f;
 		
-		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(0.04f + x, 0.79f - y, 0.01f);
-		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(0.04f + x + w, 0.79f - y, 0.01f);
-		GL11.glTexCoord2f(0, 0); GL11.glVertex3f(0.04f + x + w, 0.79f - y + h, 0.01f); // 0.2
-		GL11.glTexCoord2f(1, 0); GL11.glVertex3f(0.04f + x, 0.79f - y + h, 0.01f);
+		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(0.04f + x, 0.79f - y, 0.01f);
+		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(0.04f + x + w, 0.79f - y, 0.01f);
+		GL11.glTexCoord2f(1, 0); GL11.glVertex3f(0.04f + x + w, 0.79f - y + h, 0.01f); // 0.2
+		GL11.glTexCoord2f(0, 0); GL11.glVertex3f(0.04f + x, 0.79f - y + h, 0.01f);
 		
 	    GL11.glEnd();
 	}
