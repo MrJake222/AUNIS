@@ -80,6 +80,12 @@ public class ItemRenderHelper {
 	public static void applyBobbing(float partialTicks) {
 		Minecraft mc = Minecraft.getMinecraft();
 		
+		if (!mc.gameSettings.viewBobbing)
+			return;
+		
+		if (mc.isGamePaused())
+			partialTicks = 0;
+		
         if (mc.getRenderViewEntity() instanceof EntityPlayer) {
             EntityPlayer entityplayer = (EntityPlayer)mc.getRenderViewEntity();
             float f = entityplayer.distanceWalkedModified - entityplayer.prevDistanceWalkedModified;

@@ -385,8 +385,11 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
 		
-		if (compound.hasKey("linkedGate"))
+		if (compound.hasKey("linkedGate")) {
 			linkedGate = BlockPos.fromLong(compound.getLong("linkedGate"));
+			if (linkedGate.equals(new BlockPos(0, 0, 0))) // 1.8 fix
+				linkedGate = null;
+		}
 		
 		itemStackHandler.deserializeNBT(compound.getCompoundTag("itemStackHandler"));
 		

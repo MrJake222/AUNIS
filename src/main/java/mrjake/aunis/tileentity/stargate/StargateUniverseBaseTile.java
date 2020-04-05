@@ -4,7 +4,6 @@ import java.util.List;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -97,7 +96,6 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 			NBTTagCompound taskData = new NBTTagCompound();
 			taskData.setInteger("symbolToDial", targetSymbol.getId());
 			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_DIAL_NEXT, 30, taskData));
-			Aunis.info("computer first");
 		}
 			
 		else
@@ -135,8 +133,8 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 				if (customData != null && customData.hasKey("symbolToDial"))
 					super.addSymbolToAddressManual(getSymbolType().valueOfSymbol(customData.getInteger("symbolToDial")), null);
 				else
-					addSymbolToAddressManual(addressPosition == maxSymbols ? getSymbolType().getOrigin() : addressToDial.get(addressPosition), null);
-				
+					addSymbolToAddressManual(addressPosition >= maxSymbols ? getSymbolType().getOrigin() : addressToDial.get(addressPosition), null);
+								
 				addressPosition++;
 				
 				break;

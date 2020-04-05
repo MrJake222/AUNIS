@@ -53,9 +53,9 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 		EnumHandSide handSide = mainhand ? EnumHandSide.RIGHT : EnumHandSide.LEFT;
 		
 		GlStateManager.pushMatrix();
-		GlStateManager.scale(20,20,20);
-				
-		ItemRenderHelper.applyBobbing(partialTicks);		
+		GlStateManager.scale(20,20,20);		
+		ItemRenderHelper.applyBobbing(partialTicks);
+		
 		ItemRenderHelper.renderArmFirstPersonSide(0, handSide, 0, null);
 	    GlStateManager.popMatrix();
 		

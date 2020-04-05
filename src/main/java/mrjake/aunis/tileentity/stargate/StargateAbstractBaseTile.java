@@ -274,9 +274,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		boolean areDimensionsEqual = world.provider.getDimension() == targetGatePos.dimensionID;
 		StargateAbstractBaseTile targetGateTile = targetGatePos.getTileEntity();
-		
-//		Aunis.info("FROM: " + world.provider.getDimensionType() + ", TO: " + targetGateTile.getWorld().provider.getDimensionType());
-		
+				
 		if ((world.provider.getDimensionType() == DimensionType.NETHER && targetGateTile.getWorld().provider.getDimensionType() == DimensionType.OVERWORLD) || 
 			(world.provider.getDimensionType() == DimensionType.OVERWORLD && targetGateTile.getWorld().provider.getDimensionType() == DimensionType.NETHER)) {
 			areDimensionsEqual = true;
@@ -288,9 +286,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		int additional = dialedAddress.size() - 7;
 		
 		if (additional > 0) {
-			Aunis.info("dialed subList: " + dialedAddress.getAdditional().subList(0, additional));
-			Aunis.info("target subList: " + targetGatePos.additionalSymbols.subList(0, additional));
-			
 			if (!dialedAddress.getAdditional().subList(0, additional).equals(targetGatePos.additionalSymbols.subList(0, additional)))
 				return false;
 		}
@@ -299,7 +294,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	public void attemptClose() {
-		targetGatePos.getTileEntity().closeGate();
+		if (targetGatePos != null)
+			targetGatePos.getTileEntity().closeGate();
+		
 		closeGate();
 	}
 	
@@ -395,15 +392,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		dialedAddress.addSymbol(symbol);
 		
-		if (stargateWillLock(symbol) && dialedAddress.validate()) {
-			StargatePos targetGatePos = network.getStargate(dialedAddress);
+		if (stargateWillLock(symbol) && checkDialedAddress().ok()) {
+			int size = dialedAddress.size();
+			if (size == 6) size++;
 			
-			if (canDial(targetGatePos) && hasEnergyToDial(targetGatePos)) {
-				int size = dialedAddress.size();
-				if (size == 6) size++;
-				
-				targetGatePos.getTileEntity().incomingWormhole(size);
-			}
+			network.getStargate(dialedAddress).getTileEntity().incomingWormhole(size);
 		}
 	}
 	
@@ -598,6 +591,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());		
 		
 		if (!world.isRemote) {
+			if (stargateState.engaged() && targetGatePos == null) {
+				Aunis.logger.error("A stargateState indicates the Gate should be open, but targetGatePos is null. This is a bug. Closing gate...");
+				attemptClose();
+			}
+			
 			// Event horizon teleportation			
 			if (stargateState.initiating()) {
 				eventHorizon.scheduleTeleportation(targetGatePos);

@@ -3,6 +3,7 @@ package mrjake.aunis.block.stargate;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
@@ -320,7 +321,8 @@ public abstract class StargateClassicMemberBlock extends Block {
 			return 	heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK) &&
 					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) &&
 					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_UNIVERSE_BASE_BLOCK) &&
-					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK);
+					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK) &&
+					heldItem != AunisItems.UNIVERSE_DIALER;
 		}
 	}
 	
