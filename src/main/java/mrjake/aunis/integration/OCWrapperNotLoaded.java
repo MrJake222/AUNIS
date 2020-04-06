@@ -3,6 +3,7 @@ package mrjake.aunis.integration;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Node;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
 public class OCWrapperNotLoaded implements OCWrapperInterface {
@@ -24,5 +25,14 @@ public class OCWrapperNotLoaded implements OCWrapperInterface {
 	}
 	
 	@Override
-	public void sendWirelessPacketPlayer(EntityPlayer player, String address, short port, Object[] data) {}
+	public void sendWirelessPacketPlayer(EntityPlayer player, ItemStack stack, String address, short port, Object[] data) {}
+	
+	@Override
+	public void joinWirelessNetwork(Object endpoint) {}
+	
+	@Override
+	public void leaveWirelessNetwork(Object endpoint) {}
+	
+	@Override
+	public void updateWirelessNetwork(Object endpoint) {}
 }

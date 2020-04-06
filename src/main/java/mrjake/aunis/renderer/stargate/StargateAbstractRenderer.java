@@ -51,10 +51,9 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 					for (AunisAxisAlignedBB b : te.getLocalInnerBlockBoxes())
 						b.render(x, y, z);
 				}
-				
-	            GlStateManager.disableRescaleNormal();
-				
+								
 	            applyTransformations(rendererState);
+	            GlStateManager.disableRescaleNormal();
 				applyLightMap(rendererState, partialTicks);
 				
 				renderGate(rendererState, partialTicks);

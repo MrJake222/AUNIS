@@ -9,12 +9,15 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
 
+import li.cil.oc.api.Network;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.Packet;
+import li.cil.oc.api.network.WirelessEndpoint;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisDamageSources;
 import mrjake.aunis.AunisProps;
@@ -84,8 +87,10 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
-public abstract class StargateAbstractBaseTile extends TileEntity implements StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment, PreparableInterface {
+@Optional.InterfaceList({
+	@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers"),
+	@Optional.Interface(iface = "li.cil.oc.api.network.WirelessEndpoint", modid = "opencomputers")})
+public abstract class StargateAbstractBaseTile extends TileEntity implements StateProviderInterface, ITickable, ICapabilityProvider, ScheduledTaskExecutorInterface, Environment, WirelessEndpoint, PreparableInterface {
 	
 	// ------------------------------------------------------------------------
 	// Stargate state
@@ -553,6 +558,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 			Aunis.ocWrapper.joinOrCreateNetwork(this);
+			Aunis.ocWrapper.joinWirelessNetwork(this);
 			
 			ForgeChunkManager.setForcedChunkLoadingCallback(Aunis.instance, chunkLoadingCallback);
 			chunkLoadingTicket = ForgeChunkManager.requestTicket(Aunis.instance, world, Type.NORMAL);
@@ -712,13 +718,15 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		if (node != null)
 			node.remove();
 		
-		super.onChunkUnload();
+		Aunis.ocWrapper.leaveWirelessNetwork(this);
 	}
 
 	@Override
 	public void invalidate() {
 		if (node != null)
 			node.remove();
+		
+		Aunis.ocWrapper.leaveWirelessNetwork(this);
 		
 		super.invalidate();
 	}
@@ -1328,6 +1336,39 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	// ------------------------------------------------------------------------
 	// OpenComputers
+	
+	// ------------------------------------------------------------
+	// Wireless Network
+	@Override
+	public int x() {
+		return pos.getX();
+	}
+	
+	@Override
+	public int y() {
+		return pos.getY();
+	}
+	
+	@Override
+	public int z() {
+		return pos.getZ();
+	}
+	
+	@Override
+	public World world() {
+		return world;
+	}
+	
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public void receivePacket(Packet packet, WirelessEndpoint sender) {
+//		Aunis.info("received packet: ttl="+packet.ttl());
+		
+		if (stargateState.engaged() && packet.ttl() > 0) {
+			Network.sendWirelessPacket(targetGatePos.getTileEntity(), 20, packet.hop());
+		}
+	}
+	
 	
 	// ------------------------------------------------------------
 	// Node-related work

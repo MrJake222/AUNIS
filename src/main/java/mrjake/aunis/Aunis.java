@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.Logger;
 
+import mrjake.aunis.capability.endpoint.ItemEndpointCapability;
 import mrjake.aunis.command.AunisCommands;
 import mrjake.aunis.datafixer.TileNamesFixer;
 import mrjake.aunis.fluid.AunisFluids;
@@ -84,6 +85,7 @@ public class Aunis {
     	GameRegistry.registerWorldGenerator(new AunisWorldGen(), 0);
     	ThermalIntegration.registerRecipes();
     	NetworkRegistry.INSTANCE.registerGuiHandler(instance, new AunisGuiHandler());
+    	ItemEndpointCapability.register();
     	
     	// ----------------------------------------------------------------------------------------------------------------
     	// OpenComputers
@@ -96,7 +98,7 @@ public class Aunis {
     	}
     	
     	catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-    		info("Exception loading OpenComputers wrapper");
+    		logger.error("Exception loading OpenComputers wrapper");
     		e.printStackTrace();
     	}
     	

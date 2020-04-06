@@ -18,10 +18,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.CLIENT)
-@EventBusSubscriber
+@EventBusSubscriber(value = Side.CLIENT)
 public class ChangeEvent {
 	
 	private static final KeyBinding MODE_SCROLL = new KeyBinding("config.aunis.universe_dialer.mode_scroll", Keyboard.KEY_LCONTROL, "Aunis");

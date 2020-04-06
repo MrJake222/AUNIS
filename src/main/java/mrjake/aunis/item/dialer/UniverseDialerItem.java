@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.capability.endpoint.ItemEndpointCapability;
+import mrjake.aunis.capability.endpoint.ItemEndpointInterface;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.renderer.UniverseDialerBakedModel;
 import mrjake.aunis.stargate.StargateClosedReasonEnum;
@@ -34,6 +36,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.IRegistry;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.Constants.NBT;
 
 public class UniverseDialerItem extends Item {
@@ -56,6 +59,11 @@ public class UniverseDialerItem extends Item {
 		compound.setTag("saved", new NBTTagList());
 		
 		return compound;
+	}
+	
+	@Override
+	public ICapabilityProvider initCapabilities(ItemStack stack, NBTTagCompound nbt) {
+		return new UniverseDialerCapabilityProvider();
 	}
 	
 	public void registerCustomModel(IRegistry<ModelResourceLocation, IBakedModel> registry) {
@@ -84,85 +92,99 @@ public class UniverseDialerItem extends Item {
 		if (!stack.hasTagCompound())
 			stack.setTagCompound(initNbt());
 		
-		if (world.getTotalWorldTime() % 20 == 0 && isSelected && !world.isRemote) {
+		if (!world.isRemote) {
 			NBTTagCompound compound = stack.getTagCompound();
-			BlockPos pos = entity.getPosition();
 			
-			int reachSquared = AunisConfig.stargateConfig.universeDialerReach * AunisConfig.stargateConfig.universeDialerReach * 2;
-			UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
-			
-			if (mode.linkable) {
-				if (compound.hasKey(mode.tagPosName)) {
-					BlockPos tilePos = BlockPos.fromLong(compound.getLong(mode.tagPosName));
-					
-					if (!mode.matcher.apply(world.getBlockState(tilePos)) || tilePos.distanceSq(pos) > reachSquared) {
-						compound.removeTag(mode.tagPosName);
-					}
-				}
+			if (world.getTotalWorldTime() % 20 == 0 && isSelected) {
+				BlockPos pos = entity.getPosition();
 				
-				else {
-					boolean found = false;
-					
-					for (BlockPos targetPos : BlockPos.getAllInBoxMutable(pos.add(-10, -10, -10), pos.add(10, 10, 10))) {
-						if (mode.matcher.apply(world.getBlockState(targetPos))) {
-							switch (mode) {
-								case MEMORY:
-								case NEARBY:
-									NBTTagList nearbyList = new NBTTagList();
-									int squaredGate = AunisConfig.stargateConfig.universeGateNearbyReach * AunisConfig.stargateConfig.universeGateNearbyReach;
-									
-									for (Map.Entry<StargateAddress, StargatePos> entry : StargateNetwork.get(world).getMap().get(SymbolTypeEnum.UNIVERSE).entrySet()) {
-										StargatePos stargatePos = entry.getValue();
-										
-										if (stargatePos.dimensionID != world.provider.getDimension())
-											continue;
-										
-										if (stargatePos.gatePos.distanceSq(targetPos) > squaredGate)
-											continue;
-										
-										if (stargatePos.gatePos.equals(targetPos))
-											continue;
-										
-										StargateAbstractBaseTile gateTile = stargatePos.getTileEntity();
-										
-										if (!gateTile.isMerged())
-											continue;
-										
-										if (gateTile instanceof StargateOrlinBaseTile)
-											continue;
-										
-										nearbyList.appendTag(entry.getKey().serializeNBT());
-									}
-									
-									compound.setTag(UniverseDialerMode.NEARBY.tagListName, nearbyList);
-									compound.setLong(mode.tagPosName, targetPos.toLong());
-									found = true;
-									break;
-									
-								case RINGS:
-									TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(targetPos);
-									NBTTagList ringsList = new NBTTagList();
-
-									for (TransportRings rings : ringsTile.ringsMap.values()) {
-										ringsList.appendTag(rings.serializeNBT());
-									}
-									
-									compound.setTag(mode.tagListName, ringsList);
-									compound.setLong(mode.tagPosName, targetPos.toLong());
-									found = true;
-									break;
-									
-								default:
-									break;
-							}
-						}
+				int reachSquared = AunisConfig.stargateConfig.universeDialerReach * AunisConfig.stargateConfig.universeDialerReach * 2;
+				UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
+				
+				if (mode.linkable) {
+					if (compound.hasKey(mode.tagPosName)) {
+						BlockPos tilePos = BlockPos.fromLong(compound.getLong(mode.tagPosName));
 						
-						if (found)
-							break;
+						if (!mode.matcher.apply(world.getBlockState(tilePos)) || tilePos.distanceSq(pos) > reachSquared) {
+							compound.removeTag(mode.tagPosName);
+						}
+					}
+					
+					else {
+						boolean found = false;
+						
+						for (BlockPos targetPos : BlockPos.getAllInBoxMutable(pos.add(-10, -10, -10), pos.add(10, 10, 10))) {
+							if (mode.matcher.apply(world.getBlockState(targetPos))) {
+								switch (mode) {
+									case MEMORY:
+									case NEARBY:
+										NBTTagList nearbyList = new NBTTagList();
+										int squaredGate = AunisConfig.stargateConfig.universeGateNearbyReach * AunisConfig.stargateConfig.universeGateNearbyReach;
+										
+										for (Map.Entry<StargateAddress, StargatePos> entry : StargateNetwork.get(world).getMap().get(SymbolTypeEnum.UNIVERSE).entrySet()) {
+											StargatePos stargatePos = entry.getValue();
+											
+											if (stargatePos.dimensionID != world.provider.getDimension())
+												continue;
+											
+											if (stargatePos.gatePos.distanceSq(targetPos) > squaredGate)
+												continue;
+											
+											if (stargatePos.gatePos.equals(targetPos))
+												continue;
+											
+											StargateAbstractBaseTile gateTile = stargatePos.getTileEntity();
+											
+											if (!gateTile.isMerged())
+												continue;
+											
+											if (gateTile instanceof StargateOrlinBaseTile)
+												continue;
+											
+											nearbyList.appendTag(entry.getKey().serializeNBT());
+										}
+										
+										compound.setTag(UniverseDialerMode.NEARBY.tagListName, nearbyList);
+										compound.setLong(mode.tagPosName, targetPos.toLong());
+										found = true;
+										break;
+										
+									case RINGS:
+										TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(targetPos);
+										NBTTagList ringsList = new NBTTagList();
+	
+										for (TransportRings rings : ringsTile.ringsMap.values()) {
+											ringsList.appendTag(rings.serializeNBT());
+										}
+										
+										compound.setTag(mode.tagListName, ringsList);
+										compound.setLong(mode.tagPosName, targetPos.toLong());
+										found = true;
+										break;
+										
+									default:
+										break;
+								}
+							}
+							
+							if (found)
+								break;
+						}
 					}
 				}
 			}
+		
+			// Server side
+			ItemEndpointInterface endpointStack = stack.getCapability(ItemEndpointCapability.ENDPOINT_CAPABILITY, null);
+			endpointStack.checkAndUpdateEndpoint(world.getTotalWorldTime());
 		}
+	}
+	
+	@Override
+	public boolean onDroppedByPlayer(ItemStack stack, EntityPlayer player) {		
+		stack.getCapability(ItemEndpointCapability.ENDPOINT_CAPABILITY, null).removeEndpoint();
+		
+		return super.onDroppedByPlayer(stack, player);
 	}
 	
 	@Override
@@ -217,7 +239,7 @@ public class UniverseDialerItem extends Item {
 					
 				case OC:
 					UniverseDialerOCMessage message = new UniverseDialerOCMessage(selectedCompound);					
-					Aunis.ocWrapper.sendWirelessPacketPlayer(player, message.address, message.port, message.getData());
+					Aunis.ocWrapper.sendWirelessPacketPlayer(player, player.getHeldItem(hand), message.address, message.port, message.getData());
 					break;
 			}
 		}
