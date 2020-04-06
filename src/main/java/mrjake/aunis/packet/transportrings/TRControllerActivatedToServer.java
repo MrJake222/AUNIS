@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.SoundEventEnum;
+import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -55,7 +56,7 @@ public class TRControllerActivatedToServer extends PositionedPacket {
 				if (ringsTile != null) {
 					AunisSoundHelper.playSoundEvent(world, message.pos, SoundEventEnum.RINGS_CONTROLLER_BUTTON);
 					
-					ringsTile.attemptTransportTo(player, message.address);
+					ringsTile.attemptTransportTo(message.address, EnumScheduledTask.RINGS_START_ANIMATION.waitTicks).sendMessageIfFailed(player);
 				}
 				
 				else

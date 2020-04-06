@@ -24,7 +24,6 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -234,7 +233,8 @@ public class UniverseDialerItem extends Item {
 					
 				case RINGS:
 					TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(linkedPos);
-					ringsTile.attemptTransportTo((EntityPlayerMP) player, new TransportRings(selectedCompound).getAddress());
+					ringsTile.attemptTransportTo(new TransportRings(selectedCompound).getAddress(), 0).sendMessageIfFailed(player);
+						
 					break;
 					
 				case OC:

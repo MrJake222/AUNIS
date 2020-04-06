@@ -6,6 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
@@ -29,6 +35,8 @@ import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.tesr.RendererProviderInterface;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
+import mrjake.aunis.transportrings.ParamsSetResult;
+import mrjake.aunis.transportrings.TransportResult;
 import mrjake.aunis.transportrings.TransportRings;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.ILinkable;
@@ -36,7 +44,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -44,13 +51,14 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class TransportRingsTile extends TileEntity implements ITickable, RendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable {
+@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
+public class TransportRingsTile extends TileEntity implements ITickable, RendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable, Environment {
 	
 	// ---------------------------------------------------------------------------------
 	// Ticking and loading
@@ -79,6 +87,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		if (!world.isRemote) {
 			setBarrierBlocks(false, false);
 			
+			Aunis.ocWrapper.joinOrCreateNetwork(this);
 			globalTeleportBox = LOCAL_TELEPORT_BOX.offset(pos);
 		}
 		
@@ -152,6 +161,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				if (targetRingsTile != null)
 					targetRingsTile.setBusy(false);
 				
+				sendSignal(ocContext, "transportrings_teleport_finished", initiating);
+				
 				break;
 				
 			default:
@@ -164,6 +175,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	// Teleportation
 	private BlockPos targetRingsPos = new BlockPos(0, 0, 0);
 	private List<Entity> excludedEntities = new ArrayList<>();
+	private Object ocContext;
+	private boolean initiating;
 	
 	/**
 	 * True if there is an active transport.
@@ -178,11 +191,13 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		this.busy = busy;
 	}
 	
-	public List<Entity> startAnimationAndTeleport(BlockPos targetRingsPos, List<Entity> excludedEntities) {
+	public List<Entity> startAnimationAndTeleport(BlockPos targetRingsPos, List<Entity> excludedEntities, int waitTime, boolean initiating) {
 		this.targetRingsPos = targetRingsPos;
 		this.excludedEntities = excludedEntities;
 		
-		addTask(new ScheduledTask(EnumScheduledTask.RINGS_START_ANIMATION));
+		addTask(new ScheduledTask(EnumScheduledTask.RINGS_START_ANIMATION, waitTime));
+		sendSignal(ocContext, "transportrings_teleport_start", initiating);
+		this.initiating = initiating;
 		
 		return world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
 	}
@@ -194,31 +209,21 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				
 		TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RINGS_START_ANIMATION, new TransportRingsStartAnimationRequest(rendererState.animationStart)), point);
-		
-		AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.RINGS_TRANSPORT);
-		AunisSoundHelper.playSoundEvent(world, targetRingsPos, SoundEventEnum.RINGS_TRANSPORT);
-		
-		for (EntityPlayerMP player : world.getEntitiesWithinAABB(EntityPlayerMP.class, globalTeleportBox)) {
-			AunisSoundHelper.playSoundToPlayer(player, SoundEventEnum.RINGS_TRANSPORT, targetRingsPos);
-		}
 	}
 
 	/**
 	 * Checks if Rings are linked to Rings at given address.
 	 * If yes, it starts teleportation.
 	 * 
-	 * @param player Initiating player
 	 * @param address Target rings address
 	 */
-	public void attemptTransportTo(EntityPlayerMP player, int address) {
+	public TransportResult attemptTransportTo(int address, int waitTime) {
 		if (checkIfObstructed()) {
-			player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.obstructed"), true);
-			return;
+			return TransportResult.OBSTRUCTED;
 		}
 		
 		if (isBusy()) {
-			player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.busy"), true);
-			return;
+			return TransportResult.BUSY;
 		}
 		
 		TransportRings rings = ringsMap.get(address);
@@ -229,25 +234,25 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			TransportRingsTile targetRingsTile = (TransportRingsTile) world.getTileEntity(targetRingsPos);
 			
 			if (targetRingsTile.checkIfObstructed()) {
-				player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.obstructed_target"), true);	
-				return;
+				return TransportResult.OBSTRUCTED_TARGET;
 			}
 			
 			if (targetRingsTile.isBusy()) {
-				player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.busy_target"), true);
-				return;
+				return TransportResult.BUSY_TARGET;
 			}
 			
 			this.setBusy(true);
 			targetRingsTile.setBusy(true);
 			
 			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
-			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite);
-			startAnimationAndTeleport(targetRingsPos, excludedEntities);
+			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite, waitTime, false);
+			startAnimationAndTeleport(targetRingsPos, excludedEntities, waitTime, true);
+			
+			return TransportResult.OK;
 		}
 		
 		else {
-			player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.non_existing_address"), true);
+			return TransportResult.NO_SUCH_ADDRESS;
 		}
 	}
 	
@@ -382,7 +387,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		}
 	}
 	
-	public void setRingsParams(EntityPlayer player, int address, String name) {
+	public ParamsSetResult setRingsParams(int address, String name) {
 		int x = pos.getX();
 		int z = pos.getZ();
 
@@ -400,10 +405,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				ringsTilesInRange.add(newRingsTile);
 
 				int newRingsAddress = newRingsTile.getClonedRings(pos).getAddress();
-				if (newRingsAddress == address && newRingsAddress != -1) {
-					player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.duplicate_address"), true);
-					
-					return;
+				if (newRingsAddress == address && newRingsAddress != -1) {					
+					return ParamsSetResult.DUPLICATE_ADDRESS;
 				}
 			}
 		}
@@ -419,11 +422,17 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		}
 		
 		markDirty();
+		return ParamsSetResult.OK;
 	}
 	
 	
 	// ---------------------------------------------------------------------------------
 	// NBT data
+	
+	@Override
+	protected void setWorldCreate(World worldIn) {
+		setWorld(worldIn);
+	}
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
@@ -454,6 +463,15 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		
 		compound.setLong("targetRingsPos", targetRingsPos.toLong());
 		compound.setBoolean("busy", isBusy());
+		
+		if (node != null) {
+			NBTTagCompound nodeCompound = new NBTTagCompound();
+			node.save(nodeCompound);
+			
+			compound.setTag("node", nodeCompound);
+		}
+		
+		compound.setBoolean("initiating", initiating);
 		
 		return super.writeToNBT(compound);
 	}
@@ -501,7 +519,11 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			}
 		}
 		
+		if (node != null && compound.hasKey("node"))
+			node.load(compound.getCompoundTag("node"));
+		
 		setBusy(compound.getBoolean("busy"));
+		initiating = compound.getBoolean("initiating");
 		
 		super.readFromNBT(compound);
 	}
@@ -553,6 +575,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				break;
 		
 			case RINGS_START_ANIMATION:
+				AunisSoundHelper.playSoundEventClientSide(world, pos, SoundEventEnum.RINGS_TRANSPORT);
 				renderer.animationStart(((TransportRingsStartAnimationRequest) state).animationStart);
 				break;
 		
@@ -587,5 +610,153 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
 		return new AxisAlignedBB(pos.add(-4, 0, -4), pos.add(4, 7, 4));
+	}
+	
+	
+	// ------------------------------------------------------------------------
+	// OpenComputers
+	
+	@Override
+	public void onChunkUnload() {
+		if (node != null)
+			node.remove();
+	}
+
+	@Override
+	public void invalidate() {
+		if (node != null)
+			node.remove();
+				
+		super.invalidate();
+	}
+	
+	// ------------------------------------------------------------
+	// Node-related work
+	private Node node = Aunis.ocWrapper.createNode(this, "transportrings");
+	
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public Node node() {
+		return node;
+	}
+
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public void onConnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public void onDisconnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public void onMessage(Message message) {}
+	
+	public void sendSignal(Object context, String name, Object... params) {
+		Aunis.ocWrapper.sendSignalToReachable(node, (Context) context, name, params);
+	}
+	
+	// ------------------------------------------------------------
+	// Methods
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] isInGrid(Context context, Arguments args) {
+		return new Object[] { rings.isInGrid() };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getAddress(Context context, Arguments args) {
+		if (!rings.isInGrid())
+			return new Object[] { "NOT_IN_GRID", "Use setAddressAndName" };
+		
+		return new Object[] { rings.getAddress() };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getName(Context context, Arguments args) {
+		if (!rings.isInGrid())
+			return new Object[] { "NOT_IN_GRID", "Use setAddressAndName" };
+		
+		return new Object[] { rings.getName() };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] setAddress(Context context, Arguments args) {
+		if (!rings.isInGrid())
+			return new Object[] { "NOT_IN_GRID", "Use setAddressAndName" };
+		
+		int address = args.checkInteger(0);
+		
+		if (address < 1 || address > 6)
+			throw new IllegalArgumentException("bad argument #1 (address out of range, allowed <1..6>)");
+				
+		return new Object[] { setRingsParams(address, rings.getName()) };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] setName(Context context, Arguments args) {
+		if (!rings.isInGrid())
+			return new Object[] { "NOT_IN_GRID", "Use setAddressAndName" };
+		
+		String name = args.checkString(0);
+		setRingsParams(rings.getAddress(), name);
+		
+		return new Object[] {};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] setAddressAndName(Context context, Arguments args) {
+		int address = args.checkInteger(0);
+		String name = args.checkString(1);
+		
+		if (address < 1 || address > 6)
+			throw new IllegalArgumentException("bad argument #1 (address out of range, allowed <1..6>)");
+				
+		return new Object[] { setRingsParams(address, name) };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getAvailableRings(Context context, Arguments args) {
+		if (!rings.isInGrid())
+			return new Object[] { "NOT_IN_GRID", "Use setAddressAndName" };
+		
+		Map<Integer, String> values = new HashMap<>(ringsMap.size());
+		
+		for (Map.Entry<Integer, TransportRings> rings : ringsMap.entrySet())
+			values.put(rings.getKey(), rings.getValue().getName());
+		
+		return new Object[] { values };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getAvailableRingsAddresses(Context context, Arguments args) {
+		if (!rings.isInGrid())
+			return new Object[] { "NOT_IN_GRID", "Use setAddressAndName" };
+		
+		return new Object[] { ringsMap.keySet() };
+	}
+	
+
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] attemptTransportTo(Context context, Arguments args) {
+		if (!rings.isInGrid())
+			return new Object[] { "NOT_IN_GRID", "Use setAddressAndName" };
+		
+		int address = args.checkInteger(0);
+
+		if (address < 1 || address > 6)
+			throw new IllegalArgumentException("bad argument #1 (address out of range, allowed <1..6>)");
+		
+		ocContext = context;
+		
+		return new Object[] { attemptTransportTo(address, 0) };
 	}
 }
