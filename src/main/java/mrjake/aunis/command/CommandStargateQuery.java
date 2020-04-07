@@ -64,18 +64,19 @@ public class CommandStargateQuery extends CommandBase {
 		}
 		
 		catch (NumberFormatException e) {
-			throw new WrongUsageException("Number expected");
+			throw new WrongUsageException("commands.sgquery.number_expected");
 		}
 		
 		catch (IllegalArgumentException e) {
-			throw new WrongUsageException("No such map");
+			throw new WrongUsageException("commands.sgquery.no_map");
 		}
 		
-		String infoString = " [dim=" + (checkDim ? dimId : "any") + ", ";
+		String infoString = "[dim=" + (checkDim ? dimId : "any") + ", ";
 		infoString += "map=" + (symbolType != null ? symbolType.toString() : "no") + ", ";
 		infoString += "id=" + (idCheck != -1 ? idCheck : "any") + ", ";
 		infoString += "box=" + (queryBox != null ? queryBox.toString() : "any") + "]:";
-		notifyCommandListener(sender, this, TextFormatting.AQUA + "Stargates" + infoString);
+		
+		notifyCommandListener(sender, this, "commands.sgquery.stargates", TextFormatting.AQUA + infoString);
 		
 		StargateNetwork network = StargateNetwork.get(sender.getEntityWorld());
 		Map<StargateAddress, StargatePos> map = network.getMap().get(symbolType != null ? symbolType : SymbolTypeEnum.MILKYWAY);

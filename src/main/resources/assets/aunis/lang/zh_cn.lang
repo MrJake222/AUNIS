@@ -6,6 +6,9 @@ item.aunis.dialer_fast.name=快速拨号程序（调试）
 
 item.aunis.crystal_glyph_dhd.name=DHD升级水晶
 item.aunis.crystal_glyph_stargate.name=星门升级水晶
+item.aunis.crystal_glyph_milkyway.name=银河系星门升级水晶
+item.aunis.crystal_glyph_pegasus.name=飞马系星门升级水晶
+item.aunis.crystal_glyph_universe.name=宇宙星门升级水晶
 
 tile.aunis.naquadah_ore.name=Naquadah矿石
 tile.aunis.naquadah_block.name=Naquadah方块
@@ -14,13 +17,18 @@ item.aunis.naquadah_alloy.name=Naquadah合金锭
 
 tile.aunis.invisible_block.name=你看不到我这个方块
 
-tile.aunis.stargate_milkyway_base_block.name=星门基础方块
-tile.aunis.stargate_milkyway_ring_block.name=星门环方块
-tile.aunis.stargate_milkyway_chevron_block.name=星门标记方块
+tile.aunis.stargate_milkyway_base_block.name=银河系星门基础方块
+tile.aunis.stargate_milkyway_ring_block.name=银河系星门环方块
+tile.aunis.stargate_milkyway_chevron_block.name=银河系星门标记方块
 tile.aunis.dhd_block.name=拨号回家装置(DHD)
+tile.aunis.capacitor_block.name=电容储存器
 
 tile.aunis.stargate_orlin_base_block.name=人造迷你星门基础方块
 tile.aunis.stargate_orlin_member_block.name=人造迷你星门环方块
+
+tile.aunis.stargate_universe_base_block.name=宇宙星门基础方块
+tile.aunis.stargate_universe_chevron_block.name=宇宙星门标记方块
+tile.aunis.stargate_universe_ring_block.name=宇宙星门环方块
 
 tile.aunis.crystal_infuser_block.name=水晶注入器
 
@@ -85,7 +93,13 @@ tile.aunis.transportrings_block.rings_name=传送环名称
 tile.aunis.transportrings_block.rings_save=保存传送环
 
 commands.sgcloseall.usage=/sgcloseall ["维度名", 维度ID or 空]
-
+commands.sgsetaddress.notstargate=目标方块不是一个星门基础方块
+commands.sgsetaddress.noaddressspace=没有给出地址类型
+commands.sgsetaddress.wrongaddressspace=输入的地址类型错误！ 可能的值为：
+commands.sgsetaddress.wrongaddress=星门地址应以空格分隔，包括7个符号(由英文字母和数字构成)
+commands.sgsetaddress.wrongsymbol=错误的 %s. 符号
+commands.sgsetaddress.exists=具有指定地址的星门已经存在
+commands.sgsetaddress.success=将星际之门的地址设置为 %s to %s
 death.attack.eventHorizon=%s 被虫洞视界打成分子级别，湮灭在了空气中
 
  
@@ -129,3 +143,125 @@ glyph.aunis.lynx=猞猁座
 glyph.aunis.orion=猎户座
 glyph.aunis.piscis_austrinus=南鱼座
 glyph.aunis.bright_red_button=明亮的红色按钮
+
+glyph.aunis.pegasus.acjesis=Acjesis
+glyph.aunis.pegasus.lenchan=Lenchan
+glyph.aunis.pegasus.alura=Alura
+glyph.aunis.pegasus.ca_po=Ca Po
+glyph.aunis.pegasus.laylox=Laylox
+glyph.aunis.pegasus.ecrumig=Ecrumig
+glyph.aunis.pegasus.avoniv=Avoniv
+glyph.aunis.pegasus.bydo=Bydo
+glyph.aunis.pegasus.aaxel=Aaxel
+glyph.aunis.pegasus.aldeni=Aldeni
+glyph.aunis.pegasus.setas=Setas
+glyph.aunis.pegasus.arami=Arami
+glyph.aunis.pegasus.danami=Danami
+glyph.aunis.pegasus.poco_re=Poco Re
+glyph.aunis.pegasus.robandus=Robandus
+glyph.aunis.pegasus.recktic=Recktic
+glyph.aunis.pegasus.zamilloz=Zamilloz
+glyph.aunis.pegasus.subido=Subido
+glyph.aunis.pegasus.dawnre=Dawnre
+glyph.aunis.pegasus.salma=Salma
+glyph.aunis.pegasus.hamlinto=Hamlinto
+glyph.aunis.pegasus.elenami=Elenami
+glyph.aunis.pegasus.tahnan=Tahnan
+glyph.aunis.pegasus.zeo=Zeo
+glyph.aunis.pegasus.roehi=Roehi
+glyph.aunis.pegasus.once_el=Once El
+glyph.aunis.pegasus.baselai=Baselai
+glyph.aunis.pegasus.sandovi=Sandovi
+glyph.aunis.pegasus.illume=Illume
+glyph.aunis.pegasus.amiwill=Amiwill
+glyph.aunis.pegasus.sibbron=Sibbron
+glyph.aunis.pegasus.gilltin=Gilltin
+glyph.aunis.pegasus.abrin=Abrin
+glyph.aunis.pegasus.ramnon=Ramnon
+glyph.aunis.pegasus.olavii=Olavii
+glyph.aunis.pegasus.hacemill=Hacemill
+
+glyph.aunis.universe.g1=Glyph 1
+glyph.aunis.universe.g2=Glyph 2
+glyph.aunis.universe.g3=Glyph 3
+glyph.aunis.universe.g4=Glyph 4
+glyph.aunis.universe.g5=Glyph 5
+glyph.aunis.universe.g6=Glyph 6
+glyph.aunis.universe.g7=Glyph 7
+glyph.aunis.universe.g8=Glyph 8
+glyph.aunis.universe.g9=Glyph 9
+glyph.aunis.universe.g10=Glyph 10
+glyph.aunis.universe.g11=Glyph 11
+glyph.aunis.universe.g12=Glyph 12
+glyph.aunis.universe.g13=Glyph 13
+glyph.aunis.universe.g14=Glyph 14
+glyph.aunis.universe.g15=Glyph 15
+glyph.aunis.universe.g16=Glyph 16
+glyph.aunis.universe.g17=Glyph 17
+glyph.aunis.universe.g18=Glyph 18
+glyph.aunis.universe.g19=Glyph 19
+glyph.aunis.universe.g20=Glyph 20
+glyph.aunis.universe.g21=Glyph 21
+glyph.aunis.universe.g22=Glyph 22
+glyph.aunis.universe.g23=Glyph 23
+glyph.aunis.universe.g24=Glyph 24
+glyph.aunis.universe.g25=Glyph 25
+glyph.aunis.universe.g26=Glyph 26
+glyph.aunis.universe.g27=Glyph 27
+glyph.aunis.universe.g28=Glyph 28
+glyph.aunis.universe.g29=Glyph 29
+glyph.aunis.universe.g30=Glyph 30
+glyph.aunis.universe.g31=Glyph 31
+glyph.aunis.universe.g32=Glyph 32
+glyph.aunis.universe.g33=Glyph 33
+glyph.aunis.universe.g34=Glyph 34
+glyph.aunis.universe.g35=Glyph 35
+glyph.aunis.universe.g36=Glyph 36
+
+ 
+
+gui.upgrades=升级
+
+gui.dhd.fusion=冷聚变
+gui.dhd.crystalStatus控制水晶:
+gui.dhd.no_crystal=没有水晶
+gui.dhd.crystal_ok=水晶已放入
+gui.dhd.linkStatus=子空间链接状态:
+gui.dhd.linked=已连接
+gui.dhd.not_linked=未连接
+gui.dhd.reactorStatus=冷聚变反应堆:
+gui.dhd.running=拨号中
+gui.dhd.standby=保持中
+gui.dhd.no_fuel=没有燃料
+
+gui.stargate.milky_way_address=银河系星门地址
+gui.stargate.pegasus_address=飞马系星门地址
+gui.stargate.universe_address=宇宙星门地址
+gui.stargate.capacitors=电容器
+gui.stargate.energyBuffer=能量缓冲计术
+
+chat.orlins.energyStored=能源存储: %s / %s RF
+
+item.aunis.universe_dialer.name=宇宙星门拨号器
+item.aunis.universe_dialer.not_linked=未连接
+item.aunis.universe_dialer.gate_busy=星门正忙无法拨通
+item.aunis.universe_dialer.mode_scan=在附近
+item.aunis.universe_dialer.mode_saved=内存
+item.aunis.universe_dialer.mode_rings=环
+item.aunis.universe_dialer.mode_oc=开放式电脑
+item.aunis.universe_dialer.aborting=中止拨号
+item.aunis.universe_dialer.oc_name=条目名称
+item.aunis.universe_dialer.oc_address=开放式电脑调制解调器的地址
+item.aunis.universe_dialer.oc_port=调制解调器的端口
+item.aunis.universe_dialer.oc_data=开放式电脑参数(逗号分隔)
+item.aunis.universe_dialer.oc_save=保存
+item.aunis.universe_dialer.oc_port_invalid=无效的端口
+config.aunis.universe_dialer.mode_scroll=宇宙星门拨号器模式滚动
+config.aunis.universe_dialer.mode_up=宇宙星门拨号模式向上
+config.aunis.universe_dialer.mode_down=宇宙星门拨号模式向下
+config.aunis.universe_dialer.address_scroll=宇宙星门拨号器地址滚动
+config.aunis.universe_dialer.address_up=宇宙星门拨号器地址向上滚动
+config.aunis.universe_dialer.address_down=宇宙星门拨号器地址向下滚动
+config.aunis.universe_dialer.address_remove=宇宙星门拨号器删除地址
+config.aunis.universe_dialer.abort=宇宙星门拨号程序中止拨号
+config.aunis.universe_dialer.oc_program=宇宙星门拨号程序OC消息
