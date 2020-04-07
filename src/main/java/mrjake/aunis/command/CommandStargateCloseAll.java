@@ -16,6 +16,9 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class CommandStargateCloseAll extends CommandBase {
 	
@@ -28,88 +31,187 @@ public class CommandStargateCloseAll extends CommandBase {
 	public String getUsage(ICommandSender sender) {
 		return "/sgcloseall";
 	}
+	
+	@Override
+	public int getRequiredPermissionLevel() {
+		return 2;
+	}
+
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-		boolean limitWorld = false;
-		int worldId = 0;
+		AxisAlignedBB queryBox = null;
+		
+		if (args.length >= 1 && args[0].equals("help")) {
+			throw new WrongUsageException("commands.sgcloseall.usage");
+		}
+		
 		boolean force = false;
+		boolean checkDim = false;
+		int dimId = 0;
 		
-		if (args.length == 2) {
-			if (args[1].equals("force")) {
-				force = true;
-			}
-			
-			else {
-				notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
-			}
-		}
-		
-		if (args.length >= 1) {
-			if (args[0].equals("force")) {
-				force = true;
-			}
-			
-			else if (args[0].equals("world")) {
-				limitWorld = true;
-				worldId = sender.getEntityWorld().provider.getDimension();
+		try {
+			if (args.length >= 6) {
+				BlockPos pos = sender.getPosition();
+				int x1 = (int) parseCoordinate(pos.getX(), args[0], false).getResult();
+				int y1 = (int) parseCoordinate(pos.getY(), args[1], 0, 255, false).getResult();
+				int z1 = (int) parseCoordinate(pos.getZ(), args[2], false).getResult();
+				int x2 = (int) parseCoordinate(pos.getX(), args[3], false).getResult();
+				int y2 = (int) parseCoordinate(pos.getY(), args[4], 0, 255, false).getResult();
+				int z2 = (int) parseCoordinate(pos.getZ(), args[5], false).getResult();
 				
-				notifyCommandListener(sender, this, "Closing Stargates in current dimension[id="+worldId+"]");
+				BlockPos sPos = new BlockPos(x1, y1, z1);
+				BlockPos tPos = new BlockPos(x2, y2, z2);
+				
+				queryBox = new AxisAlignedBB(sPos, tPos);
+			
 			}
 			
-			else {
-				try {
-					worldId = Integer.parseInt(args[0]);
-					limitWorld = true;
+			for (int i=0; i<args.length; i++) {
+				if (args[i].startsWith("dim=")) {
+					checkDim = true;
+					String sub = args[i].substring(4);
 					
-					notifyCommandListener(sender, this, "Closing Stargates in dimension id="+worldId);
+					if (sub.equals("current"))
+						dimId = sender.getEntityWorld().provider.getDimension();
+					else
+						dimId = Integer.valueOf(sub);
+					
+					break;
 				}
 				
-				catch (NumberFormatException e) {
-					throw new WrongUsageException("commands.sgcloseall.usage", new Object[0]);
+				else if (args[i].startsWith("force=")) {
+					if (Boolean.valueOf(args[i].substring(6))) {
+						force = true;
+					}
 				}
 			}
+			
 		}
 		
-		if (args.length == 0) 		
-			notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
+		catch (NumberFormatException e) {
+			throw new WrongUsageException("commands.sgquery.number_expected");
+		}
+		
+		Aunis.info("force : " +force);
+		
+		notifyCommandListener(sender, this, "commands.sgcloseall.closing", dimId, (queryBox != null ? queryBox.toString() : "box=infinite"));
 		
 		StargateNetwork network = StargateNetwork.get(sender.getEntityWorld());
+		Map<StargateAddress, StargatePos> map = network.getMap().get(SymbolTypeEnum.MILKYWAY);
+		List<StargateAddress> toBeRemoved = new ArrayList<StargateAddress>();
 		
 		int closed = 0;
 		
-		List<StargateAddress> toBeRemoved = new ArrayList<StargateAddress>();
-		
-		for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
-			Map<StargateAddress, StargatePos> map = network.getMap().get(symbolType);
+		for (StargateAddress address : map.keySet()) {
+			StargatePos stargatePos = network.getStargate(address);
 			
-			for (StargateAddress address : map.keySet()) {
-				StargatePos stargatePos = network.getStargate(address);
-				
-				if (limitWorld && stargatePos.dimensionID != worldId)
-					continue;
-								
-				StargateAbstractBaseTile gateTile = stargatePos.getTileEntity();
-				
-				if (gateTile != null) {					
-					if (gateTile.getStargateState().initiating() || (force && gateTile.getStargateState().engaged())) {
-						gateTile.attemptClose(StargateClosedReasonEnum.COMMAND);
-						closed++;
-					}
+			if (checkDim && stargatePos.dimensionID != dimId)
+				continue;
+			
+			if (queryBox != null && !queryBox.contains(new Vec3d(stargatePos.gatePos)))
+				continue;
+							
+			StargateAbstractBaseTile gateTile = stargatePos.getTileEntity();
+			
+			if (gateTile != null) {					
+				if (gateTile.getStargateState().initiating() || (force && gateTile.getStargateState().engaged())) {
+					gateTile.attemptClose(StargateClosedReasonEnum.COMMAND);
+					closed++;
 				}
-				
-				else {
-					toBeRemoved.add(address);
-				}
+			}
+			
+			else {
+				toBeRemoved.add(address);
 			}
 		}
 		
 		for (StargateAddress address : toBeRemoved) {
 			network.removeStargate(address);
-			Aunis.info("Removing address " + address);
+			Aunis.logger.warn("Removing address " + address);
 		}
 		
-		notifyCommandListener(sender, this, "Closed " + closed + " gates.");
+		notifyCommandListener(sender, this, "commands.sgcloseall.closed", closed);
+		
+//		boolean limitWorld = false;
+//		int worldId = 0;
+//		boolean force = false;
+//		
+//		if (args.length == 2) {
+//			if (args[1].equals("force")) {
+//				force = true;
+//			}
+//			
+//			else {
+//				notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
+//			}
+//		}
+//		
+//		if (args.length >= 1) {
+//			if (args[0].equals("force")) {
+//				force = true;
+//			}
+//			
+//			else if (args[0].equals("world")) {
+//				limitWorld = true;
+//				worldId = sender.getEntityWorld().provider.getDimension();
+//				
+//				notifyCommandListener(sender, this, "Closing Stargates in current dimension[id="+worldId+"]");
+//			}
+//			
+//			else {
+//				try {
+//					worldId = Integer.parseInt(args[0]);
+//					limitWorld = true;
+//					
+//					notifyCommandListener(sender, this, "Closing Stargates in dimension id="+worldId);
+//				}
+//				
+//				catch (NumberFormatException e) {
+//					throw new WrongUsageException("commands.sgcloseall.usage", new Object[0]);
+//				}
+//			}
+//		}
+//		
+//		if (args.length == 0) 		
+//			notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
+//		
+//		StargateNetwork network = StargateNetwork.get(sender.getEntityWorld());
+//		
+//		int closed = 0;
+//		
+//		List<StargateAddress> toBeRemoved = new ArrayList<StargateAddress>();
+//		
+//		for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
+//			Map<StargateAddress, StargatePos> map = network.getMap().get(symbolType);
+//			
+//			for (StargateAddress address : map.keySet()) {
+//				StargatePos stargatePos = network.getStargate(address);
+//				
+//				if (limitWorld && stargatePos.dimensionID != worldId)
+//					continue;
+//								
+//				StargateAbstractBaseTile gateTile = stargatePos.getTileEntity();
+//				
+//				if (gateTile != null) {					
+//					if (gateTile.getStargateState().initiating() || (force && gateTile.getStargateState().engaged())) {
+//						gateTile.attemptClose(StargateClosedReasonEnum.COMMAND);
+//						closed++;
+//					}
+//				}
+//				
+//				else {
+//					toBeRemoved.add(address);
+//				}
+//			}
+//		}
+//		
+//		for (StargateAddress address : toBeRemoved) {
+//			network.removeStargate(address);
+//			Aunis.info("Removing address " + address);
+//		}
+//		
+//		notifyCommandListener(sender, this, "Closed " + closed + " gates.");
 	}
 
 }

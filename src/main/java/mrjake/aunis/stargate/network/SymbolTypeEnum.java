@@ -38,14 +38,14 @@ public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
 	
 	public SymbolInterface valueOfSymbol(int id) {
 		switch (this) {
-			case MILKYWAY:
-				return SymbolMilkyWayEnum.valueOf(id);
-				
-			case PEGASUS:
-				return SymbolPegasusEnum.valueOf(id);
-				
-			case UNIVERSE:
-				return SymbolUniverseEnum.valueOf(id);
+		case MILKYWAY:
+			return SymbolMilkyWayEnum.valueOf(id);
+			
+		case PEGASUS:
+			return SymbolPegasusEnum.valueOf(id);
+			
+		case UNIVERSE:
+			return SymbolUniverseEnum.valueOf(id);
 		}
 		
 		return null;

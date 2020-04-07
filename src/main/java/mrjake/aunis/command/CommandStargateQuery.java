@@ -33,14 +33,26 @@ public class CommandStargateQuery extends CommandBase {
 		AxisAlignedBB queryBox = null;
 		SymbolTypeEnum symbolType = null;
 		
+		if (args.length >= 1 && args[0].equals("help")) {
+			throw new WrongUsageException("commands.sgquery.usage");
+		}
+		
 		boolean checkDim = false;
 		int dimId = 0;
 		int idCheck = -1;
 		
 		try {
 			if (args.length >= 6) {
-				BlockPos sPos = new BlockPos(Integer.valueOf(args[0]), Integer.valueOf(args[1]), Integer.valueOf(args[2]));
-				BlockPos tPos = new BlockPos(Integer.valueOf(args[3]), Integer.valueOf(args[4]), Integer.valueOf(args[5]));
+				BlockPos pos = sender.getPosition();
+				int x1 = (int) parseCoordinate(pos.getX(), args[0], false).getResult();
+				int y1 = (int) parseCoordinate(pos.getY(), args[1], 0, 255, false).getResult();
+				int z1 = (int) parseCoordinate(pos.getZ(), args[2], false).getResult();
+				int x2 = (int) parseCoordinate(pos.getX(), args[3], false).getResult();
+				int y2 = (int) parseCoordinate(pos.getY(), args[4], 0, 255, false).getResult();
+				int z2 = (int) parseCoordinate(pos.getZ(), args[5], false).getResult();
+				
+				BlockPos sPos = new BlockPos(x1, y1, z1);
+				BlockPos tPos = new BlockPos(x2, y2, z2);
 				
 				queryBox = new AxisAlignedBB(sPos, tPos);
 			

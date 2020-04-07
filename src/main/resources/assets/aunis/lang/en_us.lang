@@ -90,17 +90,25 @@ tile.aunis.transportrings_block.rings_address=Address
 tile.aunis.transportrings_block.rings_name=Name
 tile.aunis.transportrings_block.rings_save=Save
 
+commands.sgquery.usage=/sgquery [(x y z) (x y z)] [dim=X] [map=Y] [id=Z]
 commands.sgquery.number_expected=Number expected
 commands.sgquery.no_map=No such map
 commands.sgquery.stargates=Stargates %s
-commands.sgcloseall.usage=/sgcloseall ["world", dimensionID, "force", empty] ["force" or empty]
+commands.sggivepage.usage=/sggivepage (player) (map=X) [biome=Y] (Symbol)x8
+commands.sggivepage.no_map=No map or wrong map given
+commands.sggivepage.give_page=Giving Page to %s
+commands.sgsetaddress.usage=/sgsetaddress (x y z) (map=X) (Symbol)x8
 commands.sgsetaddress.notstargate=Targeted block is not a Stargate Base
-commands.sgsetaddress.noaddressspace=No address type given
-commands.sgsetaddress.wrongaddressspace=Wrong address type given. Possible values:
+commands.sgsetaddress.noaddressspace=No map or wrong map given
 commands.sgsetaddress.wrongaddress=Address should be a space-separated list of 7 symbols (English names)
 commands.sgsetaddress.wrongsymbol=Wrong %s. symbol name
+commands.sgsetaddress.duplicatesymbol=Duplicate %s. symbol name
 commands.sgsetaddress.exists=Stargate with given address already exists
 commands.sgsetaddress.success=Set Stargate's address at %s to %s 
+commands.sgcloseall.usage=/sgcloseall [(x y z) (x y z)] [dim=X]
+commands.sgcloseall.closing=Closing Stargates in dim=%s, %s.
+commands.sgcloseall.closed=Closed %s gates.
+commands.sgcloseall.number_expected=Number or "current" expected as dimension ID
 
 death.attack.eventHorizon=%s was given a kawoosh cremation
 
