@@ -483,8 +483,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	/**
 	 * Called on the failed dialing.
 	 */
-	public void dialingFailed() {
-		sendSignal(null, "stargate_failed", new Object[] {});
+	public void dialingFailed(StargateOpenResult reason) {
+		sendSignal(null, "stargate_failed", new Object[] { reason.toString().toLowerCase() });
 		horizonFlashTask = null;
 		
 		addFailedTaskAndPlaySound();		

@@ -489,7 +489,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				
 			case STARGATE_CHEVRON_FAIL:
 				sendRenderingUpdate(EnumGateAction.CHEVRON_CLOSE, 0, false);
-				dialingFailed();
+				dialingFailed(checkDialedAddress());
 								
 				break;
 				

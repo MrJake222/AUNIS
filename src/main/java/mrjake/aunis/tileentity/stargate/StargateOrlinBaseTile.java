@@ -18,6 +18,7 @@ import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.StargateClosedReasonEnum;
+import mrjake.aunis.stargate.StargateOpenResult;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.stargate.network.StargateNetwork;
@@ -55,8 +56,8 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	}
 	
 	@Override
-	public void dialingFailed() {
-		super.dialingFailed();
+	public void dialingFailed(StargateOpenResult result) {
+		super.dialingFailed(result);
 		
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAILED_SOUND, 30));
 	}

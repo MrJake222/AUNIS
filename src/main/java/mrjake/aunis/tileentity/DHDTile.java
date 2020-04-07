@@ -137,13 +137,15 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 						}
 					}
 					
-					float percent = energyStorage.getEnergyStored() / (float)energyStorage.getMaxEnergyStored();
-					
-					if (percent < AunisConfig.dhdConfig.activationLevel)
-						reactorState = ReactorStateEnum.ONLINE;
-					
-					else if (percent == AunisConfig.dhdConfig.deactivationLevel)
-						reactorState = ReactorStateEnum.STANDBY;
+					if (reactorState == ReactorStateEnum.ONLINE || reactorState == ReactorStateEnum.STANDBY) {
+						float percent = energyStorage.getEnergyStored() / (float)energyStorage.getMaxEnergyStored();
+						
+						if (percent < AunisConfig.dhdConfig.activationLevel)
+							reactorState = ReactorStateEnum.ONLINE;
+						
+						else if (percent == AunisConfig.dhdConfig.deactivationLevel)
+							reactorState = ReactorStateEnum.STANDBY;
+					}
 				}
 				
 				// Not linked

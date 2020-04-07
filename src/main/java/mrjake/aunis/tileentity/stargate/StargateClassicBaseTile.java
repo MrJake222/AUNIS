@@ -697,7 +697,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			else {
 				stargateState = EnumStargateState.IDLE;
 				markDirty();
-				dialingFailed();
+				dialingFailed(gateState);
 				
 				sendSignal(null, "stargate_failed", new Object[] {});
 				return new Object[] {null, "stargate_failure_opening", "Stargate failed to open", gateState.toString()};

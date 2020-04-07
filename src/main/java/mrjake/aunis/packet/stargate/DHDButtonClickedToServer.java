@@ -82,7 +82,7 @@ public class DHDButtonClickedToServer extends PositionedPacket {
 						StargateOpenResult openResult = gateTile.attemptOpenDialed();
 						
 						if (!openResult.ok()) {
-							gateTile.dialingFailed();
+							gateTile.dialingFailed(openResult);
 							
 							if (openResult == StargateOpenResult.NOT_ENOUGH_POWER)
 								player.sendStatusMessage(new TextComponentTranslation("tile.aunis.stargatebase_block.not_enough_power"), true);

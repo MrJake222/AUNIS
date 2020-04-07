@@ -18,6 +18,7 @@ import mrjake.aunis.sound.StargateSoundEventEnum;
 import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
+import mrjake.aunis.stargate.StargateOpenResult;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.merging.StargateUniverseMergeHelper;
 import mrjake.aunis.stargate.network.StargateAddress;
@@ -156,19 +157,20 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 								addTask(new ScheduledTask(EnumScheduledTask.STARGATE_DIAL_NEXT, 30));
 							else {
 								stargateState = EnumStargateState.IDLE;
+								StargateOpenResult result = attemptOpenDialed();
 								
-								if (!attemptOpenDialed().ok()) {
-									dialingFailed();
+								if (!result.ok()) {
+									dialingFailed(result);
 								}
 							}
 						}
 					}
 					
 					else {
+						dialingFailed(abortDialing ? StargateOpenResult.ABORTED : StargateOpenResult.ADDRESS_MALFORMED);
+						
 						stargateState = EnumStargateState.IDLE;
 						abortDialing = false;
-						
-						dialingFailed();
 					}
 				}
 				
