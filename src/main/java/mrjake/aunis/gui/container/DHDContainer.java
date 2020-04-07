@@ -72,8 +72,13 @@ public class DHDContainer extends Container {
         else {
         	if (stack.getItem() == AunisItems.CRYSTAL_CONTROL_DHD) {
         		if (!slotCrystal.getHasStack()) {
-        			slotCrystal.putStack(stack.copy());
-        			stack.shrink(1);
+        			ItemStack stack1 = stack.copy();
+    				stack1.setCount(1);
+        			slotCrystal.putStack(stack1);
+        			
+    				stack.shrink(1);
+        			
+                	return ItemStack.EMPTY;
         		}
         	}
         	

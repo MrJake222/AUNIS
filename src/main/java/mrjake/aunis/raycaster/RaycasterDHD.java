@@ -94,7 +94,7 @@ public class RaycasterDHD extends Raycaster {
 	
 	private int button;
 	
-	public boolean onActivated(World world, BlockPos pos, EntityPlayer player, EnumHand hand) {
+	public boolean onActivated(World world, BlockPos pos, EntityPlayer player, EnumHand hand) {		
 		float rotation = world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
 		button = -1;
 		

@@ -68,7 +68,9 @@ public class StargateClassicMemberTile extends TileEntity implements StateProvid
 	
 	public void syncLightUp() {
 //		Aunis.info("Syncing light state for chevron");
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.LIGHT_STATE, getState(StateTypeEnum.LIGHT_STATE)), targetPoint);
+		if (targetPoint != null) {
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.LIGHT_STATE, getState(StateTypeEnum.LIGHT_STATE)), targetPoint);
+		}
 	}
 	
 	public void setLitUp(boolean isLitUp) {

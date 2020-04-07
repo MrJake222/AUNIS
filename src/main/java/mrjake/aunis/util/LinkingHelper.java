@@ -30,7 +30,7 @@ public class LinkingHelper {
 				
 				ILinkable linkedTile = (ILinkable) world.getTileEntity(target);
 									
-				if (!linkedTile.isLinked()) {
+				if (linkedTile.canLinkTo()) {
 					double distanceSq = startPos.distanceSq(target);
 					
 					if (distanceSq < closestDistance) {

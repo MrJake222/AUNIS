@@ -70,11 +70,23 @@ public class CapacitorItemBlock extends ItemBlock {
 	}
 	
 	@Override
+	public boolean getShareTag() {
+		return true;
+	}
+	
+	@Override
 	public NBTTagCompound getNBTShareTag(ItemStack stack) {
 		NBTTagCompound compound = new NBTTagCompound();
 		
 		compound.setInteger("energy", stack.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored());
 		
 		return compound;
+	}
+	
+	@Override
+	public void readNBTShareTag(ItemStack stack, NBTTagCompound compound) {
+		if (compound != null) {
+			((StargateAbstractEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null)).setEnergyStored(compound.getInteger("energy"));
+		}
 	}
 }

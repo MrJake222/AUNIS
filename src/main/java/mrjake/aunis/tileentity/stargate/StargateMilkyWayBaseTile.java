@@ -196,7 +196,6 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		return (DHDTile) world.getTileEntity(linkedDHD);
 	}
 	
-	@Override
 	public boolean isLinked() {
 		return linkedDHD != null;
 	}
@@ -207,6 +206,10 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		markDirty();
 	}
 	
+	@Override
+	public boolean canLinkTo() {
+		return isMerged() && !isLinked();
+	}
 	
 	// ------------------------------------------------------------------------
 	// NBT

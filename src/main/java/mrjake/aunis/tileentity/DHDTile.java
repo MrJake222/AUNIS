@@ -69,7 +69,6 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		markDirty();
 	}
 	
-	@Override
 	public boolean isLinked() {
 		return this.linkedGate != null;
 	}
@@ -81,6 +80,10 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		return (StargateAbstractBaseTile) world.getTileEntity(linkedGate);
 	}
 	
+	@Override
+	public boolean canLinkTo() {
+		return !isLinked();
+	}
 	
 	// ---------------------------------------------------------------------------------------------------
 	// Renderer state
@@ -120,22 +123,21 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			if (!itemStackHandler.getStackInSlot(0).isEmpty()) {
 				if (isLinked()) {
 					StargateAbstractBaseTile gateTile = getLinkedGate(world);
+					if (gateTile == null) {
+						setLinkedGate(null);
+						Aunis.logger.error("Gate didn't unlink properly, forcing...");
+						return;
+					}
+					
 					IEnergyStorage energyStorage = (IEnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
 					
-					if (reactorState == ReactorStateEnum.ONLINE) {						
-						// Has fuel
-						if (fluidHandler.drainInternal(1 * AunisConfig.dhdConfig.powerGenerationMultiplier, false) != null) {
-							fluidHandler.drainInternal(1 * AunisConfig.dhdConfig.powerGenerationMultiplier, true);
-							energyStorage.receiveEnergy(AunisConfig.dhdConfig.energyPerNaquadah * AunisConfig.dhdConfig.powerGenerationMultiplier, false);
-							
-							reactorState = ReactorStateEnum.ONLINE;
-						}
-						
-						// No fuel
-						else {
-							reactorState = ReactorStateEnum.NO_FUEL;
-						}
-					}
+					int amount = 1 * AunisConfig.dhdConfig.powerGenerationMultiplier;
+					FluidStack simulatedDrain = fluidHandler.drainInternal(amount, false);
+					
+					if (simulatedDrain != null && simulatedDrain.amount >= amount)
+						reactorState = ReactorStateEnum.ONLINE;
+					else
+						reactorState = ReactorStateEnum.NO_FUEL;
 					
 					if (reactorState == ReactorStateEnum.ONLINE || reactorState == ReactorStateEnum.STANDBY) {
 						float percent = energyStorage.getEnergyStored() / (float)energyStorage.getMaxEnergyStored();
@@ -143,8 +145,13 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 						if (percent < AunisConfig.dhdConfig.activationLevel)
 							reactorState = ReactorStateEnum.ONLINE;
 						
-						else if (percent == AunisConfig.dhdConfig.deactivationLevel)
+						else if (percent >= AunisConfig.dhdConfig.deactivationLevel)
 							reactorState = ReactorStateEnum.STANDBY;
+					}
+					
+					if (reactorState == ReactorStateEnum.ONLINE) {
+						fluidHandler.drainInternal(amount, true);
+						energyStorage.receiveEnergy(AunisConfig.dhdConfig.energyPerNaquadah * AunisConfig.dhdConfig.powerGenerationMultiplier, false);
 					}
 				}
 				

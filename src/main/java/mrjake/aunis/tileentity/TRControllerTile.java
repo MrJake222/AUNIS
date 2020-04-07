@@ -32,7 +32,6 @@ public class TRControllerTile extends TileEntity implements ILinkable, RendererP
 		return linkedRings;
 	}
 	
-	@Override
 	public boolean isLinked() {
 		return linkedRings != null;
 	}
@@ -41,6 +40,10 @@ public class TRControllerTile extends TileEntity implements ILinkable, RendererP
 		return (linkedRings != null ? ((TransportRingsTile) world.getTileEntity(linkedRings)) : null);
 	}
 	
+	@Override
+	public boolean canLinkTo() {
+		return !isLinked();
+	}
 	
 	// ------------------------------------------------------------------------
 	// NBT

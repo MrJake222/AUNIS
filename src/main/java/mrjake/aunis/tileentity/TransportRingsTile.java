@@ -322,7 +322,6 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		return linkedController;
 	}
 	
-	@Override
 	public boolean isLinked() {
 		return linkedController != null;
 	}
@@ -331,6 +330,10 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		return (linkedController != null ? ((TRControllerTile) world.getTileEntity(linkedController)) : null);
 	}
 	
+	@Override
+	public boolean canLinkTo() {
+		return !isLinked();
+	}
 	
 	// ---------------------------------------------------------------------------------
 	// Rings network
