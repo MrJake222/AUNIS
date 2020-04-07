@@ -73,15 +73,14 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 	@Override
 	protected boolean checkMemberBlock(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing, EnumMemberVariant variant) {
 		IBlockState state = blockAccess.getBlockState(pos);
-		
+				
 		return MEMBER_MATCHER.apply(state) &&
 				state.getValue(AunisProps.ORLIN_VARIANT) == facing &&
 				!((StargateOrlinMemberTile) blockAccess.getTileEntity(pos)).isBroken();
 	}
 
 	@Override
-	protected void updateMemberMergeStatus(World world, BlockPos checkPos, BlockPos basePos, EnumFacing baseFacing, boolean shouldBeMerged) {
-//		EnumFacing facing = world.getBlockState(basePos).getValue(AunisProps.FACING_HORIZONTAL);
+	protected void updateMemberMergeStatus(World world, BlockPos checkPos, BlockPos basePos, EnumFacing baseFacing, boolean shouldBeMerged) {		
 		EnumFacing variant = BLOCK_MAP.get(checkPos);
 		
 		checkPos = checkPos.rotate(FacingToRotation.get(baseFacing)).add(basePos);
@@ -109,7 +108,7 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 				memberState = memberState.withProperty(AunisProps.ORLIN_VARIANT, shouldBeMerged ? variant : baseFacing);			
 				world.setBlockState(checkPos, memberState.withProperty(AunisProps.RENDER_BLOCK, !shouldBeMerged));
 				
-				memberTile.setBasePos(basePos);
+				memberTile.setBasePos(shouldBeMerged ? basePos : null);
 			}
 		}
 	}

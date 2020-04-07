@@ -588,16 +588,13 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		return energyStorage;
 	}
 	
-	private int currentPowerTier;
+	private int currentPowerTier = 1;
 	
 	public int getPowerTier() {
 		return currentPowerTier;
 	}
 	
-	private void updatePowerTier() {
-		if (!world.isRemote)
-			Aunis.info("updatePowerTier called");
-		
+	private void updatePowerTier() {		
 		int powerTier = 1;
 				
 		for (int i=4; i<7; i++) {
@@ -728,5 +725,18 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		else {
 			return new Object[] {null, "stargate_failure_not_open", "The gate is closed"};
 		}
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getCapacitorsInstalled(Context context, Arguments args) {
+		return new Object[] {isMerged() ? currentPowerTier-1 : null};
+	}
+	
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getGateType(Context context, Arguments args) {
+		return new Object[] {isMerged() ? getSymbolType() : null};
 	}
 }

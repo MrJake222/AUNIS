@@ -13,7 +13,8 @@ item.aunis.crystal_glyph_universe.name=Universe Glyphs Crystal
 tile.aunis.naquadah_ore.name=Naquadah Ore
 tile.aunis.naquadah_block.name=Naquadah Block
 item.aunis.naquadah_shard.name=Naquadah Shard
-item.aunis.naquadah_alloy.name=Naquadah Alloy Ingot
+item.aunis.naquadah_alloy.name=Refined Naquadah Alloy Ingot
+item.aunis.naquadah_alloy_raw.name=Naquadah Alloy Ingot
 
 tile.aunis.invisible_block.name=You can't see me block
 
@@ -22,6 +23,7 @@ tile.aunis.stargate_milkyway_ring_block.name=Stargate Ring (Milky Way)
 tile.aunis.stargate_milkyway_chevron_block.name=Stargate Chevron (Milky Way)
 tile.aunis.dhd_block.name=Dial Home Device (DHD)
 tile.aunis.capacitor_block.name=Capacitor Bank
+tile.aunis.capacitor_block_empty.name=Capacitor Bank (Empty)
 
 tile.aunis.stargate_orlin_base_block.name=Stargate Base (Orlin)
 tile.aunis.stargate_orlin_member_block.name=Stargate Ring (Orlin)
@@ -45,6 +47,7 @@ item.aunis.circuit_control_crystal.name=Crystal Control Circuit
 item.aunis.dhd_brb.name=Bright Red Button (BRB)
 
 item.aunis.stargate_ring_fragment.name=Stargate Ring Fragment
+item.aunis.universe_ring_fragment.name=Universe Ring Fragment
 item.aunis.holder_crystal.name=Crystal Holder
 
 item.aunis.page_notebook.name=Notebook Page

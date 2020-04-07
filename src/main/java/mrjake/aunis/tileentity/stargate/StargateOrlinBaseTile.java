@@ -3,6 +3,9 @@ package mrjake.aunis.tileentity.stargate;
 import java.util.Arrays;
 import java.util.List;
 
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
@@ -36,6 +39,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -154,6 +158,9 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 						
 					case NOT_ENOUGH_POWER:
 						Aunis.info("Orlin's gate - Not enough power");
+						break;
+						
+					case ABORTED:
 						break;
 				}
 			}
@@ -362,5 +369,11 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		openCount = compound.getInteger("openCount");
 		
 		super.readFromNBT(compound);
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getGateType(Context context, Arguments args) {
+		return new Object[] {isMerged() ? "ORLIN" : null};
 	}
 }

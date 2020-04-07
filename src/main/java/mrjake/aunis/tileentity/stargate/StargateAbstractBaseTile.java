@@ -1410,4 +1410,17 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	public Object[] dialedAddress(Context context, Arguments args) {
 		return new Object[] {(isMerged && stargateState != EnumStargateState.ENGAGED) ? dialedAddress : null};
 	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getEnergyStored(Context context, Arguments args) {
+		
+		return new Object[] {isMerged ? getEnergyStorage().getEnergyStored() : null};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getMaxEnergyStored(Context context, Arguments args) {
+		return new Object[] {isMerged ? getEnergyStorage().getMaxEnergyStored() : null};
+	}
 }

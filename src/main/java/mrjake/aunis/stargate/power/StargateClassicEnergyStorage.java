@@ -3,7 +3,6 @@ package mrjake.aunis.stargate.power;
 import java.util.ArrayList;
 import java.util.List;
 
-import mrjake.aunis.Aunis;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public class StargateClassicEnergyStorage extends StargateAbstractEnergyStorage {
@@ -18,9 +17,7 @@ public class StargateClassicEnergyStorage extends StargateAbstractEnergyStorage 
 		storages.clear();
 	}
 	
-	public void addStorage(IEnergyStorage storage) {
-		Aunis.info("adding storage: " + storage);
-		
+	public void addStorage(IEnergyStorage storage) {		
 		storages.add(storage);
 	}
 	
