@@ -122,7 +122,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 					StargateAbstractBaseTile gateTile = getLinkedGate(world);
 					IEnergyStorage energyStorage = (IEnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
 					
-					if (energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored() >= AunisConfig.dhdConfig.energyPerNaquadah) {						
+					if (reactorState == ReactorStateEnum.ONLINE) {						
 						// Has fuel
 						if (fluidHandler.drainInternal(1 * AunisConfig.dhdConfig.powerGenerationMultiplier, false) != null) {
 							fluidHandler.drainInternal(1 * AunisConfig.dhdConfig.powerGenerationMultiplier, true);
@@ -137,10 +137,13 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 						}
 					}
 					
-					// Buffer full
-					else {
+					float percent = energyStorage.getEnergyStored() / (float)energyStorage.getMaxEnergyStored();
+					
+					if (percent < AunisConfig.dhdConfig.activationLevel)
+						reactorState = ReactorStateEnum.ONLINE;
+					
+					else if (percent == AunisConfig.dhdConfig.deactivationLevel)
 						reactorState = ReactorStateEnum.STANDBY;
-					}
 				}
 				
 				// Not linked

@@ -115,6 +115,12 @@ public class AunisConfig {
 			"Consumed mB/t is equal to this"
 		})
 		public int powerGenerationMultiplier = 1;
+
+		@RangeDouble(min=0, max=1)
+		public double activationLevel = 0.4;
+		
+		@RangeDouble(min=0, max=1)
+		public double deactivationLevel = 0.98;
 	}
 	
 	public static class DebugConfig {
