@@ -2,6 +2,7 @@ package mrjake.aunis.item.renderer;
 
 import org.lwjgl.opengl.GL11;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.OBJLoader.ModelEnum;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.item.dialer.UniverseDialerMode;
@@ -11,18 +12,35 @@ import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import mrjake.aunis.transportrings.TransportRings;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHandSide;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants.NBT;
 
 public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
+	
+	private static FontRenderer fontRenderer;
+
+	private static FontRenderer getFontRenderer() {
+		if (fontRenderer == null) {
+			Minecraft mc = Minecraft.getMinecraft();
+			fontRenderer = new AunisFontRenderer(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.renderEngine, false);
+			((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(fontRenderer);
+			
+			Aunis.info("Created custom FontRenderer");
+		}
+		
+		return fontRenderer;
+	}
 	
 	@Override
 	public void renderByItem(ItemStack stack) {
@@ -65,11 +83,11 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		
 		GlStateManager.translate(0, 0.20f, 0.1f);
 		GlStateManager.rotate(-90, 1, 0, 0);
-		
-		GlStateManager.enableBlend();
-		
+				
 		// ---------------------------------------------------------------------------------------------
 		// List rendering
+		
+		GlStateManager.enableBlend();
 		
 		if (stack.hasTagCompound()) {		
 			NBTTagCompound compound = stack.getTagCompound();
@@ -123,6 +141,8 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 			}
 		}
 		
+		GlStateManager.enableLighting();
+		GlStateManager.disableBlend();
 		GlStateManager.popMatrix();
 	}
 	
@@ -130,17 +150,15 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, 0);
 		GlStateManager.rotate(180, 0,0,1);
-        GlStateManager.rotate(180, 0,1,0);
 		GlStateManager.scale(0.015f, 0.015f, 0.015f);
 		
+		getFontRenderer().drawString(text, -6, 19, active ? 0xFFFFFF : 0x006060, false);
+		
 		if (active) {
-			GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_ADD);
-			Minecraft.getMinecraft().fontRenderer.drawString(text, 0, 19, 0xFF808080, false);
-			GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+			GlStateManager.translate(-0.4, 0.6, -0.1);
+			getFontRenderer().drawString(text, -6, 19, 0x606060, false);
 		}
-
-		GlStateManager.translate(0.4, 0.6, 0.1);
-		Minecraft.getMinecraft().fontRenderer.drawString(text, 0, 19, active ? 0x00FFFFFF : 0x0000FFFF, false);
+		
 		GlStateManager.popMatrix();
 	}
 	
@@ -153,18 +171,17 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		
 		if (!is9Chevron)
 			x += 0.09f;
-		
-		GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_ADD);
-		
+				
 		Minecraft.getMinecraft().getTextureManager().bindTexture(symbol.getIconResource());
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableBlend();
 		GL11.glBegin(GL11.GL_QUADS);
-
+		
 		if (isActive)
-			GlStateManager.color(0.76f, 0.98f, 1, isActive ? 1 : 0.6f);
+			GlStateManager.color(0.91f, 1, 1, 1);
 		else
-			GlStateManager.color(0.0f, 0.36f, 0.40f, 1f);
+			GlStateManager.color(0.0f, 0.38f, 0.40f, 1f);
+		
 		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(x,   y,   0);
 		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(x+w, y,   0);
 		GL11.glTexCoord2f(0, 0); GL11.glVertex3f(x+w, y+h, 0);
@@ -180,7 +197,6 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		GL11.glTexCoord2f(1, 0); GL11.glVertex3f(x,   y+h, -0.01f);
 		
 		GL11.glEnd();
-		GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 	}
 	
 	private static void renderArms(EnumHandSide handSide, float angle, float partialTicks) {

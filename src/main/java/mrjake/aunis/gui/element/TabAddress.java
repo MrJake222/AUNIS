@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
 
 public class TabAddress extends Tab {
 	
@@ -31,21 +32,32 @@ public class TabAddress extends Tab {
 		super.render(fontRenderer);
 		
 		int shadow = 2;
+		float color = 1.0f;
 		
-		if (symbolType == SymbolTypeEnum.PEGASUS)
-			shadow = 1;
+		switch (symbolType) {
+			case UNIVERSE:
+				color = 0.0f;
+				break;
+				
+			default:
+				break;
+		}
 		
 		if (isVisible() && gateTile.getStargateAddress(symbolType) != null) {
 			for (int i=0; i<maxSymbols; i++) {
 				Minecraft.getMinecraft().getTextureManager().bindTexture(gateTile.getStargateAddress(symbolType).get(i).getIconResource());		
 				
 				SymbolCoords symbolCoords = getSymbolCoords(i);
-				GuiHelper.drawTexturedRectWithShadow(symbolCoords.x, symbolCoords.y, shadow, shadow, symbolType.iconWidht, symbolType.iconHeight);
+				GuiHelper.drawTexturedRectWithShadow(symbolCoords.x, symbolCoords.y, shadow, shadow, symbolType.iconWidht, symbolType.iconHeight, color);
 			}
+			
+			GlStateManager.enableBlend();
 			
 			Minecraft.getMinecraft().getTextureManager().bindTexture(bgTexLocation);
 			int progress = gateTile.getPageProgress();
 			Gui.drawModalRectWithCustomSizedTexture(guiLeft+currentOffsetX+97, guiTop+defaultY+86+(18-progress), 0, 174+(18-progress), 6, progress, textureSize, textureSize);
+			
+			GlStateManager.disableBlend();
 		}
 	}
 	

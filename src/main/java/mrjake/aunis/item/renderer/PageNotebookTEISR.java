@@ -19,7 +19,7 @@ public class PageNotebookTEISR extends TileEntityItemStackRenderer {
 	private void renderSymbol(float x, float y, float w, float h, SymbolInterface symbol) {
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableBlend();
-		GlStateManager.color(1, 1, 1, 0.8f);
+		GlStateManager.color(0, 0, 0, 0.8f);
 		
 		Minecraft.getMinecraft().getTextureManager().bindTexture(symbol.getIconResource());		
 		GL11.glBegin(GL11.GL_QUADS);
