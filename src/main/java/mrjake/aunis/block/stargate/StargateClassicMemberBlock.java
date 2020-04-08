@@ -3,6 +3,7 @@ package mrjake.aunis.block.stargate;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -204,6 +205,13 @@ public abstract class StargateClassicMemberBlock extends Block {
 				
 				return false;
 			
+			if (!(heldItem instanceof ItemBlock) && camoBlockState == null) {
+				BlockPos basePos = memberTile.getBasePos();
+				player.openGui(Aunis.instance, GuiIdEnum.GUI_STARGATE.id, world, basePos.getX(), basePos.getY(), basePos.getZ());
+				
+				return true;
+			}
+			
 			if (camoBlockState != null) {
 				Block camoBlock = camoBlockState.getBlock();
 				
@@ -321,8 +329,7 @@ public abstract class StargateClassicMemberBlock extends Block {
 			return 	heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK) &&
 					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) &&
 					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_UNIVERSE_BASE_BLOCK) &&
-					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK) &&
-					heldItem != AunisItems.UNIVERSE_DIALER;
+					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK);
 		}
 	}
 	
