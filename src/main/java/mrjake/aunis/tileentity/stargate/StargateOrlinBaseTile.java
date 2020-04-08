@@ -138,6 +138,9 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	private boolean isPowered;
 	
 	public void redstonePowerUpdate(boolean power) {
+		if (!isMerged())
+			return;
+		
 		if ((isPowered && !power) || (!isPowered && power)) {
 			isPowered = power;
 						

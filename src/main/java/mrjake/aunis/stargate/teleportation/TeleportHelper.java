@@ -110,6 +110,7 @@ public class TeleportHelper {
 		player.interactionManager.setWorld(newWorld);
 		playerList.updateTimeAndWeatherForPlayer(player, newWorld);
 		playerList.syncPlayerInventory(player);
+		playerList.updatePermissionLevel(player);
 		
 		Iterator<PotionEffect> var6 = player.getActivePotionEffects().iterator();
 		while (var6.hasNext()) {
