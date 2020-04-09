@@ -32,8 +32,9 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 		rendererDispatcher.renderEngine.bindTexture(ModelEnum.UNIVERSE_GATE_MODEL.textureResource);
 		ModelLoader.getModel(ModelEnum.UNIVERSE_GATE_MODEL).render();
 		
-		GlStateManager.disableTexture2D();
 		GlStateManager.disableLighting();
+		rendererDispatcher.renderEngine.bindTexture(ModelEnum.UNIVERSE_CHEVRON_MODEL.textureResource);
+		
 		for (SymbolUniverseEnum symbol : SymbolUniverseEnum.values()) {
 			if (symbol.model != null) {
 				float color = rendererState.getSymbolColor(symbol) + 0.25f;
@@ -42,7 +43,7 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 				ModelLoader.getModel(symbol.model).render();
 			}
 		}
-		GlStateManager.enableTexture2D();
+		GlStateManager.enableLighting();
 		
 		rendererState.iterate(getWorld(), partialTicks);
 	}
