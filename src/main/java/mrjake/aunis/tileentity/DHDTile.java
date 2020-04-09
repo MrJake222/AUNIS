@@ -132,15 +132,19 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 					IEnergyStorage energyStorage = (IEnergyStorage) gateTile.getCapability(CapabilityEnergy.ENERGY, null);
 					
 					int amount = 1 * AunisConfig.dhdConfig.powerGenerationMultiplier;
-					FluidStack simulatedDrain = fluidHandler.drainInternal(amount, false);
 					
-					if (simulatedDrain != null && simulatedDrain.amount >= amount)
-						reactorState = ReactorStateEnum.ONLINE;
-					else
-						reactorState = ReactorStateEnum.NO_FUEL;
+					if (reactorState != ReactorStateEnum.STANDBY) {
+						FluidStack simulatedDrain = fluidHandler.drainInternal(amount, false);
+						
+						if (simulatedDrain != null && simulatedDrain.amount >= amount)
+							reactorState = ReactorStateEnum.ONLINE;
+						else
+							reactorState = ReactorStateEnum.NO_FUEL;
+					}
 					
 					if (reactorState == ReactorStateEnum.ONLINE || reactorState == ReactorStateEnum.STANDBY) {
 						float percent = energyStorage.getEnergyStored() / (float)energyStorage.getMaxEnergyStored();
+//						Aunis.info("state: " + reactorState + ", percent: " + percent);
 						
 						if (percent < AunisConfig.dhdConfig.activationLevel)
 							reactorState = ReactorStateEnum.ONLINE;
@@ -168,7 +172,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		}
 	}
 	
-	
+	 
 	// -----------------------------------------------------------------------------
 	// Symbol activation
 	

@@ -202,7 +202,7 @@ public class StargateGenerator {
 					else {
 						int fluid = AunisConfig.powerConfig.stargateEnergyStorage / AunisConfig.dhdConfig.energyPerNaquadah;
 						
-						world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.CIRCUIT_CONTROL_CRYSTAL), false);
+						world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.CRYSTAL_CONTROL_DHD), false);
 						((FluidTank) world.getTileEntity(dhdPos).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)).fillInternal(new FluidStack(AunisFluids.moltenNaquadahRefined, fluid), true);
 					}
 					
