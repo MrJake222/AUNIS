@@ -1,12 +1,12 @@
 {
 	"parent": "block/cube_all",
 	"textures": {
-		"particle": "aunis:blocks/naquadah_block",
-		"north": "aunis:blocks/naquadah_block",
-		"south": "aunis:blocks/naquadah_block",
-		"west": "aunis:blocks/naquadah_block",
-		"east": "aunis:blocks/naquadah_block",
+		"particle": "aunis:blocks/naquadah_block_dark",
+		"north": "aunis:blocks/naquadah_block_dark",
+		"south": "aunis:blocks/naquadah_block_dark",
+		"west": "aunis:blocks/naquadah_block_dark",
+		"east": "aunis:blocks/naquadah_block_dark",
 		"up": "aunis:blocks/transportrings_block_top",
-		"down": "aunis:blocks/transportrings_block_bottom"
+		"down": "aunis:blocks/naquadah_block_dark"
 	}
 }

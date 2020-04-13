@@ -253,6 +253,10 @@ gui.stargate.energyBuffer=Energy buffer
 
 gui.capacitor.name=Capacitor Bank
 
+tile.aunis.beamer_block.name=Beamer Block
+item.aunis.beamer_crystal_power.name=Beamer Power Crystal
+item.aunis.beamer_crystal_fluid.name=Beamer Fluid Crystal
+item.aunis.beamer_crystal_items.name=Beamer Items Crystal
 gui.beamer.name=Gate Beamer
 gui.beamer.beamer_status=Beamer status:
 gui.beamer.beamer_ok=Beamer sees gate

@@ -1,12 +1,12 @@
 {
 	"parent": "block/cube_all",
 	"textures": {
-		"particle": "aunis:blocks/naquadah_block",
+		"particle": "aunis:blocks/naquadah_block_dark",
 		"north": "aunis:blocks/stargate_orlin_member_block_front",
-		"south": "aunis:blocks/naquadah_block",
-		"west": "aunis:blocks/naquadah_block",
-		"east": "aunis:blocks/naquadah_block",
-		"up": "aunis:blocks/naquadah_block",
-		"down": "aunis:blocks/naquadah_block"
+		"south": "aunis:blocks/naquadah_block_dark",
+		"west": "aunis:blocks/naquadah_block_dark",
+		"east": "aunis:blocks/naquadah_block_dark",
+		"up": "aunis:blocks/naquadah_block_dark",
+		"down": "aunis:blocks/naquadah_block_dark"
 	}
 }
