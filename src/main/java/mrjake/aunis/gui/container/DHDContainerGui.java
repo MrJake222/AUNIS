@@ -109,8 +109,11 @@ public class DHDContainerGui extends GuiContainer {
 		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
         
 		// Crystal background
-		if (container.slotCrystal.getHasStack())
+		if (container.slotCrystal.getHasStack()) {
+			GlStateManager.enableBlend();
 			drawTexturedModalRect(guiLeft+76, guiTop+16, 176, 0, 24, 32);
+			GlStateManager.disableBlend();
+		}
 		
 		Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 		GlStateManager.color(1, 1, 1, 1);

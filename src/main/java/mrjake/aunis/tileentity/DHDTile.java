@@ -184,12 +184,18 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS);
 		
         world.notifyNeighborsOfStateChange(pos, AunisBlocks.DHD_BLOCK, true);
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(symbol)), targetPoint);
+        
+        if (targetPoint != null) {
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(symbol)), targetPoint);
+		}
 	}
 	
 	public void clearSymbols() {
         world.notifyNeighborsOfStateChange(pos, AunisBlocks.DHD_BLOCK, true);
-		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(true)), targetPoint);
+		
+        if (targetPoint != null) {
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(true)), targetPoint);
+		}
 	}
 	
 	

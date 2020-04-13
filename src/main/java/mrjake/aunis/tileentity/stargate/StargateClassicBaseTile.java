@@ -823,10 +823,21 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		return new Object[] {isMerged() ? currentPowerTier-1 : null};
 	}
 	
-	
 	@Optional.Method(modid = "opencomputers")
 	@Callback
 	public Object[] getGateType(Context context, Arguments args) {
 		return new Object[] {isMerged() ? getSymbolType() : null};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getGateStatus(Context context, Arguments args) {
+		if (!isMerged())
+			return new Object[] {"not_merged"};
+		
+		if (stargateState.engaged())
+			return new Object[] {"open", stargateState.initiating()};
+		
+		return new Object[] {stargateState.toString().toLowerCase()};
 	}
 }

@@ -3,7 +3,7 @@ package mrjake.aunis.raycaster.util;
 import java.util.Arrays;
 import java.util.List;
 
-import org.lwjgl.util.vector.Vector2f;
+import mrjake.vector.Vector2f;
 
 public class Ray {
 	// Direction and offset of the linear function coming through first and last vertex

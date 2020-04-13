@@ -1,12 +1,11 @@
 package mrjake.aunis.renderer.transportrings;
 
-import org.lwjgl.util.vector.Vector3f;
-
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.OBJLoader.ModelEnum;
 import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.tileentity.TRControllerTile;
+import mrjake.vector.Vector3f;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;

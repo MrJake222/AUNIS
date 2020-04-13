@@ -3,12 +3,11 @@ package mrjake.aunis.raycaster;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
-
 import mrjake.aunis.raycaster.util.Box;
 import mrjake.aunis.raycaster.util.DHDVertex;
 import mrjake.aunis.raycaster.util.Ray;
+import mrjake.vector.Vector2f;
+import mrjake.vector.Vector3f;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;

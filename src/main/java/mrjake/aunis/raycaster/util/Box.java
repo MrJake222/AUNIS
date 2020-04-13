@@ -3,7 +3,7 @@ package mrjake.aunis.raycaster.util;
 import java.util.Arrays;
 import java.util.List;
 
-import org.lwjgl.util.vector.Vector2f;
+import mrjake.vector.Vector2f;
 
 public class Box {
 	private List<Ray> rays;

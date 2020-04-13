@@ -3,13 +3,12 @@ package mrjake.aunis.raycaster;
 import java.util.Arrays;
 import java.util.List;
 
-import org.lwjgl.util.vector.Vector3f;
-
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.transportrings.TRControllerActivatedToServer;
 import mrjake.aunis.raycaster.util.Ray;
 import mrjake.aunis.renderer.transportrings.TRControllerRenderer;
+import mrjake.vector.Vector3f;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;

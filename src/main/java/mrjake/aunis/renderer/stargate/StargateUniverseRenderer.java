@@ -14,7 +14,7 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 		float scale = 0.90f;
 		GlStateManager.scale(scale, scale, scale);
 		
-		GlStateManager.translate(0.5, GATE_DIAMETER/2 + 0.20, 0.5);
+		GlStateManager.translate(0.5, GATE_DIAMETER/2 + 0.20, 0.55);
 		GlStateManager.rotate(90, 0, 0, 1);
 	}
 

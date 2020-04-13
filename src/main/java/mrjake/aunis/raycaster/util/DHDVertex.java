@@ -1,9 +1,8 @@
 package mrjake.aunis.raycaster.util;
 
-import org.lwjgl.util.vector.Matrix3f;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
-
+import mrjake.vector.Matrix3f;
+import mrjake.vector.Vector2f;
+import mrjake.vector.Vector3f;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
