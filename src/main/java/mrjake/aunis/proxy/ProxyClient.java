@@ -14,6 +14,7 @@ import mrjake.aunis.item.dialer.ChangeEvent;
 import mrjake.aunis.item.dialer.UniverseDialerItem;
 import mrjake.aunis.item.renderer.PageNotebookTEISR;
 import mrjake.aunis.item.renderer.UniverseDialerTEISR;
+import mrjake.aunis.renderer.BeamerRenderer;
 import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.SpecialRenderer;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
@@ -22,6 +23,7 @@ import mrjake.aunis.renderer.stargate.StargateOrlinRenderer;
 import mrjake.aunis.renderer.stargate.StargateUniverseRenderer;
 import mrjake.aunis.sound.AunisSoundHelperClient;
 import mrjake.aunis.sound.SoundPositionedEnum;
+import mrjake.aunis.tileentity.BeamerTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
@@ -79,9 +81,11 @@ public class ProxyClient implements IProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateUniverseBaseTile.class, new StargateUniverseRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(StargateOrlinBaseTile.class, new StargateOrlinRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(DHDTile.class, new DHDRenderer());
-		
+				
 		ClientRegistry.bindTileEntitySpecialRenderer(TransportRingsTile.class, specialRenderer);
 		ClientRegistry.bindTileEntitySpecialRenderer(TRControllerTile.class, specialRenderer);
+		
+		ClientRegistry.bindTileEntitySpecialRenderer(BeamerTile.class, new BeamerRenderer());
 	}
 	
 

@@ -46,7 +46,7 @@ public class TransportRingsRenderer implements RendererInterface {
 		GlStateManager.translate(x, y, z);
 		
 		if (AunisConfig.debugConfig.renderBoundingBoxes)
-			localTeleportBox.render(x, y, z);
+			localTeleportBox.render();
 		
 		GlStateManager.translate(0.50, 0.63271/2 + 1.35, 0.50);
 		GlStateManager.scale(0.5, 0.5, 0.5);

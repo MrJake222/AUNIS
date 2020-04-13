@@ -2,10 +2,12 @@ package mrjake.aunis;
 
 import java.util.Arrays;
 
+import mrjake.aunis.block.BeamerBlock;
 import mrjake.aunis.block.CapacitorBlock;
 import mrjake.aunis.block.InvisibleBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.block.stargate.StargateOrlinMemberBlock;
+import mrjake.aunis.property.PropertyBeamerMode;
 import mrjake.aunis.property.PropertyMemberVariant;
 import mrjake.aunis.property.PropertyUnlistedCamoBlockState;
 import net.minecraft.block.properties.IProperty;
@@ -69,4 +71,9 @@ public class AunisProps {
 	 * Used by {@link CapacitorBlock} to display energy level.
 	 */
 	public static final PropertyInteger LEVEL = PropertyInteger.create("level", 0, 10);
+
+	/**
+	 * Used by {@link BeamerBlock} to display textures.
+	 */
+	public static final PropertyBeamerMode BEAMER_MODE = PropertyBeamerMode.create("mode");
 }

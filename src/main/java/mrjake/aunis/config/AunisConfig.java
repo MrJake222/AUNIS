@@ -35,6 +35,9 @@ public class AunisConfig {
 	@Name("AutoClose options")
 	public static AutoCloseConfig autoCloseConfig = new AutoCloseConfig();
 	
+	@Name("Beamer options")
+	public static BeamerConfig beamerConfig = new BeamerConfig();
+	
 	public static class StargateConfig {
 		@Name("Orlin's gate max open count")
 		@RangeInt(min=0)
@@ -152,11 +155,33 @@ public class AunisConfig {
 	}
 	
 	public static class AutoCloseConfig {
-		@Name("autoclose enabled")
+		@Name("Autoclose enabled")
 		public boolean autocloseEnabled = true;
 		
 		@Name("Seconds to autoclose with no players nearby")
 		@RangeInt(min=1, max=300)
 		public int secondsToAutoclose = 5;
+	}
+	
+	public static class BeamerConfig {
+		@Name("Fluid buffer capacity")
+		@RangeInt(min=1)
+		public int fluidCapacity = 60000;
+		
+		@Name("Energy buffer capacity")
+		@RangeInt(min=1)
+		public int energyCapacity = 17820000;
+		
+		@Name("Energy buffer max transfer")
+		@RangeInt(min=1)
+		public int energyTransfer = 26360;
+
+		@Name("Fluid max transfer")
+		@RangeInt(min=1)
+		public int fluidTransfer = 100;
+
+		@Name("Item max transfer")
+		@RangeInt(min=1)
+		public int itemTransfer = 4;
 	}
 }

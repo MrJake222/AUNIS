@@ -6,6 +6,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.ItemHandlerHelper;
@@ -120,6 +121,35 @@ public class DHDBlock extends Block {
 		super.breakBlock(world, pos, state);
 	}
 
+	private int getPower(IBlockAccess world, BlockPos pos) {
+		DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
+		if (!dhdTile.isLinked())
+			return 0;
+		
+		StargateAbstractBaseTile gateTile = dhdTile.getLinkedGate(world);
+		return gateTile.getDialedAddress().size() > 0 ? 15 : 0;
+	}
+	
+	@Override
+	public boolean canProvidePower(IBlockState state) {
+		return true;
+	}
+	
+	@Override
+	public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+		return true;
+	}
+	
+	@Override
+	public int getWeakPower(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+		return getPower(world, pos);
+	}
+	
+	@Override
+	public int getStrongPower(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+		return getPower(world, pos);
+	}
+	
 	// ------------------------------------------------------------------------
 	@Override
 	public boolean hasTileEntity(IBlockState state) {

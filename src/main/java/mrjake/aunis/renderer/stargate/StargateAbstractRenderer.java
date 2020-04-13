@@ -40,16 +40,18 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 			
 			if (shouldRender(rendererState)) {				
 				if (AunisConfig.debugConfig.renderBoundingBoxes || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
-					te.getEventHorizonLocalBox().render(x, y, z);
+					te.getEventHorizonLocalBox().render();
 					
 					int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? te.getLocalKillingBoxes().size() : rendererState.horizonSegments;
 	
 					for (int i=0; i<segments; i++) {
-						te.getLocalKillingBoxes().get(i).render(x, y, z);
+						te.getLocalKillingBoxes().get(i).render();
 					}
 								
 					for (AunisAxisAlignedBB b : te.getLocalInnerBlockBoxes())
-						b.render(x, y, z);
+						b.render();
+					
+					te.getRenderBoundingBoxForDisplay().render();
 				}
 								
 	            applyTransformations(rendererState);
@@ -147,6 +149,7 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 		
 		
 		GlStateManager.disableLighting();
+        GlStateManager.enableCull();
 		
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0, 0, 0.1);
@@ -381,5 +384,10 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 		}
 		
 		GlStateManager.disableBlend();
+	}
+	
+	@Override
+	public boolean isGlobalRenderer(StargateAbstractBaseTile te) {
+		return true;
 	}
 }

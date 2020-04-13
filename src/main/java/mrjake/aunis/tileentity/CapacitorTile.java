@@ -2,6 +2,7 @@ package mrjake.aunis.tileentity;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.gui.container.CapacitorContainerGuiUpdate;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
@@ -63,6 +64,9 @@ public class CapacitorTile extends TileEntity implements ITickable, ICapabilityP
 				
 				lastPowerLevel = powerLevel;
 			}
+			
+			energyTransferedLastTick = energyStorage.getEnergyStored() - energyStoredLastTick;
+			energyStoredLastTick = energyStorage.getEnergyStored();
 		}
 	}
 	
@@ -87,7 +91,14 @@ public class CapacitorTile extends TileEntity implements ITickable, ICapabilityP
 	
 	// -----------------------------------------------------------------------------
 	// Power system
-		
+	
+	private int energyStoredLastTick = 0;
+	private int energyTransferedLastTick = 0;
+	
+	public int getEnergyTransferedLastTick() {
+		return energyTransferedLastTick;
+	}
+	
 	private StargateAbstractEnergyStorage energyStorage = new StargateAbstractEnergyStorage() {
 		
 		@Override
@@ -119,6 +130,9 @@ public class CapacitorTile extends TileEntity implements ITickable, ICapabilityP
 		switch (stateType) {
 			case RENDERER_UPDATE:
 				return new CapacitorPowerLevelUpdate(powerLevel);
+			
+			case GUI_UPDATE:
+				return new CapacitorContainerGuiUpdate(energyStorage.getEnergyStored(), energyTransferedLastTick);
 				
 			default:
 				return null;
@@ -132,6 +146,9 @@ public class CapacitorTile extends TileEntity implements ITickable, ICapabilityP
 			case RENDERER_UPDATE:
 				return new CapacitorPowerLevelUpdate();
 				
+			case GUI_UPDATE:
+				return new CapacitorContainerGuiUpdate();
+				
 			default:
 				return null;
 		}
@@ -144,6 +161,12 @@ public class CapacitorTile extends TileEntity implements ITickable, ICapabilityP
 			case RENDERER_UPDATE:
 				powerLevel = ((CapacitorPowerLevelUpdate) state).powerLevel;
 				world.markBlockRangeForRenderUpdate(pos, pos);
+				break;
+				
+			case GUI_UPDATE:
+				CapacitorContainerGuiUpdate guiUpdate = (CapacitorContainerGuiUpdate) state;
+				energyStorage.setEnergyStored(guiUpdate.energyStored);
+				energyTransferedLastTick = guiUpdate.energyTransferedLastTick;
 				break;
 				
 			default:

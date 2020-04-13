@@ -174,6 +174,7 @@ public class StargateGeneratorNether {
 						EnumFacing facing = world.getBlockState(basePos).getValue(AunisProps.FACING_HORIZONTAL);
 						StargateMilkyWayMergeHelper.INSTANCE.updateMembersBasePos(world, datablock.getKey().down(), facing);
 						world.getTileEntity(basePos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(4, new ItemStack(AunisBlocks.CAPACITOR_BLOCK), false);
+						world.getTileEntity(basePos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.CRYSTAL_GLYPH_MILKYWAY), false);
 						
 						break;
 						

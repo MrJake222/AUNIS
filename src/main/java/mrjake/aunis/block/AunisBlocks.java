@@ -14,6 +14,7 @@ import mrjake.aunis.item.CapacitorItemBlock;
 import mrjake.aunis.item.StargateMilkyWayMemberItemBlock;
 import mrjake.aunis.item.StargateUniverseMemberItemBlock;
 import mrjake.aunis.stargate.EnumMemberVariant;
+import mrjake.aunis.tileentity.BeamerTile;
 import mrjake.aunis.tileentity.CapacitorTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
@@ -58,8 +59,10 @@ public class AunisBlocks {
 	// -----------------------------------------------------------------------------
 	public static final StargateMilkyWayMemberBlock STARGATE_MILKY_WAY_MEMBER_BLOCK = new StargateMilkyWayMemberBlock();
 	public static final StargateUniverseMemberBlock STARGATE_UNIVERSE_MEMBER_BLOCK = new StargateUniverseMemberBlock();
+	
 	public static final CapacitorBlockEmpty CAPACITOR_BLOCK_EMPTY = new CapacitorBlockEmpty();
 	public static final CapacitorBlock CAPACITOR_BLOCK = new CapacitorBlock();
+	public static final BeamerBlock BEAMER_BLOCK = new BeamerBlock();
 	
 	
 	private static Block[] blocks = {
@@ -77,7 +80,8 @@ public class AunisBlocks {
 		TR_CONTROLLER_BLOCK,
 		INVISIBLE_BLOCK,
 		
-		CAPACITOR_BLOCK_EMPTY
+		CAPACITOR_BLOCK_EMPTY,
+		BEAMER_BLOCK
 	};
 		
 	@SubscribeEvent
@@ -100,6 +104,7 @@ public class AunisBlocks {
 		GameRegistry.registerTileEntity(TransportRingsTile.class, AunisBlocks.TRANSPORT_RINGS_BLOCK.getRegistryName());
 		GameRegistry.registerTileEntity(TRControllerTile.class, AunisBlocks.TR_CONTROLLER_BLOCK.getRegistryName());
 		GameRegistry.registerTileEntity(CapacitorTile.class, AunisBlocks.CAPACITOR_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(BeamerTile.class, AunisBlocks.BEAMER_BLOCK.getRegistryName());
 	}
 	
 	@SubscribeEvent

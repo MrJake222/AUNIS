@@ -251,6 +251,32 @@ gui.stargate.universe_address=Universe address
 gui.stargate.capacitors=Capacitors
 gui.stargate.energyBuffer=Energy buffer
 
+gui.capacitor.name=Capacitor Bank
+
+gui.beamer.name=Gate Beamer
+gui.beamer.beamer_status=Beamer status:
+gui.beamer.beamer_ok=Beamer sees gate
+gui.beamer.beamer_link_status=Beamer link status:
+gui.beamer.beamer_link_ok=Beamer link ok
+gui.beamer.role_status=Role status:
+gui.beamer.role_ok=Role ok
+gui.beamer.disabled=Beamer disabled
+gui.beamer.disabled_target=Target beamer disabled
+gui.beamer.obstructed=Obstructed
+gui.beamer.obstructed_target=Obstructed (Target)
+gui.beamer.two_transmitters=Two transmitters
+gui.beamer.two_receivers=Two receivers
+gui.beamer.mode_mismatch=Mode mismatch
+gui.beamer.no_beamer=No Beamer found
+gui.beamer.closed=Gate closed
+gui.beamer.incoming=Incoming wormhole
+gui.beamer.running=Running
+gui.beamer.no_crystal=No crystal
+
+gui.beamer.transmit=Transmit
+gui.beamer.receive=Receive
+gui.beamer.disabled=Disabled
+
 chat.orlins.energyStored=Energy stored: %s / %s RF
 
 item.aunis.universe_dialer.name=Universe Dialer

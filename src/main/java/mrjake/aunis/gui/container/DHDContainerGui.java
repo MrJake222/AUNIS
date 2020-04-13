@@ -7,17 +7,16 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.gui.element.Diode;
 import mrjake.aunis.gui.element.Diode.DiodeStatus;
-import mrjake.aunis.gui.element.Diode.DiodeStatusString;
 import mrjake.aunis.tileentity.util.ReactorStateEnum;
 import mrjake.aunis.gui.element.FluidTankElement;
 import mrjake.aunis.gui.element.GuiHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fluids.FluidStack;
 
 public class DHDContainerGui extends GuiContainer {
@@ -27,11 +26,8 @@ public class DHDContainerGui extends GuiContainer {
 	private DHDContainer container;
 	private FluidTankElement tank;
 	
-	private List<Diode> diodes = new ArrayList<Diode>(2);
+	private List<Diode> diodes = new ArrayList<Diode>(3);
 	
-	private static final String NO_CRYSTAL_STRING = new DiodeStatusString("gui.dhd.no_crystal").setItalic().setColor(TextFormatting.DARK_RED).getFormattedText();
-	private static final String NOT_LINKED_STRING = new DiodeStatusString("gui.dhd.not_linked").setItalic().setColor(TextFormatting.DARK_RED).getFormattedText();
-
 	private boolean hasCrystal;
 	private boolean isLinked;
 	
@@ -43,32 +39,32 @@ public class DHDContainerGui extends GuiContainer {
 				
 		this.container = container;
 		container.tankNaquadah.setFluid(new FluidStack(AunisFluids.moltenNaquadahRefined, 0));
-		this.tank = new FluidTankElement(this, 151, 18, 16, 54, AunisFluids.moltenNaquadahRefined, container.tankNaquadah);
+		this.tank = new FluidTankElement(this, 151, 18, 16, 54, container.tankNaquadah);
 		
 		diodes.add(new Diode(this, 8, 55, I18n.format("gui.dhd.crystalStatus")).setDiodeStatus(DiodeStatus.OFF)
-				.putStatus(DiodeStatus.OFF, NO_CRYSTAL_STRING)
-				.putStatus(DiodeStatus.ON, new DiodeStatusString("gui.dhd.crystal_ok").setItalic().setColor(TextFormatting.GREEN))
+				.putStatus(DiodeStatus.OFF, I18n.format("gui.dhd.no_crystal"))
+				.putStatus(DiodeStatus.ON, I18n.format("gui.dhd.crystal_ok"))
 				.setStatusMapper(() -> {
 					return hasCrystal ? DiodeStatus.ON : DiodeStatus.OFF;
 				}));
 		
 		diodes.add(new Diode(this, 17, 55, I18n.format("gui.dhd.linkStatus")).setDiodeStatus(DiodeStatus.OFF)
-				.putStatus(DiodeStatus.OFF, NOT_LINKED_STRING)
-				.putStatus(DiodeStatus.ON, new DiodeStatusString("gui.dhd.linked").setItalic().setColor(TextFormatting.GREEN))
+				.putStatus(DiodeStatus.OFF, I18n.format("gui.dhd.not_linked"))
+				.putStatus(DiodeStatus.ON, I18n.format("gui.dhd.linked"))
 				.setStatusMapper(() -> {
 					return (hasCrystal && isLinked) ? DiodeStatus.ON : DiodeStatus.OFF;
 				})
 				.setStatusStringMapper(() -> {
 					if (!hasCrystal)
-						return NO_CRYSTAL_STRING;
+						return I18n.format("gui.dhd.no_crystal");
 					
 					return null;
 				}));
 		
 		diodes.add(new Diode(this, 26, 55, I18n.format("gui.dhd.reactorStatus"))
-				.putStatus(DiodeStatus.OFF, new DiodeStatusString("gui.dhd.no_fuel").setItalic().setColor(TextFormatting.DARK_RED))
-				.putStatus(DiodeStatus.WARN, new DiodeStatusString("gui.dhd.standby").setItalic().setColor(TextFormatting.YELLOW))
-				.putStatus(DiodeStatus.ON, new DiodeStatusString("gui.dhd.running").setItalic().setColor(TextFormatting.GREEN))
+				.putStatus(DiodeStatus.OFF, I18n.format("gui.dhd.no_fuel"))
+				.putStatus(DiodeStatus.WARN, I18n.format("gui.dhd.standby"))
+				.putStatus(DiodeStatus.ON, I18n.format("gui.dhd.running"))
 				.setStatusMapper(() -> {
 					switch (container.dhdTile.getReactorState()) {
 						case NOT_LINKED:
@@ -87,10 +83,10 @@ public class DHDContainerGui extends GuiContainer {
 				})
 				.setStatusStringMapper(() -> {
 					if (!hasCrystal)
-						return NO_CRYSTAL_STRING;
+						return I18n.format("gui.dhd.no_crystal");
 					
 					else if (!isLinked)
-						return NOT_LINKED_STRING;
+						return I18n.format("gui.dhd.not_linked");
 	
 					return null;
 				}));
@@ -120,13 +116,15 @@ public class DHDContainerGui extends GuiContainer {
 		GlStateManager.color(1, 1, 1, 1);
 		
 		if (container.dhdTile.getReactorState() == ReactorStateEnum.ONLINE) {
+			TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(AunisFluids.moltenNaquadahRefined.getStill().toString());
+			
 			// Top duct Naquadah
 			for (int i=0; i<3; i++)
-				drawTexturedModalRect(guiLeft+102+16*i, guiTop+55, tank.sprite, 16, 16);
+				drawTexturedModalRect(guiLeft+102+16*i, guiTop+55, sprite, 16, 16);
 			
 			// Bottom duct Naquadah
 			for (int i=0; i<5; i++)
-				GuiHelper.drawTexturedRectScaled(guiLeft+86+16*i, guiTop+82, tank.sprite, 16, 16, 10.0f/16);
+				GuiHelper.drawTexturedRectScaled(guiLeft+86+16*i, guiTop+82, sprite, 16, 16, 10.0f/16);
 		}
 		
 		// Naquadah ducts
@@ -162,35 +160,6 @@ public class DHDContainerGui extends GuiContainer {
 			if (statuses[i])
 				diodes.get(i).renderTooltip(mouseX-guiLeft, mouseY-guiTop);
 		}
-		
-//		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(Aunis.ModID, "textures/gui/diodes.png"));
-		
-//		boolean linked = container.dhdTile.isLinked();
-//		boolean reactorRunning = true;
-//		boolean drawLinkedStatus = drawDiode(8,  55, mouseX, mouseY, linked);
-//		boolean drawReactorStatus = drawDiode(17,  55, mouseX, mouseY, reactorRunning);
-//		
-//		if (drawLinkedStatus) {
-//			TextComponentTranslation linkedState = new TextComponentTranslation(linked ? "gui.dhd.linked" : "gui.dhd.not_linked");
-//			linkedState.getStyle().setItalic(true).setColor(linked ? TextFormatting.GREEN : TextFormatting.DARK_RED);
-//			
-//			List<String> linkedStatus = Arrays.asList(
-//					I18n.format("gui.dhd.linkStatus"),
-//					linkedState.getFormattedText());
-//			
-//			drawHoveringText(linkedStatus, mouseX-guiLeft, mouseY-guiTop);
-//		}
-//		
-//		if (drawReactorStatus) {
-//			TextComponentTranslation reactorState = new TextComponentTranslation(reactorRunning ? "gui.dhd.running" : "gui.dhd.not_running");
-//			reactorState.getStyle().setItalic(true).setColor(reactorRunning ? TextFormatting.GREEN : TextFormatting.DARK_RED);
-//			
-//			List<String> reactorStatus = Arrays.asList(
-//					I18n.format("gui.dhd.reactorStatus"),
-//					reactorState.getFormattedText());
-//			
-//			drawHoveringText(reactorStatus, mouseX-guiLeft, mouseY-guiTop);
-//		}
 		
 		tank.renderTooltip(mouseX, mouseY);
 	}

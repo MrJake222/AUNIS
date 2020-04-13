@@ -58,6 +58,10 @@ public class AunisItems {
 	public static final PageMysteriousItem PAGE_MYSTERIOUS_ITEM = new PageMysteriousItem();
 	public static final UniverseDialerItem UNIVERSE_DIALER = new UniverseDialerItem();
 	
+	public static final Item BEAMER_CRYSTAL_POWER = ItemHelper.createGenericItem("beamer_crystal_power");
+	public static final Item BEAMER_CRYSTAL_FLUID = ItemHelper.createGenericItem("beamer_crystal_fluid");
+	public static final Item BEAMER_CRYSTAL_ITEMS = ItemHelper.createGenericItem("beamer_crystal_items");
+	
 	private static Item[] items = {		
 		CRYSTAL_CONTROL_DHD,
 		
@@ -89,7 +93,11 @@ public class AunisItems {
 		
 		DHD_BRB,
 		PAGE_MYSTERIOUS_ITEM,
-		UNIVERSE_DIALER
+		UNIVERSE_DIALER,
+		
+		BEAMER_CRYSTAL_POWER,
+		BEAMER_CRYSTAL_FLUID,
+		BEAMER_CRYSTAL_ITEMS
 	};
 	
 	@SubscribeEvent

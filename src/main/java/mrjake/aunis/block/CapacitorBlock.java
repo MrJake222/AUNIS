@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
 import mrjake.aunis.tileentity.CapacitorTile;
 import net.minecraft.block.Block;
@@ -22,7 +23,6 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -81,14 +81,8 @@ public class CapacitorBlock extends Block {
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		
-		if (!world.isRemote && !player.isSneaking()) {
-			CapacitorTile gateTile = (CapacitorTile) world.getTileEntity(pos);
-			IEnergyStorage energyStorage = gateTile.getCapability(CapabilityEnergy.ENERGY, null);
-			
-			String energy = String.format("%,d", energyStorage.getEnergyStored());
-			String capacity = String.format("%,d", energyStorage.getMaxEnergyStored());
-			
-			player.sendMessage(new TextComponentTranslation("chat.orlins.energyStored", energy, capacity));
+		if (!player.isSneaking()) {
+			player.openGui(Aunis.instance, GuiIdEnum.GUI_CAPACITOR.id, world, pos.getX(), pos.getY(), pos.getZ());
 		}
 				
 		return !player.isSneaking();

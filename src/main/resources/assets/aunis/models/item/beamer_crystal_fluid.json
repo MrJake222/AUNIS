@@ -1,0 +1,6 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "aunis:items/beamer_crystal_fluid"
+    }
+}

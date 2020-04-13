@@ -1,0 +1,26 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "aunis:beamer_block"
+	},
+	"variants": {
+		"normal": [{}],
+		"inventory": [{
+			"textures": { "front": "aunis:blocks/beamer_front_none" }
+		}],
+		
+		"facing": {
+			"south": { "y": 180 },
+			"west": { "y": 270 },
+			"north": {},
+			"east": { "y": 90 }
+		},
+		
+		"mode": {
+			"power": { "textures": { "front": "aunis:blocks/beamer_front_power" } },
+			"fluid": { "textures": { "front": "aunis:blocks/beamer_front_fluid" } },
+			"items": { "textures": { "front": "aunis:blocks/beamer_front_items" } },
+			"none": { "textures": { "front": "aunis:blocks/beamer_front_none" } }
+		}
+	}
+}

@@ -5,6 +5,7 @@ import java.util.List;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.gui.container.DHDContainerGuiUpdate;
@@ -36,7 +37,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -73,7 +74,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		return this.linkedGate != null;
 	}
 	
-	public StargateAbstractBaseTile getLinkedGate(World world) {
+	public StargateAbstractBaseTile getLinkedGate(IBlockAccess world) {
 		if (linkedGate == null)
 			return null;
 		
@@ -182,10 +183,12 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		else
 			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS);
 		
+        world.notifyNeighborsOfStateChange(pos, AunisBlocks.DHD_BLOCK, true);
 		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(symbol)), targetPoint);
 	}
 	
 	public void clearSymbols() {
+        world.notifyNeighborsOfStateChange(pos, AunisBlocks.DHD_BLOCK, true);
 		AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(true)), targetPoint);
 	}
 	

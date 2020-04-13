@@ -1,0 +1,20 @@
+{
+	"parent": "block/cube_all",
+	"textures": {
+		"normal": "aunis:blocks/naquadah_block",
+		"particle": "aunis:blocks/naquadah_block"
+	},
+    "elements": [
+        {   "from": [ 0, 0, 0 ],
+            "to": [ 16, 16, 16 ],
+            "faces": {
+                "down":  { "texture": "#normal", "cullface": "down" },
+                "up":    { "texture": "#normal", "cullface": "up" },
+                "north": { "texture": "#front", "cullface": "north" },
+                "south": { "texture": "#normal", "cullface": "south" },
+                "west":  { "texture": "#normal", "cullface": "west" },
+                "east":  { "texture": "#normal", "cullface": "east" }
+            }
+        }
+    ]
+}

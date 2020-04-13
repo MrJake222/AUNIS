@@ -12,6 +12,10 @@ public class StargateAbstractEnergyStorage extends EnergyStorage implements INBT
 		super(AunisConfig.powerConfig.stargateEnergyStorage/4, AunisConfig.powerConfig.stargateMaxEnergyTransfer, 0);
 	}
 	
+	public StargateAbstractEnergyStorage(int capacity, int maxTransfer) {
+		super(capacity, maxTransfer);
+	}
+	
 	@Override
 	public NBTTagCompound serializeNBT() {
 		NBTTagCompound tagCompound = new NBTTagCompound();
@@ -32,25 +36,34 @@ public class StargateAbstractEnergyStorage extends EnergyStorage implements INBT
 	
 	@Override
 	public int receiveEnergy(int maxReceive, boolean simulate) {
-		int rx = super.receiveEnergy(maxReceive, simulate);
+		int energyReceived = super.receiveEnergy(maxReceive, simulate);
 		
-		if (rx > 0)
+		if (energyReceived > 0)
 			onEnergyChanged();
 		
-		return rx;
+		return energyReceived;
 	}
 	
 	@Override
 	public int extractEnergy(int maxExtract, boolean simulate) {
 		int energyExtracted = Math.min(energy, maxExtract);
 		
-		if (!simulate) {
+		if (!simulate && energyExtracted > 0) {
 			energy -= energyExtracted;
 			onEnergyChanged();
 		}
 		
 		return energyExtracted;
 	}
+	
+    public int receiveEnergyInternal(int maxReceive, boolean simulate) {
+        int energyReceived = Math.min(capacity - energy, Math.min(this.maxReceive, maxReceive));
+        if (!simulate && energyReceived > 0) {
+			energy += energyReceived;
+			onEnergyChanged();
+		}
+        return energyReceived;
+    }
 	
 	public void setEnergyStored(int energyStored) {
 		this.energy = Math.min(energyStored, capacity);

@@ -11,8 +11,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 public class Diode {
@@ -41,10 +40,6 @@ public class Diode {
 	public Diode putStatus(DiodeStatus status, String statusString) {
 		statusStringMap.put(status, statusString);
 		return this;
-	}
-	
-	public Diode putStatus(DiodeStatus status, DiodeStatusString statusString) {
-		return putStatus(status, statusString.getFormattedText());
 	}
 	
 	public Diode setStatusMapper(StatusMapperInterface statusMapper) {
@@ -82,44 +77,28 @@ public class Diode {
 		if (statusString == null)
 			statusString = statusStringMap.get(status);
 		
+		TextComponentString textComponent = new TextComponentString(statusString);
+		textComponent.getStyle().setItalic(true);
+		textComponent.getStyle().setColor(status.color);
+				
 		screen.drawHoveringText(Arrays.asList(
 				description,
-				statusString), mouseX, mouseY);
+				textComponent.getFormattedText()), mouseX, mouseY);
 	}
 	
 	public static enum DiodeStatus {
-		OFF(0, 0),
-		WARN(8, 0),
-		ON(0, 7);
+		OFF(0, 0, TextFormatting.DARK_RED),
+		WARN(8, 0, TextFormatting.YELLOW),
+		ON(0, 7, TextFormatting.GREEN);
 		
 		public int xTex;
 		public int yTex;
+		public TextFormatting color;
 
-		private DiodeStatus(int xTex, int yTex) {
+		private DiodeStatus(int xTex, int yTex, TextFormatting color) {
 			this.xTex = xTex;
 			this.yTex = yTex;
-		}
-	}
-	
-	public static class DiodeStatusString {
-		private ITextComponent textComponent;
-
-		public DiodeStatusString(String translationKey) {
-			this.textComponent = new TextComponentTranslation(translationKey);
-		}
-
-		public DiodeStatusString setColor(TextFormatting color) {
-			textComponent.getStyle().setColor(color);
-			return this;
-		}
-		
-		public DiodeStatusString setItalic() {
-			textComponent.getStyle().setItalic(true);
-			return this;
-		}
-		
-		public String getFormattedText() {
-			return textComponent.getFormattedText();
+			this.color = color;
 		}
 	}
 	

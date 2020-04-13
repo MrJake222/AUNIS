@@ -1,11 +1,15 @@
 package mrjake.aunis.tileentity.stargate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
+import mrjake.aunis.beamer.BeamerLinkingHelper;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.container.StargateContainerGuiState;
 import mrjake.aunis.gui.container.StargateContainerGuiUpdate;
@@ -33,15 +37,19 @@ import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
+import mrjake.aunis.tileentity.BeamerTile;
 import mrjake.aunis.tileentity.util.ScheduledTask;
+import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.EnumKeyInterface;
 import mrjake.aunis.util.EnumKeyMap;
 import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.ItemHandlerHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -65,6 +73,24 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	// Stargate state
 	
 	protected boolean isFinalActive;
+	
+	@Override
+	protected void engageGate() {
+		super.engageGate();
+		
+		for (BlockPos beamerPos : linkedBeamers) {
+			((BeamerTile) world.getTileEntity(beamerPos)).gateEngaged(targetGatePos);
+		}
+	}
+	
+	@Override
+	public void closeGate(StargateClosedReasonEnum reason) {
+		super.closeGate(reason);
+		
+		for (BlockPos beamerPos : linkedBeamers) {
+			((BeamerTile) world.getTileEntity(beamerPos)).gateClosed();
+		}
+	}
 	
 	@Override
 	protected void disconnectGate() {
@@ -114,11 +140,34 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 
 		playPositionedSound(StargateSoundPositionedEnum.GATE_RING_ROLL, false);
 		ItemHandlerHelper.dropInventoryItems(world, pos, itemStackHandler);
+				
+		for (BlockPos beamerPos : linkedBeamers) {
+			BeamerTile beamerTile = (BeamerTile) world.getTileEntity(beamerPos);
+			beamerTile.setLinkedGate(null, null);
+		}
+		
+		linkedBeamers.clear();
 	}
 	
+	@Override
+	protected void onGateMerged() {
+		super.onGateMerged();
+		
+		BeamerLinkingHelper.findBeamersInFront(world, pos, facing);
+		updateBeamers();
+	}
 	
 	// ------------------------------------------------------------------------
 	// Loading and ticking
+	
+	@Override
+	public void onLoad() {
+		super.onLoad();
+		
+		if (!world.isRemote) {
+			updateBeamers();
+		}
+	}
 	
 	@Override
 	public void update() {
@@ -194,6 +243,11 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		compound.setInteger("targetRingSymbol", targetRingSymbol.getId());
 		compound.setInteger("spinDirection", spinDirection.id);
 
+		NBTTagList linkedBeamersTagList = new NBTTagList();
+		for (BlockPos vect : linkedBeamers)
+			linkedBeamersTagList.appendTag(new NBTTagLong(vect.toLong()));
+		compound.setTag("linkedBeamers", linkedBeamersTagList);
+		
 		return super.writeToNBT(compound);
 	}
 	
@@ -214,6 +268,9 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		targetRingSymbol = getSymbolType().valueOfSymbol(compound.getInteger("targetRingSymbol"));
 		spinDirection = EnumSpinDirection.valueOf(compound.getInteger("spinDirection"));
 		
+		for (NBTBase tag : compound.getTagList("linkedBeamers", NBT.TAG_LONG))		
+			linkedBeamers.add(BlockPos.fromLong(((NBTTagLong) tag).getLong()));
+			
 		super.readFromNBT(compound);
 	}
 	
@@ -255,6 +312,12 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		return (StargateClassicRendererState) super.getRendererStateClient();
 	}
 	
+	public static final AunisAxisAlignedBB RENDER_BOX = new AunisAxisAlignedBB(-5.5, 0, -0.5, 5.5, 10.5, 0.5);
+	
+	@Override
+	protected AunisAxisAlignedBB getRenderBoundingBoxRaw() {
+		return RENDER_BOX;
+	}
 	
 	// -----------------------------------------------------------------
 	// States
@@ -459,7 +522,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		markDirty();
 	}
 	
-	
 	// -----------------------------------------------------------------------------
 	// Page conversion
 	
@@ -637,6 +699,34 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
 		
 		return super.getCapability(capability, facing);	
+	}
+	
+	
+	// -----------------------------------------------------------------
+	// Beamers
+	
+	private List<BlockPos> linkedBeamers = new ArrayList<>();
+	
+	public void addLinkedBeamer(BlockPos pos) {
+		Aunis.info("adding beamer " + pos);
+		((BeamerTile) world.getTileEntity(pos)).gateEngaged(targetGatePos);
+		
+		linkedBeamers.add(pos.toImmutable());
+		markDirty();
+	}
+	
+	public void removeLinkedBeamer(BlockPos pos) {
+		Aunis.info("removing beamer " + pos);
+		linkedBeamers.remove(pos);
+		markDirty();
+	}
+	
+	private void updateBeamers() {
+		if (stargateState.engaged()) {
+			for (BlockPos beamerPos : linkedBeamers) {
+				((BeamerTile) world.getTileEntity(beamerPos)).gateEngaged(targetGatePos);
+			}
+		}
 	}
 	
 	

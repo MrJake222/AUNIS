@@ -5,7 +5,9 @@ import java.util.Map;
 
 public enum GuiIdEnum {
 	GUI_DHD(0),
-	GUI_STARGATE(1);
+	GUI_STARGATE(1),
+	GUI_CAPACITOR(2),
+	GUI_BEAMER(3);
 	
 	public int id;
 	

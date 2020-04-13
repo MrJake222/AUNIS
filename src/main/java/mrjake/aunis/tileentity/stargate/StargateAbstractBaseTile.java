@@ -811,6 +811,12 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	// ------------------------------------------------------------------------
 	// Rendering
 	
+	private AxisAlignedBB renderBoundingBox = TileEntity.INFINITE_EXTENT_AABB;
+	
+	public AunisAxisAlignedBB getRenderBoundingBoxForDisplay() {
+		return getRenderBoundingBoxRaw().rotate((int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5);
+	}
+	
 	protected StargateAbstractRendererStateBuilder getRendererStateServer() {
 		return StargateAbstractRendererState.builder()
 				.setStargateState(stargateState);
@@ -830,9 +836,12 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_LIGHTING_UPDATE_CLIENT, 10));
 	}
 	
+	protected abstract AunisAxisAlignedBB getRenderBoundingBoxRaw();
+	
 	public void updateFacing(EnumFacing facing, boolean server) {
 		this.facing = facing;
 		this.eventHorizon = new EventHorizon(world, pos, facing, getHorizonTeleportBox(server));
+		this.renderBoundingBox = getRenderBoundingBoxRaw().rotate((int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5).offset(pos);
 		
 		AunisAxisAlignedBB kBox = getHorizonKillingBox(server);
 		double width = kBox.maxZ - kBox.minZ;
@@ -861,7 +870,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
-		return new AxisAlignedBB(getPos().add(-7, 0, -7), getPos().add(7, 12, 7));
+		return renderBoundingBox;
 	}
 		
 	@Override

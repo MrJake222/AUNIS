@@ -9,10 +9,14 @@ public class StargateClassicEnergyStorage extends StargateAbstractEnergyStorage 
 	
 	private List<IEnergyStorage> storages = new ArrayList<IEnergyStorage>();
 	
+	public StargateClassicEnergyStorage(int capacity, int maxTransfer) {
+		super(capacity, maxTransfer);
+	}
+	
 	public StargateClassicEnergyStorage() {
 		super();
 	}
-	
+
 	public void clearStorages() {
 		storages.clear();
 	}

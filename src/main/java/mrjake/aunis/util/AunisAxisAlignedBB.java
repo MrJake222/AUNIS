@@ -72,7 +72,7 @@ public class AunisAxisAlignedBB extends AxisAlignedBB {
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public void render(double x, double y, double z) {
+	public void render() {
 		GlStateManager.color(1.0f, 0, 0);
 		GlStateManager.disableTexture2D();
 		GlStateManager.disableLighting();

@@ -69,7 +69,6 @@ public abstract class StargateClassicBaseBlock extends Block {
 				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.byHorizontalIndex(meta & 0x03));
 	}
 	
-	
 	// --------------------------------------------------------------------------------------
 	// Interactions
 	

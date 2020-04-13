@@ -355,6 +355,13 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 //		return !isBroken();
 //	}
 	
+	public static final AunisAxisAlignedBB RENDER_BOX = new AunisAxisAlignedBB(-5.5, 0, -0.5, 5.5, 10.5, 0.5);
+	
+	@Override
+	protected AunisAxisAlignedBB getRenderBoundingBoxRaw() {
+		return RENDER_BOX;
+	}
+	
 	// ------------------------------------------------------------------------
 	// NBT
 	
