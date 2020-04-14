@@ -1,0 +1,40 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"F F",
+		"BAR",
+		"OIO"
+	],
+	
+	"key": {
+		"O": {
+			"item": "aunis:naquadah_block"
+		},
+	
+		"F": {
+			"item": "aunis:naquadah_alloy"
+		},
+		
+		"A": {
+			"item": "minecraft:beacon"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_red"
+		},
+		
+		"B": {
+			"item": "aunis:crystal_blue"
+		},
+		
+		"I": {
+			"item": "aunis:circuit_control_naquadah"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:beamer_block",
+		"count": 1,
+		"data": 0
+	}
+}

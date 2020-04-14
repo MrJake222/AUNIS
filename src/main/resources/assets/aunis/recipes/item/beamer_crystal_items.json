@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"   ",
+		"RCR",
+		"   "
+	],
+	
+	"key": {
+		"C": {
+			"item": "aunis:circuit_control_crystal"
+		},
+		
+		"R": {
+			"item": "aunis:crystal_ender"
+		}
+	},
+	
+	"result": {
+		"item": "aunis:beamer_crystal_items",
+		"count": 1,
+		"data": 0
+	}
+}
