@@ -117,6 +117,11 @@ public class UniverseDialerItem extends Item {
 								switch (mode) {
 									case MEMORY:
 									case NEARBY:
+										StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) world.getTileEntity(targetPos);
+										
+										if (!gateTile.isMerged())
+											continue;
+										
 										NBTTagList nearbyList = new NBTTagList();
 										int squaredGate = AunisConfig.stargateConfig.universeGateNearbyReach * AunisConfig.stargateConfig.universeGateNearbyReach;
 										
@@ -132,12 +137,12 @@ public class UniverseDialerItem extends Item {
 											if (stargatePos.gatePos.equals(targetPos))
 												continue;
 											
-											StargateAbstractBaseTile gateTile = stargatePos.getTileEntity();
+											StargateAbstractBaseTile targetGateTile = stargatePos.getTileEntity();
 											
-											if (!gateTile.isMerged())
+											if (!targetGateTile.isMerged())
 												continue;
 											
-											if (gateTile instanceof StargateOrlinBaseTile)
+											if (targetGateTile instanceof StargateOrlinBaseTile)
 												continue;
 											
 											nearbyList.appendTag(entry.getKey().serializeNBT());
