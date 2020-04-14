@@ -5,6 +5,8 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.beamer.BeamerLinkingHelper;
 import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.tileentity.BeamerTile;
 import mrjake.aunis.util.ItemHandlerHelper;
 import net.minecraft.block.Block;
@@ -137,6 +139,8 @@ public class BeamerBlock extends Block {
 			
 			if (beamerTile.isLinked())
 				beamerTile.getLinkedGateTile().removeLinkedBeamer(pos);
+			
+			AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.BEAMER_LOOP, false);
 		}
 		
 		super.breakBlock(world, pos, state);

@@ -10,7 +10,8 @@ import net.minecraft.util.SoundCategory;
 public enum SoundPositionedEnum {
 	MILKYWAY_RING_ROLL(0, "gate_milkyway_ring_roll", SoundCategory.AMBIENT, false),
 	WORMHOLE_LOOP(1, "wormhole_loop", SoundCategory.AMBIENT, true),
-	UNIVERSE_RING_ROLL(2, "gate_universe_roll", SoundCategory.AMBIENT, false);
+	UNIVERSE_RING_ROLL(2, "gate_universe_roll", SoundCategory.AMBIENT, false),
+	BEAMER_LOOP(3, "beamer_loop", SoundCategory.AMBIENT, true);
 	
 	public int id;
 	public ResourceLocation resourceLocation;

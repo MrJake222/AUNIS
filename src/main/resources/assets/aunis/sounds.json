@@ -198,6 +198,30 @@
     "sounds": [
       "aunis:gate/universe/gate_universe_close"
     ]
+  },
+  
+  "beamer_start": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.beamer_start",
+    "sounds": [
+      "aunis:beamer/beamer_start"
+    ]
+  },
+  
+  "beamer_stop": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.beamer_stop",
+    "sounds": [
+      "aunis:beamer/beamer_stop"
+    ]
+  },
+  
+  "beamer_loop": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.beamer_loop",
+    "sounds": [
+      "aunis:beamer/beamer_loop"
+    ]
   }
 }
 

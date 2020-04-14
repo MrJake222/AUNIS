@@ -10,7 +10,10 @@ import mrjake.aunis.item.dialer.UniverseDialerModeChangeToServer;
 import mrjake.aunis.item.dialer.UniverseDialerModeChangeToServer.UniverseDialerModeChangeServerHandler;
 import mrjake.aunis.item.dialer.UniverseDialerOCProgramToServer.UniverseDialerOCProgramServerHandler;
 import mrjake.aunis.item.dialer.UniverseDialerOCProgramToServer;
-import mrjake.aunis.packet.BeamerChangeRoleToServer.BeamerChangeModeServerHandler;
+import mrjake.aunis.packet.BeamerChangeRoleToServer.BeamerChangeRoleServerHandler;
+import mrjake.aunis.packet.BeamerChangedInactivityToServer.BeamerChangedInactivityServerHandler;
+import mrjake.aunis.packet.BeamerChangedLevelsToServer.BeamerChangedLevelsServerHandler;
+import mrjake.aunis.packet.ChangeRedstoneModeToServer.ChangeRedstoneModeServerHandler;
 import mrjake.aunis.packet.SetOpenTabToServer.SetOpenTabServerHandler;
 import mrjake.aunis.packet.SoundPositionedPlayToClient.PlayPositionedSoundClientHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient.StateUpdateClientHandler;
@@ -48,7 +51,10 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(UniverseDialerAddressRemoveServerHandler.class, UniverseDialerAddressRemoveToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(UniverseDialerAbortServerHandler.class, UniverseDialerAbortToSever.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(UniverseDialerOCProgramServerHandler.class, UniverseDialerOCProgramToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(BeamerChangeModeServerHandler.class, BeamerChangeRoleToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(BeamerChangeRoleServerHandler.class, BeamerChangeRoleToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(ChangeRedstoneModeServerHandler.class, ChangeRedstoneModeToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(BeamerChangedLevelsServerHandler.class, BeamerChangedLevelsToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(BeamerChangedInactivityServerHandler.class, BeamerChangedInactivityToServer.class, id, Side.SERVER); id++;
 
 		
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, StargateMotionToClient.class, id, Side.CLIENT); id++;

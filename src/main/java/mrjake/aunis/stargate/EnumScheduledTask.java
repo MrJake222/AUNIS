@@ -33,7 +33,8 @@ public enum EnumScheduledTask {
 	STARGATE_FAILED_SOUND(23, -1),
 	STARGATE_FAIL(24, -1),
 	STARGATE_GIVE_PAGE(25, -1),
-	STARGATE_DIAL_NEXT(26, -1);	
+	STARGATE_DIAL_NEXT(26, -1),
+	BEAMER_TOGGLE_SOUND(27, -1);
 	
 	public int id;
 	public int waitTicks;

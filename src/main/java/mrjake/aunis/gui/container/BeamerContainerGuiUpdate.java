@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.beamer.BeamerRoleEnum;
 import mrjake.aunis.state.State;
+import mrjake.aunis.tileentity.util.RedstoneModeEnum;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -15,12 +16,20 @@ public class BeamerContainerGuiUpdate extends State {
 	public int transferredLastTick;
 	public FluidStack fluidStack;
 	public BeamerRoleEnum beamerRole;
+	public RedstoneModeEnum mode;
+	public int start;
+	public int stop;
+	public int inactivity;
 
-	public BeamerContainerGuiUpdate(int energyStored, int transferedLastTick, FluidStack fluidStack, BeamerRoleEnum beamerRole) {
+	public BeamerContainerGuiUpdate(int energyStored, int transferedLastTick, FluidStack fluidStack, BeamerRoleEnum beamerRole, RedstoneModeEnum redstoneMode, int start, int stop, int inactivity) {
 		this.energyStored = energyStored;
 		this.transferredLastTick = transferedLastTick;
 		this.fluidStack = fluidStack;
 		this.beamerRole = beamerRole;
+		this.mode = redstoneMode;
+		this.start = start;
+		this.stop = stop;
+		this.inactivity = inactivity;
 	}
 	
 	@Override
@@ -28,6 +37,10 @@ public class BeamerContainerGuiUpdate extends State {
 		buf.writeInt(energyStored);
 		buf.writeInt(transferredLastTick);
 		buf.writeInt(beamerRole.id);
+		buf.writeInt(mode.getKey());
+		buf.writeInt(start);
+		buf.writeInt(stop);
+		buf.writeInt(inactivity);
 		
 		if (fluidStack != null) {
 			buf.writeBoolean(true);
@@ -48,6 +61,10 @@ public class BeamerContainerGuiUpdate extends State {
 		energyStored = buf.readInt();
 		transferredLastTick = buf.readInt();
 		beamerRole = BeamerRoleEnum.valueOf(buf.readInt());
+		mode = RedstoneModeEnum.valueOf(buf.readInt());
+		start = buf.readInt();
+		stop = buf.readInt();
+		inactivity = buf.readInt();
 		
 		if (buf.readBoolean()) {
 			int size = buf.readInt();

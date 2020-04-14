@@ -15,7 +15,7 @@ public class BeamerChangeRoleToServer extends PositionedPacket {
 	}
 	
 	
-	public static class BeamerChangeModeServerHandler implements IMessageHandler<BeamerChangeRoleToServer, IMessage> {
+	public static class BeamerChangeRoleServerHandler implements IMessageHandler<BeamerChangeRoleToServer, IMessage> {
 
 		@Override
 		public IMessage onMessage(BeamerChangeRoleToServer message, MessageContext ctx) {

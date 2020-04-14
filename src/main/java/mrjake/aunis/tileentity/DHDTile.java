@@ -358,6 +358,9 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		
 		@Override
 		public boolean canFillFluidType(FluidStack fluid) {
+			if (fluid == null)
+				return false;
+			
 			return fluid.getFluid() == AunisFluids.moltenNaquadahRefined;
 		}
 		

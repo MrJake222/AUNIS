@@ -608,11 +608,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				eventHorizon.scheduleTeleportation(targetGatePos);
 			}
 			
-			// Not initiating
-			if (stargateState == EnumStargateState.ENGAGED && AunisConfig.autoCloseConfig.autocloseEnabled) {
-				if (getAutoCloseManager().shouldClose(targetGatePos)) {
-					targetGatePos.getTileEntity().attemptClose(StargateClosedReasonEnum.REQUESTED);
-				}
+			// Autoclose
+			if (world.getTotalWorldTime() % 20 == 0 && stargateState == EnumStargateState.ENGAGED && AunisConfig.autoCloseConfig.autocloseEnabled && shouldAutoclose()) {
+				targetGatePos.getTileEntity().attemptClose(StargateClosedReasonEnum.REQUESTED);
 			}
 			
 			if (horizonFlashTask != null && horizonFlashTask.isActive()) {
@@ -711,6 +709,14 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			energyTransferedLastTick = getEnergyStorage().getEnergyStored() - energyStoredLastTick;
 			energyStoredLastTick = getEnergyStorage().getEnergyStored();
 		}
+	}
+	
+	/**
+	 * Method for closing the gate using Autoclose mechanism.
+	 * @return {@code True} if the gate should be closed, false otherwise.
+	 */
+	protected boolean shouldAutoclose() {
+		return getAutoCloseManager().shouldClose(targetGatePos);
 	}
 	
 	@Override

@@ -274,12 +274,25 @@ gui.beamer.mode_mismatch=Mode mismatch
 gui.beamer.no_beamer=No Beamer found
 gui.beamer.closed=Gate closed
 gui.beamer.incoming=Incoming wormhole
+gui.beamer.disabled_by_logic=Disabled by logic
+gui.beamer.disabled_by_logic_target=Disabled by logic (Target)
 gui.beamer.running=Running
 gui.beamer.no_crystal=No crystal
 
 gui.beamer.transmit=Transmit
 gui.beamer.receive=Receive
 gui.beamer.disabled=Disabled
+gui.beamer.activation=Beamer activation
+gui.beamer.auto=Auto
+gui.beamer.on_high=On signal
+gui.beamer.on_low=Without signal
+gui.beamer.ignored=Ignored
+gui.beamer.activate_below=Activate below [%%]
+gui.beamer.deactivate_over=Deactivate over [%%]
+gui.beamer.deactivate=Deactivate after
+gui.beamer.after_inactivity=inactivity [s]
+gui.beamer.save=Save
+gui.beamer.invalid=Invalid
 
 chat.orlins.energyStored=Energy stored: %s / %s RF
 

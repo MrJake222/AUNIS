@@ -21,7 +21,7 @@ public class BeamerRenderer extends TileEntitySpecialRenderer<BeamerTile> {
 	        GlStateManager.popMatrix();
 		}
 		
-		if (te.getMode() != BeamerModeEnum.NONE && te.isActive()) { 
+		if (te.getMode() != BeamerModeEnum.NONE && (te.isActive() || te.beamRadiusClient > 0)) { 
 			GlStateManager.alphaFunc(516, 0.1F);
 	        this.bindTexture(TileEntityBeaconRenderer.TEXTURE_BEACON_BEAM);
 			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
@@ -32,8 +32,9 @@ public class BeamerRenderer extends TileEntitySpecialRenderer<BeamerTile> {
 			GlStateManager.rotate(-90, 1, 0, 0);
 			
 			float mul = 1;
-	        TileEntityBeaconRenderer.renderBeamSegment(-0.5, -1.07, -0.5, partialTicks*mul, (te.getRole() == BeamerRoleEnum.TRANSMIT ? 1 : -1), getWorld().getTotalWorldTime()*mul, 1, te.beamLengthClient, te.getMode().colors, 0.1375D, 0.1875D);
+	        TileEntityBeaconRenderer.renderBeamSegment(-0.5, -1.07, -0.5, partialTicks*mul, (te.getRole() == BeamerRoleEnum.TRANSMIT ? 1 : -1), getWorld().getTotalWorldTime()*mul, 1, te.beamLengthClient, te.getMode().colors, te.beamRadiusClient, te.beamRadiusClient+0.05f);
 	        GlStateManager.popMatrix();
+	        GlStateManager.enableCull();
 		}
 	}
 	

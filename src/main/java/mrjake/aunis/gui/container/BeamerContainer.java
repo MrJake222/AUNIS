@@ -9,6 +9,7 @@ import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.BeamerTile;
+import mrjake.aunis.tileentity.util.RedstoneModeEnum;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -38,6 +39,10 @@ public class BeamerContainer extends Container {
 	private int lastFluidStored;
 	private boolean lastLinked;
 	private BeamerRoleEnum lastRole;
+	private RedstoneModeEnum lastRedstoneMode;
+	private int lastStart;
+	private int lastStop;
+	private int lastIn;
 	
 	public BeamerContainer(IInventory playerInventory, World world, int x, int y, int z) {
 		pos = new BlockPos(x, y, z);
@@ -106,7 +111,7 @@ public class BeamerContainer extends Container {
 		
 		StargateAbstractEnergyStorage energyStorage = (StargateAbstractEnergyStorage) beamerTile.getCapability(CapabilityEnergy.ENERGY, null);
 		
-		if (lastEnergyStored != energyStorage.getEnergyStored() || energyTransferedLastTick != beamerTile.getEnergyTransferredLastTick() || lastFluidStored != tank.getFluidAmount() || lastLinked != beamerTile.isLinked() || lastRole != beamerTile.getRole()) {
+		if (lastEnergyStored != energyStorage.getEnergyStored() || energyTransferedLastTick != beamerTile.getEnergyTransferredLastTick() || lastFluidStored != tank.getFluidAmount() || lastLinked != beamerTile.isLinked() || lastRole != beamerTile.getRole() || lastRedstoneMode != beamerTile.getRedstoneMode() || lastStart != beamerTile.getStart() || lastStop != beamerTile.getStop() || lastIn != beamerTile.getInactivity()) {
 			for (IContainerListener listener : listeners) {
 				if (listener instanceof EntityPlayerMP) {
 					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_UPDATE, beamerTile.getState(StateTypeEnum.GUI_UPDATE)), (EntityPlayerMP) listener);
@@ -118,6 +123,10 @@ public class BeamerContainer extends Container {
 			lastFluidStored = tank.getFluidAmount();
 			lastLinked = beamerTile.isLinked();
 			lastRole = beamerTile.getRole();
+			lastRedstoneMode = beamerTile.getRedstoneMode();
+			lastStart = beamerTile.getStart();
+			lastStop = beamerTile.getStop();
+			lastIn = beamerTile.getInactivity();
 		}
 	}
 	

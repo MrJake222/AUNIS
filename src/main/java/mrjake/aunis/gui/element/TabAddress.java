@@ -28,8 +28,8 @@ public class TabAddress extends Tab {
 	}
 	
 	@Override
-	public void render(FontRenderer fontRenderer) {
-		super.render(fontRenderer);
+	public void render(FontRenderer fontRenderer, int mouseX, int mouseY) {
+		super.render(fontRenderer, mouseX, mouseY);
 		
 		int shadow = 2;
 		float color = 1.0f;

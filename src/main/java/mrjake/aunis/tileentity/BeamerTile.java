@@ -1,5 +1,16 @@
 package mrjake.aunis.tileentity;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.beamer.BeamerModeEnum;
@@ -7,11 +18,16 @@ import mrjake.aunis.beamer.BeamerRoleEnum;
 import mrjake.aunis.beamer.BeamerStatusEnum;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.gui.container.BeamerContainerGui;
 import mrjake.aunis.gui.container.BeamerContainerGuiUpdate;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
+import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.SoundEventEnum;
+import mrjake.aunis.sound.SoundPositionedEnum;
+import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
@@ -21,9 +37,14 @@ import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import mrjake.aunis.tileentity.util.ComparatorHelper;
+import mrjake.aunis.tileentity.util.RedstoneModeEnum;
+import mrjake.aunis.tileentity.util.ScheduledTask;
+import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.pattern.BlockMatcher;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -41,12 +62,16 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class BeamerTile extends TileEntity implements ITickable, StateProviderInterface {
+@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
+public class BeamerTile extends TileEntity implements ITickable, StateProviderInterface, ScheduledTaskExecutorInterface, Environment {
 	
 	// -----------------------------------------------------------------------------
 	// Ticking & loading
@@ -69,6 +94,11 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		
 		if (!world.isRemote) {
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
+			Aunis.ocWrapper.joinOrCreateNetwork(this);
+			
+			if (loopSoundPlaying) {
+				AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.BEAMER_LOOP, true);
+			}
 		}
 		
 		else {
@@ -112,6 +142,9 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		if (targetBeamerTile.getRole() == BeamerRoleEnum.DISABLED)
 			return BeamerStatusEnum.BEAMER_DISABLED_TARGET;
 		
+		if (targetBeamerTile.getStatus() == BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC)
+			return BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC_TARGET;
+		
 		if (beamerRole == targetBeamerTile.getRole()) {
 			if (beamerRole == BeamerRoleEnum.TRANSMIT)
 				return BeamerStatusEnum.TWO_TRANSMITTERS;
@@ -125,12 +158,72 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		if (beamerMode != BeamerModeEnum.POWER && ((gateTile.getStargateState().initiating() && beamerRole != BeamerRoleEnum.TRANSMIT) || (gateTile.getStargateState() == EnumStargateState.ENGAGED && beamerRole != BeamerRoleEnum.RECEIVE)))
 			return BeamerStatusEnum.INCOMING;
 		
+		switch (redstoneMode) {
+			case AUTO:
+				if (beamerRole == BeamerRoleEnum.RECEIVE && (beamerMode == BeamerModeEnum.POWER || beamerMode == BeamerModeEnum.FLUID)) {
+					float level = 0;
+					
+					if (beamerMode == BeamerModeEnum.POWER)
+						level = energyStorage.getEnergyStored() / (float)energyStorage.getMaxEnergyStored();
+					else
+						level = fluidHandler.getFluidAmount() / (float)fluidHandler.getCapacity();
+						
+					level *= 100;
+					
+					if (beamerStatus == BeamerStatusEnum.OK) {
+						if (level > stop)
+							return BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC;
+						
+						return BeamerStatusEnum.OK;
+					}
+					
+					if (beamerStatus == BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC) {
+						if (level < start)
+							return BeamerStatusEnum.OK;
+						
+						return BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC;
+					}
+				}
+					
+				if (beamerMode == BeamerModeEnum.ITEMS) {
+					if (beamerStatus == BeamerStatusEnum.OK) {
+						if (timeWithoutItemTransfer > inactivity)
+							return BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC;
+						
+						return BeamerStatusEnum.OK;
+					}
+					
+					if (beamerStatus == BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC) {
+						for (int i=1; i<5; i++) {
+							if ((beamerRole == BeamerRoleEnum.RECEIVE && !targetBeamerTile.itemStackHandler.getStackInSlot(i).isEmpty()) || (beamerRole == BeamerRoleEnum.TRANSMIT && !itemStackHandler.getStackInSlot(i).isEmpty())) {
+								return BeamerStatusEnum.OK;
+							}
+						}
+						
+						return BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC;
+					}
+				}
+				
+				break;
+		
+			case ON_HIGH:
+				return world.isBlockPowered(pos) ? BeamerStatusEnum.OK : BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC;
+		
+			case ON_LOW:
+				return world.isBlockPowered(pos) ? BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC : BeamerStatusEnum.OK;
+			
+			case IGNORED:
+				return (ocLocked ? BeamerStatusEnum.BEAMER_DISABLED_BY_LOGIC : BeamerStatusEnum.OK);
+		}
+		
 		return BeamerStatusEnum.OK;
 	}
 	
 	@Override
 	public void update() {
 		if (!world.isRemote) {
+			ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());
+			
 			BeamerStatusEnum lastBeamerStatus = beamerStatus;
 			
 			if (world.getTotalWorldTime() % 20 == 0) {
@@ -184,6 +277,8 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 									itemStackHandler.extractItem(i, accepted, false);
 									toTransfer -= accepted;
 									
+									timeWithoutItemTransfer = 0;
+									
 									if (toTransfer == 0)
 										break;
 								}
@@ -192,6 +287,10 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 									break;
 							}
 							
+							if (toTransfer == AunisConfig.beamerConfig.itemTransfer && world.getTotalWorldTime()%20 == 0) {
+								timeWithoutItemTransfer++;
+							}
+																					
 							break;
 						
 						default:
@@ -227,6 +326,10 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 								break;
 								
 							case ITEMS:
+									if (beamerStatus == BeamerStatusEnum.OK && world.getTotalWorldTime()%20 == 0) {
+										timeWithoutItemTransfer++;
+									}
+								
 									if (tileEntity.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side.getOpposite())) {
 										IItemHandler targetItemHandler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side.getOpposite());
 										
@@ -269,6 +372,41 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 			
 			if (lastBeamerStatus != beamerStatus) {
 				syncToClient();
+				
+				if (beamerStatus == BeamerStatusEnum.OK) {
+					sendSignal(null, "beamer_started");
+					AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.BEAMER_START); // 0.611s delay = 12 ticks
+					addTask(new ScheduledTask(EnumScheduledTask.BEAMER_TOGGLE_SOUND, 12));
+				}
+				
+				else if (lastBeamerStatus == BeamerStatusEnum.OK) {
+					sendSignal(null, "beamer_stopped");
+					AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.BEAMER_STOP); // 0.634s delay = 12 ticks
+					addTask(new ScheduledTask(EnumScheduledTask.BEAMER_TOGGLE_SOUND, 12));
+				}
+			}
+		}
+		
+		// Client update
+		else {
+			float speed = 0.005f;
+			
+			if (beamRadiusShrink) {
+				if (beamRadiusClient > 0)
+					beamRadiusClient -= speed;
+				else {
+					beamRadiusShrink = false;
+					beamRadiusClient = 0;
+				}
+			}
+			
+			else if (beamRadiusWiden) {
+				if (beamRadiusClient < 0.1375f)
+					beamRadiusClient += speed;
+				else {
+					beamRadiusWiden = false;
+					beamRadiusClient = 0.1375f;
+				}
 			}
 		}
 	}
@@ -300,6 +438,12 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	private World targetBeamerWorld = null;
 	private BlockPos targetBeamerPos = null;
 	private int comparatorOutput;
+	private RedstoneModeEnum redstoneMode = RedstoneModeEnum.AUTO;
+	private int start = 10;
+	private int stop = 90;
+	private int inactivity = 5;
+	private int timeWithoutItemTransfer;
+	private boolean ocLocked;
 	
 	private boolean isObstructed;
 	
@@ -317,6 +461,41 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	
 	public int getComparatorOutput() {
 		return comparatorOutput;
+	}
+	
+	public RedstoneModeEnum getRedstoneMode() {
+		return redstoneMode;
+	}
+	
+	public void setRedstoneMode(RedstoneModeEnum redstoneMode) {
+		this.redstoneMode = redstoneMode;
+		this.ocLocked = false;
+		
+		markDirty();
+	}
+	
+	public void setStartStop(int start, int stop) {
+		this.start = start;
+		this.stop = stop;
+		
+		markDirty();
+	}
+	
+	public int getStart() {
+		return start;
+	}
+	
+	public int getStop() {
+		return stop;
+	}
+	
+	public void setInactivity(int inactivity) {
+		this.inactivity = inactivity;
+		markDirty();
+	}
+	
+	public int getInactivity() {
+		return inactivity;
 	}
 	
 	public boolean isActive() {
@@ -396,9 +575,7 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	/**
 	 * @param baseVect South-rotated gate-to-beamer vector.
 	 */
-	public void setLinkedGate(BlockPos basePos, BlockPos baseVect) {
-		Aunis.info("setting gate vec to " + baseVect);
-		
+	public void setLinkedGate(BlockPos basePos, BlockPos baseVect) {		
 		if (basePos == null || baseVect == null) {
 			this.basePos = null;
 			this.baseVect = null;
@@ -463,13 +640,15 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		}
 		
 		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-			if (beamerRole != BeamerRoleEnum.TRANSMIT)
+			if (beamerRole != BeamerRoleEnum.TRANSMIT && slot != 0)
 				return stack;
 			
 			return super.insertItem(slot, stack, simulate);
 		}
 		
-		public ItemStack insertItemInternal(int slot, ItemStack stack, boolean simulate) {			
+		public ItemStack insertItemInternal(int slot, ItemStack stack, boolean simulate) {
+			timeWithoutItemTransfer = 0;
+			
 			return super.insertItem(slot, stack, simulate);
 		}
 	}
@@ -571,9 +750,47 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	
 	
 	// ---------------------------------------------------------------------------------------------------
+	// Tasks
+	
+	private boolean loopSoundPlaying;
+	
+	List<ScheduledTask> scheduledTasks = new ArrayList<>();
+	
+	@Override
+	public void addTask(ScheduledTask scheduledTask) {
+		scheduledTask.setExecutor(this);
+		scheduledTask.setTaskCreated(world.getTotalWorldTime());
+		
+		scheduledTasks.add(scheduledTask);
+		markDirty();
+	}
+	
+	@Override
+	public void executeTask(EnumScheduledTask scheduledTask, NBTTagCompound customData) {
+		switch (scheduledTask) {
+			case BEAMER_TOGGLE_SOUND:
+				if (loopSoundPlaying)
+					AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.BEAMER_LOOP, false);
+				else
+					AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.BEAMER_LOOP, true);
+				
+				loopSoundPlaying ^= true;
+				markDirty();
+				
+				break;
+				
+			default:
+				break;
+		}
+	}
+	
+	// ---------------------------------------------------------------------------------------------------
 	// States
 	
 	public int beamLengthClient;
+	public float beamRadiusClient;
+	private boolean beamRadiusWiden;
+	private boolean beamRadiusShrink;
 	
 	@Override
 	public State getState(StateTypeEnum stateType) {
@@ -589,7 +806,7 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 				return new BeamerRendererStateUpdate(beamerMode, beamerStatus, isObstructed, distance);
 		
 			case GUI_UPDATE:
-				return new BeamerContainerGuiUpdate(energyStorage.getEnergyStored(), energyTransferredLastTick, fluidHandler.getFluid(), beamerRole);
+				return new BeamerContainerGuiUpdate(energyStorage.getEnergyStored(), energyTransferredLastTick, fluidHandler.getFluid(), beamerRole, redstoneMode, start, stop, inactivity);
 				
 			default:
 				return null;
@@ -609,18 +826,35 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 				return null;
 		}
 	}
-
+	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
 			case RENDERER_UPDATE:
 				BeamerRendererStateUpdate update = (BeamerRendererStateUpdate) state;
+				if (beamerStatus != update.beamerStatus) {
+					if (beamerStatus == BeamerStatusEnum.OK) {
+						// disable
+						beamRadiusClient = 0.1375f;
+						beamRadiusWiden = false;
+						beamRadiusShrink = true;
+					}
+					
+					else if (update.beamerStatus == BeamerStatusEnum.OK) {
+						// enable
+						beamRadiusClient = 0;
+						beamRadiusWiden = true;
+						beamRadiusShrink = false;
+					}
+				}
+				
+				
 				beamerMode = update.beamerMode;
 				beamerStatus = update.beamerStatus;
 				isObstructed = update.isObstructed;
 				beamLengthClient = update.beamLength;
 				world.markBlockRangeForRenderUpdate(pos, pos);
-				Aunis.info("beamerStatus: " + beamerStatus);
 
 				break;
 		
@@ -630,6 +864,15 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 				energyTransferredLastTick = guiUpdate.transferredLastTick;
 				fluidHandler.setFluid(guiUpdate.fluidStack);
 				beamerRole = guiUpdate.beamerRole;
+				redstoneMode = guiUpdate.mode;
+				start = guiUpdate.start;
+				stop = guiUpdate.stop;
+				inactivity = guiUpdate.inactivity;
+				
+				GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+				if (screen instanceof BeamerContainerGui ) {
+					((BeamerContainerGui) screen).updateStartStopInactivity();
+				}
 				
 				break;
 				
@@ -658,6 +901,14 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		
 		compound.setInteger("beamerMode", beamerMode.getKey());
 		compound.setInteger("beamerRole", beamerRole.getKey());
+		compound.setInteger("redstoneMode", redstoneMode.getKey());
+		compound.setInteger("start", start);
+		compound.setInteger("stop", stop);
+		compound.setInteger("inactivity", inactivity);
+		compound.setBoolean("ocLocked", ocLocked);
+		compound.setBoolean("loopSoundPlaying", loopSoundPlaying);
+		
+		compound.setTag("scheduledTasks", ScheduledTask.serializeList(scheduledTasks));
 		
 		return super.writeToNBT(compound);
 	}
@@ -677,6 +928,14 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		
 		beamerMode = BeamerModeEnum.valueOf(compound.getInteger("beamerMode"));
 		beamerRole = BeamerRoleEnum.valueOf(compound.getInteger("beamerRole"));
+		redstoneMode = RedstoneModeEnum.valueOf(compound.getInteger("redstoneMode"));
+		start = compound.getInteger("start");
+		stop = compound.getInteger("stop");
+		inactivity = compound.getInteger("inactivity");
+		ocLocked = compound.getBoolean("ocLocked");
+		loopSoundPlaying = compound.getBoolean("loopSoundPlaying");
+		
+		ScheduledTask.deserializeList(compound.getCompoundTag("scheduledTasks"), scheduledTasks, this);
 	}
 	
 	
@@ -691,5 +950,143 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	@Override
 	public double getMaxRenderDistanceSquared() {
 		return 65536;
+	}
+	
+	// ------------------------------------------------------------------------
+	// OpenComputers
+	
+	@Override
+	public void onChunkUnload() {
+		if (node != null)
+			node.remove();
+	}
+
+	@Override
+	public void invalidate() {
+		if (node != null)
+			node.remove();
+				
+		super.invalidate();
+	}
+	
+	// ------------------------------------------------------------
+	// Node-related work
+	private Node node = Aunis.ocWrapper.createNode(this, "beamer");
+	
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public Node node() {
+		return node;
+	}
+
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public void onConnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public void onDisconnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public void onMessage(Message message) {}
+	
+	public void sendSignal(Object context, String name, Object... params) {
+		Aunis.ocWrapper.sendSignalToReachable(node, (Context) context, name, params);
+	}
+	
+	// ------------------------------------------------------------
+	// Methods
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] isActive(Context context, Arguments args) {
+		return new Object[] { isActive() };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] setActive(Context context, Arguments args) {
+		ocLocked = !args.checkBoolean(0);
+		markDirty();
+		
+		return new Object[] {};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] start(Context context, Arguments args) {
+		ocLocked = false;
+		markDirty();
+		
+		return new Object[] {};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] stop(Context context, Arguments args) {
+		ocLocked = true;
+		markDirty();
+		
+		return new Object[] {};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getBeamerMode(Context context, Arguments args) {		
+		return new Object[] { beamerMode.toString().toLowerCase() };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getBeamerRole(Context context, Arguments args) {		
+		return new Object[] { beamerRole.toString().toLowerCase() };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getBeamerStatus(Context context, Arguments args) {		
+		return new Object[] { beamerStatus.toString().toLowerCase() };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getBufferStored(Context context, Arguments args) {
+		switch (beamerMode) {
+		case POWER: return new Object[] { energyStorage.getEnergyStored() };
+		case FLUID: return new Object[] { fluidHandler.getFluidAmount(), (fluidHandler.getFluid() != null ? Aunis.proxy.localize(fluidHandler.getFluid().getFluid().getUnlocalizedName()) : null) };
+		case ITEMS:
+			List<Map.Entry<String, Integer>> stackList = new ArrayList<>(4);
+			
+			for (int i=1; i<5; i++) {
+				ItemStack stack = itemStackHandler.getStackInSlot(i);
+				stackList.add(new AbstractMap.SimpleEntry<String, Integer>(stack.getDisplayName(), stack.getCount()));
+			}
+			
+			return new Object[] { stackList };
+			
+		default:
+			return new Object[] { "no_mode_set" };
+		}
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getBufferCapacity(Context context, Arguments args) {
+		switch (beamerMode) {
+			case POWER: return new Object[] { energyStorage.getMaxEnergyStored() };
+			case FLUID: return new Object[] { fluidHandler.getCapacity() };
+			case ITEMS:
+				List<Map.Entry<String, Integer>> stackList = new ArrayList<>(4);
+				
+				for (int i=1; i<5; i++) {
+					ItemStack stack = itemStackHandler.getStackInSlot(i);
+					stackList.add(new AbstractMap.SimpleEntry<String, Integer>(stack.getDisplayName(), stack.getMaxStackSize()));
+				}
+				
+				return new Object[] { stackList };
+				
+			default:
+				return new Object[] { "no_mode_set" };
+		}
 	}
 }

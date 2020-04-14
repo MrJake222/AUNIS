@@ -223,6 +223,20 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		}
 	}
 	
+	@Override
+	protected boolean shouldAutoclose() {
+		boolean beamerActive = false;
+		
+		for (BlockPos beamerPos : linkedBeamers) {
+			BeamerTile beamerTile = (BeamerTile) world.getTileEntity(beamerPos);
+			beamerActive = beamerTile.isActive();
+			
+			if (beamerActive)
+				break;
+		}
+		
+		return !beamerActive && super.shouldAutoclose();
+	}
 	
 	// ------------------------------------------------------------------------
 	// NBT
@@ -708,15 +722,15 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	private List<BlockPos> linkedBeamers = new ArrayList<>();
 	
 	public void addLinkedBeamer(BlockPos pos) {
-		Aunis.info("adding beamer " + pos);
-		((BeamerTile) world.getTileEntity(pos)).gateEngaged(targetGatePos);
+		if (stargateState.engaged()) {
+			((BeamerTile) world.getTileEntity(pos)).gateEngaged(targetGatePos);
+		}
 		
 		linkedBeamers.add(pos.toImmutable());
 		markDirty();
 	}
 	
 	public void removeLinkedBeamer(BlockPos pos) {
-		Aunis.info("removing beamer " + pos);
 		linkedBeamers.remove(pos);
 		markDirty();
 	}

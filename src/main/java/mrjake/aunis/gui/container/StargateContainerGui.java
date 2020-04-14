@@ -175,7 +175,7 @@ public class StargateContainerGui extends GuiContainer {
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {		
 		for (Tab tab : tabs) {
-			tab.render(fontRenderer);
+			tab.render(fontRenderer, mouseX, mouseY);
 		}
 		
 		mc.getTextureManager().bindTexture(BACKGROUND_TEXTURE);

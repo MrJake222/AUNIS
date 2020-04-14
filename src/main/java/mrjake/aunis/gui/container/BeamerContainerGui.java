@@ -10,9 +10,11 @@ import mrjake.aunis.beamer.BeamerModeEnum;
 import mrjake.aunis.beamer.BeamerStatusEnum;
 import mrjake.aunis.gui.element.Diode;
 import mrjake.aunis.gui.element.Diode.DiodeStatus;
+import mrjake.aunis.gui.element.FluidTankElement;
+import mrjake.aunis.gui.element.Tab;
+import mrjake.aunis.gui.element.TabRedstone;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.BeamerChangeRoleToServer;
-import mrjake.aunis.gui.element.FluidTankElement;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -30,10 +32,11 @@ public class BeamerContainerGui extends GuiContainer {
 	private BeamerContainer container;
 	private FluidTankElement tank;
 	
-	private List<Diode> diodes = new ArrayList<Diode>(3);
+	private List<Diode> diodes = new ArrayList<Diode>();
+	private List<Tab> tabs = new ArrayList<Tab>();
 	
-//	private static final String NOT_LINKED_STRING = new DiodeStatusString().setItalic().setColor(TextFormatting.DARK_RED).getFormattedText();
-	
+	private TabRedstone tabRedstone;
+		
 	public BeamerContainerGui(BeamerContainer container) {
 		super(container);
 		
@@ -135,6 +138,8 @@ public class BeamerContainerGui extends GuiContainer {
 							return DiodeStatus.OFF;
 					
 						case INCOMING:
+						case BEAMER_DISABLED_BY_LOGIC:
+						case BEAMER_DISABLED_BY_LOGIC_TARGET:
 							return DiodeStatus.WARN;
 							
 						case OK:
@@ -158,6 +163,8 @@ public class BeamerContainerGui extends GuiContainer {
 
 						case CLOSED: return I18n.format("gui.beamer.closed");
 						case INCOMING: return I18n.format("gui.beamer.incoming");
+						case BEAMER_DISABLED_BY_LOGIC: return I18n.format("gui.beamer.disabled_by_logic");
+						case BEAMER_DISABLED_BY_LOGIC_TARGET: return I18n.format("gui.beamer.disabled_by_logic_target");
 							
 						case OK: return I18n.format("gui.beamer.running");
 					}
@@ -169,8 +176,41 @@ public class BeamerContainerGui extends GuiContainer {
 	@Override
 	public void initGui() {
 		super.initGui();
-		
 		buttonList.add(new GuiButton(0, guiLeft+124, guiTop+18, 46, 20, "Change"));
+				
+		tabRedstone = (TabRedstone) TabRedstone.builder()
+				.setFontRenderer(fontRenderer)
+				.setRedstoneModeGetter(() -> container.beamerTile.getRedstoneMode())
+				.setBeamerModeGetter(() -> container.beamerTile.getMode())
+				.setBlockPos(container.pos)
+				.setGuiPosition(guiLeft, guiTop)
+				.setTabPosition(-21, 2)
+				.setOpenPosition(-128)
+				.setTabSize(128, 80)
+				.setTabTitle(I18n.format("gui.beamer.activation"))
+				.setTexture(BACKGROUND_TEXTURE, 256)
+				.setBackgroundTextureLocation(0, 176)
+				.setIconRenderPos(1, 7)
+				.setIconSize(20, 18)
+				.setIconTextureLocation(128, 0).build();
+		
+		updated = false;
+		
+		tabs.clear();
+		tabs.add(tabRedstone);
+	}
+	
+	private boolean updated = false;
+	
+	public void updateStartStopInactivity() {
+		if (updated)
+			return;
+		
+		updated = true;
+		
+		tabRedstone.setText(0, container.beamerTile.getStart());
+		tabRedstone.setText(1, container.beamerTile.getStop());
+		tabRedstone.setText(2, container.beamerTile.getInactivity());
 	}
 	
 	@Override
@@ -179,11 +219,18 @@ public class BeamerContainerGui extends GuiContainer {
 		
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		renderHoveredToolTip(mouseX, mouseY);
+		
+		Tab.updatePositions(tabs);
 	}
 	
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+		for (Tab tab : tabs) {
+			tab.render(fontRenderer, mouseX, mouseY);
+		}
+		
 		mc.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
+		GlStateManager.color(1, 1, 1, 1);
 		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 		
 		switch (container.beamerTile.getMode()) {
@@ -215,7 +262,7 @@ public class BeamerContainerGui extends GuiContainer {
 	}
 	
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {		
 		String role = I18n.format(container.beamerTile.getRole().translationKey);
 		fontRenderer.drawString(role, 168-fontRenderer.getStringWidth(role)+2, 8, 4210752);
 		fontRenderer.drawString(I18n.format("gui.beamer.name"), 7, 6, 4210752);
@@ -223,7 +270,8 @@ public class BeamerContainerGui extends GuiContainer {
         
         boolean[] statuses = new boolean[diodes.size()];
 		
-		GlStateManager.color(1, 1, 1);
+        GlStateManager.color(1, 1, 1);
+		GlStateManager.disableLighting();
 		for (int i=0; i<diodes.size(); i++) {
 			statuses[i] = diodes.get(i).render(mouseX-guiLeft, mouseY-guiTop);
 		}
@@ -285,11 +333,44 @@ public class BeamerContainerGui extends GuiContainer {
 	        default:
 	        	break;
         }
+        
+		for (Tab tab : tabs) {
+			tab.renderFg(this, fontRenderer, mouseX, mouseY);
+		}
 	}
 	
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		AunisPacketHandler.INSTANCE.sendToServer(new BeamerChangeRoleToServer(container.pos));
+	}
+	
+	@Override
+	protected void keyTyped(char typedChar, int keyCode) throws IOException {
+		super.keyTyped(typedChar, keyCode);
+		tabRedstone.keyTyped(typedChar, keyCode);
+	}
+	
+	@Override
+	public void updateScreen() {
+		super.updateScreen();
+		tabRedstone.updateScreen();
+	}
+	
+	@Override
+	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+		super.mouseClicked(mouseX, mouseY, mouseButton);
+		
+		for (int i=0; i<tabs.size(); i++) {
+			Tab tab = tabs.get(i);
+			
+			if (tab.isCursorOnTab(mouseX, mouseY)) {
+				Tab.tabsInteract(tabs, i);
+				
+				break;
+			}
+		}
+		
+		tabRedstone.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 	
 	private class BeamerSlot extends SlotItemHandler {

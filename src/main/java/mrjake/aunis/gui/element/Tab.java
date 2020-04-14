@@ -97,7 +97,7 @@ public class Tab {
 	
 	protected int currentOffsetX = 0;
 	
-	public void render(FontRenderer fontRenderer) {
+	public void render(FontRenderer fontRenderer, int mouseX, int mouseY) {
 		if (!isVisible)
 			return;
 		
