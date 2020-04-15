@@ -11,6 +11,7 @@ item.aunis.crystal_glyph_pegasus.name=Pegasus Glyphs Crystal
 item.aunis.crystal_glyph_universe.name=Universe Glyphs Crystal
 
 tile.aunis.naquadah_ore.name=Naquadah Ore
+tile.aunis.naquadah_ore_stone.name=Naquadah Ore (Stone)
 tile.aunis.naquadah_block.name=Naquadah Block
 item.aunis.naquadah_shard.name=Naquadah Shard
 item.aunis.naquadah_alloy.name=Refined Naquadah Alloy Ingot

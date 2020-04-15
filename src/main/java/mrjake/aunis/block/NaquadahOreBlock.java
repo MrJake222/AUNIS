@@ -9,16 +9,15 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class NaquadahOreBlock extends Block {
-	
-	private static final String blockName = "naquadah_ore";
-	
-	public NaquadahOreBlock() {
+		
+	public NaquadahOreBlock(String blockName) {
 		super(Material.ROCK);
 		
 		setRegistryName(Aunis.ModID + ":" + blockName);
@@ -38,5 +37,10 @@ public class NaquadahOreBlock extends Block {
 		int quantity = 5 + random.nextInt(4) + (fortune * random.nextInt(3));
 		
 		drops.add(new ItemStack(AunisItems.NAQUADAH_SHARD, quantity));
+	}
+	
+	@Override
+	public BlockRenderLayer getRenderLayer() {
+		return BlockRenderLayer.CUTOUT;
 	}
 }

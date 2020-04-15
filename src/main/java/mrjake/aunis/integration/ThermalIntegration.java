@@ -43,6 +43,7 @@ public class ThermalIntegration {
 		
 		// Naquadah
 		ThermalExpansionHelper.addCrucibleRecipe(25000, new ItemStack(AunisBlocks.ORE_NAQUADAH_BLOCK), new FluidStack(AunisFluids.moltenNaquadahRaw, 6800));
+		ThermalExpansionHelper.addCrucibleRecipe(25000, new ItemStack(AunisBlocks.ORE_NAQUADAH_BLOCK_STONE), new FluidStack(AunisFluids.moltenNaquadahRaw, 6800));
 		ThermalExpansionHelper.addCrucibleRecipe(2500, new ItemStack(AunisItems.NAQUADAH_SHARD), new FluidStack(AunisFluids.moltenNaquadahRaw, 500));
 		ThermalExpansionHelper.addRefineryRecipe(2500, new FluidStack(AunisFluids.moltenNaquadahRaw, 300), new FluidStack(AunisFluids.moltenNaquadahRefined, 200), ItemStack.EMPTY);
 		ThermalExpansionHelper.addTransposerFill(2500, new ItemStack(Items.IRON_INGOT), new ItemStack(AunisItems.NAQUADAH_ALLOY_RAW, 2), new FluidStack(AunisFluids.moltenNaquadahRaw, 1000), true);

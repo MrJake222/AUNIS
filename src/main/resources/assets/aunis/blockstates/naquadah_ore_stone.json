@@ -3,8 +3,8 @@
 	"defaults": {
 		"model": "aunis:naquadah_ore",
 		"textures": {
-			"normal": "minecraft:blocks/netherrack",
-			"particle": "minecraft:blocks/netherrack",
+			"normal": "minecraft:blocks/stone",
+			"particle": "minecraft:blocks/stone",
 			"overlay": "aunis:blocks/naquadah_ore"
 		}
 	},
