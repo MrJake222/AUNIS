@@ -2,6 +2,7 @@ package mrjake.aunis.integration;
 
 import cofh.api.util.ThermalExpansionHelper;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
 import net.minecraft.init.Blocks;
@@ -14,7 +15,7 @@ public class ThermalIntegration {
 
 	public static void registerRecipes() {
 		// Silicons
-		if (OreDictionary.getOres("itemSilicon").isEmpty()) {
+		if (OreDictionary.getOres("itemSilicon").isEmpty() || !AunisConfig.recipeConfig.enableSiliconRecipes) {
 			ThermalExpansionHelper.addCrucibleRecipe(2500, new ItemStack(Blocks.SAND), new FluidStack(AunisFluids.moltenSiliconBlack, 50));
 		}
 		

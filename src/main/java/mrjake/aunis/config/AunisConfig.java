@@ -5,6 +5,7 @@ import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
 import net.minecraftforge.common.config.Config.RangeDouble;
 import net.minecraftforge.common.config.Config.RangeInt;
+import net.minecraftforge.common.config.Config.RequiresMcRestart;
 import net.minecraftforge.common.config.Config.RequiresWorldRestart;
 
 @Config(modid="aunis", name="aunis")
@@ -37,6 +38,9 @@ public class AunisConfig {
 	
 	@Name("Beamer options")
 	public static BeamerConfig beamerConfig = new BeamerConfig();
+	
+	@Name("Recipe options")
+	public static RecipeConfig recipeConfig = new RecipeConfig();
 	
 	public static class StargateConfig {
 		@Name("Orlin's gate max open count")
@@ -175,13 +179,23 @@ public class AunisConfig {
 		@Name("Energy buffer max transfer")
 		@RangeInt(min=1)
 		public int energyTransfer = 26360;
-
+		
 		@Name("Fluid max transfer")
 		@RangeInt(min=1)
 		public int fluidTransfer = 100;
-
+		
 		@Name("Item max transfer")
 		@RangeInt(min=1)
 		public int itemTransfer = 4;
+	}
+	
+	public static class RecipeConfig {
+		@Name("Enable silicon recipes")
+		@RequiresMcRestart
+		@Comment({
+			"Should Molten Silicon require Silicon (provided by other mods)",
+			"or just plain sand. Disable if having balance issues with AE/EnderIO silicon."
+		})
+		public boolean enableSiliconRecipes = true;
 	}
 }
