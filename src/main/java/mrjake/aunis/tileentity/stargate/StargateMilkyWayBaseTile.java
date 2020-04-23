@@ -430,7 +430,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 					addSymbolToAddress(targetRingSymbol);
 					
 					if (stargateWillLock(targetRingSymbol)) {
-						if (checkDialedAddress().ok()) {
+						if (checkAddressAndEnergy(dialedAddress).ok()) {
 							addTask(new ScheduledTask(EnumScheduledTask.STARGATE_CHEVRON_OPEN_SECOND, 8));
 						}
 						
@@ -492,7 +492,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				
 			case STARGATE_CHEVRON_FAIL:
 				sendRenderingUpdate(EnumGateAction.CHEVRON_CLOSE, 0, false);
-				dialingFailed(checkDialedAddress());
+				dialingFailed(checkAddressAndEnergy(dialedAddress));
 								
 				break;
 				

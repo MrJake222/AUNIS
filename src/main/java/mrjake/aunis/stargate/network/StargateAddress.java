@@ -64,6 +64,13 @@ public class StargateAddress implements INBTSerializable<NBTTagCompound> {
 		return address.get(pos);
 	}
 	
+	public SymbolInterface getLast() {
+		if (address.size() == 0)
+			return null;
+		
+		return address.get(address.size() - 1);
+	}
+	
 	public List<SymbolInterface> subList(int start, int end) {
 		return address.subList(start, end);
 	}

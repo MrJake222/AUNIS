@@ -145,7 +145,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 			isPowered = power;
 						
 			if (isPowered && stargateState.idle() && !isBroken()) {
-				switch (checkDialedAddress()) {
+				switch (checkAddressAndEnergy(dialedAddress)) {
 					case OK:
 						stargateState = EnumStargateState.DIALING;
 						

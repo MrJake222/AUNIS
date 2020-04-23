@@ -219,7 +219,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * @return
 	 */
 	public StargateOpenResult attemptOpenDialed() {
-		StargateOpenResult result = checkDialedAddress();
+		StargateOpenResult result = checkAddressAndEnergy(dialedAddress);
 		
 		if (result.ok()) {		
 			StargatePos targetGatePos = network.getStargate(dialedAddress);
@@ -242,23 +242,37 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	/**
-	 * Wrapper for {@link this#checkDialedGate(StargatePos)}. Adds
-	 * address validation.
-	 * @return {@code True} if the {@link this#dialedAddress} is valid and the dialed gate can be reached, {@code false} otherwise.
+	 * Checks if the address can be dialed. 
+	 * @param address Address to be checked.
+	 * @return {@code True} if the address parameter is valid and the dialed gate can be reached, {@code false} otherwise.
 	 */
-	protected StargateOpenResult checkDialedAddress() {
-		if (!dialedAddress.validate())
+	protected StargateOpenResult checkAddress(StargateAddressDynamic address) {
+		if (!address.validate())
 			return StargateOpenResult.ADDRESS_MALFORMED;
 		
-		StargatePos targetGatePos = network.getStargate(dialedAddress);
-		
-		if (!canDial(targetGatePos))
+		if (!canDialAddress(address))
 			return StargateOpenResult.ADDRESS_MALFORMED;
 		
-		StargateAbstractBaseTile targetTile = targetGatePos.getTileEntity();
+		StargateAbstractBaseTile targetTile = network.getStargate(address).getTileEntity();
 			
 		if (!targetTile.canAcceptConnectionFrom(gatePosMap.get(getSymbolType())))
 			return StargateOpenResult.ADDRESS_MALFORMED;
+		
+		return StargateOpenResult.OK;
+	}
+	
+	/**
+	 * Checks if the address can be dialed and if the gate has power to do so.
+	 * @param address Address to be checked.
+	 * @return {@code True} if the address parameter is valid and the dialed gate can be reached, {@code false} otherwise.
+	 */
+	protected StargateOpenResult checkAddressAndEnergy(StargateAddressDynamic address) {
+		StargateOpenResult result = checkAddress(address);
+		
+		if (!result.ok())
+			return result;
+		
+		StargatePos targetGatePos = network.getStargate(address);
 		
 		if (!hasEnergyToDial(targetGatePos))
 			return StargateOpenResult.NOT_ENOUGH_POWER;
@@ -267,11 +281,14 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	/**
-	 * Checks if {@link StargateAbstractBaseTile#dialedAddress} points to
+	 * Checks if given address points to
 	 * a valid target gate (and not to itself).
-	 * @return {@code True} if the gate can be reached, {@code false} otherwise
+	 * @param address Address to check,
+	 * @return {@code True} if the gate can be reached, {@code false} otherwise.
 	 */
-	protected boolean canDial(StargatePos targetGatePos) {		
+	protected boolean canDialAddress(StargateAddressDynamic address) {	
+		StargatePos targetGatePos = network.getStargate(address);
+		
 		if (targetGatePos == null)
 			return false;
 		
@@ -279,20 +296,20 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			return false;
 		
 		boolean areDimensionsEqual = world.provider.getDimension() == targetGatePos.dimensionID;
-		StargateAbstractBaseTile targetGateTile = targetGatePos.getTileEntity();
-				
-		if ((world.provider.getDimensionType() == DimensionType.NETHER && targetGateTile.getWorld().provider.getDimensionType() == DimensionType.OVERWORLD) || 
-			(world.provider.getDimensionType() == DimensionType.OVERWORLD && targetGateTile.getWorld().provider.getDimensionType() == DimensionType.NETHER)) {
+		
+		if ((world.provider.getDimensionType() == DimensionType.NETHER && targetGatePos.dimensionID == DimensionType.OVERWORLD.getId()) || 
+			(world.provider.getDimensionType() == DimensionType.OVERWORLD && targetGatePos.dimensionID == DimensionType.NETHER.getId())) {
 			areDimensionsEqual = true;
 		}
 		
-		if (dialedAddress.size() < getSymbolType().getMinimalSymbolCountTo(targetGateTile.getSymbolType(), areDimensionsEqual))
+		// TODO Optimize this, prevent dimension from loading only to check the SymbolType...
+		if (address.size() < getSymbolType().getMinimalSymbolCountTo(targetGatePos.getTileEntity().getSymbolType(), areDimensionsEqual))
 			return false;
 		
-		int additional = dialedAddress.size() - 7;
+		int additional = address.size() - 7;
 		
 		if (additional > 0) {
-			if (!dialedAddress.getAdditional().subList(0, additional).equals(targetGatePos.additionalSymbols.subList(0, additional)))
+			if (!address.getAdditional().subList(0, additional).equals(targetGatePos.additionalSymbols.subList(0, additional)))
 				return false;
 		}
 		
@@ -398,7 +415,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		dialedAddress.addSymbol(symbol);
 		
-		if (stargateWillLock(symbol) && checkDialedAddress().ok()) {
+		if (stargateWillLock(symbol) && checkAddressAndEnergy(dialedAddress).ok()) {
 			int size = dialedAddress.size();
 			if (size == 6) size++;
 			
@@ -1351,6 +1368,31 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	// ------------------------------------------------------------------------
 	// OpenComputers
+	
+	/**
+	 * Tries to find a {@link SymbolInterface} instance from
+	 * Integer index or String name of the symbol.
+	 * @param nameIndex Name or index.
+	 * @return Symbol.
+	 * @throws IllegalArgumentException When symbol/index is invalid.
+	 */
+	public SymbolInterface getSymbolFromNameIndex(Object nameIndex) throws IllegalArgumentException {
+		SymbolInterface symbol = null;
+		
+		if (nameIndex instanceof Integer)
+			symbol = getSymbolType().valueOfSymbol((Integer) nameIndex);
+		
+		else if (nameIndex instanceof byte[])
+			symbol = getSymbolType().fromEnglishName(new String((byte[]) nameIndex));
+		
+		else if (nameIndex instanceof String)
+			symbol = getSymbolType().fromEnglishName((String) nameIndex);
+
+		if (symbol == null)
+			throw new IllegalArgumentException("bad argument (symbol name/index invalid)");
+		
+		return symbol;
+	}
 	
 	// ------------------------------------------------------------
 	// Wireless Network

@@ -1,7 +1,10 @@
 package mrjake.aunis.tileentity.stargate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -27,11 +30,13 @@ import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.StargateClassicSpinHelper;
 import mrjake.aunis.stargate.StargateClosedReasonEnum;
 import mrjake.aunis.stargate.StargateOpenResult;
+import mrjake.aunis.stargate.network.StargateAddressDynamic;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
 import mrjake.aunis.stargate.power.StargateClassicEnergyStorage;
+import mrjake.aunis.stargate.power.StargateEnergyRequired;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.StargateSpinState;
@@ -761,22 +766,8 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			return new Object[] {null, "stargate_failure_full", "Already dialed 9 chevrons"};
 		}
 		
-		SymbolInterface targetSymbol = null;
-		
-		if (args.isInteger(0))
-			targetSymbol = getSymbolType().valueOfSymbol(args.checkInteger(0));
-		else if (args.isString(0))
-			targetSymbol = getSymbolType().fromEnglishName(args.checkString(0));
-		
-		if (targetSymbol == null)
-			throw new IllegalArgumentException("bad argument #1 (symbol name/index invalid)");
-		
-//		if (canAddSymbol(targetSymbol)) {
-//			return new Object[] {null, "stargate_failure_add", "Dialed address contains this symbol already"};
-//		}
-		
+		SymbolInterface targetSymbol = getSymbolFromNameIndex(args.checkAny(0));
 		addSymbolToAddressManual(targetSymbol, context);
-		
 		markDirty();
 		
 		return new Object[] {"stargate_spin"};
@@ -853,5 +844,57 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			return new Object[] {"open", stargateState.initiating()};
 		
 		return new Object[] {stargateState.toString().toLowerCase()};
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getEnergyRequiredToDial(Context context, Arguments args) {
+		if (!isMerged())
+			return new Object[] {"not_merged"};
+		
+		StargateAddressDynamic stargateAddress = new StargateAddressDynamic(getSymbolType());
+		Iterator<Object> iter = null;
+		
+		if (args.isTable(0)) {
+			iter = args.checkTable(0).values().iterator();
+		}
+		
+		else {
+			iter = args.iterator();
+		}		
+		
+		while (iter.hasNext()) {
+			Object symbolObj = iter.next();
+						
+			if (stargateAddress.size() == 9) {
+				throw new IllegalArgumentException("Too much glyphs");
+			}
+			
+			SymbolInterface symbol = getSymbolFromNameIndex(symbolObj);
+			if (stargateAddress.contains(symbol)) {
+				throw new IllegalArgumentException("Duplicate glyph");
+			}
+			
+			stargateAddress.addSymbol(symbol);
+		}
+		
+		if (!stargateAddress.getLast().origin() && stargateAddress.size() < 9)
+			stargateAddress.addOrigin();
+		
+		if (!stargateAddress.validate())
+			return new Object[] {"address_malformed"};
+		
+		if (!canDialAddress(stargateAddress))
+			return new Object[] {"address_malformed"};
+		
+		StargateEnergyRequired energyRequired = getEnergyRequiredToDial(network.getStargate(stargateAddress));
+		Map<String, Object> energyMap = new HashMap<>(2);
+		
+		energyMap.put("open", energyRequired.energyToOpen);
+		energyMap.put("keepAlive", energyRequired.keepAlive);
+		energyMap.put("canOpen", getEnergyStorage().getEnergyStored() >= energyRequired.energyToOpen);
+		
+		return new Object[] {energyMap};
 	}
 }
