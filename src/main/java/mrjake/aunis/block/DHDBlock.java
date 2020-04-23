@@ -125,8 +125,14 @@ public class DHDBlock extends Block {
 		DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
 		if (!dhdTile.isLinked())
 			return 0;
-		
+				
 		StargateAbstractBaseTile gateTile = dhdTile.getLinkedGate(world);
+		
+		if (gateTile == null) {
+			Aunis.logger.error("gateTile was null while getting power for DHD. Did you use Mysterious Page? ;)");
+			return 0;
+		}
+		
 		return gateTile.getDialedAddress().size() > 0 ? 15 : 0;
 	}
 	
