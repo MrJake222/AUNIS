@@ -1,22 +1,13 @@
 package mrjake.aunis.stargate.teleportation;
 
-import java.util.Iterator;
-
 import javax.vecmath.Vector2f;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.vector.Matrix2f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.SPacketEntityEffect;
-import net.minecraft.network.play.server.SPacketRespawn;
-import net.minecraft.network.play.server.SPacketSetExperience;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumFacing.AxisDirection;
@@ -24,9 +15,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.common.util.ITeleporter;
 
 public class TeleportHelper {
 	
@@ -85,58 +75,6 @@ public class TeleportHelper {
 		v.y += dest.y;
 	}
 	
-	// Kindly borrowed from SGCraft beacause I have no idea how Minecraft dimension teleportation system works
-	// and there is hardly any docs
-	private static void transferPlayerToDimension(EntityPlayerMP player, int newDimension, Vec3d position, float yaw) {
-		MinecraftServer server = player.getServer();
-		PlayerList playerList = server.getPlayerList();
-		
-		WorldServer oldWorld = player.getServerWorld();
-		WorldServer newWorld = (WorldServer) getWorld(newDimension);
-		player.dimension = newDimension;
-		
-		player.closeScreen();
-		player.connection.sendPacket( new SPacketRespawn(player.dimension,
-				player.world.getDifficulty(), newWorld.getWorldInfo().getTerrainType(),
-				player.interactionManager.getGameType()) );
-		
-		oldWorld.removeEntityDangerously(player);
-		player.isDead = false;
-		player.setLocationAndAngles(position.x, position.y, position.z, yaw, player.rotationPitch);
-		newWorld.spawnEntity(player);
-		player.setWorld(newWorld);
-		playerList.preparePlayer(player, oldWorld);
-		player.connection.setPlayerLocation(position.x, position.y, position.z, yaw, player.rotationPitch);
-		player.interactionManager.setWorld(newWorld);
-		playerList.updateTimeAndWeatherForPlayer(player, newWorld);
-		playerList.syncPlayerInventory(player);
-		playerList.updatePermissionLevel(player);
-		
-		Iterator<PotionEffect> var6 = player.getActivePotionEffects().iterator();
-		while (var6.hasNext()) {
-			PotionEffect effect = (PotionEffect)var6.next();
-			player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), effect));
-		}
-		player.connection.sendPacket(new SPacketSetExperience(player.experience, player.experienceTotal, player.experienceLevel));
-		FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, oldWorld.provider.getDimension(), newDimension);
-		
-	}
-	
-	private static void transferEntityToDimension(Entity entity, int oldDimension, int newDimension, Vec3d position, float yaw) {
-//        MinecraftServer server = entity.getServer();
-//        PlayerList playerList = server.getPlayerList();
-        
-        WorldServer oldWorld = (WorldServer) getWorld(oldDimension);
-        WorldServer newWorld = (WorldServer) getWorld(newDimension);
-        entity.dimension = newDimension;
-        
-        oldWorld.removeEntityDangerously(entity);
-        entity.isDead = false;
-        entity.setLocationAndAngles(position.x, position.y, position.z, yaw, entity.rotationPitch);
-        newWorld.spawnEntity(entity);
-        entity.setWorld(newWorld);
-    }
-	
 	public static void teleportEntity(Entity entity, BlockPos sourceGatePos, StargatePos targetGatePos, float rotation, Vector2f motionVector) {		
 		World world = entity.getEntityWorld();
 		int sourceDim = world.provider.getDimension();
@@ -161,30 +99,33 @@ public class TeleportHelper {
 		else
 			pos = getPosition(entity, sourceTile.getGateCenterPos(), targetTile.getGateCenterPos(), rotation, targetTile.getFacing().getAxis()==Axis.Z ? ~flipAxis : flipAxis);
 		
-		float yaw = getRotation(entity, rotation, flipAxis);
+		final float yawRotated = getRotation(entity, rotation, flipAxis);
 		boolean isPlayer = entity instanceof EntityPlayerMP;
-		
-		Aunis.info("pos: " + pos);
-		
+				
 		if (sourceDim == targetGatePos.dimensionID) {
-			entity.rotationYaw = yaw;
+			entity.rotationYaw = yawRotated;
 			entity.setPositionAndUpdate(pos.x, pos.y, pos.z);
 		}
 		
-		else {			
+		else {
+			final Vec3d posFinal = pos;
+			
+			ITeleporter teleporter = new ITeleporter() {
+				
+				@Override
+				public void placeEntity(World world, Entity entity, float yaw) {
+					entity.rotationYaw = yawRotated;
+					entity.setPositionAndUpdate(posFinal.x, posFinal.y, posFinal.z);
+				}
+			};
+			
 			if (isPlayer) {
 				EntityPlayerMP player = (EntityPlayerMP) entity;
-				
-				boolean flying = player.capabilities.isFlying;
-				
-				transferPlayerToDimension(player, targetGatePos.dimensionID, pos, yaw);
-				
-				player.capabilities.isFlying = flying;
-				player.sendPlayerAbilities();
+				player.getServer().getPlayerList().transferPlayerToDimension(player, targetGatePos.dimensionID, teleporter);
 			}
 			
-			else {
-				transferEntityToDimension(entity, sourceDim, targetGatePos.dimensionID, pos, yaw);
+			else {			
+				entity.changeDimension(targetGatePos.dimensionID, teleporter);
 			}
 		}
 		
@@ -193,40 +134,6 @@ public class TeleportHelper {
 		sourceTile.entityPassing(isPlayer, false);
 		targetTile.entityPassing(isPlayer, true);
 	}
-	
-	/* public static void teleportPlayer(EntityPlayerMP player, BlockPos sourceGatePos, StargatePos targetGatePos, float rotation, Vector2f motionVector) {
-		World world = player.getEntityWorld();
-		
-		EnumFacing sourceFacing = world.getBlockState(sourceGatePos).getValue(BlockFaced.FACING);
-		EnumFacing targetFacing = targetGatePos.getWorld().getBlockState(targetGatePos.getPos()).getValue(BlockFaced.FACING);
-		
-		int flipAxis = 0;
-		
-		if (sourceFacing.getAxis() == targetFacing.getAxis())
-			flipAxis |= EnumFlipAxis.X.mask;
-		else
-			flipAxis |= EnumFlipAxis.Z.mask;
-		
-		float yaw = getRotation(player, rotation, flipAxis);
-		Vec3d pos = getPosition(player, sourceGatePos, targetGatePos.getPos(), rotation, targetFacing.getAxis()==Axis.Z ? ~flipAxis : flipAxis);
-		int sourceDim = world.provider.getDimension();
-		
-		if (sourceDim == targetGatePos.getDimension()) {
-			player.rotationYaw = yaw;
-			player.setPositionAndUpdate(pos.x, pos.y, pos.z);
-		}
-		
-		else {
-			boolean flying = player.capabilities.isFlying;
-			
-			transferPlayerToDimension(player, targetGatePos.getDimension(), pos, yaw);
-			
-			player.capabilities.isFlying = flying;
-			player.sendPlayerAbilities();
-		}
-		
-		setMotion(player, rotation, motionVector);
-	} */
 	
 	public static float getRotation(Entity player, float rotation, int flipAxis) {
 		Vec3d lookVec = player.getLookVec();
