@@ -8,7 +8,7 @@ import mrjake.aunis.util.EnumKeyMap;
 
 public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
 	MILKYWAY(0, 32, 32),
-	PEGASUS (1, 32, 32),
+	PEGASUS (1, 27, 27),
 	UNIVERSE(2, 20, 42);
 	
 	public int id;

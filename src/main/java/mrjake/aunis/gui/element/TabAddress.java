@@ -81,6 +81,9 @@ public class TabAddress extends Tab {
 			case UNIVERSE:
 				return new SymbolCoords(guiLeft+currentOffsetX+24+16*(symbol%6), guiTop+defaultY+20+45*(symbol/6));
 
+			case PEGASUS:
+				return new SymbolCoords(guiLeft+currentOffsetX+29+34*(symbol%3), guiTop+defaultY+20+28*(symbol/3));
+				
 			default:
 				return new SymbolCoords(guiLeft+currentOffsetX+29+31*(symbol%3), guiTop+defaultY+20+28*(symbol/3));
 		}
