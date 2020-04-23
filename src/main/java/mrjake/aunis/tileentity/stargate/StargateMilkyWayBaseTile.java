@@ -108,7 +108,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	}
 	
 	protected int getMaxChevrons() {
-		if (isLinked()) {
+		if (isLinked() && stargateState != EnumStargateState.DIALING_COMPUTER) {
 			switch (getLinkedDHD(world).upgradeInstalledCount(DHDUpgradeEnum.CHEVRON_UPGRADE)) {
 				case 0: return 7;
 				case 1: return 8;
@@ -135,9 +135,9 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	
 	@Override
 	public void addSymbolToAddressManual(SymbolInterface targetSymbol, Object context) {
-		super.addSymbolToAddressManual(targetSymbol, context);
-		
 		stargateState = EnumStargateState.DIALING_COMPUTER;
+		
+		super.addSymbolToAddressManual(targetSymbol, context);
 	}
 	
 	public void incomingWormhole(int dialedAddressSize) {
