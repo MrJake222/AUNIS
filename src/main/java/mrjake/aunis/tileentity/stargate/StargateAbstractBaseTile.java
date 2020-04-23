@@ -108,6 +108,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		eventHorizon.reset();
 		
 		AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.WORMHOLE_LOOP, true);
+		sendSignal(null, "stargate_wormhole_stabilized", new Object[] { isInitiating });
 		
 		markDirty();
 	}
@@ -120,6 +121,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			dialedAddress.clear();
 		
 		ForgeChunkManager.unforceChunk(chunkLoadingTicket, new ChunkPos(pos));
+		sendSignal(null, "stargate_wormhole_closed_fully", new Object[] { isInitiating });
 		
 		markDirty();
 	}
