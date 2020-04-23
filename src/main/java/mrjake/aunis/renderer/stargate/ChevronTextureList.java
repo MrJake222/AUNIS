@@ -1,6 +1,7 @@
 package mrjake.aunis.renderer.stargate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +85,15 @@ public class ChevronTextureList {
 		activeChevrons.clear();
 	}
 	
-	public void lightUpChevrons(long totalWorldTime, int incomingAddressSize) {		
+	public void lightUpChevrons(long totalWorldTime, int incomingAddressSize) {	
+		for (ChevronEnum chevron : Arrays.asList(ChevronEnum.C7, ChevronEnum.C8)) {
+			if (activeChevrons.contains(chevron) && chevron.index >= incomingAddressSize-1) {
+				activationList.add(new StargateActivation(chevron, totalWorldTime, true));
+			}
+		}
+		
+		activeChevrons.clear();
+		
 		while (activeChevrons.size() < incomingAddressSize-1) {
 			activateNextChevron(totalWorldTime);
 		}

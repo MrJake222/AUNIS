@@ -18,6 +18,7 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -26,6 +27,11 @@ public class AunisEventHandler {
 
 	@SubscribeEvent
 	public static void onRightClickBlock(RightClickBlock event) {	
+		onRightClick(event);
+	}
+	
+	@SubscribeEvent
+	public static void onRightClickItem(RightClickItem event) {	
 		onRightClick(event);
 	}
 	
@@ -58,13 +64,9 @@ public class AunisEventHandler {
 					 */
 					if (block == AunisBlocks.DHD_BLOCK && RaycasterDHD.INSTANCE.onActivated(world, activatedBlock, player, event.getHand())) {
 						
-						/*
-						 * Walkaround for crashes happening when this event is not cancellable. It should be...
-						 */
-						if (event.isCancelable())
+						if (event.isCancelable()) {
 							event.setCanceled(true);
-						else
-							Aunis.logger.error("Couldn't cancel " + event.getClass().getCanonicalName() + ". It should be cancelable. This is a bug. Someone is doing something nasty...");
+						}
 					}
 				}
 			}
