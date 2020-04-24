@@ -176,4 +176,12 @@ public enum SymbolUniverseEnum implements SymbolInterface {
 	public static final SymbolUniverseEnum valueOf(int id) {
 		return ID_MAP.get(id);
 	}
+	
+	public static final SymbolUniverseEnum fromEnglishName(String englishName) {
+		String id = "";
+		int idInt = 1;
+		id = englishName.replaceAll("[^\\d.]", "");
+		idInt = Integer.valueOf(id);
+		return ID_MAP.get(idInt);
+	}
 }
