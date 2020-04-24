@@ -124,9 +124,13 @@ public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
 				try {
 					return SymbolUniverseEnum.valueOf(englishName.toUpperCase());
 				}
-				
+
 				catch (IllegalArgumentException ex) {
-					return null;
+					try {
+						return SymbolUniverseEnum.fromEnglishName(englishName);
+					} catch (IllegalArgumentException ex1) {
+						return null;
+					}
 				}
 		}
 		
