@@ -102,7 +102,7 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		}
 		
 		else {
-			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_UPDATE));
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_UPDATE));
 		}
 	}
 	

@@ -110,7 +110,7 @@ public class RingsGUI extends GuiBase {
 				String name = nameTextField.getText();
 				
 				if (address > 0 && address <= 6) {
-					AunisPacketHandler.INSTANCE.sendToServer(new SaveRingsParametersToServer(pos, player, address, name));
+					AunisPacketHandler.INSTANCE.sendToServer(new SaveRingsParametersToServer(pos, address, name));
 				}
 				
 				else {

@@ -93,7 +93,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		
 		else {
 			renderer = new TransportRingsRenderer(world, LOCAL_TELEPORT_BOX);
-			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_STATE));
 		}
 	}
 	

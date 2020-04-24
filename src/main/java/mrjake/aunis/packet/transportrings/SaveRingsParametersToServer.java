@@ -3,12 +3,12 @@ package mrjake.aunis.packet.transportrings;
 import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.packet.PositionedPlayerPacket;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.PositionedPacket;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.transportrings.ParamsSetResult;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -17,14 +17,14 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class SaveRingsParametersToServer extends PositionedPlayerPacket {
+public class SaveRingsParametersToServer extends PositionedPacket {
 	public SaveRingsParametersToServer() {}
 	
 	int address;
 	String name;
 	
-	public SaveRingsParametersToServer(BlockPos pos, EntityPlayer player, int address, String name) {
-		super(pos, player);
+	public SaveRingsParametersToServer(BlockPos pos, int address, String name) {
+		super(pos);
 		
 		this.address = address;
 		this.name = name;
@@ -61,7 +61,7 @@ public class SaveRingsParametersToServer extends PositionedPlayerPacket {
 				if (ringsTile.setRingsParams(message.address, message.name) == ParamsSetResult.DUPLICATE_ADDRESS)
 					player.sendStatusMessage(new TextComponentTranslation("tile.aunis.transportrings_block.duplicate_address"), true);
 			
-				message.respond(world, new StateUpdatePacketToClient(message.pos, StateTypeEnum.GUI_STATE, ringsTile.getState(StateTypeEnum.GUI_STATE)));
+				AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(message.pos, StateTypeEnum.GUI_STATE, ringsTile.getState(StateTypeEnum.GUI_STATE)), player);
 			});
 			
 			return null;

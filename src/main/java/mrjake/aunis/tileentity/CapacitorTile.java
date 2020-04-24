@@ -1,6 +1,5 @@
 package mrjake.aunis.tileentity;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.gui.container.CapacitorContainerGuiUpdate;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -40,7 +39,7 @@ public class CapacitorTile extends TileEntity implements ITickable, ICapabilityP
 		}
 		
 		else {
-			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_UPDATE));
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_UPDATE));
 		}
 	}
 	

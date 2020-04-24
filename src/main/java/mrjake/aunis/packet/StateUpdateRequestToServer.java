@@ -1,10 +1,10 @@
 package mrjake.aunis.packet;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.state.StateTypeEnum;
-import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.State;
-import net.minecraft.entity.player.EntityPlayer;
+import mrjake.aunis.state.StateProviderInterface;
+import mrjake.aunis.state.StateTypeEnum;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -12,14 +12,13 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import scala.NotImplementedError;
 
-public class StateUpdateRequestToServer extends PositionedPlayerPacket {
+public class StateUpdateRequestToServer extends PositionedPacket {
 	public StateUpdateRequestToServer() {}	
-	
 	
 	StateTypeEnum stateType;
 	
-	public StateUpdateRequestToServer(BlockPos pos, EntityPlayer player, StateTypeEnum stateType) {
-		super(pos, player);
+	public StateUpdateRequestToServer(BlockPos pos, StateTypeEnum stateType) {
+		super(pos);
 		
 		this.stateType = stateType;
 	}
@@ -43,7 +42,8 @@ public class StateUpdateRequestToServer extends PositionedPlayerPacket {
 
 		@Override
 		public StateUpdatePacketToClient onMessage(StateUpdateRequestToServer message, MessageContext ctx) {	
-			WorldServer world = ctx.getServerHandler().player.getServerWorld();
+			EntityPlayerMP player = ctx.getServerHandler().player;
+			WorldServer world = player.getServerWorld();
 			
 			if (world.isBlockLoaded(message.pos)) {
 				
@@ -55,8 +55,7 @@ public class StateUpdateRequestToServer extends PositionedPlayerPacket {
 							State state = te.getState(message.stateType);
 						
 							if (state != null)
-								message.respond(world, new StateUpdatePacketToClient(message.pos, message.stateType, state));
-							
+								AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(message.pos, message.stateType, state), player);							
 							else
 								throw new NotImplementedError("State not implemented on " + te.toString());
 						}

@@ -607,7 +607,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		}
 		
 		else {
-			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, Aunis.proxy.getPlayerClientSide(), StateTypeEnum.RENDERER_STATE));
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_STATE));
 		}
 	}
 	
