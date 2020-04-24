@@ -97,6 +97,11 @@ public enum SymbolUniverseEnum implements SymbolInterface {
 	}
 	
 	@Override
+	public String toString() {
+		return getEnglishName();
+	}
+	
+	@Override
 	public ResourceLocation getIconResource() {
 		return iconResource;
 	}
@@ -167,13 +172,20 @@ public enum SymbolUniverseEnum implements SymbolInterface {
 	}
 	
 	private static final Map<Integer, SymbolUniverseEnum> ID_MAP = new HashMap<>();
+	private static final Map<String, SymbolUniverseEnum> ENGLISH_NAME_MAP = new HashMap<>();
+	
 	static {
 		for (SymbolUniverseEnum symbol : values()) {
 			ID_MAP.put(symbol.id, symbol);
+			ENGLISH_NAME_MAP.put(symbol.englishName.toLowerCase(), symbol);
 		}
 	}
 	
 	public static final SymbolUniverseEnum valueOf(int id) {
 		return ID_MAP.get(id);
+	}
+	
+	public static final SymbolUniverseEnum fromEnglishName(String englishName) {
+		return ENGLISH_NAME_MAP.get(englishName.toLowerCase());
 	}
 }

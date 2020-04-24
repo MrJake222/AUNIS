@@ -85,6 +85,11 @@ public enum SymbolPegasusEnum implements SymbolInterface {
 	}
 	
 	@Override
+	public String toString() {
+		return getEnglishName();
+	}
+	
+	@Override
 	public ResourceLocation getIconResource() {
 		return iconResource;
 	}

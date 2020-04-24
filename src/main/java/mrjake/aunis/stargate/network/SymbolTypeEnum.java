@@ -121,6 +121,11 @@ public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
 				return SymbolPegasusEnum.fromEnglishName(englishName);
 				
 			case UNIVERSE:
+				SymbolUniverseEnum symbol = SymbolUniverseEnum.fromEnglishName(englishName);
+				
+				if (symbol != null)
+					return symbol;
+				
 				try {
 					return SymbolUniverseEnum.valueOf(englishName.toUpperCase());
 				}
