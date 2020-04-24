@@ -1461,7 +1461,19 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	@Optional.Method(modid = "opencomputers")
 	@Callback(getter = true)
 	public Object[] stargateAddress(Context context, Arguments args) {
-		return new Object[] {isMerged ? gateAddressMap : null};
+		Map<SymbolTypeEnum, String[]> convertedAddressMap = new HashMap<>(3);
+
+		for (SymbolTypeEnum key : gateAddressMap.keySet()) {
+			String[] convertedAddress = new String[8];
+
+			for (int i = 0; i < 8; i++) {
+				convertedAddress[i] = gateAddressMap.get(key).get(i).getEnglishName();
+			}
+
+			convertedAddressMap.put(key, convertedAddress);
+		}
+
+		return new Object[] { isMerged ? convertedAddressMap : null };
 	}
 
 	@Optional.Method(modid = "opencomputers")
