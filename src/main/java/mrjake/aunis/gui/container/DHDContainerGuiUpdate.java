@@ -10,11 +10,13 @@ public class DHDContainerGuiUpdate extends State {
 	public int fluidAmount;
 	public int tankCapacity;
 	public ReactorStateEnum reactorState;
+	public boolean isLinked;
 	
-	public DHDContainerGuiUpdate(int fluidAmount, int tankCapacity, ReactorStateEnum reactorState) {
+	public DHDContainerGuiUpdate(int fluidAmount, int tankCapacity, ReactorStateEnum reactorState, boolean isLinked) {
 		this.fluidAmount = fluidAmount;
 		this.tankCapacity = tankCapacity;
 		this.reactorState = reactorState;
+		this.isLinked = isLinked;
 	}
 	
 	@Override
@@ -22,6 +24,7 @@ public class DHDContainerGuiUpdate extends State {
 		buf.writeInt(fluidAmount);
 		buf.writeInt(tankCapacity);
 		buf.writeShort(reactorState.getKey());
+		buf.writeBoolean(isLinked);
 	}
 
 	@Override
@@ -29,6 +32,7 @@ public class DHDContainerGuiUpdate extends State {
 		fluidAmount = buf.readInt();
 		tankCapacity = buf.readInt();
 		reactorState = ReactorStateEnum.valueOf(buf.readShort());
+		isLinked = buf.readBoolean();
 	}
 
 }
