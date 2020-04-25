@@ -101,14 +101,18 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	
 	public void updateNetherAddress() {
 		dialedAddress.clear();
-		dialedAddress.addAll(network.getNetherGate().subList(0, 6));
+		dialedAddress.addAll(network.getNetherGate().subList(0, AunisConfig.stargateConfig.nether8thSymbol ? 7 : 6));
 		dialedAddress.addSymbol(SymbolMilkyWayEnum.ORIGIN);
 		
 		Aunis.info("Orlin's dialed address: " + dialedAddress);
 	}
 	
-	public boolean hasEnergyToDial() {
-		return hasEnergyToDial(network.getStargate(dialedAddress));
+	public StargateEnergyRequired getEnergyRequiredToDial() {
+		return getEnergyRequiredToDial(network.getStargate(dialedAddress));
+	}
+	
+	public int getEnergyStored() {
+		return getEnergyStorage().getEnergyStored();
 	}
 	
 	// ------------------------------------------------------------------------

@@ -38,6 +38,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 /**
  * Handles generating the Stargate structure in the Nether.
@@ -173,8 +174,13 @@ public class StargateGeneratorNether {
 						
 						EnumFacing facing = world.getBlockState(basePos).getValue(AunisProps.FACING_HORIZONTAL);
 						StargateMilkyWayMergeHelper.INSTANCE.updateMembersBasePos(world, datablock.getKey().down(), facing);
-						world.getTileEntity(basePos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(4, new ItemStack(AunisBlocks.CAPACITOR_BLOCK), false);
-						world.getTileEntity(basePos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.CRYSTAL_GLYPH_MILKYWAY), false);
+						IItemHandler itemHandler = world.getTileEntity(basePos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+						
+						itemHandler.insertItem(4, new ItemStack(AunisBlocks.CAPACITOR_BLOCK), false);
+						itemHandler.insertItem(0, new ItemStack(AunisItems.CRYSTAL_GLYPH_MILKYWAY), false);
+						
+						if (AunisConfig.stargateConfig.nether8thSymbol)
+							itemHandler.insertItem(1, new ItemStack(AunisItems.CRYSTAL_GLYPH_STARGATE), false);
 						
 						break;
 						
@@ -183,9 +189,13 @@ public class StargateGeneratorNether {
 						world.setBlockToAir(datablock.getKey());
 						
 						int fluid = (int) (6000 + Math.random() * 3000);
-						
-						world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.CRYSTAL_CONTROL_DHD), false);
 						((FluidTank) world.getTileEntity(dhdPos).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)).fillInternal(new FluidStack(AunisFluids.moltenNaquadahRefined, fluid), true);
+						
+						itemHandler = world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+						itemHandler.insertItem(0, new ItemStack(AunisItems.CRYSTAL_CONTROL_DHD), false);
+						
+						if (AunisConfig.stargateConfig.nether8thSymbol)
+							itemHandler.insertItem(1, new ItemStack(AunisItems.CRYSTAL_GLYPH_DHD), false);
 						
 						break;
 				}

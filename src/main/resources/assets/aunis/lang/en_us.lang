@@ -295,7 +295,7 @@ gui.beamer.after_inactivity=inactivity [s]
 gui.beamer.save=Save
 gui.beamer.invalid=Invalid
 
-chat.orlins.energyStored=Energy stored: %s / %s RF
+chat.orlins.energyStored=Energy stored: %s RF (Required: %s RF, %s s)
 
 item.aunis.universe_dialer.name=Universe Dialer
 item.aunis.universe_dialer.not_linked=Not linked

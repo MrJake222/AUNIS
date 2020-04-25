@@ -301,7 +301,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		if ((world.provider.getDimensionType() == DimensionType.NETHER && targetGatePos.dimensionID == DimensionType.OVERWORLD.getId()) || 
 			(world.provider.getDimensionType() == DimensionType.OVERWORLD && targetGatePos.dimensionID == DimensionType.NETHER.getId())) {
-			areDimensionsEqual = true;
+			
+			if (!AunisConfig.stargateConfig.nether8thSymbol)
+				areDimensionsEqual = true;
 		}
 		
 		// TODO Optimize this, prevent dimension from loading only to check the SymbolType...

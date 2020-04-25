@@ -8,6 +8,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.stargate.network.StargateNetwork;
+import mrjake.aunis.stargate.power.StargateEnergyRequired;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.worldgen.StargateGeneratorNether;
 import net.minecraft.block.Block;
@@ -92,10 +93,21 @@ public class StargateOrlinBaseBlock extends Block {
 			IEnergyStorage energyStorage = gateTile.getCapability(CapabilityEnergy.ENERGY, null);
 			
 			String energy = String.format("%,d", energyStorage.getEnergyStored());
-			String capacity = String.format("%,d", energyStorage.getMaxEnergyStored());
-			boolean hasEnergy = gateTile.hasEnergyToDial();
 			
-			player.sendMessage(new TextComponentTranslation("chat.orlins.energyStored", (hasEnergy ? TextFormatting.GREEN : TextFormatting.RED) + energy, capacity));
+			StargateEnergyRequired energyRequired = gateTile.getEnergyRequiredToDial();
+			String required = String.format("%,d", energyRequired.energyToOpen);
+			int energyStored = gateTile.getEnergyStored();
+			boolean hasEnergy = (energyStored >= energyRequired.energyToOpen);
+			
+			int missing = energyRequired.energyToOpen - energyStored;
+			float secondsLeft = 0;
+						
+			if (missing > 0 && gateTile.getEnergyTransferedLastTick() > 0)
+				secondsLeft = missing / (float)gateTile.getEnergyTransferedLastTick() / 20;
+			
+			String left = String.format("%.2f", secondsLeft);
+						
+			player.sendMessage(new TextComponentTranslation("chat.orlins.energyStored", (hasEnergy ? TextFormatting.GREEN : TextFormatting.RED) + energy, TextFormatting.DARK_GREEN + required, TextFormatting.DARK_GREEN + left));
 		}
 				
 		return !player.isSneaking();
