@@ -79,7 +79,7 @@ public class AunisConfig {
 		@RangeInt(min=0)
 		public int keepAliveBlockToEnergyRatioPerTick = 2;
 
-		@Name("Stargate instability threshold(seconds to close)")
+		@Name("Stargate instability threshold (seconds of energy left before gate becomes unstable)")
 		@RangeInt(min=1)
 		public int instabilitySeconds = 20;
 		

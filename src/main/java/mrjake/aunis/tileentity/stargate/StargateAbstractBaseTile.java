@@ -696,20 +696,24 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				energySecondsToClose = energyStored/(float)keepAliveEnergyPerTick / 20f;
 				
 				if (energySecondsToClose >= 1) {
+					
 					/*
 					 * If energy can sustain connection for less than AunisConfig.powerConfig.instabilitySeconds seconds
 					 * Start flickering
+					 * 
+					 * 2020-04-25: changed the below to check if the gate is being sufficiently externally powered and, if so,
+					 * do not start flickering even if the internal power isn't enough.
 					 */
 					
 					// Horizon becomes unstable
-					if (horizonFlashTask == null && energySecondsToClose < AunisConfig.powerConfig.instabilitySeconds) {
+					if (horizonFlashTask == null && energySecondsToClose < AunisConfig.powerConfig.instabilitySeconds && energyTransferedLastTick < 0) {
 						resetFlashingSequence();
 						
 						setHorizonFlashTask(new ScheduledTask(EnumScheduledTask.HORIZON_FLASH, (int) (Math.random() * 40) + 5));
 					}
 					
 					// Horizon becomes stable
-					if (horizonFlashTask != null && energySecondsToClose > AunisConfig.powerConfig.instabilitySeconds) {
+					if (horizonFlashTask != null && (energySecondsToClose > AunisConfig.powerConfig.instabilitySeconds || energyTransferedLastTick >= 0)) {
 						horizonFlashTask = null;
 						isCurrentlyUnstable = false;
 						
