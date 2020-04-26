@@ -51,6 +51,7 @@ public class StargateOrlinMemberBlock extends Block {
 		setLightOpacity(0);
 		
 		setHardness(3.0f);
+		setResistance(16.0f);
 		setHarvestLevel("pickaxe", 3);
 	}
 	
