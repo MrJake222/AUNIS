@@ -44,7 +44,7 @@ public class AunisEventHandler {
 		EntityPlayer player = event.getEntityPlayer();
 		World world = player.getEntityWorld();
 		
-		if (!player.isSneaking()) {
+		if (!player.isSneaking() && !player.isSpectator()) {
 			BlockPos pos = player.getPosition();
 			EnumFacing playerFacing = EnumFacing.getDirectionFromEntityLiving(pos, player).getOpposite();
 			
