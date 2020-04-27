@@ -31,6 +31,7 @@ public class DHDContainer extends Container {
 	private BlockPos pos;
 	private int tankLastAmount;
 	private ReactorStateEnum lastReactorState;
+	private boolean lastLinked;
 	
 	public DHDContainer(IInventory playerInventory, World world, int x, int y, int z) {	
 		pos = new BlockPos(x, y, z);
@@ -66,6 +67,8 @@ public class DHDContainer extends Container {
         	if (!mergeItemStack(stack, 5, inventorySlots.size(), false)) {
         		return ItemStack.EMPTY;
         	}
+        	
+        	putStackInSlot(index, ItemStack.EMPTY);
         }
         
 		// Transfering from player's inventory to DHD
@@ -106,15 +109,16 @@ public class DHDContainer extends Container {
 	public void detectAndSendChanges() {
 		super.detectAndSendChanges();
 				
-		if (tankLastAmount != tankNaquadah.getFluidAmount() || lastReactorState != dhdTile.getReactorState()) {			
+		if (tankLastAmount != tankNaquadah.getFluidAmount() || lastReactorState != dhdTile.getReactorState() || lastLinked != dhdTile.isLinked()) {			
 			for (IContainerListener listener : listeners) {
 				if (listener instanceof EntityPlayerMP) {
-					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_UPDATE, new DHDContainerGuiUpdate(tankNaquadah.getFluidAmount(), tankNaquadah.getCapacity(), dhdTile.getReactorState())), (EntityPlayerMP) listener);
+					AunisPacketHandler.INSTANCE.sendTo(new StateUpdatePacketToClient(pos, StateTypeEnum.GUI_UPDATE, new DHDContainerGuiUpdate(tankNaquadah.getFluidAmount(), tankNaquadah.getCapacity(), dhdTile.getReactorState(), dhdTile.isLinked())), (EntityPlayerMP) listener);
 				}
 			}
 			
 			tankLastAmount = tankNaquadah.getFluidAmount();
 			lastReactorState = dhdTile.getReactorState();
+			lastLinked = dhdTile.isLinked();
 		}
 	}
 }

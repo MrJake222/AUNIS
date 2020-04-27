@@ -47,6 +47,13 @@ public class AunisConfig {
 		@RangeInt(min=0)
 		public int stargateOrlinMaxOpenCount = 2;
 		
+		@Name("Does Nether require 8 symbols")
+		@Comment({
+			"This option will also enable DHD Glyph Crystal and Stargate Glyph Crystal",
+			"generation in the Nether DHD/Gate. This will prevent you from getting locked down."
+		})
+		public boolean nether8thSymbol = false;
+		
 		@Name("Universe dialer max horizontal reach radius")
 		@RangeInt(min=0, max=64)
 		public int universeDialerReach = 10;

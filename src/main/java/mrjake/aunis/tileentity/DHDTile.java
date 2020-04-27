@@ -109,6 +109,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	public void onLoad() {
 		if (!world.isRemote) {
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
+			hadControlCrystal = hasControlCrystal();
 		}
 		
 		else {
@@ -121,7 +122,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		if (!world.isRemote) {
 			
 			// Has crystal
-			if (!itemStackHandler.getStackInSlot(0).isEmpty()) {
+			if (hasControlCrystal()) {
 				if (isLinked()) {
 					StargateAbstractBaseTile gateTile = getLinkedGate(world);
 					if (gateTile == null) {
@@ -168,11 +169,34 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			
 			// No crystal
 			else {
-				reactorState = ReactorStateEnum.NO_FUEL;
+				reactorState = ReactorStateEnum.NO_CRYSTAL;
 			}
 		}
 	}
 	
+	private boolean hadControlCrystal;
+	
+	public boolean hasControlCrystal() {
+		return !itemStackHandler.getStackInSlot(0).isEmpty();
+	}
+	
+	private void updateCrystal() {
+		boolean hasControlCrystal = hasControlCrystal();
+		
+		if (hadControlCrystal != hasControlCrystal) {
+			if (hasControlCrystal) {
+				if (targetPoint != null) {
+					AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_STATE, getState(StateTypeEnum.RENDERER_STATE)), targetPoint);
+				}
+			}
+			
+			else {
+				clearSymbols();
+			}
+			
+			hadControlCrystal = hasControlCrystal;
+		}
+	}
 	 
 	// -----------------------------------------------------------------------------
 	// Symbol activation
@@ -255,6 +279,8 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		}
 	}
 
+	public boolean isLinkedClient;
+	
 	@Override
 	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
@@ -280,6 +306,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 				fluidHandler.setFluid(new FluidStack(AunisFluids.moltenNaquadahRefined, guiState.fluidAmount));
 				fluidHandler.setCapacity(guiState.tankCapacity);
 				reactorState = guiState.reactorState;
+				isLinkedClient = guiState.isLinked;
 				
 				break;
 				
@@ -319,6 +346,28 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		@Override
 		protected int getStackLimit(int slot, ItemStack stack) {
 			return 1;
+		}
+		
+		@Override
+		public void setStackInSlot(int slot, ItemStack stack) {
+			super.setStackInSlot(slot, stack);
+			
+			if (!world.isRemote && slot == 0) {
+				// Crystal changed
+				updateCrystal();
+			}
+		};
+		
+		@Override
+		public ItemStack extractItem(int slot, int amount, boolean simulate) {
+			ItemStack out = super.extractItem(slot, amount, simulate);
+			
+			if (!world.isRemote && slot == 0 && amount > 0 && !simulate) {
+				// Removing crystal
+				updateCrystal();
+			}
+			
+			return out;
 		}
 		
 		@Override

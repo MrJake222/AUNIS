@@ -125,7 +125,7 @@ public class TeleportHelper {
 			}
 			
 			else {			
-				entity.changeDimension(targetGatePos.dimensionID, teleporter);
+				entity = entity.changeDimension(targetGatePos.dimensionID, teleporter);
 			}
 		}
 		

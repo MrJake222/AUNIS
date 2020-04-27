@@ -49,7 +49,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	protected void disconnectGate() {
 		super.disconnectGate();
 		
-		if (isLinked())
+		if (isLinkedAndDHDOperational())
 			getLinkedDHD(world).clearSymbols();
 	}
 	
@@ -57,7 +57,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	protected void failGate() {
 		super.failGate();
 		
-		if (isLinked())
+		if (isLinkedAndDHDOperational())
 			getLinkedDHD(world).clearSymbols();
 	}
 	
@@ -75,7 +75,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	public void openGate(StargatePos targetGatePos, boolean isInitiating) {
 		super.openGate(targetGatePos, isInitiating);
 		
-		if (isLinked()) {
+		if (isLinkedAndDHDOperational()) {
 			getLinkedDHD(world).activateSymbol(SymbolMilkyWayEnum.BRB);
 		}
 	}
@@ -108,7 +108,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	}
 	
 	protected int getMaxChevrons() {
-		if (isLinked() && stargateState != EnumStargateState.DIALING_COMPUTER) {
+		if (isLinkedAndDHDOperational() && stargateState != EnumStargateState.DIALING_COMPUTER) {
 			switch (getLinkedDHD(world).upgradeInstalledCount(DHDUpgradeEnum.CHEVRON_UPGRADE)) {
 				case 0: return 7;
 				case 1: return 8;
@@ -128,7 +128,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		
 		super.addSymbolToAddress(symbol);
 
-		if (isLinked()) {
+		if (isLinkedAndDHDOperational()) {
 			getLinkedDHD(world).activateSymbol((SymbolMilkyWayEnum) symbol);
 		}
 	}
@@ -143,7 +143,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	public void incomingWormhole(int dialedAddressSize) {
 		super.incomingWormhole(dialedAddressSize);
 						
-		if (isLinked()) {
+		if (isLinkedAndDHDOperational()) {
 			getLinkedDHD(world).clearSymbols();
 		}
 	}
@@ -198,6 +198,17 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	
 	public boolean isLinked() {
 		return linkedDHD != null;
+	}
+	
+	public boolean isLinkedAndDHDOperational() {
+		if (!isLinked())
+			return false;
+		
+		DHDTile dhdTile = getLinkedDHD(world);
+		if (!dhdTile.hasControlCrystal())
+			return false;
+		
+		return true;
 	}
 	
 	public void setLinkedDHD(BlockPos dhdPos) {		

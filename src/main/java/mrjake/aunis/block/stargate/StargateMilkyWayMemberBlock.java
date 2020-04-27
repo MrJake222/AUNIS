@@ -9,6 +9,12 @@ public class StargateMilkyWayMemberBlock extends StargateClassicMemberBlock {
 
 	public static final String BLOCK_NAME = "stargate_milkyway_member_block";
 
+	public StargateMilkyWayMemberBlock() {
+		super();
+		
+		setResistance(2000.0f);
+	}
+	
 	@Override
 	protected String getBlockName() {
 		return BLOCK_NAME;

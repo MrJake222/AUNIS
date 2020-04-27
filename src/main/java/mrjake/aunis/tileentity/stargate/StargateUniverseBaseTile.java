@@ -89,6 +89,8 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 	public void addSymbolToAddressManual(SymbolInterface targetSymbol, Object context) {		
 		if (context != null)
 			stargateState = EnumStargateState.DIALING_COMPUTER;
+		else
+			stargateState = EnumStargateState.DIALING;
 		
 		if (stargateState.dialingComputer() && dialedAddress.size() == 0) {
 			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.GATE_UNIVERSE_DIAL_START);

@@ -50,6 +50,7 @@ public class DHDBlock extends Block {
 		setLightOpacity(0);
 		
 		setHardness(3.0f);
+		setResistance(20.0f);
 		setHarvestLevel("pickaxe", 3);
 	}
 	

@@ -15,7 +15,7 @@ public class StargateNetherTemplateProcessor implements ITemplateProcessor {
 	public BlockInfo processBlock(World world, BlockPos pos, BlockInfo blockInfoIn) {
 		if (StargateMilkyWayMergeHelper.BASE_MATCHER.apply(blockInfoIn.blockState) ||
 			StargateMilkyWayMergeHelper.MEMBER_MATCHER.apply(blockInfoIn.blockState) ||
-			blockInfoIn.blockState == AunisBlocks.DHD_BLOCK)
+			blockInfoIn.blockState.getBlock() == AunisBlocks.DHD_BLOCK)
 			return blockInfoIn;
 		
 		if ((blockInfoIn.blockState.getBlock() == Blocks.NETHERRACK || blockInfoIn.blockState.getBlock() == Blocks.QUARTZ_ORE) && world.isAirBlock(pos.down()))

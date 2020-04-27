@@ -140,6 +140,8 @@ public class BeamerBlock extends Block {
 			if (beamerTile.isLinked())
 				beamerTile.getLinkedGateTile().removeLinkedBeamer(pos);
 			
+			beamerTile.clearTargetBeamerPos();
+			
 			AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.BEAMER_LOOP, false);
 		}
 		

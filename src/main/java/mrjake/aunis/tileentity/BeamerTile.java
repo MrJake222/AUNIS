@@ -42,6 +42,8 @@ import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -417,16 +419,62 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		}
 	}
 	
-	public void gateEngaged(StargatePos targetGatePos) {
+	public void gateEngaged(StargatePos targetGatePos, StargatePos sourceGatePos) {
+		updateTargetBeamerPos(targetGatePos, sourceGatePos);
+	}
+	
+	public void gateClosed() {
+		clearTargetBeamerPos();
+	}
+	
+	private void updateTargetBeamerPos(StargatePos targetGatePos, StargatePos sourceGatePos) {		
+		if (targetBeamerPos != null)
+			return;
+		
 		targetBeamerWorld = targetGatePos.getWorld();
 		EnumFacing targetFacing = targetBeamerWorld.getBlockState(targetGatePos.gatePos).getValue(AunisProps.FACING_HORIZONTAL);		
 		Rotation rotation = FacingToRotation.get(targetFacing);
 		
-		targetBeamerPos = targetGatePos.gatePos.add(baseVect.rotate(rotation));
+		BlockPos origVec = baseVect.rotate(rotation);
+		BlockPos startingVec = null;
+		
+		switch (targetFacing.getAxis()) {
+			case X:
+				startingVec = new BlockPos(0, origVec.getY(), -origVec.getZ());
+				break;
+				
+			case Z:
+				startingVec = new BlockPos(-origVec.getX(), origVec.getY(), 0);
+				break;
+				
+			default:
+				break;
+		}
+		
+		BlockPos beamerPos = targetGatePos.gatePos.add(startingVec);
+		
+		for (int i=1; i<=9; i++) {
+			beamerPos = beamerPos.offset(targetFacing);
+//			 Aunis.info("checking " + beamerPos);
+			
+			if (BEAMER_MATCHER.apply(world.getBlockState(beamerPos))) {
+				targetBeamerPos = beamerPos.toImmutable();
+				BeamerTile targetBeamerTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
+				
+				if (targetBeamerTile.targetBeamerPos == null) {
+					targetBeamerTile.updateTargetBeamerPos(sourceGatePos, targetGatePos); // Intentionally swaped
+				}
+				
+				break;
+			}
+		}
 	}
 	
-	public void gateClosed() {
-		
+	public void clearTargetBeamerPos() {
+		if (targetBeamerPos != null) {
+			BeamerTile targetBeamerTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
+			targetBeamerTile.targetBeamerPos = null;
+		}
 	}
 	
 	// -----------------------------------------------------------------------------
@@ -530,7 +578,10 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		if (diff < 0) diff *= -1;
 		
 		for (BlockPos pos : BlockPos.getAllInBoxMutable(pos.offset(facing), pos.offset(facing, diff))) {
-			if (!world.isAirBlock(pos) && !world.getBlockState(pos).getBlock().isReplaceable(world, pos)) {
+			IBlockState state = world.getBlockState(pos);
+			Block block = state.getBlock();
+			
+			if (!block.isAir(state, world, pos) && !block.isReplaceable(world, pos) && state.isOpaqueCube()) {
 				isObstructed = true;
 				break;
 			}
@@ -1040,6 +1091,40 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	@Callback
 	public Object[] getBeamerRole(Context context, Arguments args) {		
 		return new Object[] { beamerRole.toString().toLowerCase() };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] setBeamerRole(Context context, Arguments args) {
+		try {
+			beamerRole = BeamerRoleEnum.valueOf(args.checkString(0).toUpperCase());
+		}
+		
+		catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Wrong Role name");
+		}
+		
+		return new Object[] {};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] toggleBeamerRole(Context context, Arguments args) {	
+		switch (beamerRole) {
+			case RECEIVE:
+				beamerRole = BeamerRoleEnum.TRANSMIT;
+				return new Object[] { beamerRole.toString().toLowerCase() };
+				
+			case TRANSMIT:
+				beamerRole = BeamerRoleEnum.RECEIVE;
+				return new Object[] { beamerRole.toString().toLowerCase() };
+				
+			case DISABLED:
+				return new Object[] { "err_beamer_disabled" };
+				
+			default:
+				return null;
+		}
 	}
 	
 	@Optional.Method(modid = "opencomputers")

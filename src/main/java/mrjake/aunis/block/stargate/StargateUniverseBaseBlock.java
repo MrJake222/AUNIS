@@ -7,6 +7,12 @@ public class StargateUniverseBaseBlock extends StargateClassicBaseBlock {
 
 	private static final String BLOCK_NAME = "stargate_universe_base_block";
 
+	public StargateUniverseBaseBlock() {
+		super();
+		
+		setResistance(20.0f);
+	}
+	
 	@Override
 	protected String getBlockName() {
 		return BLOCK_NAME;

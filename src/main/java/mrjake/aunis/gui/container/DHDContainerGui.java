@@ -28,9 +28,6 @@ public class DHDContainerGui extends GuiContainer {
 	
 	private List<Diode> diodes = new ArrayList<Diode>(3);
 	
-	private boolean hasCrystal;
-	private boolean isLinked;
-	
 	public DHDContainerGui(DHDContainer container) {
 		super(container);
 		
@@ -45,20 +42,14 @@ public class DHDContainerGui extends GuiContainer {
 				.putStatus(DiodeStatus.OFF, I18n.format("gui.dhd.no_crystal"))
 				.putStatus(DiodeStatus.ON, I18n.format("gui.dhd.crystal_ok"))
 				.setStatusMapper(() -> {
-					return hasCrystal ? DiodeStatus.ON : DiodeStatus.OFF;
+					return container.slotCrystal.getHasStack() ? DiodeStatus.ON : DiodeStatus.OFF;
 				}));
 		
 		diodes.add(new Diode(this, 17, 55, I18n.format("gui.dhd.linkStatus")).setDiodeStatus(DiodeStatus.OFF)
 				.putStatus(DiodeStatus.OFF, I18n.format("gui.dhd.not_linked"))
 				.putStatus(DiodeStatus.ON, I18n.format("gui.dhd.linked"))
 				.setStatusMapper(() -> {
-					return (hasCrystal && isLinked) ? DiodeStatus.ON : DiodeStatus.OFF;
-				})
-				.setStatusStringMapper(() -> {
-					if (!hasCrystal)
-						return I18n.format("gui.dhd.no_crystal");
-					
-					return null;
+					return container.dhdTile.isLinkedClient ? DiodeStatus.ON : DiodeStatus.OFF;
 				}));
 		
 		diodes.add(new Diode(this, 26, 55, I18n.format("gui.dhd.reactorStatus"))
@@ -69,6 +60,7 @@ public class DHDContainerGui extends GuiContainer {
 					switch (container.dhdTile.getReactorState()) {
 						case NOT_LINKED:
 						case NO_FUEL:
+						case NO_CRYSTAL:
 							return DiodeStatus.OFF;
 							
 						case ONLINE:
@@ -82,23 +74,18 @@ public class DHDContainerGui extends GuiContainer {
 					}
 				})
 				.setStatusStringMapper(() -> {
-					if (!hasCrystal)
-						return I18n.format("gui.dhd.no_crystal");
-					
-					else if (!isLinked)
-						return I18n.format("gui.dhd.not_linked");
-	
-					return null;
+					switch (container.dhdTile.getReactorState()) {
+						case NOT_LINKED: return I18n.format("gui.dhd.not_linked");
+						case NO_CRYSTAL: return I18n.format("gui.dhd.no_crystal");
+						default: return null;
+					}	
 				}));
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		drawDefaultBackground();
-		
-		hasCrystal = container.slotCrystal.getHasStack();
-		isLinked = container.dhdTile.getReactorState() != ReactorStateEnum.NOT_LINKED;
-		
+				
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		renderHoveredToolTip(mouseX, mouseY);
 	}
