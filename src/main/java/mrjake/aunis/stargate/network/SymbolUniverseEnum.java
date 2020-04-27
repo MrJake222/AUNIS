@@ -27,7 +27,7 @@ public enum SymbolUniverseEnum implements SymbolInterface {
 	G14(14, ModelEnum.UNIVERSE_G14),
 	G15(15, ModelEnum.UNIVERSE_G15),
 	G16(16, ModelEnum.UNIVERSE_G16),
-	G17(17, ModelEnum.UNIVERSE_G17),
+	G17(17, ModelEnum.UNIVERSE_G17), //Point of origin.
 	G18(18, ModelEnum.UNIVERSE_G18),
 	G19(19, ModelEnum.UNIVERSE_G19),
 	G20(20, ModelEnum.UNIVERSE_G20),
