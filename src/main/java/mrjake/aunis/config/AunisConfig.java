@@ -60,6 +60,12 @@ public class AunisConfig {
 
 		@Name("Universe dialer nearby radius")
 		public int universeGateNearbyReach = 1024;
+		
+		@Name("Wormhole audio range multiplier")
+		@Comment({"How far from the gate can you hear a wormhole opening and closing?",
+					"The default range will be multiplied against this number."})
+		@RangeDouble(min=1d, max=100d)
+		public double audioRangeMultiplier = 1d;
 	}
 	
 	public static class PowerConfig {
@@ -79,7 +85,8 @@ public class AunisConfig {
 		@RangeInt(min=0)
 		public int keepAliveBlockToEnergyRatioPerTick = 2;
 
-		@Name("Stargate instability threshold (seconds of energy left before gate becomes unstable)")
+		@Name("Stargate instability threshold")
+		@Comment({"Seconds of energy left before the wormhole becomes unstable"})
 		@RangeInt(min=1)
 		public int instabilitySeconds = 20;
 		
