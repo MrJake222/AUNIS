@@ -26,7 +26,7 @@ public enum SymbolPegasusEnum implements SymbolInterface {
 	ROBANDUS(14, "Robandus"),
 	RECKTIC(15, "Recktic"),
 	ZAMILLOZ(16, "Zamilloz"),
-	SUBIDO(17, "Subido"),
+	SUBIDO(17, "Subido"), //Point of origin
 	DAWNRE(18, "Dawnre"),
 	SALMA(19, "Salma"),
 	HAMLINTO(20, "Hamlinto"),
