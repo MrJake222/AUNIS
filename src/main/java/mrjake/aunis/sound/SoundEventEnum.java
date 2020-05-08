@@ -22,8 +22,8 @@ public enum SoundEventEnum implements EnumKeyInterface<Integer> {
 	DHD_MILKYWAY_PRESS(10, "dhd_milkyway_press", 0.5f),
 	DHD_MILKYWAY_PRESS_BRB(11, "dhd_milkyway_press_brb", 0.5f),
 	
-	GATE_MILKYWAY_OPEN(12, "gate_milkyway_open", 0.5f * (float)AunisConfig.stargateConfig.audioRangeMultiplier),
-	GATE_MILKYWAY_CLOSE(13, "gate_milkyway_close", 0.5f * (float)AunisConfig.stargateConfig.audioRangeMultiplier),
+	GATE_MILKYWAY_OPEN(12, "gate_milkyway_open", 1.0f * (float)AunisConfig.stargateConfig.audioRangeMultiplier),
+	GATE_MILKYWAY_CLOSE(13, "gate_milkyway_close", 1.0f * (float)AunisConfig.stargateConfig.audioRangeMultiplier),
 	GATE_MILKYWAY_DIAL_FAILED(14, "gate_milkyway_dial_fail", 0.3f),
 	GATE_MILKYWAY_DIAL_FAILED_COMPUTER(15, "gate_milkyway_dial_fail_computer", 1.5f),
 	GATE_MILKYWAY_INCOMING(16, "gate_milkyway_incoming", 0.5f),
