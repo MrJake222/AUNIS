@@ -99,6 +99,7 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 			NBTTagCompound taskData = new NBTTagCompound();
 			taskData.setInteger("symbolToDial", targetSymbol.getId());
 			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_DIAL_NEXT, 30, taskData));
+			ringSpinContext = context;
 		}
 			
 		else
@@ -134,7 +135,7 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 		switch (scheduledTask) {
 			case STARGATE_DIAL_NEXT:
 				if (customData != null && customData.hasKey("symbolToDial"))
-					super.addSymbolToAddressManual(getSymbolType().valueOfSymbol(customData.getInteger("symbolToDial")), null);
+					super.addSymbolToAddressManual(getSymbolType().valueOfSymbol(customData.getInteger("symbolToDial")), ringSpinContext);
 				else
 					addSymbolToAddressManual(addressPosition >= maxSymbols ? getSymbolType().getOrigin() : addressToDial.get(addressPosition), null);
 								
@@ -150,7 +151,8 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 						
 						if (stargateState.dialingComputer()) {
 							stargateState = EnumStargateState.IDLE;
-							sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), stargateWillLock(targetRingSymbol), targetRingSymbol.getEnglishName() });
+//							sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), stargateWillLock(targetRingSymbol), targetRingSymbol.getEnglishName() });
+							addTask(new ScheduledTask(EnumScheduledTask.STARGATE_DIAL_FINISHED, 15));
 						}
 						
 						else {
@@ -184,6 +186,10 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 			
 			case STARGATE_FAILED_SOUND:
 				playSoundEvent(StargateSoundEventEnum.DIAL_FAILED);
+				break;
+				
+			case STARGATE_DIAL_FINISHED:
+				sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), stargateWillLock(targetRingSymbol), targetRingSymbol.getEnglishName() });
 				break;
 				
 			default:
