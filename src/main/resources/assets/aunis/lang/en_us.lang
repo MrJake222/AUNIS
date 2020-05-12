@@ -98,6 +98,10 @@ commands.sgquery.usage=/sgquery [(x y z) (x y z)] [dim=X] [map=Y] [id=Z]
 commands.sgquery.number_expected=Number expected
 commands.sgquery.no_map=No such map
 commands.sgquery.stargates=Stargates %s
+commands.sgquery.wrong_id=Wrong ID or not given any
+commands.sgquery.wrong_map=Wrong map or not given any
+commands.sgquery.wrong_sender=Wrong sender (not a player)
+commands.sgquery.giving_page=Giving page to %s
 commands.sggivepage.usage=/sggivepage (player) (map=X) [biome=Y] (Symbol)x8/6
 commands.sggivepage.no_map=No map or wrong map given
 commands.sggivepage.give_page=Giving Page to %s

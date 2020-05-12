@@ -23,6 +23,7 @@ import mrjake.aunis.AunisDamageSources;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.config.StargateDimensionConfig;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
@@ -46,7 +47,6 @@ import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
-import mrjake.aunis.stargate.power.DimensionPowerMap;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
 import mrjake.aunis.stargate.power.StargateEnergyRequired;
 import mrjake.aunis.stargate.teleportation.EventHorizon;
@@ -75,6 +75,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
@@ -296,18 +297,12 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		if (targetGatePos.equals(gatePosMap.get(getSymbolType())))
 			return false;
-		
-		boolean areDimensionsEqual = world.provider.getDimension() == targetGatePos.dimensionID;
-		
-		if ((world.provider.getDimensionType() == DimensionType.NETHER && targetGatePos.dimensionID == DimensionType.OVERWORLD.getId()) || 
-			(world.provider.getDimensionType() == DimensionType.OVERWORLD && targetGatePos.dimensionID == DimensionType.NETHER.getId())) {
 			
-			if (!AunisConfig.stargateConfig.nether8thSymbol)
-				areDimensionsEqual = true;
-		}
+		boolean localDial = world.provider.getDimension() == targetGatePos.dimensionID ||
+				StargateDimensionConfig.isGroupEqual(world.provider.getDimensionType(), DimensionManager.getProviderType(targetGatePos.dimensionID));
 		
 		// TODO Optimize this, prevent dimension from loading only to check the SymbolType...
-		if (address.size() < getSymbolType().getMinimalSymbolCountTo(targetGatePos.getTileEntity().getSymbolType(), areDimensionsEqual))
+		if (address.size() < getSymbolType().getMinimalSymbolCountTo(targetGatePos.getTileEntity().getSymbolType(), localDial))
 			return false;
 		
 		int additional = address.size() - 7;
@@ -1244,7 +1239,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			distance = 5000 * Math.log10(distance) / Math.log10(5000);	
 		
 		StargateEnergyRequired energyRequired = new StargateEnergyRequired(AunisConfig.powerConfig.openingBlockToEnergyRatio, AunisConfig.powerConfig.keepAliveBlockToEnergyRatioPerTick);
-		energyRequired = energyRequired.mul(distance).add(DimensionPowerMap.getCost(world.provider.getDimensionType(), targetDim));
+		energyRequired = energyRequired.mul(distance).add(StargateDimensionConfig.getCost(world.provider.getDimensionType(), targetDim));
 		
 		Aunis.info(String.format("Energy required to dial [distance=%,d, from=%s, to=%s] = %,d / keepAlive: %,d/t, stored=%,d", 
 				Math.round(distance),

@@ -9,6 +9,7 @@ import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.config.StargateDimensionConfig;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
@@ -101,7 +102,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	
 	public void updateNetherAddress() {
 		dialedAddress.clear();
-		dialedAddress.addAll(network.getNetherGate().subList(0, AunisConfig.stargateConfig.nether8thSymbol ? 7 : 6));
+		dialedAddress.addAll(network.getNetherGate().subList(0, StargateDimensionConfig.netherOverworld8thSymbol() ? 7 : 6));
 		dialedAddress.addSymbol(SymbolMilkyWayEnum.ORIGIN);
 		
 		Aunis.info("Orlin's dialed address: " + dialedAddress);

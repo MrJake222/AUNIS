@@ -130,11 +130,11 @@ public enum SymbolPegasusEnum implements SymbolInterface {
 		return dialedAddress.subList(0, dialedAddress.size()-1);
 	}
 	
-	public static int getMinimalSymbolCountTo(SymbolTypeEnum symbolType, boolean areDimensionsEqual) {
+	public static int getMinimalSymbolCountTo(SymbolTypeEnum symbolType, boolean localDial) {
 		switch (symbolType) {
 			case MILKYWAY:
 			case PEGASUS:
-				return areDimensionsEqual ? 7 : 8;
+				return localDial ? 7 : 8;
 				
 			case UNIVERSE:
 				return 9;
