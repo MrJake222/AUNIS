@@ -150,6 +150,9 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 					}
 				}
 				
+				teleportList.clear();
+				excludedEntities.clear();
+				
 				addTask(new ScheduledTask(EnumScheduledTask.RINGS_CLEAR_OUT));
 				break;
 				
