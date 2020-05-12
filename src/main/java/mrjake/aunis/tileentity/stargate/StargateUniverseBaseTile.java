@@ -151,7 +151,6 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 						
 						if (stargateState.dialingComputer()) {
 							stargateState = EnumStargateState.IDLE;
-//							sendSignal(ringSpinContext, "stargate_spin_chevron_engaged", new Object[] { dialedAddress.size(), stargateWillLock(targetRingSymbol), targetRingSymbol.getEnglishName() });
 							addTask(new ScheduledTask(EnumScheduledTask.STARGATE_DIAL_FINISHED, 15));
 						}
 						
@@ -375,14 +374,5 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 	@Override
 	public StargateUniverseRendererState getRendererStateClient() {
 		return (StargateUniverseRendererState) super.getRendererStateClient();
-	}
-
-	
-	// --------------------------------------------------------------------------------
-	// OpenComputers
-	
-	@Override
-	public Object[] engageSymbol(Context context, Arguments args) {
-		return super.engageSymbol(context, args);
 	}
 }

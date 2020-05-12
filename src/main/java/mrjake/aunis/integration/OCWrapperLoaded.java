@@ -67,8 +67,11 @@ public class OCWrapperLoaded implements OCWrapperInterface {
 			Network.joinWirelessNetwork(endpoint);
 			
 			endpointStack.setEndpoint(endpoint, player.getEntityWorld().getTotalWorldTime());
-			Aunis.info("setting: " + stack.hashCode());
 		}
+		
+		// Broadcast
+		if (address.isEmpty())
+			address = null;
 		
 		Packet packet = Network.newPacket("unv-dialer-"+player.getName(), address, port, data);
 //		Aunis.info("sending packet with endpoint: " + endpointStack.getEndpoint());
