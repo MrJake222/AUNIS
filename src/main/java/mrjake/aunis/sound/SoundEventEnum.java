@@ -19,14 +19,14 @@ public enum SoundEventEnum implements EnumKeyInterface<Integer> {
 	// ----------------------------------------------------------
 	// Stargate - Milky Way
 	
-	DHD_MILKYWAY_PRESS(10, "dhd_milkyway_press", 0.5f),
-	DHD_MILKYWAY_PRESS_BRB(11, "dhd_milkyway_press_brb", 0.5f),
+	DHD_MILKYWAY_PRESS(10, "dhd_milkyway_press", 0.3f),
+	DHD_MILKYWAY_PRESS_BRB(11, "dhd_milkyway_press_brb", 0.3f),
 	
 	GATE_MILKYWAY_OPEN(12, "gate_milkyway_open", 1.0f * (float)AunisConfig.stargateConfig.audioRangeMultiplier),
 	GATE_MILKYWAY_CLOSE(13, "gate_milkyway_close", 1.0f * (float)AunisConfig.stargateConfig.audioRangeMultiplier),
 	GATE_MILKYWAY_DIAL_FAILED(14, "gate_milkyway_dial_fail", 0.3f),
 	GATE_MILKYWAY_DIAL_FAILED_COMPUTER(15, "gate_milkyway_dial_fail_computer", 1.5f),
-	GATE_MILKYWAY_INCOMING(16, "gate_milkyway_incoming", 0.5f),
+	GATE_MILKYWAY_INCOMING(16, "gate_milkyway_incoming", 1.0f),
 	
 	GATE_MILKYWAY_CHEVRON_SHUT(17, "gate_milkyway_chevron_shut", 1.0f),
 	GATE_MILKYWAY_CHEVRON_OPEN(18, "gate_milkyway_chevron_open", 1.0f),
@@ -39,8 +39,8 @@ public enum SoundEventEnum implements EnumKeyInterface<Integer> {
 	GATE_UNIVERSE_CHEVRON_LOCK(71, "gate_universe_chevron_lock", 1.0f),
 	GATE_UNIVERSE_CHEVRON_TOP_LOCK(72, "gate_universe_chevron_top_lock", 1.0f),
 	GATE_UNIVERSE_DIAL_FAILED(73, "gate_universe_fail", 1.0f),
-	GATE_UNIVERSE_OPEN(74, "gate_universe_open", 1.0f),
-	GATE_UNIVERSE_CLOSE(75, "gate_universe_close", 1.0f),
+	GATE_UNIVERSE_OPEN(74, "gate_universe_open", 1.0f * (float)AunisConfig.stargateConfig.audioRangeMultiplier),
+	GATE_UNIVERSE_CLOSE(75, "gate_universe_close", 1.0f * (float)AunisConfig.stargateConfig.audioRangeMultiplier),
 	
 	// ----------------------------------------------------------
 	// Ring transporter

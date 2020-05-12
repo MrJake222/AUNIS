@@ -63,8 +63,9 @@ public class AunisConfig {
 		
 		@Name("Wormhole audio range multiplier")
 		@Comment({"How far from the gate can you hear a wormhole opening and closing?",
-					"The default range will be multiplied against this number."})
-		@RangeDouble(min=1d, max=100d)
+					"The default range will be multiplied against this number.",
+					"(Default of 1.0x is approximately 15 blocks from source)"})
+		@RangeDouble(min=1d, max=20d)
 		public double audioRangeMultiplier = 1d;
 	}
 	
