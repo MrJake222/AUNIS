@@ -206,15 +206,11 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 		
 		StargateAbstractBaseTile gateTile = getLinkedGate(world);
 		
-		Aunis.logger.error("Linked gate state: " + gateTile.getStargateState());
-		
 		if (gateTile.getStargateState() != EnumStargateState.DIALING_COMPUTER) {
-		
 			if (symbol.brb())
 				AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS_BRB);
 			else
 				AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS);
-			
 		}
 		
         world.notifyNeighborsOfStateChange(pos, AunisBlocks.DHD_BLOCK, true);
