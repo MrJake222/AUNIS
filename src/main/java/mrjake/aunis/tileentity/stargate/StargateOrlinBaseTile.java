@@ -155,7 +155,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 						stargateState = EnumStargateState.DIALING;
 						
 						startSparks();
-						AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.GATE_ORLIN_DIAL);
+						AunisSoundHelper.playSoundEvent(world, getGateCenterPos(), SoundEventEnum.GATE_ORLIN_DIAL);
 						
 						addTask(new ScheduledTask(EnumScheduledTask.STARGATE_ORLIN_OPEN));
 						break;

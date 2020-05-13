@@ -33,7 +33,7 @@ public class TeleportPacket {
 	public void teleport() {
 		TeleportHelper.teleportEntity(entity, sourceGatePos, targetGatePos, rotation, motionVector);
 		
-		AunisSoundHelper.playSoundEvent(targetGatePos.getWorld(), targetGatePos.gatePos, SoundEventEnum.WORMHOLE_GO);
+		AunisSoundHelper.playSoundEvent(targetGatePos.getWorld(), targetGatePos.getTileEntity().getGateCenterPos(), SoundEventEnum.WORMHOLE_GO);
 	}
 
 	public TeleportPacket setMotion(Vector2f motion) {

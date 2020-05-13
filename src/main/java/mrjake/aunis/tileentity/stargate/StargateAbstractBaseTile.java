@@ -543,9 +543,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			throw new IllegalArgumentException("Tried to play " + soundEnum + " on " + getClass().getCanonicalName() + " which apparently doesn't support it.");
 		
 		if (world.isRemote)
-			AunisSoundHelper.playSoundEventClientSide(world, pos, soundEvent);
+			AunisSoundHelper.playSoundEventClientSide(world, getGateCenterPos(), soundEvent);
 		else
-			AunisSoundHelper.playSoundEvent(world, pos, soundEvent);
+			AunisSoundHelper.playSoundEvent(world, getGateCenterPos(), soundEvent);
 	}
 	
 	// ------------------------------------------------------------------------
@@ -866,7 +866,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	public void updateFacing(EnumFacing facing, boolean server) {
 		this.facing = facing;
-		this.eventHorizon = new EventHorizon(world, pos, facing, getHorizonTeleportBox(server));
+		this.eventHorizon = new EventHorizon(world, pos, getGateCenterPos(), facing, getHorizonTeleportBox(server));
 		this.renderBoundingBox = getRenderBoundingBoxRaw().rotate((int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5).offset(pos);
 		
 		AunisAxisAlignedBB kBox = getHorizonKillingBox(server);
@@ -1166,7 +1166,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 					flashIndex++;
 					
 					if (flashIndex == 1) {
-						AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.WORMHOLE_FLICKER);
+						AunisSoundHelper.playSoundEvent(world, getGateCenterPos(), SoundEventEnum.WORMHOLE_FLICKER);
 						AunisSoundHelper.playSoundEvent(targetGatePos.getWorld(), targetGatePos.gatePos, SoundEventEnum.WORMHOLE_FLICKER);
 					}
 					
