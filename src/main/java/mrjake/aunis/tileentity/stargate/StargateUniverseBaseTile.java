@@ -2,8 +2,6 @@ package mrjake.aunis.tileentity.stargate;
 
 import java.util.List;
 
-import li.cil.oc.api.machine.Arguments;
-import li.cil.oc.api.machine.Context;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -56,7 +54,7 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 		
 		stargateState = EnumStargateState.DIALING;
 		
-		AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.GATE_UNIVERSE_DIAL_START);
+		AunisSoundHelper.playSoundEvent(world, getGateCenterPos(), SoundEventEnum.GATE_UNIVERSE_DIAL_START);
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_DIAL_NEXT, 30));
 		sendRenderingUpdate(EnumGateAction.LIGHT_UP_CHEVRONS, 9, true);
 		updateChevronLight(9, true);
@@ -93,7 +91,7 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 			stargateState = EnumStargateState.DIALING;
 		
 		if (stargateState.dialingComputer() && dialedAddress.size() == 0) {
-			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.GATE_UNIVERSE_DIAL_START);
+			AunisSoundHelper.playSoundEvent(world, getGateCenterPos(), SoundEventEnum.GATE_UNIVERSE_DIAL_START);
 			sendRenderingUpdate(EnumGateAction.LIGHT_UP_CHEVRONS, 9, true);
 			
 			NBTTagCompound taskData = new NBTTagCompound();

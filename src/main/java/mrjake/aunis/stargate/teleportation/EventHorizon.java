@@ -22,13 +22,15 @@ import net.minecraft.world.World;
 public class EventHorizon {	
 	private World world;
 	private BlockPos pos;
+	private BlockPos gateCenter;
 
 	private AunisAxisAlignedBB localBox;
 	private AunisAxisAlignedBB globalBox;
 	
-	public EventHorizon(World world, BlockPos pos, EnumFacing facing, AunisAxisAlignedBB localBox) {
+	public EventHorizon(World world, BlockPos pos, BlockPos gateCenter, EnumFacing facing, AunisAxisAlignedBB localBox) {
 		this.world = world;
 		this.pos = pos;
+		this.gateCenter = gateCenter;
 		
 		this.localBox = localBox.rotate(facing).offset(0.5, 0, 0.5);
 		this.globalBox = this.localBox.offset(pos); 
@@ -97,7 +99,7 @@ public class EventHorizon {
 	public void teleportEntity(int entityId) {
 		scheduledTeleportMap.get(entityId).teleport();
 		
-		AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.WORMHOLE_GO);
+		AunisSoundHelper.playSoundEvent(world, gateCenter, SoundEventEnum.WORMHOLE_GO);
 		scheduledTeleportMap.remove(entityId);
 	}
 	

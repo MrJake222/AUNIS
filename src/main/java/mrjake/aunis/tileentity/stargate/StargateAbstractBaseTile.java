@@ -543,9 +543,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			throw new IllegalArgumentException("Tried to play " + soundEnum + " on " + getClass().getCanonicalName() + " which apparently doesn't support it.");
 		
 		if (world.isRemote)
-			AunisSoundHelper.playSoundEventClientSide(world, pos, soundEvent);
+			AunisSoundHelper.playSoundEventClientSide(world, getGateCenterPos(), soundEvent);
 		else
-			AunisSoundHelper.playSoundEvent(world, pos, soundEvent);
+			AunisSoundHelper.playSoundEvent(world, getGateCenterPos(), soundEvent);
 	}
 	
 	// ------------------------------------------------------------------------
@@ -573,8 +573,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			network = StargateNetwork.get(world);
 			
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-			Aunis.ocWrapper.joinOrCreateNetwork(this);
-			Aunis.ocWrapper.joinWirelessNetwork(this);
 			
 			ForgeChunkManager.setForcedChunkLoadingCallback(Aunis.instance, chunkLoadingCallback);
 			chunkLoadingTicket = ForgeChunkManager.requestTicket(Aunis.instance, world, Type.NORMAL);
@@ -608,12 +606,24 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		}
 	}
 	
+	private boolean addedToNetwork;
+	
 	@Override
 	public void update() {
 		// Scheduled tasks
 		ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());		
 		
 		if (!world.isRemote) {
+			
+			// This cannot be done in onLoad because it makes
+			// Stargates invisible to the network sometimes
+			if (!addedToNetwork) {
+				addedToNetwork = true;
+				Aunis.ocWrapper.joinWirelessNetwork(this);
+				Aunis.ocWrapper.joinOrCreateNetwork(this);
+				// Aunis.info(pos + ": Stargate joined OC network");
+			}
+			
 			if (stargateState.engaged() && targetGatePos == null) {
 				Aunis.logger.error("A stargateState indicates the Gate should be open, but targetGatePos is null. This is a bug. Closing gate...");
 				attemptClose(StargateClosedReasonEnum.CONNECTION_LOST);
@@ -866,7 +876,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	
 	public void updateFacing(EnumFacing facing, boolean server) {
 		this.facing = facing;
-		this.eventHorizon = new EventHorizon(world, pos, facing, getHorizonTeleportBox(server));
+		this.eventHorizon = new EventHorizon(world, pos, getGateCenterPos(), facing, getHorizonTeleportBox(server));
 		this.renderBoundingBox = getRenderBoundingBoxRaw().rotate((int) facing.getHorizontalAngle()).offset(0.5, 0, 0.5).offset(pos);
 		
 		AunisAxisAlignedBB kBox = getHorizonKillingBox(server);
@@ -1166,7 +1176,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 					flashIndex++;
 					
 					if (flashIndex == 1) {
-						AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.WORMHOLE_FLICKER);
+						AunisSoundHelper.playSoundEvent(world, getGateCenterPos(), SoundEventEnum.WORMHOLE_FLICKER);
 						AunisSoundHelper.playSoundEvent(targetGatePos.getWorld(), targetGatePos.gatePos, SoundEventEnum.WORMHOLE_FLICKER);
 					}
 					
