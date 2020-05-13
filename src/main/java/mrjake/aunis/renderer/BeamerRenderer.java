@@ -21,7 +21,7 @@ public class BeamerRenderer extends TileEntitySpecialRenderer<BeamerTile> {
 	        GlStateManager.popMatrix();
 		}
 		
-		if (te.getMode() != BeamerModeEnum.NONE && (te.isActive() || te.beamRadiusClient > 0)) { 
+		if (te.getMode() != BeamerModeEnum.NONE && te.beamRadiusClient > 0) { 
 			GlStateManager.alphaFunc(516, 0.1F);
 	        this.bindTexture(TileEntityBeaconRenderer.TEXTURE_BEACON_BEAM);
 			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);

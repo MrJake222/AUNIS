@@ -81,16 +81,16 @@ public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
 		return null;
 	}
 	
-	public int getMinimalSymbolCountTo(SymbolTypeEnum symbolType, boolean areDimensionsEqual) {
+	public int getMinimalSymbolCountTo(SymbolTypeEnum symbolType, boolean localDial) {
 		switch (this) {
 			case MILKYWAY:
-				return SymbolMilkyWayEnum.getMinimalSymbolCountTo(symbolType, areDimensionsEqual);
+				return SymbolMilkyWayEnum.getMinimalSymbolCountTo(symbolType, localDial);
 				
 			case PEGASUS:
-				return SymbolPegasusEnum.getMinimalSymbolCountTo(symbolType, areDimensionsEqual);
+				return SymbolPegasusEnum.getMinimalSymbolCountTo(symbolType, localDial);
 				
 			case UNIVERSE:
-				return SymbolUniverseEnum.getMinimalSymbolCountTo(symbolType, areDimensionsEqual);
+				return SymbolUniverseEnum.getMinimalSymbolCountTo(symbolType, localDial);
 		}
 		
 		return 0;

@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import mrjake.aunis.capability.endpoint.ItemEndpointCapability;
 import mrjake.aunis.command.AunisCommands;
+import mrjake.aunis.config.StargateDimensionConfig;
 import mrjake.aunis.datafixer.TileNamesFixer;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.gui.AunisGuiHandler;
@@ -13,7 +14,6 @@ import mrjake.aunis.integration.OCWrapperInterface;
 import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
-import mrjake.aunis.stargate.power.DimensionPowerMap;
 import mrjake.aunis.worldgen.AunisWorldGen;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraftforge.common.util.CompoundDataFixer;
@@ -75,7 +75,7 @@ public class Aunis {
         AunisPacketHandler.registerPackets();
         AunisFluids.registerFluids();
         
-    	DimensionPowerMap.load(event.getModConfigurationDirectory());
+    	StargateDimensionConfig.load(event.getModConfigurationDirectory());
         
         proxy.preInit(event);
     }
@@ -124,7 +124,7 @@ public class Aunis {
     
     @EventHandler
     public void serverStarted(FMLServerStartedEvent event) throws IOException {    	
-    	DimensionPowerMap.update();
+    	StargateDimensionConfig.update();
     }
     
 	public static void log(String msg) {

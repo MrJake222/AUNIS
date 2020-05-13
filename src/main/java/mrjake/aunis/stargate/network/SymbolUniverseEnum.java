@@ -146,14 +146,14 @@ public enum SymbolUniverseEnum implements SymbolInterface {
 		return dialedAddress;
 	}
 	
-	public static int getMinimalSymbolCountTo(SymbolTypeEnum symbolType, boolean areDimensionsEqual) {
+	public static int getMinimalSymbolCountTo(SymbolTypeEnum symbolType, boolean localDial) {
 		switch (symbolType) {
 			case MILKYWAY:
 			case PEGASUS:
 				return 9;
 				
 			case UNIVERSE:
-				return areDimensionsEqual ? 7 : 9;
+				return localDial ? 7 : 9;
 		}
 		
 		return 0;

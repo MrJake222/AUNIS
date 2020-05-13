@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.config.StargateDimensionConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRendererState;
@@ -122,8 +123,17 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	@Override
 	public void addSymbolToAddress(SymbolInterface symbol) {
 		if (symbol.origin() && dialedAddress.size() >= 6 && dialedAddress.equals(StargateNetwork.EARTH_ADDRESS) && !network.isStargateInNetwork(StargateNetwork.EARTH_ADDRESS)) {
-			dialedAddress.clear();
-			dialedAddress.addAll(network.getLastActivatedOrlins().subList(0, 6));
+			if (StargateDimensionConfig.netherOverworld8thSymbol()) {
+				if (dialedAddress.size() == 7 && dialedAddress.getLast() == SymbolMilkyWayEnum.SERPENSCAPUT) {
+					dialedAddress.clear();
+					dialedAddress.addAll(network.getLastActivatedOrlins().subList(0, 7));
+				}
+			}
+			
+			else {
+				dialedAddress.clear();
+				dialedAddress.addAll(network.getLastActivatedOrlins().subList(0, 6));
+			}
 		}
 		
 		super.addSymbolToAddress(symbol);

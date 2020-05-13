@@ -14,6 +14,7 @@ import li.cil.oc.api.network.Node;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.beamer.BeamerModeEnum;
+import mrjake.aunis.beamer.BeamerRendererAction;
 import mrjake.aunis.beamer.BeamerRoleEnum;
 import mrjake.aunis.beamer.BeamerStatusEnum;
 import mrjake.aunis.block.AunisBlocks;
@@ -25,13 +26,16 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.sound.AunisSoundHelper;
+import mrjake.aunis.sound.AunisSoundHelperClient;
 import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
-import mrjake.aunis.state.BeamerRendererStateUpdate;
+import mrjake.aunis.state.BeamerRendererActionState;
+import mrjake.aunis.state.BeamerRendererState;
+import mrjake.aunis.state.BeamerRendererUpdate;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
@@ -98,12 +102,13 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
 			Aunis.ocWrapper.joinOrCreateNetwork(this);
 			
-			if (loopSoundPlaying) {
-				AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.BEAMER_LOOP, true);
-			}
+//			if (loopSoundPlaying) {
+//				AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.BEAMER_LOOP, true);
+//			}
 		}
 		
 		else {
+			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_STATE));
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_UPDATE));
 		}
 	}
@@ -379,12 +384,14 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 					sendSignal(null, "beamer_started");
 					AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.BEAMER_START); // 0.611s delay = 12 ticks
 					addTask(new ScheduledTask(EnumScheduledTask.BEAMER_TOGGLE_SOUND, 12));
+					sendRenderingAction(BeamerRendererAction.BEAM_ON);
 				}
 				
 				else if (lastBeamerStatus == BeamerStatusEnum.OK) {
 					sendSignal(null, "beamer_stopped");
 					AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.BEAMER_STOP); // 0.634s delay = 12 ticks
 					addTask(new ScheduledTask(EnumScheduledTask.BEAMER_TOGGLE_SOUND, 12));
+					sendRenderingAction(BeamerRendererAction.BEAM_OFF);
 				}
 			}
 		}
@@ -415,7 +422,13 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	
 	private void syncToClient() {
 		if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, getState(StateTypeEnum.RENDERER_UPDATE)), targetPoint);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_STATE, getState(StateTypeEnum.RENDERER_STATE)), targetPoint);
+		}
+	}
+	
+	private void sendRenderingAction(BeamerRendererAction action) {
+		if (targetPoint != null) {
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_ACTION, new BeamerRendererActionState(action)), targetPoint);
 		}
 	}
 	
@@ -457,7 +470,7 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 			beamerPos = beamerPos.offset(targetFacing);
 //			 Aunis.info("checking " + beamerPos);
 			
-			if (BEAMER_MATCHER.apply(world.getBlockState(beamerPos))) {
+			if (BEAMER_MATCHER.apply(targetBeamerWorld.getBlockState(beamerPos))) {
 				targetBeamerPos = beamerPos.toImmutable();
 				BeamerTile targetBeamerTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
 				
@@ -826,6 +839,7 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 					AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.BEAMER_LOOP, true);
 				
 				loopSoundPlaying ^= true;
+//				syncToClient();
 				markDirty();
 				
 				break;
@@ -847,6 +861,9 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case RENDERER_UPDATE:
+				return new BeamerRendererUpdate(beamerStatus);
+				
+			case RENDERER_STATE:
 				int distance = 0;
 				
 				if (baseVect != null) {
@@ -854,7 +871,7 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 					if (distance < 0) distance = -distance;
 				}
 								
-				return new BeamerRendererStateUpdate(beamerMode, beamerStatus, isObstructed, distance);
+				return new BeamerRendererState(beamerMode, beamerRole, beamerStatus, isObstructed, distance);
 		
 			case GUI_UPDATE:
 				return new BeamerContainerGuiUpdate(energyStorage.getEnergyStored(), energyTransferredLastTick, fluidHandler.getFluid(), beamerRole, redstoneMode, start, stop, inactivity);
@@ -867,8 +884,14 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	@Override
 	public State createState(StateTypeEnum stateType) {
 		switch (stateType) {
+			case RENDERER_ACTION:
+				return new BeamerRendererActionState();
+				
+			case RENDERER_STATE:
+				return new BeamerRendererState();
+				
 			case RENDERER_UPDATE:
-				return new BeamerRendererStateUpdate();
+				return new BeamerRendererUpdate();
 		
 			case GUI_UPDATE:
 				return new BeamerContainerGuiUpdate();
@@ -882,30 +905,41 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 	@SideOnly(Side.CLIENT)
 	public void setState(StateTypeEnum stateType, State state) {
 		switch (stateType) {
+			case RENDERER_STATE:
+				BeamerRendererState rendererState = (BeamerRendererState) state;
+				
+				beamerMode = rendererState.beamerMode;
+				beamerRole = rendererState.beamerRole;
+				beamerStatus = rendererState.beamerStatus;
+				isObstructed = rendererState.isObstructed;
+				beamLengthClient = rendererState.beamLength;
+				world.markBlockRangeForRenderUpdate(pos, pos);
+				break;
+				
 			case RENDERER_UPDATE:
-				BeamerRendererStateUpdate update = (BeamerRendererStateUpdate) state;
-				if (beamerStatus != update.beamerStatus) {
-					if (beamerStatus == BeamerStatusEnum.OK) {
-						// disable
-						beamRadiusClient = 0.1375f;
-						beamRadiusWiden = false;
-						beamRadiusShrink = true;
-					}
-					
-					else if (update.beamerStatus == BeamerStatusEnum.OK) {
-						// enable
+				BeamerRendererUpdate update = (BeamerRendererUpdate) state;
+				
+				beamRadiusClient = update.beamerStatus == BeamerStatusEnum.OK ? 0.1375f : 0;
+				AunisSoundHelperClient.playPositionedSoundClientSide(pos, SoundPositionedEnum.BEAMER_LOOP, update.beamerStatus == BeamerStatusEnum.OK);
+				
+				break;
+				
+			case RENDERER_ACTION:
+				BeamerRendererActionState rendererAction = (BeamerRendererActionState) state;
+				
+				switch (rendererAction.action) {
+					case BEAM_ON:
 						beamRadiusClient = 0;
 						beamRadiusWiden = true;
 						beamRadiusShrink = false;
-					}
+						break;
+				
+					case BEAM_OFF:
+						beamRadiusClient = 0.1375f;
+						beamRadiusWiden = false;
+						beamRadiusShrink = true;
+						break;
 				}
-				
-				
-				beamerMode = update.beamerMode;
-				beamerStatus = update.beamerStatus;
-				isObstructed = update.isObstructed;
-				beamLengthClient = update.beamLength;
-				world.markBlockRangeForRenderUpdate(pos, pos);
 
 				break;
 		

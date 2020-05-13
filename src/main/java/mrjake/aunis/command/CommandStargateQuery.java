@@ -2,6 +2,9 @@ package mrjake.aunis.command;
 
 import java.util.Map;
 
+import mrjake.aunis.Aunis;
+import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.item.PageNotebookItem;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.stargate.network.StargatePos;
@@ -10,6 +13,8 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -40,6 +45,7 @@ public class CommandStargateQuery extends CommandBase {
 		boolean checkDim = false;
 		int dimId = 0;
 		int idCheck = -1;
+		boolean givePage = false;
 		
 		try {
 			if (args.length >= 6) {
@@ -71,6 +77,10 @@ public class CommandStargateQuery extends CommandBase {
 				else if (args[i].startsWith("id=")) {
 					idCheck = Integer.valueOf(args[i].substring(3));
 				}
+				
+				else if (args[i].equals("page")) {
+					givePage = true;
+				}
 			}
 			
 		}
@@ -94,6 +104,8 @@ public class CommandStargateQuery extends CommandBase {
 		Map<StargateAddress, StargatePos> map = network.getMap().get(symbolType != null ? symbolType : SymbolTypeEnum.MILKYWAY);
 		
 		int id = 1;
+		StargateAddress selectedAddress = null;
+		StargatePos selectedStargatePos = null;
 		
 		for (StargateAddress address : map.keySet()) {
 			if (checkDim && map.get(address).dimensionID != dimId)
@@ -105,6 +117,9 @@ public class CommandStargateQuery extends CommandBase {
 				continue;
 			
 			if (idCheck == -1 || id == idCheck) {
+				selectedStargatePos = map.get(address);
+				selectedAddress = address;
+				
 				String gateString = " " + id + ". [";
 				gateString += "x=" + pos.getX() + ", ";
 				gateString += "y=" + pos.getY() + ", ";
@@ -134,6 +149,28 @@ public class CommandStargateQuery extends CommandBase {
 			}
 			
 			id++;
+		}
+		
+		if (givePage) {
+			Aunis.info("id: " + idCheck);
+			
+			if (idCheck == -1 || selectedAddress == null) {
+				throw new WrongUsageException("commands.sgquery.wrong_id");
+			}
+			
+			if (symbolType == null) {
+				throw new WrongUsageException("commands.sgquery.wrong_map");
+			}
+			
+			if (!(sender instanceof EntityPlayer)) {
+				throw new WrongUsageException("commands.sgquery.wrong_sender");
+			}
+			
+			ItemStack stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
+			stack.setTagCompound(PageNotebookItem.getCompoundFromAddress(selectedAddress, true, PageNotebookItem.getRegistryPathFromWorld(selectedStargatePos.getWorld(), selectedStargatePos.gatePos)));
+			((EntityPlayer) sender).addItemStackToInventory(stack);
+			
+			notifyCommandListener(sender, this, "commands.sgquery.giving_page", sender.getName());
 		}
 	}
 

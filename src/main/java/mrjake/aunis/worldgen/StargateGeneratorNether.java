@@ -11,6 +11,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.config.StargateDimensionConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
@@ -179,7 +180,7 @@ public class StargateGeneratorNether {
 						itemHandler.insertItem(4, new ItemStack(AunisBlocks.CAPACITOR_BLOCK), false);
 						itemHandler.insertItem(0, new ItemStack(AunisItems.CRYSTAL_GLYPH_MILKYWAY), false);
 						
-						if (AunisConfig.stargateConfig.nether8thSymbol)
+						if (StargateDimensionConfig.netherOverworld8thSymbol())
 							itemHandler.insertItem(1, new ItemStack(AunisItems.CRYSTAL_GLYPH_STARGATE), false);
 						
 						break;
@@ -194,7 +195,7 @@ public class StargateGeneratorNether {
 						itemHandler = world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 						itemHandler.insertItem(0, new ItemStack(AunisItems.CRYSTAL_CONTROL_DHD), false);
 						
-						if (AunisConfig.stargateConfig.nether8thSymbol)
+						if (StargateDimensionConfig.netherOverworld8thSymbol())
 							itemHandler.insertItem(1, new ItemStack(AunisItems.CRYSTAL_GLYPH_DHD), false);
 						
 						break;

@@ -98,6 +98,10 @@ commands.sgquery.usage=/sgquery [(x y z) (x y z)] [dim=X] [map=Y] [id=Z]
 commands.sgquery.number_expected=Number expected
 commands.sgquery.no_map=No such map
 commands.sgquery.stargates=Stargates %s
+commands.sgquery.wrong_id=Wrong ID or not given any
+commands.sgquery.wrong_map=Wrong map or not given any
+commands.sgquery.wrong_sender=Wrong sender (not a player)
+commands.sgquery.giving_page=Giving page to %s
 commands.sggivepage.usage=/sggivepage (player) (map=X) [biome=Y] (Symbol)x8/6
 commands.sggivepage.no_map=No map or wrong map given
 commands.sggivepage.give_page=Giving Page to %s
@@ -306,7 +310,7 @@ item.aunis.universe_dialer.mode_rings=Rings
 item.aunis.universe_dialer.mode_oc=OpnCom
 item.aunis.universe_dialer.aborting=Aborting dial
 item.aunis.universe_dialer.oc_name=Entry name
-item.aunis.universe_dialer.oc_address=OpenComputers' modem's address
+item.aunis.universe_dialer.oc_address=OpenComputers' modem's address (Leave blank for broadcast)
 item.aunis.universe_dialer.oc_port=Modem's port
 item.aunis.universe_dialer.oc_data=OpenComputers parameters (comma separated)
 item.aunis.universe_dialer.oc_save=Save
