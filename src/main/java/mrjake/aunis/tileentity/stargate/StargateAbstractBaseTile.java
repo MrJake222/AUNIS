@@ -573,8 +573,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			network = StargateNetwork.get(world);
 			
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-			Aunis.ocWrapper.joinOrCreateNetwork(this);
-			Aunis.ocWrapper.joinWirelessNetwork(this);
 			
 			ForgeChunkManager.setForcedChunkLoadingCallback(Aunis.instance, chunkLoadingCallback);
 			chunkLoadingTicket = ForgeChunkManager.requestTicket(Aunis.instance, world, Type.NORMAL);
@@ -608,12 +606,24 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		}
 	}
 	
+	private boolean addedToNetwork;
+	
 	@Override
 	public void update() {
 		// Scheduled tasks
 		ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());		
 		
 		if (!world.isRemote) {
+			
+			// This cannot be done in onLoad because it makes
+			// Stargates invisible to the network sometimes
+			if (!addedToNetwork) {
+				addedToNetwork = true;
+				Aunis.ocWrapper.joinWirelessNetwork(this);
+				Aunis.ocWrapper.joinOrCreateNetwork(this);
+				// Aunis.info(pos + ": Stargate joined OC network");
+			}
+			
 			if (stargateState.engaged() && targetGatePos == null) {
 				Aunis.logger.error("A stargateState indicates the Gate should be open, but targetGatePos is null. This is a bug. Closing gate...");
 				attemptClose(StargateClosedReasonEnum.CONNECTION_LOST);
