@@ -8,7 +8,6 @@ import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.Packet;
 import li.cil.oc.api.network.Visibility;
 import li.cil.oc.api.network.WirelessEndpoint;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.capability.endpoint.ItemEndpointCapability;
 import mrjake.aunis.capability.endpoint.ItemEndpointInterface;
 import mrjake.aunis.item.dialer.UniverseDialerWirelessEndpoint;

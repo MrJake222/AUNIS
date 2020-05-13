@@ -1,8 +1,6 @@
 package mrjake.aunis.state;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.beamer.BeamerModeEnum;
-import mrjake.aunis.beamer.BeamerRoleEnum;
 import mrjake.aunis.beamer.BeamerStatusEnum;
 
 public class BeamerRendererUpdate extends State {

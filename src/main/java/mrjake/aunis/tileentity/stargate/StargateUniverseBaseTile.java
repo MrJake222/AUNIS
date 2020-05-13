@@ -2,8 +2,6 @@ package mrjake.aunis.tileentity.stargate;
 
 import java.util.List;
 
-import li.cil.oc.api.machine.Arguments;
-import li.cil.oc.api.machine.Context;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.packet.AunisPacketHandler;

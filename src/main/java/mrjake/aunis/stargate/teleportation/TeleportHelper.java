@@ -16,6 +16,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.ITeleporter;
 
 public class TeleportHelper {
@@ -108,6 +109,8 @@ public class TeleportHelper {
 		}
 		
 		else {
+	        if (!ForgeHooks.onTravelToDimension(entity, targetGatePos.dimensionID)) return;
+			
 			final Vec3d posFinal = pos;
 			
 			ITeleporter teleporter = new ITeleporter() {
