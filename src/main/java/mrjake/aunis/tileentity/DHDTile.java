@@ -16,6 +16,7 @@ import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.SoundEventEnum;
+import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.network.StargateAddressDynamic;
 import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
@@ -202,10 +203,19 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	// Symbol activation
 	
 	public void activateSymbol(SymbolMilkyWayEnum symbol) {	
-		if (symbol.brb())
-			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS_BRB);
-		else
-			AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS);
+		
+		StargateAbstractBaseTile gateTile = getLinkedGate(world);
+		
+		Aunis.logger.error("Linked gate state: " + gateTile.getStargateState());
+		
+		if (gateTile.getStargateState() != EnumStargateState.DIALING_COMPUTER) {
+		
+			if (symbol.brb())
+				AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS_BRB);
+			else
+				AunisSoundHelper.playSoundEvent(world, pos, SoundEventEnum.DHD_MILKYWAY_PRESS);
+			
+		}
 		
         world.notifyNeighborsOfStateChange(pos, AunisBlocks.DHD_BLOCK, true);
         
