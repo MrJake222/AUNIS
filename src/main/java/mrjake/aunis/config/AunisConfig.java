@@ -54,10 +54,9 @@ public class AunisConfig {
 		@Name("Universe dialer nearby radius")
 		public int universeGateNearbyReach = 1024;
 		
-		@Name("Wormhole audio range multiplier")
-		@Comment({"How far from the gate can you hear a wormhole opening and closing?",
-					"The default range will be multiplied against this number.",
-					"(Default of 1.0x is approximately 15 blocks from source)"})
+		@Name("Gate audio range multiplier")
+		@Comment({"How far from the gate can you hear it?",
+					"The default range (approximately 20 blocks) will be multiplied against this number."})
 		@RangeDouble(min=1d, max=20d)
 		public double audioRangeMultiplier = 1d;
 	}
