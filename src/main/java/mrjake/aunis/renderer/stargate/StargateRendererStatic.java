@@ -95,7 +95,7 @@ public class StargateRendererStatic {
 				y.add( cos.get(i) * innerCircleRadius );
 				
 				tx.add( toUV( sin.get(i) * texMul ) );
-				ty.add( toUV( cos.get(i) * texMul ) );
+				ty.add( -toUV( cos.get(i) * texMul ) );
 			}
 		}
 		
@@ -109,7 +109,7 @@ public class StargateRendererStatic {
 			glBegin(GL_TRIANGLE_FAN);
 			
 			if (alpha != null) glColor4f(1.0f, 1.0f, 1.0f, alpha.floatValue());
-			if (!white) glTexCoord2f(0.5f, 0.5f);
+			if (!white) glTexCoord2f(0.5f, -0.5f);
 			
 			glVertex3f(0, 0, 0);
 			
@@ -177,7 +177,7 @@ public class StargateRendererStatic {
 					y.add( rad * cos.get(i) );
 					
 					tx.add( toUV( sin.get(i) * texMul.get(k) ) );
-					ty.add( toUV( cos.get(i) * texMul.get(k) ) );
+					ty.add( -toUV( cos.get(i) * texMul.get(k) ) );
 				}
 			}
 		}
