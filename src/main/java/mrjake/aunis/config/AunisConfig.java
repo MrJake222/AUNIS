@@ -59,6 +59,14 @@ public class AunisConfig {
 					"The default range (approximately 20 blocks) will be multiplied against this number."})
 		@RangeDouble(min=1d, max=20d)
 		public double audioRangeMultiplier = 1d;
+
+		@Name("Disable animated Event Horizon")
+		@Comment({
+			"Changing this option will require you to reload resources manually.",
+			"Just press F3+Q once in-game."
+		})
+		public boolean disableAnimatedEventHorizon = false;
+
 	}
 	
 	public static class PowerConfig {

@@ -1,7 +1,6 @@
 package mrjake.aunis.proxy;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.OBJLoader.ModelReloadListener;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.stargate.StargateClassicMemberBlockColor;
 import mrjake.aunis.fluid.AunisBlockFluid;
@@ -14,6 +13,7 @@ import mrjake.aunis.item.dialer.ChangeEvent;
 import mrjake.aunis.item.dialer.UniverseDialerItem;
 import mrjake.aunis.item.renderer.PageNotebookTEISR;
 import mrjake.aunis.item.renderer.UniverseDialerTEISR;
+import mrjake.aunis.loader.ReloadListener;
 import mrjake.aunis.renderer.BeamerRenderer;
 import mrjake.aunis.renderer.DHDRenderer;
 import mrjake.aunis.renderer.SpecialRenderer;
@@ -65,7 +65,7 @@ public class ProxyClient implements IProxy {
     }
  
     public void postInit(FMLPostInitializationEvent event) {
-		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ModelReloadListener());
+		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ReloadListener());
     }
 
 	public String localize(String unlocalized, Object... args) {

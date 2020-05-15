@@ -6,49 +6,49 @@ import java.util.Map;
 import java.util.Random;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.OBJLoader.ModelEnum;
+import mrjake.aunis.loader.model.ModelLoader;
 import net.minecraft.util.ResourceLocation;
 
 public enum SymbolMilkyWayEnum implements SymbolInterface {
-	SCULPTOR(0, 19, "Sculptor", ModelEnum.MILKYWAY_B0),
-	SCORPIUS(1, 8, "Scorpius", ModelEnum.MILKYWAY_B1),
-	CENTAURUS(2, 4, "Centaurus", ModelEnum.MILKYWAY_B2),
-	MONOCEROS(3, 31, "Monoceros", ModelEnum.MILKYWAY_B3),
-	ORIGIN(4, 0, "Point of Origin", ModelEnum.MILKYWAY_B4),
-	PEGASUS(5, 18, "Pegasus", ModelEnum.MILKYWAY_B5),
-	ANDROMEDA(6, 21, "Andromeda", ModelEnum.MILKYWAY_B6),
-	SERPENSCAPUT(7, 6, "Serpens Caput", ModelEnum.MILKYWAY_B7),
-	ARIES(8, 23, "Aries", ModelEnum.MILKYWAY_B8),
-	LIBRA(9, 5, "Libra", ModelEnum.MILKYWAY_B9),
-	ERIDANUS(10, 28, "Eridanus", ModelEnum.MILKYWAY_B10),
-	LEOMINOR(11, 37, "Leo Minor", ModelEnum.MILKYWAY_B11),
-	HYDRA(12, 33, "Hydra", ModelEnum.MILKYWAY_B12),
-	SAGITTARIUS(13, 11, "Sagittarius", ModelEnum.MILKYWAY_B13),
-	SEXTANS(14, 36, "Sextans", ModelEnum.MILKYWAY_B14),
-	SCUTUM(15, 10, "Scutum", ModelEnum.MILKYWAY_B15),
-	PISCES(16, 20, "Pisces", ModelEnum.MILKYWAY_B16),
-	VIRGO(17, 2, "Virgo", ModelEnum.MILKYWAY_B17),
-	BOOTES(18, 3, "Bootes", ModelEnum.MILKYWAY_B18),
-	AURIGA(19, 27, "Auriga", ModelEnum.MILKYWAY_B19),
-	CORONAAUSTRALIS(20, 9, "Corona Australis", ModelEnum.MILKYWAY_B20),
-	GEMINI(21, 32, "Gemini", ModelEnum.MILKYWAY_B21),
-	LEO(22, 38, "Leo", ModelEnum.MILKYWAY_B22),
-	CETUS(23, 25, "Cetus", ModelEnum.MILKYWAY_B23),
-	TRIANGULUM(24, 22, "Triangulum", ModelEnum.MILKYWAY_B24),
-	AQUARIUS(25, 17, "Aquarius", ModelEnum.MILKYWAY_B25),
-	MICROSCOPIUM(26, 13, "Microscopium", ModelEnum.MILKYWAY_B26),
-	EQUULEUS(27, 16, "Equuleus", ModelEnum.MILKYWAY_B27),
-	CRATER(28, 1, "Crater", ModelEnum.MILKYWAY_B28),
-	PERSEUS(29, 24, "Perseus", ModelEnum.MILKYWAY_B29),
-	CANCER(30, 35, "Cancer", ModelEnum.MILKYWAY_B30),
-	NORMA(31, 7, "Norma", ModelEnum.MILKYWAY_B31),
-	TAURUS(32, 26, "Taurus", ModelEnum.MILKYWAY_B32),
-	CANISMINOR(33, 30, "Canis Minor", ModelEnum.MILKYWAY_B33),
-	CAPRICORNUS(34, 14, "Capricornus", ModelEnum.MILKYWAY_B34),
-	LYNX(35, 34, "Lynx", ModelEnum.MILKYWAY_B35),
-	ORION(36, 29, "Orion", ModelEnum.MILKYWAY_B36),
-	PISCISAUSTRINUS(37, 15, "Piscis Austrinus", ModelEnum.MILKYWAY_B37),
-	BRB(38, -1, "Bright Red Button", ModelEnum.MILKYWAY_BRB);
+	SCULPTOR(0, 19, "Sculptor", "0.obj"),
+	SCORPIUS(1, 8, "Scorpius", "1.obj"),
+	CENTAURUS(2, 4, "Centaurus", "2.obj"),
+	MONOCEROS(3, 31, "Monoceros", "3.obj"),
+	ORIGIN(4, 0, "Point of Origin", "4.obj"),
+	PEGASUS(5, 18, "Pegasus", "5.obj"),
+	ANDROMEDA(6, 21, "Andromeda", "6.obj"),
+	SERPENSCAPUT(7, 6, "Serpens Caput", "7.obj"),
+	ARIES(8, 23, "Aries", "8.obj"),
+	LIBRA(9, 5, "Libra", "9.obj"),
+	ERIDANUS(10, 28, "Eridanus", "10.obj"),
+	LEOMINOR(11, 37, "Leo Minor", "11.obj"),
+	HYDRA(12, 33, "Hydra", "12.obj"),
+	SAGITTARIUS(13, 11, "Sagittarius", "13.obj"),
+	SEXTANS(14, 36, "Sextans", "14.obj"),
+	SCUTUM(15, 10, "Scutum", "15.obj"),
+	PISCES(16, 20, "Pisces", "16.obj"),
+	VIRGO(17, 2, "Virgo", "17.obj"),
+	BOOTES(18, 3, "Bootes", "18.obj"),
+	AURIGA(19, 27, "Auriga", "19.obj"),
+	CORONAAUSTRALIS(20, 9, "Corona Australis", "20.obj"),
+	GEMINI(21, 32, "Gemini", "21.obj"),
+	LEO(22, 38, "Leo", "22.obj"),
+	CETUS(23, 25, "Cetus", "23.obj"),
+	TRIANGULUM(24, 22, "Triangulum", "24.obj"),
+	AQUARIUS(25, 17, "Aquarius", "25.obj"),
+	MICROSCOPIUM(26, 13, "Microscopium", "26.obj"),
+	EQUULEUS(27, 16, "Equuleus", "27.obj"),
+	CRATER(28, 1, "Crater", "28.obj"),
+	PERSEUS(29, 24, "Perseus", "29.obj"),
+	CANCER(30, 35, "Cancer", "30.obj"),
+	NORMA(31, 7, "Norma", "31.obj"),
+	TAURUS(32, 26, "Taurus", "32.obj"),
+	CANISMINOR(33, 30, "Canis Minor", "33.obj"),
+	CAPRICORNUS(34, 14, "Capricornus", "34.obj"),
+	LYNX(35, 34, "Lynx", "35.obj"),
+	ORION(36, 29, "Orion", "36.obj"),
+	PISCISAUSTRINUS(37, 15, "Piscis Austrinus", "37.obj"),
+	BRB(38, -1, "Bright Red Button", "BRB.obj");
 	
 	public static final float ANGLE_PER_GLYPH = 9.2307692f;
 	
@@ -59,10 +59,9 @@ public enum SymbolMilkyWayEnum implements SymbolInterface {
 	public String englishName;
 	public String translationKey;
 	public ResourceLocation iconResource;
+	public ResourceLocation modelResource;
 	
-	public ModelEnum model;
-	
-	SymbolMilkyWayEnum(int id, int angleIndex, String englishName, ModelEnum model) {
+	SymbolMilkyWayEnum(int id, int angleIndex, String englishName, String model) {
 		this.id = id;
 		
 		this.angleIndex = angleIndex;
@@ -72,7 +71,7 @@ public enum SymbolMilkyWayEnum implements SymbolInterface {
 		this.translationKey = "glyph.aunis.milkyway." + englishName.toLowerCase().replace(" ", "_");
 		this.iconResource = new ResourceLocation(Aunis.ModID, "textures/gui/symbol/milkyway/" + englishName.toLowerCase() + ".png");
 		
-		this.model = model;
+		this.modelResource = ModelLoader.getModelResource("milkyway/" + model);
 	}
 	
 	public boolean brb() {

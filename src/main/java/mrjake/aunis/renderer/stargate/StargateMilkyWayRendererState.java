@@ -36,7 +36,7 @@ public class StargateMilkyWayRendererState extends StargateClassicRendererState 
 	
 	@Override
 	protected String getChevronTextureBase() {
-		return "textures/tesr/milkyway/chevron";
+		return "milkyway/chevron";
 	}
 		
 	@Override

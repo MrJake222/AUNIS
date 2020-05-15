@@ -581,7 +581,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				break;
 		
 			case RINGS_START_ANIMATION:
-				AunisSoundHelper.playSoundEventClientSide(world, pos, SoundEventEnum.RINGS_TRANSPORT);
+				AunisSoundHelper.playSoundEventClientSide(world, pos.up(3), SoundEventEnum.RINGS_TRANSPORT);
 				renderer.animationStart(((TransportRingsStartAnimationRequest) state).animationStart);
 				break;
 		
