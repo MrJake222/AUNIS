@@ -30,7 +30,7 @@ public class ChevronTextureList {
 	
 	public ChevronTextureList(String chevronTextureBase) {		
 		for (int i=0; i<=10; i++) {
-			CHEVRON_RESOURCE_MAP.put(i, TextureLoader.getTextureResource(chevronTextureBase + i + ".png"));
+			CHEVRON_RESOURCE_MAP.put(i, TextureLoader.getTextureResource(chevronTextureBase + i + ".jpg"));
 		}
 	}
 	
