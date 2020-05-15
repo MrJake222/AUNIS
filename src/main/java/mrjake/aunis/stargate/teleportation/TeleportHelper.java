@@ -1,7 +1,10 @@
 package mrjake.aunis.stargate.teleportation;
 
+import java.util.List;
+
 import javax.vecmath.Vector2f;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
@@ -77,6 +80,20 @@ public class TeleportHelper {
 	}
 	
 	public static void teleportEntity(Entity entity, BlockPos sourceGatePos, StargatePos targetGatePos, float rotation, Vector2f motionVector) {		
+		List<Entity> passengers = null;
+				
+		if (entity.isRiding())
+			return;
+		
+		if (entity.isBeingRidden()) {
+			passengers = entity.getPassengers();
+			entity.removePassengers();
+			
+			for (Entity passenger : passengers) {
+				teleportEntity(passenger, sourceGatePos, targetGatePos, rotation, motionVector);
+			}
+		}
+		
 		World world = entity.getEntityWorld();
 		int sourceDim = world.provider.getDimension();
 		
@@ -100,12 +117,11 @@ public class TeleportHelper {
 		else
 			pos = getPosition(entity, sourceTile.getGateCenterPos(), targetTile.getGateCenterPos(), rotation, targetTile.getFacing().getAxis()==Axis.Z ? ~flipAxis : flipAxis);
 		
-		final float yawRotated = getRotation(entity, rotation, flipAxis);
+		final float yawRotated = getRotation(entity.isBeingRidden() ? entity.getControllingPassenger() : entity, rotation, flipAxis);
 		boolean isPlayer = entity instanceof EntityPlayerMP;
 				
 		if (sourceDim == targetGatePos.dimensionID) {
-			entity.rotationYaw = yawRotated;
-			entity.setPositionAndUpdate(pos.x, pos.y, pos.z);
+			setRotationAndPosition(entity, yawRotated, pos);
 		}
 		
 		else {
@@ -117,8 +133,7 @@ public class TeleportHelper {
 				
 				@Override
 				public void placeEntity(World world, Entity entity, float yaw) {
-					entity.rotationYaw = yawRotated;
-					entity.setPositionAndUpdate(posFinal.x, posFinal.y, posFinal.z);
+					setRotationAndPosition(entity, yawRotated, posFinal);
 				}
 			};
 			
@@ -134,8 +149,30 @@ public class TeleportHelper {
 		
 		setMotion(entity, rotation, motionVector);
 		
-		sourceTile.entityPassing(isPlayer, false);
-		targetTile.entityPassing(isPlayer, true);
+		sourceTile.entityPassing(entity, false);
+		targetTile.entityPassing(entity, true);
+		
+		if (passengers != null) {
+			for (Entity passenger : passengers) {
+				passenger.startRiding(entity);
+			}
+		}
+	}
+	
+	public static void teleportWithRiders(Entity entity, float yawRotated, Vec3d pos) {
+		if (entity.isBeingRidden()) {			
+			for (Entity entity2 : entity.getPassengers()) {
+				setRotationAndPosition(entity2, yawRotated, pos);
+			}
+		}
+		
+		setRotationAndPosition(entity, yawRotated, pos);
+	}
+	
+	public static void setRotationAndPosition(Entity entity, float yawRotated, Vec3d pos) {
+		entity.rotationYaw = yawRotated;
+		entity.setPositionAndUpdate(pos.x, pos.y, pos.z);
+		entity.getEntityWorld().updateEntityWithOptionalForce(entity, true);
 	}
 	
 	public static float getRotation(Entity player, float rotation, int flipAxis) {
