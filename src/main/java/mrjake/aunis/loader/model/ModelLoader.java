@@ -1,5 +1,6 @@
 package mrjake.aunis.loader.model;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class ModelLoader {
 		return LOADED_MODELS.get(resourceLocation);
 	}
 
-	public static void reloadModels() {
+	public static void reloadModels() throws IOException {
 		LOADED_MODELS.clear();
 		
 		List<String> modelPaths = FolderLoader.getAllFiles(MODELS_PATH, ".obj");

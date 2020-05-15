@@ -28,7 +28,7 @@ public class TextureLoader {
 		return LOADED_TEXTURES.get(resourceLocation);
 	}
 	
-	public static void reloadTextures(IResourceManager resourceManager) {
+	public static void reloadTextures(IResourceManager resourceManager) throws IOException {		
 		for (Texture texture : LOADED_TEXTURES.values())
 			texture.deleteTexture();
 		

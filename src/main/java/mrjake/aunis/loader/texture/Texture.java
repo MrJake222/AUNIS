@@ -17,7 +17,7 @@ public class Texture {
 		this.textureId = TextureUtil.glGenTextures();
 		
 		if (desaturate) {
-			Aunis.info("DESATURATE");
+			Aunis.info("Started desaturation of the event horizon texture");
 			
         	WritableRaster raster = bufferedImage.getRaster();
         	
@@ -43,7 +43,10 @@ public class Texture {
         	catch (InterruptedException e) {
         		e.printStackTrace();
         	}
+        	
+			Aunis.info("Finished desaturation of the event horizon texture");
 
+			// Single threaded code
 //        	float[] pixel = new float[3];
 //        	float gray;
 //        	
