@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.vecmath.Vector2f;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToClient;
@@ -49,48 +50,56 @@ public class EventHorizon {
 	
 	private Map<Integer, TeleportPacket> scheduledTeleportMap = new HashMap<>();
 	
+	/**
+	 * This map is used not to double the teleport packet on Entity's
+	 * passengers.
+	 */
+	private Map<Integer, Integer> timeoutMap = new HashMap<>();
+	
 	public void scheduleTeleportation(StargatePos targetGate) {
 		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, globalBox);
 
 //		Aunis.info(globalBox + ": " + entities + ", map: " + scheduledTeleportMap);
 		
+//		if (!timeoutMap.isEmpty())
+//			Aunis.info("timeoutMap: " + timeoutMap);
+		
+		for (int entityId : timeoutMap.keySet())
+			timeoutMap.put(entityId, timeoutMap.get(entityId)-1);
+		timeoutMap.entrySet().removeIf(entry -> entry.getValue() < 0);
+		
 		for (Entity entity : entities) {
 			int entityId = entity.getEntityId();
 			
-			if ( !scheduledTeleportMap.containsKey(entityId) ) {				
-				try {					
-					EnumFacing sourceFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
-					EnumFacing targetFacing = targetGate.getBlockState().getValue(AunisProps.FACING_HORIZONTAL);
-					
-					float rotation = (float) Math.toRadians( EnumFacing.fromAngle(targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle()).getOpposite().getHorizontalAngle() );
-
-					TeleportPacket packet = new TeleportPacket(entity, pos, targetGate, rotation);
-					
-					if (entity instanceof EntityPlayerMP) {
-						scheduledTeleportMap.put(entityId, packet);
-						AunisPacketHandler.INSTANCE.sendTo(new StargateMotionToClient(pos), (EntityPlayerMP) entity);
-					}
-					
-					else {
-						Vector2f motion = new Vector2f( (float)entity.motionX, (float)entity.motionZ );
-						
-						if (TeleportHelper.frontSide(sourceFacing, motion)) {
-							scheduledTeleportMap.put(entityId, packet.setMotion(motion) );
-							teleportEntity(entityId);
-						}
-						
-						/*else {
-							// TODO Back side killing
-							// Make custom message appear
-							// entity.onKillCommand();
-						}*/
-					}
+			if (!scheduledTeleportMap.containsKey(entityId) && !timeoutMap.containsKey(entityId) && !entity.isRiding()) {				
+				EnumFacing sourceFacing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
+				EnumFacing targetFacing = targetGate.getBlockState().getValue(AunisProps.FACING_HORIZONTAL);
+				
+				float rotation = (float) Math.toRadians( EnumFacing.fromAngle(targetFacing.getHorizontalAngle() - sourceFacing.getHorizontalAngle()).getOpposite().getHorizontalAngle() );
+				TeleportPacket packet = new TeleportPacket(entity, pos, targetGate, rotation);
+				
+				if (entity instanceof EntityPlayerMP) {
+					scheduledTeleportMap.put(entityId, packet);
+					AunisPacketHandler.INSTANCE.sendTo(new StargateMotionToClient(pos), (EntityPlayerMP) entity);
 				}
 				
-				catch (Exception e) {
-					e.printStackTrace();
+				else {
+					Vector2f motion = new Vector2f( (float)entity.motionX, (float)entity.motionZ );
 					
-					scheduledTeleportMap.remove(entityId);
+					if (TeleportHelper.frontSide(sourceFacing, motion)) {
+						for (Entity passenger : entity.getPassengers())
+							timeoutMap.put(passenger.getEntityId(), 40);
+						timeoutMap.put(entityId, 40);
+						
+						scheduledTeleportMap.put(entityId, packet.setMotion(motion) );
+						teleportEntity(entityId);
+					}
+					
+					/*else {
+						// TODO Back side killing
+						// Make custom message appear
+						// entity.onKillCommand();
+					}*/
 				}
 			}
 		}

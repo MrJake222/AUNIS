@@ -64,7 +64,9 @@ import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -954,13 +956,15 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	// ------------------------------------------------------------------------
 	// AutoClose
 	
-	public final void entityPassing(boolean isPlayer, boolean inbound) {		
+	public final void entityPassing(Entity entity, boolean inbound) {
+		boolean isPlayer = entity instanceof EntityPlayerMP;
+		
 		if (isPlayer) {
 			getAutoCloseManager().playerPassing();
 			markDirty();
 		}
 		
-		sendSignal(null, "stargate_traveler", new Object[] {inbound, isPlayer});
+		sendSignal(null, "stargate_traveler", new Object[] {inbound, isPlayer, entity.getClass().getSimpleName()});
 	}
 
 	
