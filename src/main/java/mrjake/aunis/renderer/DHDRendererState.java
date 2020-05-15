@@ -28,8 +28,8 @@ public class DHDRendererState extends State {
 	
 	static {
 		for (int i=0; i<=5; i++) {
-			SYMBOL_RESOURCE_MAP.put(i, new ResourceLocation(Aunis.ModID, SYMBOL_TEXTURE_BASE + i + ".png"));
-			BRB_RESOURCE_MAP.put(i, new ResourceLocation(Aunis.ModID, BRB_TEXTURE_BASE + i + ".png"));
+			SYMBOL_RESOURCE_MAP.put(i, new ResourceLocation(Aunis.ModID, SYMBOL_TEXTURE_BASE + i + ".jpg"));
+			BRB_RESOURCE_MAP.put(i, new ResourceLocation(Aunis.ModID, BRB_TEXTURE_BASE + i + ".jpg"));
 		}
 	}
 	

@@ -1,9 +1,11 @@
 package mrjake.aunis.renderer.stargate;
 
-import mrjake.aunis.OBJLoader.ModelEnum;
-import mrjake.aunis.OBJLoader.ModelLoader;
+import mrjake.aunis.loader.ElementEnum;
+import mrjake.aunis.loader.model.ModelLoader;
+import mrjake.aunis.loader.texture.TextureLoader;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
 
 public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUniverseRendererState> {
 
@@ -29,18 +31,17 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 		GlStateManager.rotate((float) angularRotation + 0.6f, 0, 1, 0);
 		renderChevrons(rendererState, partialTicks);
 					
-		rendererDispatcher.renderEngine.bindTexture(ModelEnum.UNIVERSE_GATE_MODEL.textureResource);
-		ModelLoader.getModel(ModelEnum.UNIVERSE_GATE_MODEL).render();
+		ElementEnum.UNIVERSE_GATE.bindTextureAndRender();
 		
 		GlStateManager.disableLighting();
-		rendererDispatcher.renderEngine.bindTexture(ModelEnum.UNIVERSE_CHEVRON_MODEL.textureResource);
+		ElementEnum.UNIVERSE_CHEVRON.bindTexture();
 		
 		for (SymbolUniverseEnum symbol : SymbolUniverseEnum.values()) {
-			if (symbol.model != null) {
+			if (symbol.modelResource != null) {
 				float color = rendererState.getSymbolColor(symbol) + 0.25f;
 				
 				GlStateManager.color(color, color, color);
-				ModelLoader.getModel(symbol.model).render();
+				ModelLoader.getModel(symbol.modelResource).render();
 			}
 		}
 		GlStateManager.enableLighting();
@@ -49,11 +50,16 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 	}
 	
 	@Override
+	protected ResourceLocation getEventHorizonTextureResource(StargateAbstractRendererState rendererState) {
+		return EV_HORIZON_DESATURATED_TEXTURE;
+	}
+	
+	@Override
 	protected void renderKawoosh(StargateAbstractRendererState rendererState, double partialTicks) {
 		GlStateManager.translate(0, 0.04, 0);
 		GlStateManager.rotate(90, 1, 0, 0);
 		GlStateManager.scale(0.9, 0.9, 0.9);
-		
+				
 		super.renderKawoosh(rendererState, partialTicks);
 	}
 	
@@ -66,8 +72,8 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 		GlStateManager.pushMatrix();
 		
 		GlStateManager.rotate(-chevron.rotation, 0, 1, 0);
-		rendererDispatcher.renderEngine.bindTexture(rendererState.chevronTextureList.get(chevron));
-		ModelLoader.getModel(ModelEnum.UNIVERSE_CHEVRON_MODEL).render();
+		TextureLoader.getTexture(rendererState.chevronTextureList.get(chevron)).bindTexture();
+		ElementEnum.UNIVERSE_CHEVRON.render();
 		
 		GlStateManager.popMatrix();
 	}

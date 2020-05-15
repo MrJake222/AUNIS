@@ -39,7 +39,14 @@ public class StargatePos implements INBTSerializable<NBTTagCompound> {
 	}
 	
 	public StargateAbstractBaseTile getTileEntity() {
-		return (StargateAbstractBaseTile) getWorld().getTileEntity(gatePos);
+		try {
+			return (StargateAbstractBaseTile) getWorld().getTileEntity(gatePos);
+		}
+		
+		catch (NullPointerException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	public IBlockState getBlockState() {

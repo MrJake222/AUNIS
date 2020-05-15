@@ -1,20 +1,15 @@
 package mrjake.aunis.renderer.stargate;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.stargate.StargateAbstractRenderer.EnumVortexState;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.state.State;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
 public class StargateAbstractRendererState extends State {
 	public StargateAbstractRendererState() {}
-	
-	public static final ResourceLocation HORIZON_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon_by_mclatchyt_2.jpg");
-	public static final ResourceLocation HORIZON_UNSTABLE_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon_by_mclatchyt_2_unstable.jpg");
 	
 	protected StargateAbstractRendererState(StargateAbstractRendererStateBuilder builder) {
 		if (builder.stargateState.engaged()) {
@@ -71,10 +66,6 @@ public class StargateAbstractRendererState extends State {
 	public void closeGate(long totalWorldTime) {		
 		gateWaitClose = totalWorldTime;
 		vortexState = EnumVortexState.CLOSING;
-	}
-
-	public ResourceLocation getEventHorizonTexture() {
-		return horizonUnstable ? HORIZON_UNSTABLE_TEXTURE : HORIZON_TEXTURE;
 	}
 	
 	@Override

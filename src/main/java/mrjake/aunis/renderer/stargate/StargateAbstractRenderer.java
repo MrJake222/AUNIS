@@ -6,8 +6,11 @@ import java.util.Map;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.loader.texture.Texture;
+import mrjake.aunis.loader.texture.TextureLoader;
 import mrjake.aunis.renderer.BlockRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
@@ -21,6 +24,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
@@ -136,6 +140,19 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 		}
 	}
 	
+	protected static final ResourceLocation EV_HORIZON_NORMAL_TEXTURE_ANIMATED = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon_animated.jpg");
+	protected static final ResourceLocation EV_HORIZON_DESATURATED_TEXTURE_ANIMATED = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon_animated.jpg_desaturated");
+	
+	protected static final ResourceLocation EV_HORIZON_NORMAL_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon.jpg");
+	protected static final ResourceLocation EV_HORIZON_DESATURATED_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon_unstable.jpg");
+	
+	protected ResourceLocation getEventHorizonTextureResource(StargateAbstractRendererState rendererState) {
+		if (AunisConfig.stargateConfig.disableAnimatedEventHorizon)
+			return rendererState.horizonUnstable ? EV_HORIZON_DESATURATED_TEXTURE : EV_HORIZON_NORMAL_TEXTURE;
+		
+		return rendererState.horizonUnstable ? EV_HORIZON_DESATURATED_TEXTURE_ANIMATED : EV_HORIZON_NORMAL_TEXTURE_ANIMATED;
+	}
+	
 	protected void renderKawoosh(StargateAbstractRendererState rendererState, double partialTicks) {
 //		rendererState.vortexState = EnumVortexState.FULL;
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
@@ -147,15 +164,15 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 			return;
 		}
 		
-		
 		GlStateManager.disableLighting();
         GlStateManager.enableCull();
 		
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0, 0, 0.1);
 		
-//		ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2.jpg"));
-		rendererDispatcher.renderEngine.bindTexture(rendererState.getEventHorizonTexture());
+		Texture ehTexture = TextureLoader.getTexture(getEventHorizonTextureResource(rendererState));
+		if (ehTexture != null)
+			ehTexture.bindTexture();
 		
 		long kawooshStart = rendererState.gateWaitStart + 44;
 		float tick = (float) (getWorld().getTotalWorldTime() - kawooshStart + partialTicks);
@@ -347,7 +364,7 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 	 * @param mul Multiplier of the horizon waving speed
 	 */
 	protected void renderEventHorizon(double partialTicks, boolean white, Float alpha, boolean backOnly, float mul) {			
-		float tick = (float) (getWorld().getTotalWorldTime() + partialTicks) * mul;	
+		float tick = (float) (getWorld().getTotalWorldTime() + partialTicks);	
 		
 	    GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.enableBlend();

@@ -12,7 +12,6 @@ import mrjake.aunis.stargate.network.StargateAddressDynamic;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -35,13 +34,8 @@ public class StargateUniverseRendererState extends StargateClassicRendererState 
 	}
 	
 	@Override
-	public ResourceLocation getEventHorizonTexture() {
-		return HORIZON_UNSTABLE_TEXTURE;
-	}
-	
-	@Override
 	protected String getChevronTextureBase() {
-		return "textures/tesr/universe/universe_chevron";
+		return "universe/universe_chevron";
 	}
 	
 	

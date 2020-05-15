@@ -1,13 +1,11 @@
 package mrjake.aunis.renderer.transportrings;
 
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.OBJLoader.ModelEnum;
-import mrjake.aunis.OBJLoader.ModelLoader;
+import mrjake.aunis.loader.ElementEnum;
 import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.vector.Vector3f;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -79,11 +77,8 @@ public class TRControllerRenderer implements RendererInterface {
 		GlStateManager.translate(tr.x, tr.y, tr.z);
 		GlStateManager.rotate(rot, 0, 1, 0);
 		
-		Minecraft.getMinecraft().getTextureManager().bindTexture(ModelEnum.RINGSCONTROLLER_GOAULD.textureResource);
-		ModelLoader.getModel(ModelEnum.RINGSCONTROLLER_GOAULD).render();
-		
-		Minecraft.getMinecraft().getTextureManager().bindTexture(ModelEnum.RINGSCONTROLLER_GOAULD_BUTTONS.textureResource);
-		ModelLoader.getModel(ModelEnum.RINGSCONTROLLER_GOAULD_BUTTONS).render();
+		ElementEnum.RINGSCONTROLLER_GOAULD.bindTextureAndRender();
+		ElementEnum.RINGSCONTROLLER_GOAULD_BUTTONS.bindTextureAndRender();
 		
 		GlStateManager.popMatrix();
 	}

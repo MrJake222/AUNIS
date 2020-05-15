@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.Aunis;
+import mrjake.aunis.loader.texture.TextureLoader;
 import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.StargateActivation;
 import net.minecraft.util.ResourceLocation;
@@ -30,7 +30,7 @@ public class ChevronTextureList {
 	
 	public ChevronTextureList(String chevronTextureBase) {		
 		for (int i=0; i<=10; i++) {
-			CHEVRON_RESOURCE_MAP.put(i, new ResourceLocation(Aunis.ModID, chevronTextureBase + i + ".png"));
+			CHEVRON_RESOURCE_MAP.put(i, TextureLoader.getTextureResource(chevronTextureBase + i + ".jpg"));
 		}
 	}
 	

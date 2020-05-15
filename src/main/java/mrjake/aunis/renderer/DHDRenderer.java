@@ -1,7 +1,7 @@
 package mrjake.aunis.renderer;
 
-import mrjake.aunis.OBJLoader.ModelEnum;
-import mrjake.aunis.OBJLoader.ModelLoader;
+import mrjake.aunis.loader.ElementEnum;
+import mrjake.aunis.loader.model.ModelLoader;
 import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.renderer.GlStateManager;
@@ -18,13 +18,12 @@ public class DHDRenderer extends TileEntitySpecialRenderer<DHDTile> {
 			
 			GlStateManager.translate(x+0.5, y, z+0.5);
 			GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
-						
-			rendererDispatcher.renderEngine.bindTexture(ModelEnum.MILKYWAY_DHD_MODEL.textureResource);
-			ModelLoader.getModel(ModelEnum.MILKYWAY_DHD_MODEL).render();
+			
+			ElementEnum.MILKYWAY_DHD.bindTextureAndRender();
 			
 			for (SymbolMilkyWayEnum symbol : SymbolMilkyWayEnum.values()) {
 				rendererDispatcher.renderEngine.bindTexture(rendererState.getButtonTexture(symbol));
-				ModelLoader.getModel(symbol.model).render();
+				ModelLoader.getModel(symbol.modelResource).render();
 			}
 			
 			GlStateManager.popMatrix();

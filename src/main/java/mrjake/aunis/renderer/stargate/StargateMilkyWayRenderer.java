@@ -1,8 +1,7 @@
 package mrjake.aunis.renderer.stargate;
 
-import mrjake.aunis.OBJLoader.ModelEnum;
-import mrjake.aunis.OBJLoader.ModelLoader;
-import mrjake.aunis.OBJLoader.OBJModel;
+import mrjake.aunis.loader.ElementEnum;
+import mrjake.aunis.loader.texture.TextureLoader;
 import mrjake.aunis.util.math.MathFunction;
 import mrjake.aunis.util.math.MathFunctionImpl;
 import mrjake.aunis.util.math.MathRange;
@@ -27,10 +26,8 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 		GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 		renderChevrons(rendererState, partialTicks);
 		
-		rendererDispatcher.renderEngine.bindTexture(ModelEnum.MILKYWAY_GATE_MODEL.textureResource);
-		ModelLoader.getModel(ModelEnum.MILKYWAY_GATE_MODEL).render();
+		ElementEnum.MILKYWAY_GATE.bindTextureAndRender();
 	}
-	
 	
 	// ----------------------------------------------------------------------------------------
 	// Ring
@@ -60,8 +57,7 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 		
 		GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 		
-		rendererDispatcher.renderEngine.bindTexture(ModelEnum.MILKYWAY_RING_MODEL.textureResource);
-		ModelLoader.getModel(ModelEnum.MILKYWAY_RING_MODEL).render();
+		ElementEnum.MILKYWAY_RING.bindTextureAndRender();
 		
 		GlStateManager.popMatrix();
 	}
@@ -102,15 +98,12 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 	}
 	
 	@Override
-	protected void renderChevron(StargateMilkyWayRendererState rendererState, double partialTicks, ChevronEnum chevron) {		
-		OBJModel ChevronLight = ModelLoader.getModel(ModelEnum.MILKYWAY_CHEVRON_LIGHT);
-		OBJModel ChevronMoving = ModelLoader.getModel(ModelEnum.MILKYWAY_CHEVRON_MOVING);
-
+	protected void renderChevron(StargateMilkyWayRendererState rendererState, double partialTicks, ChevronEnum chevron) {
 		GlStateManager.pushMatrix();
 			
 		GlStateManager.rotate(chevron.rotation, 0, 0, 1);
-					
-		rendererDispatcher.renderEngine.bindTexture(rendererState.chevronTextureList.get(chevron));
+		
+		TextureLoader.getTexture(rendererState.chevronTextureList.get(chevron)).bindTexture();
 					
 		if (chevron.isFinal()) {
 			float chevronOffset = calculateTopChevronOffset(rendererState, partialTicks);
@@ -118,25 +111,22 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 			GlStateManager.pushMatrix();
 			
 			GlStateManager.translate(0, chevronOffset, 0);
-			ChevronLight.render();
+			ElementEnum.MILKYWAY_CHEVRON_LIGHT.render();
 			
 			GlStateManager.translate(0, -2*chevronOffset, 0);
-			ChevronMoving.render();
-			
+			ElementEnum.MILKYWAY_CHEVRON_MOVING.render();
+
 			GlStateManager.popMatrix();
 		}
 		
 		else {
-			ChevronMoving.render();
-			
-//			GlStateManager.disableLighting();
-			ChevronLight.render();	
-			GlStateManager.enableLighting();
+			ElementEnum.MILKYWAY_CHEVRON_MOVING.render();
+			ElementEnum.MILKYWAY_CHEVRON_LIGHT.render();
 		}			
 		
-		rendererDispatcher.renderEngine.bindTexture(ModelEnum.MILKYWAY_CHEVRON_FRAME.textureResource);
-		ModelLoader.getModel(ModelEnum.MILKYWAY_CHEVRON_FRAME).render();
-		ModelLoader.getModel(ModelEnum.MILKYWAY_CHEVRON_BACK).render();
+		ElementEnum.MILKYWAY_CHEVRON_FRAME.bindTextureAndRender();
+		ElementEnum.MILKYWAY_CHEVRON_BACK.render();
+
 		
 		GlStateManager.popMatrix();
 	}
