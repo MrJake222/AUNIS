@@ -3,10 +3,9 @@ package mrjake.aunis.item.renderer;
 import org.lwjgl.opengl.GL11;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.OBJLoader.ModelEnum;
-import mrjake.aunis.OBJLoader.ModelLoader;
 import mrjake.aunis.item.dialer.UniverseDialerMode;
 import mrjake.aunis.item.dialer.UniverseDialerOCMessage;
+import mrjake.aunis.loader.ElementEnum;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
@@ -78,8 +77,7 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		}
 		
 		GlStateManager.scale(0.3f, 0.3f, 0.3f);
-		Minecraft.getMinecraft().getTextureManager().bindTexture(ModelEnum.UNIVERSE_DIALER_MODEL.textureResource);
-		ModelLoader.getModel(ModelEnum.UNIVERSE_DIALER_MODEL).render();
+		ElementEnum.UNIVERSE_DIALER.bindTextureAndRender();
 		
 		GlStateManager.translate(0, 0.20f, 0.1f);
 		GlStateManager.rotate(-90, 1, 0, 0);

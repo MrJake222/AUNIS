@@ -53,6 +53,13 @@ public class AunisConfig {
 
 		@Name("Universe dialer nearby radius")
 		public int universeGateNearbyReach = 1024;
+		
+		@Name("Disable animated Event Horizon")
+		@Comment({
+			"Changing this option will require you to reload resources manually.",
+			"Just press F3+Q once in-game."
+		})
+		public boolean disableAnimatedEventHorizon = false;
 	}
 	
 	public static class PowerConfig {

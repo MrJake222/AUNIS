@@ -1,8 +1,6 @@
 package mrjake.aunis.renderer.transportrings;
 
-import mrjake.aunis.OBJLoader.ModelEnum;
-import mrjake.aunis.OBJLoader.ModelLoader;
-import net.minecraft.client.Minecraft;
+import mrjake.aunis.loader.ElementEnum;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -39,8 +37,7 @@ public class Ring {
 			GlStateManager.pushMatrix();				
 			GlStateManager.translate(0, y, 0);
 			
-			Minecraft.getMinecraft().getTextureManager().bindTexture(ModelEnum.RINGS_BLACK.textureResource);
-			ModelLoader.getModel(ModelEnum.RINGS_BLACK).render();
+			ElementEnum.RINGS_BLACK.bindTextureAndRender();
 			GlStateManager.popMatrix();
 
 		}

@@ -108,7 +108,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		stargateState = isInitiating ? EnumStargateState.ENGAGED_INITIATING : EnumStargateState.ENGAGED;
 		eventHorizon.reset();
 		
-		AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.WORMHOLE_LOOP, true);
+		AunisSoundHelper.playPositionedSound(world, getGateCenterPos(), SoundPositionedEnum.WORMHOLE_LOOP, true);
 		sendSignal(null, "stargate_wormhole_stabilized", new Object[] { isInitiating });
 		
 		markDirty();
@@ -159,7 +159,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		sendRenderingUpdate(EnumGateAction.CLEAR_CHEVRONS, 0, false);
 		
 		ForgeChunkManager.unforceChunk(chunkLoadingTicket, new ChunkPos(pos));
-		AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.WORMHOLE_LOOP, false);
+		AunisSoundHelper.playPositionedSound(world, getGateCenterPos(), SoundPositionedEnum.WORMHOLE_LOOP, false);
 		
 		markDirty();
 	}
@@ -483,7 +483,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		playSoundEvent(StargateSoundEventEnum.CLOSE);
 		sendRenderingUpdate(EnumGateAction.CLOSE_GATE, 0, false);
 		sendSignal(null, "stargate_close", new Object[] { reason.toString().toLowerCase() });
-		AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.WORMHOLE_LOOP, false);
+		AunisSoundHelper.playPositionedSound(world, getGateCenterPos(), SoundPositionedEnum.WORMHOLE_LOOP, false);
 		
 		if (isInitiating) {
 			horizonFlashTask = null;
@@ -868,7 +868,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	protected void setRendererStateClient(StargateAbstractRendererState rendererState) {
 		this.rendererStateClient = rendererState;
 		
-		AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.WORMHOLE_LOOP, rendererState.doEventHorizonRender);
+		AunisSoundHelper.playPositionedSound(world, getGateCenterPos(), SoundPositionedEnum.WORMHOLE_LOOP, rendererState.doEventHorizonRender);
 		addTask(new ScheduledTask(EnumScheduledTask.STARGATE_LIGHTING_UPDATE_CLIENT, 10));
 	}
 	
@@ -1177,7 +1177,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 					
 					if (flashIndex == 1) {
 						AunisSoundHelper.playSoundEvent(world, getGateCenterPos(), SoundEventEnum.WORMHOLE_FLICKER);
-						AunisSoundHelper.playSoundEvent(targetGatePos.getWorld(), targetGatePos.gatePos, SoundEventEnum.WORMHOLE_FLICKER);
+						AunisSoundHelper.playSoundEvent(targetGatePos.getWorld(), targetGatePos.getTileEntity().getGateCenterPos(), SoundEventEnum.WORMHOLE_FLICKER);
 					}
 					
 					// Schedule change into stable state

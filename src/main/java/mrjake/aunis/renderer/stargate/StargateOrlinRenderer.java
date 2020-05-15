@@ -6,14 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.OBJLoader.ModelEnum;
-import mrjake.aunis.OBJLoader.ModelLoader;
+import mrjake.aunis.loader.ElementEnum;
 import mrjake.aunis.particle.ParticleBlender;
 import mrjake.aunis.particle.ParticleBlender.RandomizeInterface;
 import mrjake.aunis.particle.ParticleBlender.SimpleVector;
-import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.particle.ParticleBlenderSmoke;
 import mrjake.aunis.particle.ParticleBlenderSparks;
+import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
@@ -31,8 +30,7 @@ public class StargateOrlinRenderer extends StargateAbstractRenderer<StargateAbst
 	protected void renderGate(StargateAbstractRendererState rendererState, double partialTicks) {
 		GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 		
-		rendererDispatcher.renderEngine.bindTexture(ModelEnum.ORLIN_GATE.textureResource);
-		ModelLoader.getModel(ModelEnum.ORLIN_GATE).render();
+		ElementEnum.ORLIN_GATE.bindTextureAndRender();
 	}
 
 	@Override

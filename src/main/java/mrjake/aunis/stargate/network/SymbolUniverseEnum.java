@@ -6,62 +6,64 @@ import java.util.Map;
 import java.util.Random;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.OBJLoader.ModelEnum;
+import mrjake.aunis.loader.model.ModelLoader;
 import net.minecraft.util.ResourceLocation;
 
 public enum SymbolUniverseEnum implements SymbolInterface {
 	TOP_CHEVRON(0, null),
-	G1(1, ModelEnum.UNIVERSE_G1),
-	G2(2, ModelEnum.UNIVERSE_G2),
-	G3(3, ModelEnum.UNIVERSE_G3),
-	G4(4, ModelEnum.UNIVERSE_G4),
-	G5(5, ModelEnum.UNIVERSE_G5),
-	G6(6, ModelEnum.UNIVERSE_G6),
-	G7(7, ModelEnum.UNIVERSE_G7),
-	G8(8, ModelEnum.UNIVERSE_G8),
-	G9(9, ModelEnum.UNIVERSE_G9),
-	G10(10, ModelEnum.UNIVERSE_G10),
-	G11(11, ModelEnum.UNIVERSE_G11),
-	G12(12, ModelEnum.UNIVERSE_G12),
-	G13(13, ModelEnum.UNIVERSE_G13),
-	G14(14, ModelEnum.UNIVERSE_G14),
-	G15(15, ModelEnum.UNIVERSE_G15),
-	G16(16, ModelEnum.UNIVERSE_G16),
-	G17(17, ModelEnum.UNIVERSE_G17),
-	G18(18, ModelEnum.UNIVERSE_G18),
-	G19(19, ModelEnum.UNIVERSE_G19),
-	G20(20, ModelEnum.UNIVERSE_G20),
-	G21(21, ModelEnum.UNIVERSE_G21),
-	G22(22, ModelEnum.UNIVERSE_G22),
-	G23(23, ModelEnum.UNIVERSE_G23),
-	G24(24, ModelEnum.UNIVERSE_G24),
-	G25(25, ModelEnum.UNIVERSE_G25),
-	G26(26, ModelEnum.UNIVERSE_G26),
-	G27(27, ModelEnum.UNIVERSE_G27),
-	G28(28, ModelEnum.UNIVERSE_G28),
-	G29(29, ModelEnum.UNIVERSE_G29),
-	G30(30, ModelEnum.UNIVERSE_G30),
-	G31(31, ModelEnum.UNIVERSE_G31),
-	G32(32, ModelEnum.UNIVERSE_G32),
-	G33(33, ModelEnum.UNIVERSE_G33),
-	G34(34, ModelEnum.UNIVERSE_G34),
-	G35(35, ModelEnum.UNIVERSE_G35),
-	G36(36, ModelEnum.UNIVERSE_G36);
+	G1(1, "01.obj"),
+	G2(2, "02.obj"),
+	G3(3, "03.obj"),
+	G4(4, "04.obj"),
+	G5(5, "05.obj"),
+	G6(6, "06.obj"),
+	G7(7, "07.obj"),
+	G8(8, "08.obj"),
+	G9(9, "09.obj"),
+	G10(10, "10.obj"),
+	G11(11, "11.obj"),
+	G12(12, "12.obj"),
+	G13(13, "13.obj"),
+	G14(14, "14.obj"),
+	G15(15, "15.obj"),
+	G16(16, "16.obj"),
+	G17(17, "17.obj"),
+	G18(18, "18.obj"),
+	G19(19, "19.obj"),
+	G20(20, "20.obj"),
+	G21(21, "21.obj"),
+	G22(22, "22.obj"),
+	G23(23, "23.obj"),
+	G24(24, "24.obj"),
+	G25(25, "25.obj"),
+	G26(26, "26.obj"),
+	G27(27, "27.obj"),
+	G28(28, "28.obj"),
+	G29(29, "29.obj"),
+	G30(30, "30.obj"),
+	G31(31, "31.obj"),
+	G32(32, "32.obj"),
+	G33(33, "33.obj"),
+	G34(34, "34.obj"),
+	G35(35, "35.obj"),
+	G36(36, "36.obj");
 	
 	
 	public static final int ANGLE_PER_SECTION = 8;
 	
 	public int id;
-	public ModelEnum model;
+	public ResourceLocation modelResource;
 	public int angle;
 	public int angleIndex;
 	public String englishName;
 	public String translationKey;
 	public ResourceLocation iconResource;
 
-	private SymbolUniverseEnum(int id, ModelEnum model) {
+	private SymbolUniverseEnum(int id, String model) {
 		this.id = id;
-		this.model = model;
+		
+		if (model != null)
+			this.modelResource = ModelLoader.getModelResource("universe/" + model);
 		
 		int id0 = id - 1;
 		this.angleIndex = id0 + id0/4 + 1; // skip one each 4
