@@ -95,7 +95,7 @@ public class CommandStargateCloseAll extends CommandBase {
 		
 		Aunis.info("force : " +force);
 		
-		notifyCommandListener(sender, this, "commands.sgcloseall.closing", dimId, (queryBox != null ? queryBox.toString() : "box=infinite"));
+		notifyCommandListener(sender, this, "commands.sgcloseall.closing", checkDim ? dimId : "any", (queryBox != null ? queryBox.toString() : "box=infinite"));
 		
 		StargateNetwork network = StargateNetwork.get(sender.getEntityWorld());
 		Map<StargateAddress, StargatePos> map = network.getMap().get(SymbolTypeEnum.MILKYWAY);
@@ -132,86 +132,6 @@ public class CommandStargateCloseAll extends CommandBase {
 		}
 		
 		notifyCommandListener(sender, this, "commands.sgcloseall.closed", closed);
-		
-//		boolean limitWorld = false;
-//		int worldId = 0;
-//		boolean force = false;
-//		
-//		if (args.length == 2) {
-//			if (args[1].equals("force")) {
-//				force = true;
-//			}
-//			
-//			else {
-//				notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
-//			}
-//		}
-//		
-//		if (args.length >= 1) {
-//			if (args[0].equals("force")) {
-//				force = true;
-//			}
-//			
-//			else if (args[0].equals("world")) {
-//				limitWorld = true;
-//				worldId = sender.getEntityWorld().provider.getDimension();
-//				
-//				notifyCommandListener(sender, this, "Closing Stargates in current dimension[id="+worldId+"]");
-//			}
-//			
-//			else {
-//				try {
-//					worldId = Integer.parseInt(args[0]);
-//					limitWorld = true;
-//					
-//					notifyCommandListener(sender, this, "Closing Stargates in dimension id="+worldId);
-//				}
-//				
-//				catch (NumberFormatException e) {
-//					throw new WrongUsageException("commands.sgcloseall.usage", new Object[0]);
-//				}
-//			}
-//		}
-//		
-//		if (args.length == 0) 		
-//			notifyCommandListener(sender, this, "Closing all Stargates in all dimensions");
-//		
-//		StargateNetwork network = StargateNetwork.get(sender.getEntityWorld());
-//		
-//		int closed = 0;
-//		
-//		List<StargateAddress> toBeRemoved = new ArrayList<StargateAddress>();
-//		
-//		for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
-//			Map<StargateAddress, StargatePos> map = network.getMap().get(symbolType);
-//			
-//			for (StargateAddress address : map.keySet()) {
-//				StargatePos stargatePos = network.getStargate(address);
-//				
-//				if (limitWorld && stargatePos.dimensionID != worldId)
-//					continue;
-//								
-//				StargateAbstractBaseTile gateTile = stargatePos.getTileEntity();
-//				
-//				if (gateTile != null) {					
-//					if (gateTile.getStargateState().initiating() || (force && gateTile.getStargateState().engaged())) {
-//						gateTile.attemptClose(StargateClosedReasonEnum.COMMAND);
-//						closed++;
-//					}
-//				}
-//				
-//				else {
-//					toBeRemoved.add(address);
-//				}
-//			}
-//		}
-//		
-//		for (StargateAddress address : toBeRemoved) {
-//			network.removeStargate(address);
-//			Aunis.info("Removing address " + address);
-//		}
-//		
-//		notifyCommandListener(sender, this, "Closed " + closed + " gates.");
 	}
 
 }
