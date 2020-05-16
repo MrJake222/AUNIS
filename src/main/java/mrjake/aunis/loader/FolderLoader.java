@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -18,8 +20,13 @@ public class FolderLoader {
 		List<String> out = new ArrayList<>();
 		
 		String classPath = Aunis.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		int separatorIndex = classPath.indexOf("!");
 		
+		if (classPath.contains("%")) {
+			classPath = URLDecoder.decode(classPath, StandardCharsets.UTF_8.toString());
+		}
+		
+		int separatorIndex = classPath.indexOf("!");
+				
 		// Separator found, we're inside a JAR file.
 		if (separatorIndex != -1) {
 			classPath = classPath.substring(5, separatorIndex);

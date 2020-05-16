@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.vecmath.Vector2f;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToClient;
