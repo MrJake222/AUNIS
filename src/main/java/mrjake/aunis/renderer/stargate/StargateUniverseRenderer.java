@@ -1,5 +1,6 @@
 package mrjake.aunis.renderer.stargate;
 
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.loader.ElementEnum;
 import mrjake.aunis.loader.model.ModelLoader;
 import mrjake.aunis.loader.texture.TextureLoader;
@@ -51,7 +52,10 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 	
 	@Override
 	protected ResourceLocation getEventHorizonTextureResource(StargateAbstractRendererState rendererState) {
-		return EV_HORIZON_DESATURATED_TEXTURE;
+		if (AunisConfig.stargateConfig.disableAnimatedEventHorizon)
+			return EV_HORIZON_DESATURATED_TEXTURE;
+		
+		return EV_HORIZON_DESATURATED_TEXTURE_ANIMATED;
 	}
 	
 	@Override

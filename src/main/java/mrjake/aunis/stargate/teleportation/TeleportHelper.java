@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.vecmath.Vector2f;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
