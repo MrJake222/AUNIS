@@ -96,8 +96,6 @@ public class StargateClassicSpinHelper {
 	}
 	
 	private float calculate(float tick) {
-		tick -= spinStartTime;
-				
 		if (tick < 0) {
 			Aunis.info("Negative argument");
 			return 0;
@@ -117,7 +115,7 @@ public class StargateClassicSpinHelper {
 	
 	public float apply(double tick) {
 //		Aunis.info("("+tick+", "+calculate((float) tick) * direction.mul+")");
-		return calculate((float) tick) * direction.mul;
+		return calculate((float) (tick - spinStartTime)) * direction.mul;
 	}
 
 	public void toBytes(ByteBuf buf) {
