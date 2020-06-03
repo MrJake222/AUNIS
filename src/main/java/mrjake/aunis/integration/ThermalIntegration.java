@@ -51,7 +51,8 @@ public class ThermalIntegration {
 		ThermalExpansionHelper.addTransposerFill(2500, new ItemStack(Items.IRON_INGOT), new ItemStack(AunisItems.NAQUADAH_ALLOY, 2), new FluidStack(AunisFluids.moltenNaquadahRefined, 1000), true);
 		
 		ThermalExpansionHelper.addCrucibleRecipe(2500, new ItemStack(AunisItems.NAQUADAH_ALLOY), new FluidStack(AunisFluids.moltenNaquadahAlloy, 1000));
-
+		ThermalExpansionHelper.addPulverizerRecipe(2500, new ItemStack(AunisBlocks.ORE_NAQUADAH_BLOCK), new ItemStack(AunisItems.NAQUADAH_SHARD, 12));
+		ThermalExpansionHelper.addPulverizerRecipe(2500, new ItemStack(AunisBlocks.ORE_NAQUADAH_BLOCK_STONE), new ItemStack(AunisItems.NAQUADAH_SHARD, 12));
 		
 		// Circuits
 		ThermalExpansionHelper.addTransposerFill(10000, new ItemStack(AunisItems.CIRCUIT_CONTROL_BASE), new ItemStack(AunisItems.CIRCUIT_CONTROL_CRYSTAL), new FluidStack(AunisFluids.moltenSiliconWhite, 1000), false);
