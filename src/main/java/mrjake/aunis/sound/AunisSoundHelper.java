@@ -1,6 +1,7 @@
 package mrjake.aunis.sound;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.SoundPositionedPlayToClient;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -21,15 +22,36 @@ public class AunisSoundHelper {
 	}
 	
 	public static void playSoundEventClientSide(World world, BlockPos pos, SoundEventEnum soundEventEnum) {		
-		world.playSound(pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEventEnum.soundEvent, Aunis.soundCategory, soundEventEnum.volume, 1.0f, false);
-	}	
-	
-	public static void playSoundEvent(World world, BlockPos pos, SoundEventEnum soundEventEnum) {		
-		world.playSound(null, pos, soundEventEnum.soundEvent, Aunis.soundCategory, soundEventEnum.volume, 1.0f);
+		world.playSound(
+				 pos.getX()+0.5
+				,pos.getY()+0.5
+				,pos.getZ()+0.5
+				,soundEventEnum.soundEvent
+				,Aunis.soundCategory
+				,soundEventEnum.attenuationMultiplied ? soundEventEnum.volume * (float)AunisConfig.stargateConfig.audioRangeMultiplier : soundEventEnum.volume
+				,1.0f
+				,false);
 	}
 	
+	public static void playSoundEvent(World world, BlockPos pos, SoundEventEnum soundEventEnum) {		
+		world.playSound(
+				 null
+				,pos
+				,soundEventEnum.soundEvent
+				,Aunis.soundCategory
+				,soundEventEnum.attenuationMultiplied ? soundEventEnum.volume * (float)AunisConfig.stargateConfig.audioRangeMultiplier : soundEventEnum.volume
+				,1.0f);
+	}
+
 	public static void playSoundToPlayer(EntityPlayerMP player, SoundEventEnum soundEventEnum, BlockPos pos) {
-		player.connection.sendPacket(new SPacketSoundEffect(soundEventEnum.soundEvent, Aunis.soundCategory, pos.getX()+0.5, pos.getY()+0.5, pos.getZ()+0.5, soundEventEnum.volume, 1.0f));
+		player.connection.sendPacket(
+				 new SPacketSoundEffect(soundEventEnum.soundEvent 
+				,Aunis.soundCategory
+				,pos.getX()+0.5
+				,pos.getY()+0.5
+				,pos.getZ()+0.5
+				,soundEventEnum.attenuationMultiplied ? soundEventEnum.volume * (float)AunisConfig.stargateConfig.audioRangeMultiplier : soundEventEnum.volume 
+				,1.0f));
 	}
 	
 	@SubscribeEvent

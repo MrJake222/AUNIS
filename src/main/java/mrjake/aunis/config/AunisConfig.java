@@ -60,6 +60,12 @@ public class AunisConfig {
 			"Just press F3+Q once in-game."
 		})
 		public boolean disableAnimatedEventHorizon = false;
+		
+		@Name("Gate audio range multiplier")
+		@Comment({"How far from the gate can you hear it?",
+					"The default range (approximately 20 blocks) will be multiplied against this number."})
+		@RangeDouble(min=1d, max=20d)
+		public double audioRangeMultiplier = 1d;
 	}
 	
 	public static class PowerConfig {

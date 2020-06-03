@@ -3,6 +3,7 @@ package mrjake.aunis.sound;
 import java.util.HashMap;
 import java.util.Map;
 
+import mrjake.aunis.config.AunisConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -14,7 +15,17 @@ public class AunisSoundHelperClient {
 	private static Map<BlockPos, Map<SoundPositionedEnum, PositionedSoundRecord>> positionedSoundRecordsMap = new HashMap<>();
 	
 	private static PositionedSoundRecord getSoundRecord(SoundPositionedEnum soundEnum, BlockPos pos) {
-		return new PositionedSoundRecord(soundEnum.resourceLocation, soundEnum.soundCategory, 0.5f, 1.0f, soundEnum.repeat, 0, AttenuationType.LINEAR, pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f);
+		return new PositionedSoundRecord(
+				 soundEnum.resourceLocation
+				,soundEnum.soundCategory
+				,soundEnum.attenuationMultiplied ? 1.5f * (float)AunisConfig.stargateConfig.audioRangeMultiplier : 1.5f
+				,1.0f
+				,soundEnum.repeat
+				,0
+				,AttenuationType.LINEAR
+				,pos.getX()+0.5f
+				,pos.getY()+0.5f
+				,pos.getZ()+0.5f);
 	}
 	
 	public static void playPositionedSoundClientSide(BlockPos pos, SoundPositionedEnum soundEnum, boolean play) {
