@@ -4,37 +4,42 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import mrjake.aunis.event.InputHandlerClient;
-import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.item.dialer.UniverseDialerOCProgramToServer;
+import mrjake.aunis.item.notebook.PageNotebookSetNameToServer;
 import mrjake.aunis.packet.AunisPacketHandler;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.EnumHand;
 
-public class OCMessageGui extends GuiScreen {
+public class PageRenameGui extends GuiScreen {
 
 	private int guiLeft;
 	private int guiTop;
 		
-	private List<LabeledTextBox> textBoxes = new ArrayList<>(4);
+	private List<LabeledTextBox> textBoxes = new ArrayList<>();
 	private GuiButton saveButton;
-	private boolean isPortInvalid = false;
+	
+	private String originalName;
+	private EnumHand hand;
+	private boolean notebook;
+	
+	public PageRenameGui(String name, EnumHand hand, boolean notebook) {
+		this.originalName = name;
+		this.hand = hand;
+		this.notebook = notebook;
+	}
 	
 	@Override
 	public void initGui() {		
 		guiLeft = (this.width - 242) / 2;
-		guiTop = (this.height - 184) / 4;
+		guiTop = (this.height - 64) / 2;
 		
 		String[] labels = {
-				"item.aunis.universe_dialer.oc_name",
-				"item.aunis.universe_dialer.oc_address",
-				"item.aunis.universe_dialer.oc_port",
-				"item.aunis.universe_dialer.oc_data"
+				"item.aunis.notebook.rename_gui",
 		};
 		
-		String[] values = new String[4];
+		String[] values = new String[labels.length];
+		values[0] = originalName;		
 		
 		for (int i=0; i<textBoxes.size(); i++)
 			values[i] = textBoxes.get(i).textField.getText();
@@ -47,10 +52,7 @@ public class OCMessageGui extends GuiScreen {
 			textBoxes.add(textBox);
 		}
 		
-		textBoxes.get(0).textField.setMaxStringLength(10);
-		textBoxes.get(1).textField.setMaxStringLength(36);
-		
-		saveButton = new GuiButton(0, guiLeft+20, guiTop+170, I18n.format("item.aunis.universe_dialer.oc_save"));
+		saveButton = new GuiButton(0, guiLeft+20, guiTop+13+18+12, I18n.format("item.aunis.universe_dialer.oc_save"));
 		buttonList.add(saveButton);
 	}
 	
@@ -61,9 +63,6 @@ public class OCMessageGui extends GuiScreen {
 		
 		for (LabeledTextBox textBox : textBoxes)
 			textBox.draw();
-		
-		if (isPortInvalid)
-			drawString(fontRenderer, TextFormatting.DARK_RED + I18n.format("item.aunis.universe_dialer.oc_port_invalid"), guiLeft+230, guiTop+103, 0x00FFFFFF);
 	}
 	
 	@Override
@@ -93,23 +92,8 @@ public class OCMessageGui extends GuiScreen {
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		String name = textBoxes.get(0).textField.getText();
-		String address = textBoxes.get(1).textField.getText();
-		String portStr = textBoxes.get(2).textField.getText();
-		String data = textBoxes.get(3).textField.getText();
-		int port = 0;
 		
-		try {
-			port = Integer.valueOf(portStr);
-			if (port < 0 || port > 65535)
-				throw new NumberFormatException();
-		} catch (NumberFormatException e) {
-			isPortInvalid = true;
-			return;
-		}
-		
-		isPortInvalid = false;
-		
-		AunisPacketHandler.INSTANCE.sendToServer(new UniverseDialerOCProgramToServer(InputHandlerClient.getHand(AunisItems.UNIVERSE_DIALER), name, address, (short) port, data));
+		AunisPacketHandler.INSTANCE.sendToServer(new PageNotebookSetNameToServer(hand, name, notebook));
 		keyTyped(' ', 1); // close GUI
 	}
 }

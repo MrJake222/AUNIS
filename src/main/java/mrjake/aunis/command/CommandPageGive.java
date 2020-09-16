@@ -1,7 +1,7 @@
 package mrjake.aunis.command;
 
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.item.PageNotebookItem;
+import mrjake.aunis.item.notebook.PageNotebookItem;
 import mrjake.aunis.stargate.network.StargateAddressDynamic;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;

@@ -1,0 +1,67 @@
+package mrjake.aunis.item.notebook;
+
+import java.util.List;
+
+import mrjake.aunis.Aunis;
+import mrjake.aunis.item.renderer.CustomModel;
+import mrjake.aunis.item.renderer.CustomModelItemInterface;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+public class NotebookItem extends Item implements CustomModelItemInterface {
+
+	public static final String ITEM_NAME = "notebook";
+	
+	public NotebookItem() {
+		setRegistryName(Aunis.ModID + ":" + ITEM_NAME);
+		setTranslationKey(Aunis.ModID + "." + ITEM_NAME);
+	}
+	
+	@Override
+	public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag flag) {
+		if (stack.hasTagCompound()) {
+//			tooltip.add("Saved gates: " + stack.getTagCompound().getTagList("addressList", NBT.TAG_COMPOUND).tagCount());
+			NBTTagCompound compound = stack.getTagCompound();
+			NBTTagList list = compound.getTagList("addressList", NBT.TAG_COMPOUND);
+			
+			for (NBTBase item : list) {
+				NBTTagCompound pageTag = (NBTTagCompound) item;
+				tooltip.add(TextFormatting.AQUA + PageNotebookItem.getNameFromCompound(pageTag));
+			}
+		}
+	}
+	
+	private CustomModel customModel;
+	
+	@Override
+	public void setCustomModel(CustomModel customModel) {
+		this.customModel = customModel;
+	}
+	
+	public TransformType getLastTransform() {
+		return customModel.lastTransform;
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public TileEntityItemStackRenderer createTEISR() {
+		return new NotebookTEISR();
+	}
+	
+	public static NBTTagCompound getSelectedPageFromCompound(NBTTagCompound compound) {
+		int selected = compound.getInteger("selected");
+		NBTTagList list = compound.getTagList("addressList", NBT.TAG_COMPOUND);
+		return (NBTTagCompound) list.get(selected);
+	}
+}

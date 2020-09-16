@@ -14,8 +14,9 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.ForgeHooksClient;
 
-public class UniverseDialerBakedModel implements IBakedModel {
+public class CustomModel implements IBakedModel {
 
 	private IBakedModel defaultModel;
 	
@@ -29,9 +30,9 @@ public class UniverseDialerBakedModel implements IBakedModel {
 	 * called from {@link RenderItem#renderItemModel}
 	 * 
 	 */
-	public static TransformType lastTransform;
+	public TransformType lastTransform;
 	
-	public UniverseDialerBakedModel(IBakedModel defaultModel) {
+	public CustomModel(IBakedModel defaultModel) {
 		this.defaultModel = defaultModel;
 	}
 	
@@ -67,10 +68,10 @@ public class UniverseDialerBakedModel implements IBakedModel {
 
 	@Override
 	public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
-		if (cameraTransformType == TransformType.FIRST_PERSON_LEFT_HAND || cameraTransformType == TransformType.FIRST_PERSON_RIGHT_HAND) {
+		if (cameraTransformType == TransformType.FIRST_PERSON_LEFT_HAND || cameraTransformType == TransformType.FIRST_PERSON_RIGHT_HAND || cameraTransformType == TransformType.FIXED) {
 			lastTransform = cameraTransformType;
 			
-			return IBakedModel.super.handlePerspective(cameraTransformType);
+			return ForgeHooksClient.handlePerspective(this, cameraTransformType);
 		}
 		
 		return defaultModel.handlePerspective(cameraTransformType);

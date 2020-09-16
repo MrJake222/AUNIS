@@ -3,6 +3,7 @@ package mrjake.aunis.item;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.item.notebook.PageNotebookItem;
 import mrjake.aunis.worldgen.StargateGenerator;
 import mrjake.aunis.worldgen.StargateGenerator.GeneratedStargate;
 import net.minecraft.client.util.ITooltipFlag;

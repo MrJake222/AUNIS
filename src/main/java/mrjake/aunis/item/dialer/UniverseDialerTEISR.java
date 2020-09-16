@@ -1,51 +1,34 @@
-package mrjake.aunis.item.renderer;
+package mrjake.aunis.item.dialer;
 
 import org.lwjgl.opengl.GL11;
 
-import mrjake.aunis.Aunis;
-import mrjake.aunis.item.dialer.UniverseDialerMode;
-import mrjake.aunis.item.dialer.UniverseDialerOCMessage;
+import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.item.renderer.AunisFontRenderer;
+import mrjake.aunis.item.renderer.ItemRenderHelper;
 import mrjake.aunis.loader.ElementEnum;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import mrjake.aunis.transportrings.TransportRings;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHandSide;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants.NBT;
 
 public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
-	
-	private static FontRenderer fontRenderer;
-
-	private static FontRenderer getFontRenderer() {
-		if (fontRenderer == null) {
-			Minecraft mc = Minecraft.getMinecraft();
-			fontRenderer = new AunisFontRenderer(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.renderEngine, false);
-			((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(fontRenderer);
-			
-			Aunis.info("Created custom FontRenderer");
-		}
-		
-		return fontRenderer;
-	}
 	
 	@Override
 	public void renderByItem(ItemStack stack) {
 		float partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
 		
-		boolean mainhand = UniverseDialerBakedModel.lastTransform == TransformType.FIRST_PERSON_RIGHT_HAND;
+		boolean mainhand = AunisItems.UNIVERSE_DIALER.getLastTransform() == TransformType.FIRST_PERSON_RIGHT_HAND;
 		EnumHandSide handSide = mainhand ? EnumHandSide.RIGHT : EnumHandSide.LEFT;
 		
 		EntityPlayer player = Minecraft.getMinecraft().player;
@@ -150,11 +133,11 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		GlStateManager.rotate(180, 0,0,1);
 		GlStateManager.scale(0.015f, 0.015f, 0.015f);
 		
-		getFontRenderer().drawString(text, -6, 19, active ? 0xFFFFFF : 0x006060, false);
+		AunisFontRenderer.getFontRenderer().drawString(text, -6, 19, active ? 0xFFFFFF : 0x006060, false);
 		
 		if (active) {
 			GlStateManager.translate(-0.4, 0.6, -0.1);
-			getFontRenderer().drawString(text, -6, 19, 0x606060, false);
+			AunisFontRenderer.getFontRenderer().drawString(text, -6, 19, 0x606060, false);
 		}
 		
 		GlStateManager.popMatrix();

@@ -1,6 +1,9 @@
 package mrjake.aunis.item;
 
 import mrjake.aunis.item.dialer.UniverseDialerItem;
+import mrjake.aunis.item.notebook.NotebookItem;
+import mrjake.aunis.item.notebook.PageNotebookItem;
+import mrjake.aunis.item.renderer.CustomModelItemInterface;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -54,6 +57,7 @@ public class AunisItems {
 	
 	public static final Item DHD_BRB = ItemHelper.createGenericItem("dhd_brb");
 	
+	public static final NotebookItem NOTEBOOK_ITEM = new NotebookItem();
 	public static final PageNotebookItem PAGE_NOTEBOOK_ITEM = new PageNotebookItem();
 	public static final PageMysteriousItem PAGE_MYSTERIOUS_ITEM = new PageMysteriousItem();
 	public static final UniverseDialerItem UNIVERSE_DIALER = new UniverseDialerItem();
@@ -92,6 +96,8 @@ public class AunisItems {
 		HOLDER_CRYSTAL,
 		
 		DHD_BRB,
+		NOTEBOOK_ITEM,
+		PAGE_NOTEBOOK_ITEM,
 		PAGE_MYSTERIOUS_ITEM,
 		UNIVERSE_DIALER,
 		
@@ -100,23 +106,27 @@ public class AunisItems {
 		BEAMER_CRYSTAL_ITEMS
 	};
 	
+	public static Item[] getItems() {
+		return items;
+	}
+	
 	@SubscribeEvent
 	public static void onRegisterItems(Register<Item> event) {	
 		for (Item item : items) {
+			if (item instanceof CustomModelItemInterface)
+				((CustomModelItemInterface) item).setTEISR();
+			
 			event.getRegistry().register(item);
 		}
-		
-		event.getRegistry().register(PAGE_NOTEBOOK_ITEM);
 	}
 	
 	@SubscribeEvent
 	public static void onModelRegistry(ModelRegistryEvent event) {		
 		for (Item item : items) {
-			ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
+			if (item instanceof CustomModelItemInterface)
+				((CustomModelItemInterface) item).setCustomModelLocation();
+			else
+				ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
 		}
-		
-		ModelLoader.setCustomModelResourceLocation(PAGE_NOTEBOOK_ITEM, 0, new ModelResourceLocation(PAGE_NOTEBOOK_ITEM.getRegistryName() + "_empty", "inventory"));
-		ModelLoader.setCustomModelResourceLocation(PAGE_NOTEBOOK_ITEM, 1, new ModelResourceLocation(PAGE_NOTEBOOK_ITEM.getRegistryName() + "_filled", "inventory"));
-
 	}
 }

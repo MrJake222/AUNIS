@@ -2,6 +2,7 @@ package mrjake.aunis.proxy;
 
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.sound.SoundPositionedEnum;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
@@ -53,4 +54,7 @@ public class ProxyServer implements IProxy {
 	
 	@Override
 	public void playPositionedSoundClientSide(BlockPos pos, SoundPositionedEnum soundEnum, boolean play) {}
+	
+	@Override
+	public void openGui(GuiScreen gui) {}
 }

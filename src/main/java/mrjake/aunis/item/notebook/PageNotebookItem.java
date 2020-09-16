@@ -1,13 +1,16 @@
-package mrjake.aunis.item;
+package mrjake.aunis.item.notebook;
 
 import java.util.List;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.item.renderer.PageNotebookBakedModel;
+import mrjake.aunis.item.renderer.CustomModel;
+import mrjake.aunis.item.renderer.CustomModelItemInterface;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -16,8 +19,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.IRegistry;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class PageNotebookItem extends Item {
+public class PageNotebookItem extends Item implements CustomModelItemInterface {
 
 	public static final String ITEM_NAME = "page_notebook";
 
@@ -27,18 +33,41 @@ public class PageNotebookItem extends Item {
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
 		
-		Aunis.proxy.setTileEntityItemStackRenderer(this);
 		setHasSubtypes(true);
 		setMaxDamage(0);
 	}
 
+	private CustomModel customModel;
+	
+	@Override
+	public void setCustomModel(CustomModel customModel) {
+		this.customModel = customModel;
+	}
+	
+	public TransformType getLastTransform() {
+		return customModel.lastTransform;
+	}
+	
+	@Override
 	public void registerCustomModel(IRegistry<ModelResourceLocation, IBakedModel> registry) {
 		ModelResourceLocation modelResourceLocation = new ModelResourceLocation(getRegistryName() + "_filled", "inventory");
 		
 		IBakedModel defaultModel = registry.getObject(modelResourceLocation);
-		PageNotebookBakedModel memberBlockBakedModel = new PageNotebookBakedModel(defaultModel);
+		customModel = new CustomModel(defaultModel);
 		
-		registry.putObject(modelResourceLocation, memberBlockBakedModel);
+		registry.putObject(modelResourceLocation, customModel);
+	}
+	
+	@Override
+	public void setCustomModelLocation() {
+		ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName() + "_empty", "inventory"));
+		ModelLoader.setCustomModelResourceLocation(this, 1, new ModelResourceLocation(getRegistryName() + "_filled", "inventory"));
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public TileEntityItemStackRenderer createTEISR() {
+		return new PageNotebookTEISR();
 	}
 	
 	@Override
@@ -101,5 +130,22 @@ public class PageNotebookItem extends Item {
 		compound.setInteger("color", PageNotebookItem.getColorForBiome(registryPath));
 		
 		return compound;
+	}
+
+	private static final String UNNAMED = "item.aunis.notebook.unnamed";
+	
+	public static String getUnnamedLocalized() {
+		return Aunis.proxy.localize(UNNAMED);
+	}
+	
+	public static String getNameFromCompound(NBTTagCompound compound) {		
+		if (compound.hasKey("display")) {
+			NBTTagCompound display = compound.getCompoundTag("display");
+			if (display.hasKey("Name")) {
+				return display.getString("Name");
+			}
+		}
+		
+		return getUnnamedLocalized();
 	}
 }

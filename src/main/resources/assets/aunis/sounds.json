@@ -222,6 +222,14 @@
     "sounds": [
       "aunis:beamer/beamer_loop"
     ]
+  },
+  
+  "page_flip": {
+    "category": "ambient",
+    "subtitle": "aunis.subtitle.page_flip",
+    "sounds": [
+      "aunis:misc/page_flip"
+    ]
   }
 }
 

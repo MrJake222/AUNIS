@@ -56,7 +56,7 @@ public class TabAddress extends Tab {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(bgTexLocation);
 			int progress = gateTile.getPageProgress();
 			Gui.drawModalRectWithCustomSizedTexture(guiLeft+currentOffsetX+97, guiTop+defaultY+86+(18-progress), 0, 174+(18-progress), 6, progress, textureSize, textureSize);
-			
+						
 			GlStateManager.disableBlend();
 		}
 	}

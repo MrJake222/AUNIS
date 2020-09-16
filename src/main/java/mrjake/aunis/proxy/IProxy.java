@@ -2,6 +2,7 @@ package mrjake.aunis.proxy;
 
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.sound.SoundPositionedEnum;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
@@ -25,4 +26,6 @@ public interface IProxy {
 	
 	public void orlinRendererSpawnParticles(World world, StargateAbstractRendererState rendererState);
 	public void playPositionedSoundClientSide(BlockPos pos, SoundPositionedEnum soundEnum, boolean play);
+	
+	public void openGui(GuiScreen gui);
 }

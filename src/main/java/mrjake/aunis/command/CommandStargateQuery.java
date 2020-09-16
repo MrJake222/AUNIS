@@ -2,9 +2,8 @@ package mrjake.aunis.command;
 
 import java.util.Map;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.item.PageNotebookItem;
+import mrjake.aunis.item.notebook.PageNotebookItem;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.stargate.network.StargatePos;
@@ -151,9 +150,7 @@ public class CommandStargateQuery extends CommandBase {
 			id++;
 		}
 		
-		if (givePage) {
-			Aunis.info("id: " + idCheck);
-			
+		if (givePage) {			
 			if (idCheck == -1 || selectedAddress == null) {
 				throw new WrongUsageException("commands.sgquery.wrong_id");
 			}
@@ -166,7 +163,7 @@ public class CommandStargateQuery extends CommandBase {
 				throw new WrongUsageException("commands.sgquery.wrong_sender");
 			}
 			
-			ItemStack stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
+			ItemStack stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 64, 1);
 			stack.setTagCompound(PageNotebookItem.getCompoundFromAddress(selectedAddress, true, PageNotebookItem.getRegistryPathFromWorld(selectedStargatePos.getWorld(), selectedStargatePos.gatePos)));
 			((EntityPlayer) sender).addItemStackToInventory(stack);
 			

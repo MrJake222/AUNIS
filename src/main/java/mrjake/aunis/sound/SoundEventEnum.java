@@ -50,8 +50,12 @@ public enum SoundEventEnum implements EnumKeyInterface<Integer> {
 	// ----------------------------------------------------------
 	// Beamer
 	BEAMER_START(110, "beamer_start", 1.0f),
-	BEAMER_STOP(111, "beamer_stop", 0.8f);
-
+	BEAMER_STOP(111, "beamer_stop", 0.8f),
+	
+	// ----------------------------------------------------------
+	// Misc
+	PAGE_FLIP(120, "page_flip", 1.0f);
+	
 	
 	// ----------------------------------------------------------
 	

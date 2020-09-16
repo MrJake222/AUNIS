@@ -42,6 +42,9 @@ public class AunisConfig {
 	@Name("Recipe options")
 	public static RecipeConfig recipeConfig = new RecipeConfig();
 	
+	@Name("Audio/Video")
+	public static AudioVideoConfig avConfig = new AudioVideoConfig();
+	
 	public static class StargateConfig {
 		@Name("Orlin's gate max open count")
 		@RangeInt(min=0)
@@ -204,5 +207,11 @@ public class AunisConfig {
 			"or just plain sand. Disable if having balance issues with AE/EnderIO silicon."
 		})
 		public boolean enableSiliconRecipes = true;
+	}
+	
+	public static class AudioVideoConfig {
+		@Name("Notebook page Glyph transparency")
+		@RangeDouble(min=0, max=1)
+		public double glyphTransparency = 0.75;
 	}
 }

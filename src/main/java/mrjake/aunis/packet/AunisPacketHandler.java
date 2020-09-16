@@ -1,14 +1,12 @@
 package mrjake.aunis.packet;
 
-import mrjake.aunis.item.dialer.UniverseDialerAbortToSever;
-import mrjake.aunis.item.dialer.UniverseDialerAbortToSever.UniverseDialerAbortServerHandler;
-import mrjake.aunis.item.dialer.UniverseDialerAddressChangeToServer;
-import mrjake.aunis.item.dialer.UniverseDialerAddressChangeToServer.UniverseDialerAddressChangeServerHandler;
-import mrjake.aunis.item.dialer.UniverseDialerAddressRemoveToServer;
-import mrjake.aunis.item.dialer.UniverseDialerAddressRemoveToServer.UniverseDialerAddressRemoveServerHandler;
-import mrjake.aunis.item.dialer.UniverseDialerModeChangeToServer;
-import mrjake.aunis.item.dialer.UniverseDialerModeChangeToServer.UniverseDialerModeChangeServerHandler;
+import mrjake.aunis.item.dialer.UniverseDialerActionPacketToServer;
+import mrjake.aunis.item.dialer.UniverseDialerActionPacketToServer.UniverseDialerActionPacketServerHandler;
 import mrjake.aunis.item.dialer.UniverseDialerOCProgramToServer.UniverseDialerOCProgramServerHandler;
+import mrjake.aunis.item.notebook.NotebookActionPacketToServer;
+import mrjake.aunis.item.notebook.NotebookActionPacketToServer.NotebookActionPacketServerHandler;
+import mrjake.aunis.item.notebook.PageNotebookSetNameToServer.PageNotebookSetNameServerHandler;
+import mrjake.aunis.item.notebook.PageNotebookSetNameToServer;
 import mrjake.aunis.item.dialer.UniverseDialerOCProgramToServer;
 import mrjake.aunis.packet.BeamerChangeRoleToServer.BeamerChangeRoleServerHandler;
 import mrjake.aunis.packet.BeamerChangedInactivityToServer.BeamerChangedInactivityServerHandler;
@@ -46,15 +44,14 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(SaveRingsParametersServerHandler.class, SaveRingsParametersToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(TRControllerActivatedServerHandler.class, TRControllerActivatedToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(SetOpenTabServerHandler.class, SetOpenTabToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(UniverseDialerModeChangeServerHandler.class, UniverseDialerModeChangeToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(UniverseDialerAddressChangeServerHandler.class, UniverseDialerAddressChangeToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(UniverseDialerAddressRemoveServerHandler.class, UniverseDialerAddressRemoveToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(UniverseDialerAbortServerHandler.class, UniverseDialerAbortToSever.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(UniverseDialerActionPacketServerHandler.class, UniverseDialerActionPacketToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(UniverseDialerOCProgramServerHandler.class, UniverseDialerOCProgramToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(BeamerChangeRoleServerHandler.class, BeamerChangeRoleToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(ChangeRedstoneModeServerHandler.class, ChangeRedstoneModeToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(BeamerChangedLevelsServerHandler.class, BeamerChangedLevelsToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(BeamerChangedInactivityServerHandler.class, BeamerChangedInactivityToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(NotebookActionPacketServerHandler.class, NotebookActionPacketToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(PageNotebookSetNameServerHandler.class, PageNotebookSetNameToServer.class, id, Side.SERVER); id++;
 
 		
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, StargateMotionToClient.class, id, Side.CLIENT); id++;

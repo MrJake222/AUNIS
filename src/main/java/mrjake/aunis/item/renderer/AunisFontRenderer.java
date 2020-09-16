@@ -1,13 +1,36 @@
 package mrjake.aunis.item.renderer;
 
+import mrjake.aunis.Aunis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.ResourceLocation;
 
+/**
+ * Font Renderer that properly handles in-world lighting
+ * 
+ * @author MrJake222
+ *
+ */
 public class AunisFontRenderer extends FontRenderer {
 
+	private static FontRenderer fontRenderer;
+
+	public static FontRenderer getFontRenderer() {
+		if (fontRenderer == null) {
+			Minecraft mc = Minecraft.getMinecraft();
+			fontRenderer = new AunisFontRenderer(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.renderEngine, false);
+			((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(fontRenderer);
+			
+			Aunis.info("Created custom FontRenderer");
+		}
+		
+		return fontRenderer;
+	}
+	
 	public AunisFontRenderer(GameSettings gameSettingsIn, ResourceLocation location, TextureManager textureManagerIn, boolean unicode) {
 		super(gameSettingsIn, location, textureManagerIn, unicode);
 	}

@@ -7,7 +7,8 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.capability.endpoint.ItemEndpointCapability;
 import mrjake.aunis.capability.endpoint.ItemEndpointInterface;
 import mrjake.aunis.config.AunisConfig;
-import mrjake.aunis.item.renderer.UniverseDialerBakedModel;
+import mrjake.aunis.item.renderer.CustomModel;
+import mrjake.aunis.item.renderer.CustomModelItemInterface;
 import mrjake.aunis.stargate.StargateClosedReasonEnum;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.StargateNetwork;
@@ -19,8 +20,8 @@ import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import mrjake.aunis.transportrings.TransportRings;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,13 +33,14 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.IRegistry;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class UniverseDialerItem extends Item {
+public class UniverseDialerItem extends Item implements CustomModelItemInterface {
 
 	public static final String ITEM_NAME = "universe_dialer";
 
@@ -48,7 +50,6 @@ public class UniverseDialerItem extends Item {
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
 		setMaxStackSize(1);
-		Aunis.proxy.setTileEntityItemStackRenderer(this);
 	}
 	
 	private static NBTTagCompound initNbt() {
@@ -60,18 +61,26 @@ public class UniverseDialerItem extends Item {
 		return compound;
 	}
 	
+	private CustomModel customModel;
+	
+	@Override
+	public void setCustomModel(CustomModel customModel) {
+		this.customModel = customModel;
+	}
+	
+	public TransformType getLastTransform() {
+		return customModel.lastTransform;
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public TileEntityItemStackRenderer createTEISR() {
+		return new UniverseDialerTEISR();
+	}
+	
 	@Override
 	public ICapabilityProvider initCapabilities(ItemStack stack, NBTTagCompound nbt) {
 		return new UniverseDialerCapabilityProvider();
-	}
-	
-	public void registerCustomModel(IRegistry<ModelResourceLocation, IBakedModel> registry) {
-		ModelResourceLocation modelResourceLocation = new ModelResourceLocation(getRegistryName(), "inventory");
-		
-		IBakedModel defaultModel = registry.getObject(modelResourceLocation);
-		UniverseDialerBakedModel bakedModel = new UniverseDialerBakedModel(defaultModel);
-		
-		registry.putObject(modelResourceLocation, bakedModel);
 	}
 	
 	@Override

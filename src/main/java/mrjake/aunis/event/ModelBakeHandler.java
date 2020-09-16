@@ -2,8 +2,10 @@ package mrjake.aunis.event;
 
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.item.AunisItems;
+import mrjake.aunis.item.renderer.CustomModelItemInterface;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.Item;
 import net.minecraft.util.registry.IRegistry;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -19,7 +21,11 @@ public class ModelBakeHandler {
 		
 		AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.registerCustomModel(registry);
 		AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK.registerCustomModel(registry);
-		AunisItems.PAGE_NOTEBOOK_ITEM.registerCustomModel(registry);
-		AunisItems.UNIVERSE_DIALER.registerCustomModel(registry);
+		
+		for (Item item : AunisItems.getItems()) {
+			if (item instanceof CustomModelItemInterface) {
+				((CustomModelItemInterface) item).registerCustomModel(registry);
+			}
+		}
 	}
 }

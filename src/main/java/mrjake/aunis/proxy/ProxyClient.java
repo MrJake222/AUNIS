@@ -1,18 +1,14 @@
 package mrjake.aunis.proxy;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.stargate.StargateClassicMemberBlockColor;
+import mrjake.aunis.event.InputHandlerClient;
 import mrjake.aunis.fluid.AunisBlockFluid;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.item.PageNotebookItem;
 import mrjake.aunis.item.color.PageMysteriousItemColor;
 import mrjake.aunis.item.color.PageNotebookItemColor;
-import mrjake.aunis.item.dialer.ChangeEvent;
-import mrjake.aunis.item.dialer.UniverseDialerItem;
-import mrjake.aunis.item.renderer.PageNotebookTEISR;
-import mrjake.aunis.item.renderer.UniverseDialerTEISR;
+import mrjake.aunis.item.renderer.CustomModelItemInterface;
 import mrjake.aunis.loader.ReloadListener;
 import mrjake.aunis.renderer.BeamerRenderer;
 import mrjake.aunis.renderer.DHDRenderer;
@@ -31,12 +27,12 @@ import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
@@ -52,7 +48,7 @@ public class ProxyClient implements IProxy {
 		registerRenderers();
 		registerFluidRenderers();
 		
-		ChangeEvent.registerKeybindings();
+		InputHandlerClient.registerKeybindings();
 	}
 
 	public void init(FMLInitializationEvent event) {		
@@ -102,11 +98,7 @@ public class ProxyClient implements IProxy {
 
 	@Override
 	public void setTileEntityItemStackRenderer(Item item) {
-		if (item.getRegistryName().equals(new ResourceLocation(Aunis.ModID, PageNotebookItem.ITEM_NAME)))
-			item.setTileEntityItemStackRenderer(new PageNotebookTEISR());
-		
-		else if (item.getRegistryName().equals(new ResourceLocation(Aunis.ModID, UniverseDialerItem.ITEM_NAME)))
-			item.setTileEntityItemStackRenderer(new UniverseDialerTEISR());
+		item.setTileEntityItemStackRenderer(((CustomModelItemInterface) item).createTEISR());
 	}
 
 	@Override
@@ -127,5 +119,10 @@ public class ProxyClient implements IProxy {
 	@Override
 	public void playPositionedSoundClientSide(BlockPos pos, SoundPositionedEnum soundEnum, boolean play) {
 		AunisSoundHelperClient.playPositionedSoundClientSide(pos, soundEnum, play);
+	}
+	
+	@Override
+	public void openGui(GuiScreen gui) {
+		Minecraft.getMinecraft().displayGuiScreen(gui);
 	}
 }

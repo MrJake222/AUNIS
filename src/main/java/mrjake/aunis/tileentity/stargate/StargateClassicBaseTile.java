@@ -17,7 +17,7 @@ import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.container.StargateContainerGuiState;
 import mrjake.aunis.gui.container.StargateContainerGuiUpdate;
 import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.item.PageNotebookItem;
+import mrjake.aunis.item.notebook.PageNotebookItem;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.renderer.stargate.StargateClassicRendererState;
@@ -478,7 +478,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 							gateAddressMap.get(symbolType),
 							hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE),
 							PageNotebookItem.getRegistryPathFromWorld(world, pos));
-	
+					
 					stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
 					stack.setTagCompound(compound);
 					itemStackHandler.setStackInSlot(pageSlotId, stack);
