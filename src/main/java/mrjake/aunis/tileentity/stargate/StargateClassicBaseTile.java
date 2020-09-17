@@ -171,6 +171,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		
 		if (!world.isRemote) {
 			updateBeamers();
+			updatePowerTier();
 		}
 	}
 	
@@ -278,7 +279,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			itemStackHandler.setStackInSlot(0, new ItemStack(AunisItems.CRYSTAL_GLYPH_STARGATE));
 		}
 				
-		updatePowerTier();
 		isFinalActive = compound.getBoolean("isFinalActive");
 		
 		isSpinning = compound.getBoolean("isSpinning");
@@ -698,7 +698,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			}
 				
 			Aunis.info("Updated to power tier: " + powerTier);
-			markDirty();
 		}
 	}
 	
