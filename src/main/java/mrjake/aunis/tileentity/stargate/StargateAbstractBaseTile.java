@@ -516,6 +516,21 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		playSoundEvent(StargateSoundEventEnum.DIAL_FAILED);
 	}
 	
+	/**
+	 * Checks if {@link this#targetGatePos} points at a valid
+	 * Stargate base block. If no, close the connection.
+	 * 
+	 * @return True if the connecion is valid.
+	 */
+	protected boolean verifyConnection() {	
+		if (targetGatePos == null || !(targetGatePos.getTileEntity() instanceof StargateAbstractBaseTile)) {
+			closeGate(StargateClosedReasonEnum.CONNECTION_LOST);
+			return false;
+		}
+		
+		return true;
+	}
+	
 	
 	// ------------------------------------------------------------------------
 	// Sounds
@@ -591,6 +606,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				}
 				
 				gatePosMap.put(symbolType, stargatePos);
+			}
+			
+			if (stargateState.engaged()) {
+				verifyConnection();
 			}
 		}
 		
@@ -1158,7 +1177,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				break;
 				
 			case STARGATE_ENGAGE:
-				engageGate();
+				// Gate destroyed mid-process
+				if (verifyConnection()) {
+					engageGate();
+				}
 				
 				break;
 				

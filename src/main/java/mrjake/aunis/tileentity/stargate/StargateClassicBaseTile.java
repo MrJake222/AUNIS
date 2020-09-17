@@ -162,6 +162,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		updateBeamers();
 	}
 	
+	
 	// ------------------------------------------------------------------------
 	// Loading and ticking
 	

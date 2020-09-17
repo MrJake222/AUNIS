@@ -156,6 +156,9 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 											
 											StargateAbstractBaseTile targetGateTile = stargatePos.getTileEntity();
 											
+											if (!(targetGateTile instanceof StargateAbstractBaseTile))
+												continue;
+											
 											if (!targetGateTile.isMerged())
 												continue;
 											
