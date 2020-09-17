@@ -23,6 +23,7 @@ import mrjake.aunis.transportrings.TransportRings;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -31,6 +32,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -52,13 +54,22 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 		setMaxStackSize(1);
 	}
 	
-	private static NBTTagCompound initNbt() {
+	private static void initNBT(ItemStack stack) {
 		NBTTagCompound compound = new NBTTagCompound();
 		compound.setByte("mode", UniverseDialerMode.NEARBY.id);
 		compound.setByte("selected", (byte) 0);
 		compound.setTag("saved", new NBTTagList());
 		
-		return compound;
+		stack.setTagCompound(compound);
+	}
+	
+	@Override
+	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+		if (this.isInCreativeTab(tab)) {
+			ItemStack stack = new ItemStack(this);
+			initNBT(stack);
+			items.add(stack);
+		}
 	}
 	
 	private CustomModel customModel;
@@ -97,9 +108,6 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 	
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
-		if (!stack.hasTagCompound())
-			stack.setTagCompound(initNbt());
-		
 		if (!world.isRemote) {
 			NBTTagCompound compound = stack.getTagCompound();
 			
