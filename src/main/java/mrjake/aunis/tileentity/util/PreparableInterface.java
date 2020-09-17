@@ -1,6 +1,7 @@
 package mrjake.aunis.tileentity.util;
 
-import mrjake.aunis.command.CommandPrepare;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.tileentity.TileEntity;
 
 /**
@@ -14,7 +15,12 @@ import net.minecraft.tileentity.TileEntity;
 public interface PreparableInterface {
 	
 	/**
-	 * Clears unnecessary data from {@link TileEntity}.
+	 * Clears unnecessary data from {@link TileEntity} preparing it to be saved to NBT.
+	 * {@link TileEntity#writeToNBT(net.minecraft.nbt.NBTTagCompound)} must perform successfully on such prepared TE.
+	 * 
+	 * @param sender Sender of the command - used for sending replies.
+	 * @param command Command issued  - used for sending replies.
+	 * @return True if operation successful.
 	 */
-	public abstract void prepare();
+	public abstract boolean prepare(ICommandSender sender, ICommand command);
 }

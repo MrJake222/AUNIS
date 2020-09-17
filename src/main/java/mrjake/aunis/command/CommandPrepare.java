@@ -8,6 +8,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextFormatting;
 
 public class CommandPrepare extends CommandBase {
 
@@ -30,13 +31,17 @@ public class CommandPrepare extends CommandBase {
 			TileEntity tileEntity = sender.getEntityWorld().getTileEntity(rayTraceResult.getBlockPos());
 			
 			if (tileEntity instanceof PreparableInterface) {
-				((PreparableInterface) tileEntity).prepare();
+				if (((PreparableInterface) tileEntity).prepare(sender, this)) {
+					notifyCommandListener(sender, this, "Preparing "+tileEntity.getClass().getSimpleName());
+				}
 				
-				notifyCommandListener(sender, this, "Preparing "+tileEntity.getClass().getSimpleName());
+				else {
+					notifyCommandListener(sender, this, TextFormatting.RED + "Failed to prepare "+tileEntity.getClass().getSimpleName()+".");
+				}
 			}
 	
 			else
-				notifyCommandListener(sender, this, "Not a instance of PreparableInterface");
+				notifyCommandListener(sender, this, "Can't prepare this block. TileEntity not a instance of PreparableInterface.");
 		}
 	}
 }

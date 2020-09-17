@@ -64,6 +64,9 @@ import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -1371,8 +1374,17 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	@Override
-	public void prepare() {
-		gateAddressMap = null;
+	public boolean prepare(ICommandSender sender, ICommand command) {
+		if (!stargateState.idle()) {
+			CommandBase.notifyCommandListener(sender, command, "Stop any gate activity before preparation.");
+			return false;
+		}
+		
+		gateAddressMap.clear();
+		dialedAddress.clear();
+		scheduledTasks.clear();
+		
+		return true;
 	}
 	
 	// ------------------------------------------------------------------------

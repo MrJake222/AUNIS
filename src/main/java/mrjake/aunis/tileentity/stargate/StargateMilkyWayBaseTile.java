@@ -34,6 +34,8 @@ import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.ILinkable;
 import mrjake.aunis.util.LinkingHelper;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -263,9 +265,10 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	}
 	
 	@Override
-	public void prepare() {
-		super.prepare();
+	public boolean prepare(ICommandSender sender, ICommand command) {
 		setLinkedDHD(null);
+		
+		return super.prepare(sender, command);
 	}
 	
 	
