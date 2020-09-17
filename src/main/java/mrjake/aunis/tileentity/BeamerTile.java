@@ -100,7 +100,6 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		
 		if (!world.isRemote) {
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-			Aunis.ocWrapper.joinOrCreateNetwork(this);
 			
 //			if (loopSoundPlaying) {
 //				AunisSoundHelper.playPositionedSound(world, pos, SoundPositionedEnum.BEAMER_LOOP, true);
@@ -226,10 +225,19 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		return BeamerStatusEnum.OK;
 	}
 	
+	private boolean addedToNetwork = false;
+	
 	@Override
 	public void update() {
 		if (!world.isRemote) {
 			ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());
+			
+			// This cannot be done in onLoad because it makes
+			// TE invisible to the network sometimes.
+			if (!addedToNetwork) {
+				Aunis.ocWrapper.joinOrCreateNetwork(this);
+				addedToNetwork = true;
+			}
 			
 			BeamerStatusEnum lastBeamerStatus = beamerStatus;
 			
@@ -995,6 +1003,13 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		
 		compound.setTag("scheduledTasks", ScheduledTask.serializeList(scheduledTasks));
 		
+		if (node != null) {
+			NBTTagCompound nodeCompound = new NBTTagCompound();
+			node.save(nodeCompound);
+			
+			compound.setTag("node", nodeCompound);
+		}
+		
 		return super.writeToNBT(compound);
 	}
 	
@@ -1019,6 +1034,9 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		inactivity = compound.getInteger("inactivity");
 		ocLocked = compound.getBoolean("ocLocked");
 		loopSoundPlaying = compound.getBoolean("loopSoundPlaying");
+		
+		if (node != null && compound.hasKey("node"))
+			node.load(compound.getCompoundTag("node"));
 		
 		ScheduledTask.deserializeList(compound.getCompoundTag("scheduledTasks"), scheduledTasks, this);
 	}
