@@ -288,11 +288,16 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 									continue;
 								
 								for (int k=1; k<5; k++) {									
-									int accepted = stack.getCount() - targetBeamerTile.itemStackHandler.insertItemInternal(k, stack, false).getCount();
+									int accepted = stack.getCount() - targetBeamerTile.itemStackHandler.insertItemInternal(k, stack.copy(), false).getCount();
 									itemStackHandler.extractItem(i, accepted, false);
-									toTransfer -= accepted;
 									
+									toTransfer -= accepted;
 									timeWithoutItemTransfer = 0;
+
+									stack.shrink(accepted);
+									
+									if (stack.isEmpty())
+										break;
 									
 									if (toTransfer == 0)
 										break;
