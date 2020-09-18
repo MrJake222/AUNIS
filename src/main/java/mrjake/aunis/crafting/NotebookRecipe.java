@@ -24,9 +24,10 @@ public class NotebookRecipe extends Impl<IRecipe> implements IRecipe {
 		int matchCount = 0;
 		
 		for (int i=0; i<inv.getSizeInventory(); i++) {
-			Item item = inv.getStackInSlot(i).getItem();
+			ItemStack stack = inv.getStackInSlot(i);
+			Item item = stack.getItem();
 			
-			if (item == AunisItems.PAGE_NOTEBOOK_ITEM || item == AunisItems.NOTEBOOK_ITEM)
+			if ((item == AunisItems.PAGE_NOTEBOOK_ITEM && stack.getMetadata() == 1) || item == AunisItems.NOTEBOOK_ITEM)
 				matchCount++;
 		}
 		

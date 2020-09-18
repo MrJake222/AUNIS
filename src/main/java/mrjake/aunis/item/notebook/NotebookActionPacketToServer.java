@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -85,8 +86,10 @@ public class NotebookActionPacketToServer implements IMessage {
 							
 							if (addressList.tagCount() == 1)
 								player.setHeldItem(message.hand, ItemStack.EMPTY);
-							else if (selected < addressList.tagCount())
+							else if (selected < addressList.tagCount()) {
 								addressList.removeTag(selected);
+								compound.setInteger("selected", MathHelper.clamp(selected, 0, addressList.tagCount()-1));
+							}
 							
 							// Add page
 							player.addItemStackToInventory(page);

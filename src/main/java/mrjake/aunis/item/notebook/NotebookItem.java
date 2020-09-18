@@ -62,6 +62,6 @@ public class NotebookItem extends Item implements CustomModelItemInterface {
 	public static NBTTagCompound getSelectedPageFromCompound(NBTTagCompound compound) {
 		int selected = compound.getInteger("selected");
 		NBTTagList list = compound.getTagList("addressList", NBT.TAG_COMPOUND);
-		return (NBTTagCompound) list.get(selected);
+		return list.getCompoundTagAt(selected);
 	}
 }
