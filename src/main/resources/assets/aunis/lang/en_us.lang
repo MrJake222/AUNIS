@@ -27,6 +27,7 @@ tile.aunis.dhd_block.name=Dial Home Device (DHD)
 tile.aunis.capacitor_block.name=Capacitor Bank
 tile.aunis.capacitor_block_empty.name=Capacitor Bank (Empty)
 
+tile.aunis.stargate_orlin_base_block.open_count=Open count: %s / %s
 tile.aunis.stargate_orlin_base_block.name=Stargate Base (Orlin)
 tile.aunis.stargate_orlin_member_block.name=Stargate Ring (Orlin)
 

@@ -112,15 +112,33 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 			}
 		}
 	}
+	
+	public void incrementMembersOpenCount(World world, BlockPos basePos, EnumFacing baseFacing) {
+		for (BlockPos pos : getRingBlocks()) {
+			pos = pos.rotate(FacingToRotation.get(baseFacing)).add(basePos);
+			
+			if (MEMBER_MATCHER.apply(world.getBlockState(pos))) {
+				StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
+				memberTile.incrementOpenCount();
+			}
+		}
+	}	
 
-	public void updateMembersBrokenStatus(World world, BlockPos basePos, EnumFacing baseFacing, boolean isBroken) {
+	public int getMaxOpenCount(World world, BlockPos basePos, EnumFacing baseFacing) {
+		int max = 0;
+		
 		for (BlockPos pos : getRingBlocks()) {
 			pos = pos.rotate(FacingToRotation.get(baseFacing)).add(basePos);
 
 			if (MEMBER_MATCHER.apply(world.getBlockState(pos))) {
 				StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
-				memberTile.setBroken(isBroken);
+				int open = memberTile.getOpenCount();
+				
+				if (open > max)
+					max = open;
 			}
 		}
+		
+		return max;
 	}	
 }

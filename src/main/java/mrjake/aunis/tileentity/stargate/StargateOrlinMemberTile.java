@@ -1,8 +1,16 @@
 package mrjake.aunis.tileentity.stargate;
 
+import java.util.List;
+import java.util.Random;
+
 import javax.annotation.Nullable;
 
+import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.config.AunisConfig;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -41,15 +49,49 @@ public class StargateOrlinMemberTile extends TileEntity {
 	// ---------------------------------------------------------------------------------
 	// Broken state
 	
-	private boolean broken = false;
+	private int openCount = 0;
 	
 	public boolean isBroken() {
-		return broken;
+		return openCount == AunisConfig.stargateConfig.stargateOrlinMaxOpenCount;
 	}
 	
-	public void setBroken(boolean broken) {
-		this.broken = broken;
+	public void incrementOpenCount() {
+		openCount++;
 		markDirty();
+	}
+	
+	public int getOpenCount() {
+		return openCount;
+	}
+	
+	public void addDrops(List<ItemStack> drops) {
+		
+		if (isBroken()) {
+			Random rand = new Random();
+			
+			drops.add(new ItemStack(Items.IRON_INGOT, 1 + rand.nextInt(2)));
+			drops.add(new ItemStack(Items.REDSTONE, 2 + rand.nextInt(3)));
+		}
+			
+		else {
+			NBTTagCompound compound = new NBTTagCompound();
+			compound.setInteger("openCount", openCount);
+			
+			ItemStack stack = new ItemStack(Item.getItemFromBlock(AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK));
+			stack.setTagCompound(compound);
+			
+			drops.add(stack);
+		}
+	}
+	
+	public void initializeFromItemStack(ItemStack stack) {
+		if (stack.hasTagCompound()) {
+			NBTTagCompound compound = stack.getTagCompound();
+			
+			if (compound.hasKey("openCount")) {
+				openCount = compound.getInteger("openCount");
+			}
+		}
 	}
 	
 	// ---------------------------------------------------------------------------------
@@ -60,7 +102,7 @@ public class StargateOrlinMemberTile extends TileEntity {
 		if (basePos != null)
 			compound.setLong("basePos", basePos.toLong());
 		
-		compound.setBoolean("broken", broken);
+		compound.setInteger("openCount", openCount);
 		
 		return super.writeToNBT(compound);
 	}
@@ -70,7 +112,7 @@ public class StargateOrlinMemberTile extends TileEntity {
 		if (compound.hasKey("basePos"))
 			basePos = BlockPos.fromLong(compound.getLong("basePos"));
 		
-		broken = compound.getBoolean("broken");
+		openCount = compound.getInteger("openCount");
 		
 		super.readFromNBT(compound);
 	}

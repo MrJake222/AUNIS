@@ -2,12 +2,14 @@ package mrjake.aunis.tileentity.stargate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateDimensionConfig;
 import mrjake.aunis.packet.AunisPacketHandler;
@@ -36,6 +38,9 @@ import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -51,10 +56,49 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	
 	private int openCount = 0;
 	
+	/**
+	 * Checks openCount of ALL members.
+	 * @return True if the gate (or any of it's parts) had been used 2 times (default)
+	 */
 	public boolean isBroken() {
-		return openCount == AunisConfig.stargateConfig.stargateOrlinMaxOpenCount;
+		if (openCount == AunisConfig.stargateConfig.stargateOrlinMaxOpenCount)
+			return true;
+				
+		if (StargateOrlinMergeHelper.INSTANCE.getMaxOpenCount(world, pos, facing) == AunisConfig.stargateConfig.stargateOrlinMaxOpenCount)
+			return true;
+		
+		return false;
 	}
 	
+	public void addDrops(List<ItemStack> drops) {
+		
+		if (openCount == AunisConfig.stargateConfig.stargateOrlinMaxOpenCount) {
+			Random rand = new Random();
+			
+			drops.add(new ItemStack(Items.IRON_INGOT, 2 + rand.nextInt(3)));
+		}
+			
+		else {
+			NBTTagCompound compound = new NBTTagCompound();
+			compound.setInteger("openCount", openCount);
+			
+			ItemStack stack = new ItemStack(Item.getItemFromBlock(AunisBlocks.STARGATE_ORLIN_BASE_BLOCK));
+			stack.setTagCompound(compound);
+			
+			drops.add(stack);
+		}
+	}
+	
+	public void initializeFromItemStack(ItemStack stack) {
+		if (stack.hasTagCompound()) {
+			NBTTagCompound compound = stack.getTagCompound();
+			
+			if (compound.hasKey("openCount")) {
+				openCount = compound.getInteger("openCount");
+			}
+		}
+	}
+
 	@Override
 	public SymbolTypeEnum getSymbolType() {
 		return SymbolTypeEnum.MILKYWAY;
@@ -86,13 +130,11 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		super.disconnectGate();
 		
 		openCount++;
+		StargateOrlinMergeHelper.INSTANCE.incrementMembersOpenCount(world, pos, facing);
 		
 		if (isBroken()) {
-			StargateOrlinMergeHelper.INSTANCE.updateMembersBrokenStatus(world, pos, facing, true);
-		}
-		
-		if (isBroken())
 			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAILED_SOUND, 5));
+		}
 	}
 	
 	@Override

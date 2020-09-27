@@ -1,12 +1,12 @@
 package mrjake.aunis.block.stargate;
 
 import java.util.List;
-import java.util.Random;
 
 import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
@@ -16,12 +16,12 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
@@ -55,6 +55,16 @@ public class StargateOrlinMemberBlock extends Block {
 		setHarvestLevel("pickaxe", 3);
 	}
 	
+	@Override
+	public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+		if (stack.hasTagCompound()) {
+			NBTTagCompound compound = stack.getTagCompound();
+			
+			if (compound.hasKey("openCount")) {
+				tooltip.add(Aunis.proxy.localize("tile.aunis.stargate_orlin_base_block.open_count", compound.getInteger("openCount"), AunisConfig.stargateConfig.stargateOrlinMaxOpenCount));
+			}
+		}
+	}
 	
 	// ------------------------------------------------------------------------
 	// Block states
@@ -84,12 +94,14 @@ public class StargateOrlinMemberBlock extends Block {
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		EnumFacing facing = placer.getHorizontalFacing().getOpposite();
+		StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {
 			state = state.withProperty(AunisProps.RENDER_BLOCK, true)
 					.withProperty(AunisProps.ORLIN_VARIANT, facing);
 		
 			world.setBlockState(pos, state, 0);
+			memberTile.initializeFromItemStack(stack);
 			
 			StargateAbstractBaseTile gateTile = StargateOrlinMergeHelper.INSTANCE.findBaseTile(world, pos, facing);
 			
@@ -113,16 +125,7 @@ public class StargateOrlinMemberBlock extends Block {
 	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
 		StargateOrlinMemberTile gateTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
 		
-		Random rand = new Random();
-				
-		if (gateTile.isBroken()) {
-			drops.add(new ItemStack(Items.IRON_INGOT, 1 + rand.nextInt(2)));
-			drops.add(new ItemStack(Items.REDSTONE, 2 + rand.nextInt(3)));
-		}
-			
-		else {
-			drops.add(new ItemStack(Item.getItemFromBlock(this)));
-		}
+		gateTile.addDrops(drops);
 	}
 	
 	@Override

@@ -1,11 +1,12 @@
 package mrjake.aunis.block.stargate;
 
-import java.util.Random;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.stargate.power.StargateEnergyRequired;
@@ -16,11 +17,11 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
@@ -60,6 +61,16 @@ public class StargateOrlinBaseBlock extends Block {
 		setHarvestLevel("pickaxe", 3);
 	}
 	
+	@Override
+	public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+		if (stack.hasTagCompound()) {
+			NBTTagCompound compound = stack.getTagCompound();
+			
+			if (compound.hasKey("openCount")) {
+				tooltip.add(Aunis.proxy.localize("tile.aunis.stargate_orlin_base_block.open_count", compound.getInteger("openCount"), AunisConfig.stargateConfig.stargateOrlinMaxOpenCount));
+			}
+		}
+	}
 	
 	// ------------------------------------------------------------------------
 	// Block states
@@ -124,9 +135,9 @@ public class StargateOrlinBaseBlock extends Block {
 					.withProperty(AunisProps.RENDER_BLOCK, true);
 		
 			world.setBlockState(pos, state);
+			gateTile.initializeFromItemStack(stack);
 			gateTile.updateFacing(facing, true);
 			gateTile.updateMergeState(StargateOrlinMergeHelper.INSTANCE.checkBlocks(world, pos, facing), facing);
-			
 			
 			// ------------------------------------------
 			// Nether handler
@@ -157,15 +168,7 @@ public class StargateOrlinBaseBlock extends Block {
 	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
 		StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
 		
-		Random rand = new Random();
-				
-		if (gateTile.isBroken()) {
-			drops.add(new ItemStack(Items.IRON_INGOT, 2 + rand.nextInt(3)));
-		}
-			
-		else {
-			drops.add(new ItemStack(Item.getItemFromBlock(this)));
-		}
+		gateTile.addDrops(drops);
 	}
 	
 	@Override
