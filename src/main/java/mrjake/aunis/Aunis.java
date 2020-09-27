@@ -16,7 +16,6 @@ import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
 import mrjake.aunis.worldgen.AunisWorldGen;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.util.CompoundDataFixer;
@@ -40,7 +39,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class Aunis {	
     public static final String ModID = "aunis";
     public static final String Name = "AUNIS";
-    public static final String Version = "1.9.9-beta";
+    public static final String Version = "1.9.10-beta";
     public static final int DATA_VERSION = 7;
 
     public static final String MCVersion = "[1.12.2]";
