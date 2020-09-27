@@ -213,5 +213,9 @@ public class AunisConfig {
 		@Name("Notebook page Glyph transparency")
 		@RangeDouble(min=0, max=1)
 		public double glyphTransparency = 0.75;
+		
+		@Name("Aunis volume")
+		@RangeDouble(min=0, max=1)
+		public float volume = 1;
 	}
 }
