@@ -1,0 +1,328 @@
+itemGroup.aunis=Aunis
+soundCategory.aunis=Aunis
+
+item.aunis.analyzer_ancient.name=Ős Analizátor
+item.aunis.crystal_control_dhd.name=Tárcsázó Irányítókristály
+item.aunis.dialer_fast.name=Gyorstárcsázó (debug)
+
+item.aunis.crystal_glyph_dhd.name=Tárcsázó Szimbólumkristály
+item.aunis.crystal_glyph_stargate.name=Csillagkapu Szimbólumkristály
+item.aunis.crystal_glyph_milkyway.name=Tejútrendszeri Szimbólumkristály
+item.aunis.crystal_glyph_pegasus.name=Pegazusi Szimbólumkristály
+item.aunis.crystal_glyph_universe.name=Univerzum Szimbólumkristály
+
+tile.aunis.naquadah_ore.name=Nakvada Érc
+tile.aunis.naquadah_ore_stone.name=Nakvada Érc (Kő)
+tile.aunis.naquadah_block.name=Nakvada Tömb
+item.aunis.naquadah_shard.name=Nakvada Töredék
+item.aunis.naquadah_alloy.name=Finomított Nakvada Ötvözetrúd
+item.aunis.naquadah_alloy_raw.name=Nakvada Ötvözetrúd
+
+tile.aunis.invisible_block.name=Nem láthatsz engem blokk
+
+tile.aunis.stargate_milkyway_base_block.name=Csillagkapu Alap (Tejútrendszer)
+tile.aunis.stargate_milkyway_ring_block.name=Csillagkapu Gyűrű (Tejútrendszer)
+tile.aunis.stargate_milkyway_chevron_block.name=Csillagkapu Ékzár (Tejútrendszer)
+tile.aunis.dhd_block.name=Tárcsázókészülék
+tile.aunis.capacitor_block.name=Kondenzátor
+tile.aunis.capacitor_block_empty.name=Kondenzátor (Üres)
+
+tile.aunis.stargate_orlin_base_block.name=Csillagkapu Alap (Orlin)
+tile.aunis.stargate_orlin_member_block.name=Csillagkapu Gyűrű (Orlin)
+
+tile.aunis.stargate_universe_base_block.name=Csillagkapu Alap (Univerzum)
+tile.aunis.stargate_universe_chevron_block.name=Csillagkapu Ékzár (Univerzum)
+tile.aunis.stargate_universe_ring_block.name=Csillagkapu Gyűrű (Univerzum)
+
+item.aunis.crystal_fragment.name=Kristálymag
+item.aunis.crystal_blank.name=Üres Kristály
+item.aunis.crystal_blue.name=Teleportációs Kristály
+item.aunis.crystal_red.name=Energiakristály
+item.aunis.crystal_ender.name=Végzetkristály
+item.aunis.crystal_yellow.name=Fény Kristály
+item.aunis.crystal_white.name=Fehér Kristály
+
+item.aunis.circuit_control_base.name=Vezérlő Áramkör Alap
+item.aunis.circuit_control_naquadah.name=Nakvada Vezérlő Áramkör
+item.aunis.circuit_control_crystal.name=Kristály Vezérlő Áramkör
+
+item.aunis.dhd_brb.name=Világos Piros Gomb
+
+item.aunis.stargate_ring_fragment.name=Csillagkapu Gyűrű Töredék
+item.aunis.universe_ring_fragment.name=Univerzum Gyűrű Töredék
+item.aunis.holder_crystal.name=Kristály Tartó
+
+item.aunis.page_notebook.name=Jegyzetoldal
+item.aunis.page_mysterious.name=Titokzatos Oldal
+item.aunis.page_mysterious.empty=Üres
+item.aunis.mysterious_page.tooltip=Ki tudja merre visz
+
+fluid.silicon_molten_black=Olvadt Szilikon
+fluid.silicon_molten_white=Finomított Szilikon
+fluid.silicon_molten_red=Áram Keverék
+fluid.silicon_molten_blue=Teleportációs Keverék
+fluid.silicon_molten_ender=Végzetkeverék
+fluid.silicon_molten_yellow=Fény Keverék
+fluid.naquadah_molten_raw=Folyékony Nakvada
+fluid.naquadah_molten_refined=Finomított Nakvada
+fluid.naquadah_molten_alloy=Folyékony Nakvadaötvözet
+
+
+
+tile.aunis.dhd_block.incoming_wormhole_warn=Nem lehet bezárni a féregjáratot erről az oldalról
+tile.aunis.dhd_block.not_linked_warn=Nincs tárcsázó kötve a kapuhoz
+tile.aunis.dhd_block.no_crystal_warn=A tárcsázóban nem található kristály
+tile.aunis.dhd_block.no_enough_power=Legalább 10,000uI szükséges a tárcsázó működtetéséhez
+tile.aunis.dhd_block.computer_dial=Számítógépes tárcsázás folyamatban
+
+tile.aunis.stargatebase_block.not_enough_power=Nem elég áram
+
+item.aunis.transportrings_ring_fragment.name=Transzportgyűrű Töredék
+tile.aunis.transportrings_controller_block.name=Transzportgyűrű Irányító
+tile.aunis.transportrings_controller_block.not_linked=Irányító nem csatlakoztatva
+
+tile.aunis.transportrings_block.name=Transzportgyűrű
+tile.aunis.transportrings_block.non_existing_address=Cím nem elérhető
+tile.aunis.transportrings_block.duplicate_address=Már létező cím
+tile.aunis.transportrings_block.wrong_address=Rossz cím, 1-6 között kell lennie
+tile.aunis.transportrings_block.obstructed=Gyűrűk eltorlaszolva, legyen 5x5 blokknyi hely a gyűrűk számára
+tile.aunis.transportrings_block.obstructed_target=Cél gyűrűk eltorlaszolva, legyen 5x5 blokknyi hely a gyűrűk számára
+tile.aunis.transportrings_block.busy=Gyűrűk használatban
+tile.aunis.transportrings_block.busy_target=Cél gyűrűk használatban
+tile.aunis.transportrings_block.rings_no=Gyűrű %s
+tile.aunis.transportrings_block.rings_not_in_grid=Gyűrűk nincsenek alakzatban
+tile.aunis.transportrings_block.rings_address=Cím
+tile.aunis.transportrings_block.rings_name=Név
+tile.aunis.transportrings_block.rings_save=Mentés
+
+commands.sgquery.usage=/sgquery [(x y z) (x y z)] [dim=X] [map=Y] [id=Z]
+commands.sgquery.number_expected=Szám várva
+commands.sgquery.no_map=Nincs ilyen térkép
+commands.sgquery.stargates=Csillagkapuk %s
+commands.sgquery.wrong_id=Rossz ID vagy nem meghatározva
+commands.sgquery.wrong_map=Rossz térkép vagy nem meghatározva
+commands.sgquery.wrong_sender=Rossz küldő (nem játékos)
+commands.sgquery.giving_page=Oldal odaadása: %s
+commands.sggivepage.usage=/sggivepage (player) (map=X) [biome=Y] (Symbol)x8/6
+commands.sggivepage.no_map=Nincs térkép, vagy rossz megadva
+commands.sggivepage.give_page=Oldal odaadása: %s
+commands.sgsetaddress.usage=/sgsetaddress (x y z) (map=X) (Symbol)x8
+commands.sgsetaddress.notstargate=Célblokk nem egy Csillagkapu Alap
+commands.sgsetaddress.noaddressspace=Nincs térkép vagy rossz térkép megadva
+commands.sgsetaddress.wrongaddress=A címnek 7 szóköz által elválasztott szimbólumnak kellene lennie (Angol nyelven)
+commands.sgsetaddress.wrongsymbol=Rossz %s. szimbólum
+commands.sgsetaddress.duplicatesymbol=Több %s. szimbólum
+commands.sgsetaddress.exists=Az adott címmel már létezik Csillagkapu
+commands.sgsetaddress.success=Csillagkapu címének átállítása itt: %s ezzé: %s 
+commands.sgcloseall.usage=/sgcloseall [(x y z) (x y z)] [dim=X]
+commands.sgcloseall.closing=Csillagkapuk leállítása a dimenzióban: %s, %s.
+commands.sgcloseall.closed=%s kapu bezárva.
+commands.sgcloseall.number_expected=Szám várva dimenzió ID-ként
+
+death.attack.eventHorizon=%s-t elért egy kawoosh
+
+
+glyph.aunis.milkyway.sculptor=Sculptor
+glyph.aunis.milkyway.scorpius=Scorpius
+glyph.aunis.milkyway.centaurus=Centaurus
+glyph.aunis.milkyway.monoceros=Monoceros
+glyph.aunis.milkyway.point_of_origin=Point of Origin
+glyph.aunis.milkyway.pegasus=Pegasus
+glyph.aunis.milkyway.andromeda=Andromeda
+glyph.aunis.milkyway.serpens_caput=Serpens Caput
+glyph.aunis.milkyway.aries=Aries
+glyph.aunis.milkyway.libra=Libra
+glyph.aunis.milkyway.eridanus=Eridanus
+glyph.aunis.milkyway.leo_minor=Leo Minor
+glyph.aunis.milkyway.hydra=Hydra
+glyph.aunis.milkyway.sagittarius=Sagittarius
+glyph.aunis.milkyway.sextans=Sextans
+glyph.aunis.milkyway.scutum=Scutum
+glyph.aunis.milkyway.pisces=Pisces
+glyph.aunis.milkyway.virgo=Virgo
+glyph.aunis.milkyway.bootes=Boötes
+glyph.aunis.milkyway.auriga=Auriga
+glyph.aunis.milkyway.corona_australis=Corona Australis
+glyph.aunis.milkyway.gemini=Gemini
+glyph.aunis.milkyway.leo=Leo
+glyph.aunis.milkyway.cetus=Cetus
+glyph.aunis.milkyway.triangulum=Triangulum
+glyph.aunis.milkyway.aquarius=Aquarius
+glyph.aunis.milkyway.microscopium=Microscopium
+glyph.aunis.milkyway.equuleus=Equuleus
+glyph.aunis.milkyway.crater=Crater
+glyph.aunis.milkyway.perseus=Perseus
+glyph.aunis.milkyway.cancer=Cancer
+glyph.aunis.milkyway.norma=Norma
+glyph.aunis.milkyway.taurus=Taurus
+glyph.aunis.milkyway.canis_minor=Canis Minor
+glyph.aunis.milkyway.capricornus=Capricornus
+glyph.aunis.milkyway.lynx=Lynx
+glyph.aunis.milkyway.orion=Orion
+glyph.aunis.milkyway.piscis_austrinus=Piscis Austrinus
+glyph.aunis.milkyway.bright_red_button=Bright Red Button
+
+glyph.aunis.pegasus.acjesis=Acjesis
+glyph.aunis.pegasus.lenchan=Lenchan
+glyph.aunis.pegasus.alura=Alura
+glyph.aunis.pegasus.ca_po=Ca Po
+glyph.aunis.pegasus.laylox=Laylox
+glyph.aunis.pegasus.ecrumig=Ecrumig
+glyph.aunis.pegasus.avoniv=Avoniv
+glyph.aunis.pegasus.bydo=Bydo
+glyph.aunis.pegasus.aaxel=Aaxel
+glyph.aunis.pegasus.aldeni=Aldeni
+glyph.aunis.pegasus.setas=Setas
+glyph.aunis.pegasus.arami=Arami
+glyph.aunis.pegasus.danami=Danami
+glyph.aunis.pegasus.poco_re=Poco Re
+glyph.aunis.pegasus.robandus=Robandus
+glyph.aunis.pegasus.recktic=Recktic
+glyph.aunis.pegasus.zamilloz=Zamilloz
+glyph.aunis.pegasus.subido=Subido
+glyph.aunis.pegasus.dawnre=Dawnre
+glyph.aunis.pegasus.salma=Salma
+glyph.aunis.pegasus.hamlinto=Hamlinto
+glyph.aunis.pegasus.elenami=Elenami
+glyph.aunis.pegasus.tahnan=Tahnan
+glyph.aunis.pegasus.zeo=Zeo
+glyph.aunis.pegasus.roehi=Roehi
+glyph.aunis.pegasus.once_el=Once El
+glyph.aunis.pegasus.baselai=Baselai
+glyph.aunis.pegasus.sandovi=Sandovi
+glyph.aunis.pegasus.illume=Illume
+glyph.aunis.pegasus.amiwill=Amiwill
+glyph.aunis.pegasus.sibbron=Sibbron
+glyph.aunis.pegasus.gilltin=Gilltin
+glyph.aunis.pegasus.abrin=Abrin
+glyph.aunis.pegasus.ramnon=Ramnon
+glyph.aunis.pegasus.olavii=Olavii
+glyph.aunis.pegasus.hacemill=Hacemill
+
+glyph.aunis.universe.g1=Glyph 1
+glyph.aunis.universe.g2=Glyph 2
+glyph.aunis.universe.g3=Glyph 3
+glyph.aunis.universe.g4=Glyph 4
+glyph.aunis.universe.g5=Glyph 5
+glyph.aunis.universe.g6=Glyph 6
+glyph.aunis.universe.g7=Glyph 7
+glyph.aunis.universe.g8=Glyph 8
+glyph.aunis.universe.g9=Glyph 9
+glyph.aunis.universe.g10=Glyph 10
+glyph.aunis.universe.g11=Glyph 11
+glyph.aunis.universe.g12=Glyph 12
+glyph.aunis.universe.g13=Glyph 13
+glyph.aunis.universe.g14=Glyph 14
+glyph.aunis.universe.g15=Glyph 15
+glyph.aunis.universe.g16=Glyph 16
+glyph.aunis.universe.g17=Glyph 17
+glyph.aunis.universe.g18=Glyph 18
+glyph.aunis.universe.g19=Glyph 19
+glyph.aunis.universe.g20=Glyph 20
+glyph.aunis.universe.g21=Glyph 21
+glyph.aunis.universe.g22=Glyph 22
+glyph.aunis.universe.g23=Glyph 23
+glyph.aunis.universe.g24=Glyph 24
+glyph.aunis.universe.g25=Glyph 25
+glyph.aunis.universe.g26=Glyph 26
+glyph.aunis.universe.g27=Glyph 27
+glyph.aunis.universe.g28=Glyph 28
+glyph.aunis.universe.g29=Glyph 29
+glyph.aunis.universe.g30=Glyph 30
+glyph.aunis.universe.g31=Glyph 31
+glyph.aunis.universe.g32=Glyph 32
+glyph.aunis.universe.g33=Glyph 33
+glyph.aunis.universe.g34=Glyph 34
+glyph.aunis.universe.g35=Glyph 35
+glyph.aunis.universe.g36=Glyph 36
+
+
+gui.upgrades=Fejlesztések
+
+gui.dhd.fusion=Hidegfúzió
+gui.dhd.crystalStatus=Irányítókristály:
+gui.dhd.no_crystal=Hiányzó kristály
+gui.dhd.crystal_ok=Helyben
+gui.dhd.linkStatus=Szubtéri kapcsolat:
+gui.dhd.linked=Összekötve
+gui.dhd.not_linked=Nem Összekötve
+gui.dhd.reactorStatus=Hidegfúziós Reaktor:
+gui.dhd.running=Fut
+gui.dhd.standby=Készen áll
+gui.dhd.no_fuel=Nincs üzemanyag
+
+gui.stargate.milky_way_address=Tejútrendszeri cím
+gui.stargate.pegasus_address=Pegazusi cím
+gui.stargate.universe_address=Univerzum cím
+gui.stargate.capacitors=Kondenzátorok
+gui.stargate.energyBuffer=Energiapuffer
+
+gui.capacitor.name=Kondenzátor
+
+tile.aunis.beamer_block.name=Vetítőblokk
+item.aunis.beamer_crystal_power.name=Vetítő Áramkristály
+item.aunis.beamer_crystal_fluid.name=Vetítő Folyadék Kristály
+item.aunis.beamer_crystal_items.name=Vetítő Tárgykristály
+gui.beamer.name=Vetítő
+gui.beamer.beamer_status=Vetítő állapota:
+gui.beamer.beamer_ok=Vetítő látja a kaput
+gui.beamer.beamer_link_status=Vetítő kapcsolat állapota:
+gui.beamer.beamer_link_ok=Vetítő kapcsolat rendben
+gui.beamer.role_status=Szerep állapot:
+gui.beamer.role_ok=Szerep rendben
+gui.beamer.disabled=Vetítő kikapcsolva
+gui.beamer.disabled_target=Célvetítő kikapcsolva
+gui.beamer.obstructed=Vetítő eltorlaszolva
+gui.beamer.obstructed_target=Célvetítő eltorlaszolva
+gui.beamer.two_transmitters=Két küldő
+gui.beamer.two_receivers=Két vevő
+gui.beamer.mode_mismatch=Mód eltérés
+gui.beamer.no_beamer=Nem található Vetítő
+gui.beamer.closed=Kapu nem aktív
+gui.beamer.incoming=Bejövő féregjárat
+gui.beamer.disabled_by_logic=Vetítő a logika által kikapcsolva
+gui.beamer.disabled_by_logic_target=Céletítő a logika által kikapcsolva
+gui.beamer.running=Fut
+gui.beamer.no_crystal=Hiányzó kristály
+
+gui.beamer.transmit=Küld
+gui.beamer.receive=Vesz
+gui.beamer.disabled=Kikapcsolva
+gui.beamer.activation=Vetítő aktiválás
+gui.beamer.auto=Automatikus
+gui.beamer.on_high=Jelre
+gui.beamer.on_low=Ha nincs jel
+gui.beamer.ignored=Jelet figyelmen kívül hagy
+gui.beamer.activate_below=Aktiválódjon [%%] alatt
+gui.beamer.deactivate_over=Deaktiválódjon [%%] alatt
+gui.beamer.deactivate=Deaktiválódjon utána
+gui.beamer.after_inactivity=inaktivitás [s]
+gui.beamer.save=Mentés
+gui.beamer.invalid=Érvénytelen
+
+chat.orlins.energyStored=Energia eltárolva: %s RF (Szükséges: %s RF, %s s)
+
+item.aunis.universe_dialer.name=Univerzum Tárcsázó
+item.aunis.universe_dialer.not_linked=Nincs összekötve
+item.aunis.universe_dialer.gate_busy=Kapu használatban
+item.aunis.universe_dialer.mode_scan=Közelben
+item.aunis.universe_dialer.mode_saved=Memória
+item.aunis.universe_dialer.mode_rings=Transzportgyűrűk
+item.aunis.universe_dialer.mode_oc=OpnCom
+item.aunis.universe_dialer.aborting=Tárcsázás leállítása
+item.aunis.universe_dialer.oc_name=Név
+item.aunis.universe_dialer.oc_address=OpenComputers modem címe (Hagyd üresen, ha minden címre küldesz)
+item.aunis.universe_dialer.oc_port=Modem portja
+item.aunis.universe_dialer.oc_data=OpenComputers Paraméterek (vesszővel elválasztva)
+item.aunis.universe_dialer.oc_save=Mentés
+item.aunis.universe_dialer.oc_port_invalid=Helytelen port
+item.aunis.universe_dialer.oc_message_received=Válasz érkezett:
+config.aunis.universe_dialer.mode_scroll=Univerzum tárcsázó mód: tekerés
+config.aunis.universe_dialer.mode_up=Univerzum tárcsázó mód: fel
+config.aunis.universe_dialer.mode_down=Univerzum tárcsázó mód: le
+config.aunis.universe_dialer.address_scroll=Univerzum tárcsázó tekerés
+config.aunis.universe_dialer.address_up=Univerzum tárcsázó fel
+config.aunis.universe_dialer.address_down=Univerzum tárcsázó le
+config.aunis.universe_dialer.address_remove=Univerzum tárcsázó: cím eltávolítása
+config.aunis.universe_dialer.abort=Univerzum tárcsázó: tárcsázó leállítása
+config.aunis.universe_dialer.oc_program=Univerzum tárcsázó OC üzenet
