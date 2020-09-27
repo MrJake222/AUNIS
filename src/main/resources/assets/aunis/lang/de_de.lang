@@ -1,0 +1,327 @@
+itemGroup.aunis=Aunis
+soundCategory.aunis=Aunis
+
+item.aunis.analyzer_ancient.name=Antiker Analysator
+item.aunis.crystal_control_dhd.name=DHD Kontrolkrystall
+item.aunis.dialer_fast.name=Fast dialer (debug)
+
+item.aunis.crystal_glyph_dhd.name=DHD Glyphenkristall
+item.aunis.crystal_glyph_stargate.name=Stargate Glyphenkristall
+item.aunis.crystal_glyph_milkyway.name=Milchstraße Glyphenkristall
+item.aunis.crystal_glyph_pegasus.name=Pegasus Glyphenkristall
+item.aunis.crystal_glyph_universe.name=Universe Glyphenkristall
+
+tile.aunis.naquadah_ore.name=Naquadah Erz
+tile.aunis.naquadah_ore_stone.name=Naquadah Erz (Stein)
+tile.aunis.naquadah_block.name=Naquadah Block
+item.aunis.naquadah_shard.name=Naquadah Scherbe
+item.aunis.naquadah_alloy.name=Raffinierter Naquadahlegierungsbarren
+item.aunis.naquadah_alloy_raw.name=Naquadahlegierungsbarren
+
+tile.aunis.invisible_block.name=Du kannst mich nicht sehen Block
+
+tile.aunis.stargate_milkyway_base_block.name=Stargate Basis (Milchstraße)
+tile.aunis.stargate_milkyway_ring_block.name=Stargate Ring (Milchstraße)
+tile.aunis.stargate_milkyway_chevron_block.name=Stargate Chevron (Milchstraße)
+tile.aunis.dhd_block.name=Dial Home Device (DHD)
+tile.aunis.capacitor_block.name=Kondensatorbatterie
+tile.aunis.capacitor_block_empty.name=Kondensatorbatterie (Leer)
+
+tile.aunis.stargate_orlin_base_block.name=Stargate Basis (Orlin)
+tile.aunis.stargate_orlin_member_block.name=Stargate Ring (Orlin)
+
+tile.aunis.stargate_universe_base_block.name=Stargate Basis (Universe)
+tile.aunis.stargate_universe_chevron_block.name=Stargate Chevron (Universe)
+tile.aunis.stargate_universe_ring_block.name=Stargate Ring (Universe)
+
+item.aunis.crystal_fragment.name=Kristallkeim
+item.aunis.crystal_blank.name=Leerer Kristall
+item.aunis.crystal_blue.name=Teleportationskristall
+item.aunis.crystal_red.name=Energiekristall
+item.aunis.crystal_ender.name=Enderkristall
+item.aunis.crystal_yellow.name=Lichtkristall
+item.aunis.crystal_white.name=Weißer Kristall
+
+item.aunis.circuit_control_base.name=Kontrollschaltkreisbasis
+item.aunis.circuit_control_naquadah.name=Naquadah Kontrollschaltkreis
+item.aunis.circuit_control_crystal.name=Kristall Kontrollschaltkreis
+
+item.aunis.dhd_brb.name=Beleuchteter Roter Button (BRB)
+
+item.aunis.stargate_ring_fragment.name=Stargate Ring Fragment
+item.aunis.universe_ring_fragment.name=Universe Ring Fragment
+item.aunis.holder_crystal.name=Kristallhalter
+
+item.aunis.page_notebook.name=Notebook Seite
+item.aunis.page_mysterious.name=Geheimnisvolle Seite
+item.aunis.page_mysterious.empty=Leer
+item.aunis.mysterious_page.tooltip=Wer weis wohin es führt
+
+fluid.silicon_molten_black=Geschmolzenes Silizium
+fluid.silicon_molten_white=Raffiniertes Silizium
+fluid.silicon_molten_red=Energymischung
+fluid.silicon_molten_blue=Teleportationmischung
+fluid.silicon_molten_ender=Endermischung
+fluid.silicon_molten_yellow=Lichtmischung
+fluid.naquadah_molten_raw=Flüssiges Naquadah
+fluid.naquadah_molten_refined=Raffiniertes Naquadah
+fluid.naquadah_molten_alloy=Flüssige Naquadahlegierung
+
+
+
+tile.aunis.dhd_block.incoming_wormhole_warn=Stargate kann von dieser Seite nicht geschlossen werden
+tile.aunis.dhd_block.not_linked_warn=DHD ist mit keinem Stargate verbunden
+tile.aunis.dhd_block.no_crystal_warn=DHD hat kein Kontrollkristall
+tile.aunis.dhd_block.no_enough_power=DHD benötigt mindestens 10,000uI zum Ordnungsgemäß zu funktionieren
+tile.aunis.dhd_block.computer_dial=Computeranwahl ist im Ablauf
+
+tile.aunis.stargatebase_block.not_enough_power=Unzureichende Energie
+
+item.aunis.transportrings_ring_fragment.name=Transporterring Fragment
+tile.aunis.transportrings_controller_block.name=Transporterring Kontroller
+tile.aunis.transportrings_controller_block.not_linked=Kontroller nicht verbunden
+
+tile.aunis.transportrings_block.name=Transporterring
+tile.aunis.transportrings_block.non_existing_address=Unmöglich diese Adresse zu erreichen
+tile.aunis.transportrings_block.duplicate_address=Doppelte Adresse
+tile.aunis.transportrings_block.wrong_address=Falsche Adresse, es sollte sein 1-6
+tile.aunis.transportrings_block.obstructed=Ringe versperrt, leere eine 5x5 Fläche um die Ringe
+tile.aunis.transportrings_block.busy=Ringe beschäftigt
+tile.aunis.transportrings_block.busy_target=Ziel Ringe beschäftigt
+tile.aunis.transportrings_block.rings_no=Ring Nr. %s
+tile.aunis.transportrings_block.rings_not_in_grid=Ringe nicht im Raster
+tile.aunis.transportrings_block.rings_address=Adresse
+tile.aunis.transportrings_block.rings_name=Name
+tile.aunis.transportrings_block.rings_save=Sichern
+
+commands.sgquery.usage=/sgquery [(x y z) (x y z)] [dim=X] [map=Y] [id=Z]
+commands.sgquery.number_expected=Numner erwartet
+commands.sgquery.no_map=Karte nicht vorhanden
+commands.sgquery.stargates=Stargates %s
+commands.sgquery.wrong_id=Falsche ID oder keine gegeben
+commands.sgquery.wrong_map=Falsche Karte oder keine gegeben
+commands.sgquery.wrong_sender=Falsche Sender (kein Spieler)
+commands.sgquery.giving_page=Gebe Seite zu %s
+commands.sggivepage.usage=/sggivepage (player) (map=X) [biome=Y] (Symbol)x8/6
+commands.sggivepage.no_map=Falsche Karte oder keine gegeben
+commands.sggivepage.give_page=Gebe Seite zu %s
+commands.sgsetaddress.usage=/sgsetaddress (x y z) (map=X) (Symbol)x8
+commands.sgsetaddress.notstargate=Zielblock ist nicht ein Stargate Basis
+commands.sgsetaddress.noaddressspace=Falsche Karte oder keine gegeben
+commands.sgsetaddress.wrongaddress=Adresse sollte eine durch Leerzeichen getrennte Liste von 7 Symbolen sein (Englische Namen)
+commands.sgsetaddress.wrongsymbol=Falsche %s. Symbolname
+commands.sgsetaddress.duplicatesymbol=Doppelte %s. Symbolname
+commands.sgsetaddress.exists=Stargate mit der gegebenen Adrese existiert bereits
+commands.sgsetaddress.success=Setze Stargateadresse bei %s auf %s 
+commands.sgcloseall.usage=/sgcloseall [(x y z) (x y z)] [dim=X]
+commands.sgcloseall.closing=Schließe Stargates in dim=%s, %s.
+commands.sgcloseall.closed=%s Stargates geschlossen.
+commands.sgcloseall.number_expected=Numner oder "current" erwartet als Dimensions ID
+
+death.attack.eventHorizon=%s bekame eine Kawoosh Einäscherung
+
+
+glyph.aunis.milkyway.sculptor=Sculptor
+glyph.aunis.milkyway.scorpius=Scorpius
+glyph.aunis.milkyway.centaurus=Centaurus
+glyph.aunis.milkyway.monoceros=Monoceros
+glyph.aunis.milkyway.point_of_origin=Point of Origin
+glyph.aunis.milkyway.pegasus=Pegasus
+glyph.aunis.milkyway.andromeda=Andromeda
+glyph.aunis.milkyway.serpens_caput=Serpens Caput
+glyph.aunis.milkyway.aries=Aries
+glyph.aunis.milkyway.libra=Libra
+glyph.aunis.milkyway.eridanus=Eridanus
+glyph.aunis.milkyway.leo_minor=Leo Minor
+glyph.aunis.milkyway.hydra=Hydra
+glyph.aunis.milkyway.sagittarius=Sagittarius
+glyph.aunis.milkyway.sextans=Sextans
+glyph.aunis.milkyway.scutum=Scutum
+glyph.aunis.milkyway.pisces=Pisces
+glyph.aunis.milkyway.virgo=Virgo
+glyph.aunis.milkyway.bootes=Boötes
+glyph.aunis.milkyway.auriga=Auriga
+glyph.aunis.milkyway.corona_australis=Corona Australis
+glyph.aunis.milkyway.gemini=Gemini
+glyph.aunis.milkyway.leo=Leo
+glyph.aunis.milkyway.cetus=Cetus
+glyph.aunis.milkyway.triangulum=Triangulum
+glyph.aunis.milkyway.aquarius=Aquarius
+glyph.aunis.milkyway.microscopium=Microscopium
+glyph.aunis.milkyway.equuleus=Equuleus
+glyph.aunis.milkyway.crater=Crater
+glyph.aunis.milkyway.perseus=Perseus
+glyph.aunis.milkyway.cancer=Cancer
+glyph.aunis.milkyway.norma=Norma
+glyph.aunis.milkyway.taurus=Taurus
+glyph.aunis.milkyway.canis_minor=Canis Minor
+glyph.aunis.milkyway.capricornus=Capricornus
+glyph.aunis.milkyway.lynx=Lynx
+glyph.aunis.milkyway.orion=Orion
+glyph.aunis.milkyway.piscis_austrinus=Piscis Austrinus
+glyph.aunis.milkyway.bright_red_button=Bright Red Button
+
+glyph.aunis.pegasus.acjesis=Acjesis
+glyph.aunis.pegasus.lenchan=Lenchan
+glyph.aunis.pegasus.alura=Alura
+glyph.aunis.pegasus.ca_po=Ca Po
+glyph.aunis.pegasus.laylox=Laylox
+glyph.aunis.pegasus.ecrumig=Ecrumig
+glyph.aunis.pegasus.avoniv=Avoniv
+glyph.aunis.pegasus.bydo=Bydo
+glyph.aunis.pegasus.aaxel=Aaxel
+glyph.aunis.pegasus.aldeni=Aldeni
+glyph.aunis.pegasus.setas=Setas
+glyph.aunis.pegasus.arami=Arami
+glyph.aunis.pegasus.danami=Danami
+glyph.aunis.pegasus.poco_re=Poco Re
+glyph.aunis.pegasus.robandus=Robandus
+glyph.aunis.pegasus.recktic=Recktic
+glyph.aunis.pegasus.zamilloz=Zamilloz
+glyph.aunis.pegasus.subido=Subido
+glyph.aunis.pegasus.dawnre=Dawnre
+glyph.aunis.pegasus.salma=Salma
+glyph.aunis.pegasus.hamlinto=Hamlinto
+glyph.aunis.pegasus.elenami=Elenami
+glyph.aunis.pegasus.tahnan=Tahnan
+glyph.aunis.pegasus.zeo=Zeo
+glyph.aunis.pegasus.roehi=Roehi
+glyph.aunis.pegasus.once_el=Once El
+glyph.aunis.pegasus.baselai=Baselai
+glyph.aunis.pegasus.sandovi=Sandovi
+glyph.aunis.pegasus.illume=Illume
+glyph.aunis.pegasus.amiwill=Amiwill
+glyph.aunis.pegasus.sibbron=Sibbron
+glyph.aunis.pegasus.gilltin=Gilltin
+glyph.aunis.pegasus.abrin=Abrin
+glyph.aunis.pegasus.ramnon=Ramnon
+glyph.aunis.pegasus.olavii=Olavii
+glyph.aunis.pegasus.hacemill=Hacemill
+
+glyph.aunis.universe.g1=Glyph 1
+glyph.aunis.universe.g2=Glyph 2
+glyph.aunis.universe.g3=Glyph 3
+glyph.aunis.universe.g4=Glyph 4
+glyph.aunis.universe.g5=Glyph 5
+glyph.aunis.universe.g6=Glyph 6
+glyph.aunis.universe.g7=Glyph 7
+glyph.aunis.universe.g8=Glyph 8
+glyph.aunis.universe.g9=Glyph 9
+glyph.aunis.universe.g10=Glyph 10
+glyph.aunis.universe.g11=Glyph 11
+glyph.aunis.universe.g12=Glyph 12
+glyph.aunis.universe.g13=Glyph 13
+glyph.aunis.universe.g14=Glyph 14
+glyph.aunis.universe.g15=Glyph 15
+glyph.aunis.universe.g16=Glyph 16
+glyph.aunis.universe.g17=Glyph 17
+glyph.aunis.universe.g18=Glyph 18
+glyph.aunis.universe.g19=Glyph 19
+glyph.aunis.universe.g20=Glyph 20
+glyph.aunis.universe.g21=Glyph 21
+glyph.aunis.universe.g22=Glyph 22
+glyph.aunis.universe.g23=Glyph 23
+glyph.aunis.universe.g24=Glyph 24
+glyph.aunis.universe.g25=Glyph 25
+glyph.aunis.universe.g26=Glyph 26
+glyph.aunis.universe.g27=Glyph 27
+glyph.aunis.universe.g28=Glyph 28
+glyph.aunis.universe.g29=Glyph 29
+glyph.aunis.universe.g30=Glyph 30
+glyph.aunis.universe.g31=Glyph 31
+glyph.aunis.universe.g32=Glyph 32
+glyph.aunis.universe.g33=Glyph 33
+glyph.aunis.universe.g34=Glyph 34
+glyph.aunis.universe.g35=Glyph 35
+glyph.aunis.universe.g36=Glyph 36
+
+
+gui.upgrades=Upgrades
+
+gui.dhd.fusion=Kalte Fusion
+gui.dhd.crystalStatus=Kontrolkristall:
+gui.dhd.no_crystal=Kristall fehlt
+gui.dhd.crystal_ok=an der Stelle
+gui.dhd.linkStatus=Subspace link Status:
+gui.dhd.linked=Verbunden
+gui.dhd.not_linked=Nicht verbunden
+gui.dhd.reactorStatus=Kalte Fusionsreaktor:
+gui.dhd.running=laufend
+gui.dhd.standby=Standby
+gui.dhd.no_fuel=Kein Treibstoff
+
+gui.stargate.milky_way_address=Milchstraßeadresse
+gui.stargate.pegasus_address=Pegasusadresse
+gui.stargate.universe_address=Universeadresse
+gui.stargate.capacitors=Kondensatoren
+gui.stargate.energyBuffer=Energiespeicher
+
+gui.capacitor.name=Kondensatorbatterie
+
+tile.aunis.beamer_block.name=Beamer Block
+item.aunis.beamer_crystal_power.name=Beamer Energiekristall
+item.aunis.beamer_crystal_fluid.name=Beamer Flüssigkeitskristall
+item.aunis.beamer_crystal_items.name=Beamer Itemkristall
+gui.beamer.name=Gate Beamer
+gui.beamer.beamer_status=Beamer Status:
+gui.beamer.beamer_ok=Beamer erkennt das Stargate
+gui.beamer.beamer_link_status=Beamer Verbindungsstatus:
+gui.beamer.beamer_link_ok=Beamer Verbindung ok
+gui.beamer.role_status=Role Status:
+gui.beamer.role_ok=Role ok
+gui.beamer.disabled=Beamer deaktiviert
+gui.beamer.disabled_target=Zielbeamer deaktiviert
+gui.beamer.obstructed=Versperrt
+gui.beamer.obstructed_target=Versperrt (Ziel)
+gui.beamer.two_transmitters=Zwei Sender
+gui.beamer.two_receivers=Zwei Empfänger
+gui.beamer.mode_mismatch=Mode stimmt nicht überein
+gui.beamer.no_beamer=Kein Beamer gefunden
+gui.beamer.closed=Stargate geschlossen
+gui.beamer.incoming=Eingehendes Wurmloch
+gui.beamer.disabled_by_logic=Durch Logik deaktiviert
+gui.beamer.disabled_by_logic_target=Durch Logik deaktiviert (Ziel)
+gui.beamer.running=laufend
+gui.beamer.no_crystal=Kein Kristall
+
+gui.beamer.transmit=Senden
+gui.beamer.receive=Empfangen
+gui.beamer.disabled=Deaktiviert
+gui.beamer.activation=Beamer Aktivierung
+gui.beamer.auto=Auto
+gui.beamer.on_high=Mit Signal
+gui.beamer.on_low=Ohne Signal
+gui.beamer.ignored=Ignoriere
+gui.beamer.activate_below=Aktiveren unter [%%]
+gui.beamer.deactivate_over=Deaktiviere über [%%]
+gui.beamer.deactivate=Deaktiviere nach
+gui.beamer.after_inactivity=Untätigkeit [s]
+gui.beamer.save=Sichern
+gui.beamer.invalid=Ungültig
+
+chat.orlins.energyStored=Energie gespeichert: %s RF (Benötigt: %s RF, %s s)
+
+item.aunis.universe_dialer.name=Universe Dialer
+item.aunis.universe_dialer.not_linked=Nicht verbunden
+item.aunis.universe_dialer.gate_busy=Stargate ist beschäftigt
+item.aunis.universe_dialer.mode_scan=Nahe
+item.aunis.universe_dialer.mode_saved=Speicher
+item.aunis.universe_dialer.mode_rings=Ringe
+item.aunis.universe_dialer.mode_oc=OpnCom
+item.aunis.universe_dialer.aborting=Anwahl abbrechen
+item.aunis.universe_dialer.oc_name=Eintrag Name
+item.aunis.universe_dialer.oc_address=OpenComputers' Modem Adresse (Lasse leer für Broadcast)
+item.aunis.universe_dialer.oc_port=Modem Port
+item.aunis.universe_dialer.oc_data=OpenComputers Parameter (durch Komma getrenntd)
+item.aunis.universe_dialer.oc_save=Speichern
+item.aunis.universe_dialer.oc_port_invalid=Ungültiger Port
+item.aunis.universe_dialer.oc_message_received=Anwort empfangen: 
+config.aunis.universe_dialer.mode_scroll=Universe Dialer Mode scroll
+config.aunis.universe_dialer.mode_up=Universe Dialer Mode hoch
+config.aunis.universe_dialer.mode_down=Universe Dialer Mode runter
+config.aunis.universe_dialer.address_scroll=Universe Dialer Adresse scroll
+config.aunis.universe_dialer.address_up=Universe Dialer Adresse hoch
+config.aunis.universe_dialer.address_down=Universe Dialer Adresse runter
+config.aunis.universe_dialer.address_remove=Universe Dialer entferne Adresse
+config.aunis.universe_dialer.abort=Universe Dialer Anwahl abbrechen
+config.aunis.universe_dialer.oc_program=Universe Dialer Programn OC Nachricht
