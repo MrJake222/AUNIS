@@ -15,7 +15,6 @@ import mrjake.aunis.integration.OCWrapperInterface;
 import mrjake.aunis.integration.ThermalIntegration;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.proxy.IProxy;
-import mrjake.aunis.sound.MODSoundCategory;
 import mrjake.aunis.worldgen.AunisWorldGen;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.datafix.FixTypes;
@@ -58,9 +57,7 @@ public class Aunis {
     @SidedProxy(clientSide = Aunis.CLIENT, serverSide = Aunis.SERVER)
     public static IProxy proxy;
     public static Logger logger;
-    
-    public static SoundCategory soundCategory;
-    
+        
     // ------------------------------------------------------------------------
     // OpenComputers
     
@@ -82,7 +79,6 @@ public class Aunis {
         AunisFluids.registerFluids();
         
     	StargateDimensionConfig.load(event.getModConfigurationDirectory());
-    	soundCategory = MODSoundCategory.add("Aunis");
     	
         proxy.preInit(event);
     }
