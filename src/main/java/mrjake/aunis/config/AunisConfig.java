@@ -214,8 +214,10 @@ public class AunisConfig {
 		@RangeDouble(min=0, max=1)
 		public double glyphTransparency = 0.75;
 		
-		@Name("Aunis volume")
-		@RangeDouble(min=0, max=1)
-		public float volume = 1;
+		@Name("Gate audio range multiplier")
+		@Comment({"How far from the gate can you hear it?",
+					"The default range (approximately 20 blocks) will be multiplied against this number."})
+		@RangeDouble(min=1d, max=20d)
+		public double audioRangeMultiplier = 1d;
 	}
 }

@@ -1,5 +1,5 @@
 {
-	"type": "minecraft:crafting_shaped",
+	"type": "forge:ore_shaped",
 	"pattern": [
 		"   ",
 		"PI ",
@@ -12,8 +12,8 @@
 		},
 		
 		"I": {
-			"item": "minecraft:dye",
-			"data": 0			
+			"type": "forge:ore_dict",
+			"ore": "dyeBlack"			
 		},
 		
 		"F": {
