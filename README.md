@@ -14,3 +14,5 @@
   * *https://www.blendswap.com/blends/view/75540*
 * Gate dialing failed sound from Stargate Network
   * *https://www.stargate-network.net*
+* Notebook flipping sound
+  * *https://freesound.org/people/carlerichudon10/sounds/466375*
