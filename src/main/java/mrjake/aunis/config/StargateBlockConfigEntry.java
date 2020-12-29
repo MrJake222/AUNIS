@@ -15,11 +15,11 @@ final class StargateBlockConfigEntry {
         this.meta = meta;
     }
 
-    boolean contains(IBlockState state){
+    boolean contains(IBlockState state) {
         return state.getBlock().getRegistryName().equals(location) && (meta == state.getBlock().getMetaFromState(state) || meta == OreDictionary.WILDCARD_VALUE);
     }
 
-    static StargateBlockConfigEntry fromString(String line){
+    static StargateBlockConfigEntry fromString(String line) {
         String[] parts = line.trim().split(":", 3);
         Block block = Block.REGISTRY.getObject(new ResourceLocation(parts[0], parts[1]));
 

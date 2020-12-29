@@ -54,10 +54,12 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 		setMaxStackSize(1);
 	}
 
-	//ToDo replace with capabilities. If item will have NBT like "display:Name" it will not init custom NBT!
-	private static void checkNBT(ItemStack stack){
-		if(!stack.hasTagCompound())
+	// TODO replace with capabilities. If item will have NBT like "display:Name" it will not init custom NBT! -- slava110
+	// MrJake: Capabilities are meh in 1.12. Hope they've fixed them in 1.16.
+	private static void checkNBT(ItemStack stack) {
+		if(!stack.hasTagCompound()) {
 			initNBT(stack);
+		}
 	}
 	
 	private static void initNBT(ItemStack stack) {

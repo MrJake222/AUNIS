@@ -693,7 +693,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				for (BlockPos dPos : blocks) {
 					if (!dPos.equals(getGateCenterPos())) {
 						IBlockState state = world.getBlockState(dPos);
-						if (!world.isAirBlock(dPos) && world.getBlockState(dPos).getBlock().getBlockHardness(state, world, dPos) >= 0.0f && AunisConfig.stargateConfig.canKawooshDestroyBlock(state)) {
+						if (!world.isAirBlock(dPos) && state.getBlockHardness(world, dPos) >= 0.0f && AunisConfig.stargateConfig.canKawooshDestroyBlock(state)) {
 							world.setBlockToAir(dPos);
 							AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.STARGATE_VAPORIZE_BLOCK_PARTICLES, new StargateVaporizeBlockParticlesRequest(dPos)), targetPoint);
 						}
