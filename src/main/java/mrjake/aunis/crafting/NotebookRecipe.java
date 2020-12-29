@@ -55,7 +55,7 @@ public class NotebookRecipe extends Impl<IRecipe> implements IRecipe {
 
 					outputCount++;
 				} else if (stack.getItem() == AunisItems.PAGE_NOTEBOOK_ITEM) {
-					//ToDo change NBT to capability + filter NBT values
+					// TODO change NBT to capability + filter NBT values
 					if (!tagListContains(tagList, compound)) {
 						tagList.appendTag(compound);
 					}

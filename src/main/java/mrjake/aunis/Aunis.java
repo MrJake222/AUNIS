@@ -71,7 +71,7 @@ public class Aunis {
     }
         	
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event){
+    public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         
         AunisPacketHandler.registerPackets();
