@@ -17,8 +17,8 @@ public class StargateClassicMemberBlockColor implements IBlockColor {
 		if (tile instanceof StargateClassicMemberTile) {
 			StargateClassicMemberTile memberTile = (StargateClassicMemberTile) tile;
 			IBlockState camoState = memberTile.getCamoState();
-			
-			if (camoState != null) {
+
+			if (camoState != null && !camoState.getBlock().equals(state.getBlock())) {
 				return Minecraft.getMinecraft().getBlockColors().colorMultiplier(camoState, world, pos, tintIndex);
 			}
 		}
