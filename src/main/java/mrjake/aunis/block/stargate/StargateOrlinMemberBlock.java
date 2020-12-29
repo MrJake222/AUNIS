@@ -39,7 +39,7 @@ public class StargateOrlinMemberBlock extends Block {
 		super(Material.IRON);
 		
 		setRegistryName(Aunis.ModID + ":" + BLOCK_NAME);
-		setTranslationKey(Aunis.ModID + "." + BLOCK_NAME);
+		setUnlocalizedName(Aunis.ModID + "." + BLOCK_NAME);
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -84,7 +84,7 @@ public class StargateOrlinMemberBlock extends Block {
 	public IBlockState getStateFromMeta(int meta) {		
 		return getDefaultState()
 				.withProperty(AunisProps.RENDER_BLOCK, (meta & 0x08) != 0)
-				.withProperty(AunisProps.ORLIN_VARIANT, EnumFacing.byIndex(meta & 0x07));
+				.withProperty(AunisProps.ORLIN_VARIANT, EnumFacing.getFront(meta & 0x07));
 	}
 	
 	

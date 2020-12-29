@@ -39,7 +39,7 @@ public class DHDBlock extends Block {
 		super(Material.IRON);
 		
 		setRegistryName(Aunis.ModID + ":" + BLOCK_NAME);
-		setTranslationKey(Aunis.ModID + "." + BLOCK_NAME);
+		setUnlocalizedName(Aunis.ModID + "." + BLOCK_NAME);
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -94,7 +94,7 @@ public class DHDBlock extends Block {
 	
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		EnumFacing dhdFacingOpposite = EnumFacing.byHorizontalIndex( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
+		EnumFacing dhdFacingOpposite = EnumFacing.getHorizontal( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
 		
 		if (facing == dhdFacingOpposite && !player.isSneaking()) {
 			if (!FluidUtil.interactWithFluidHandler(player, hand, world, pos, null))

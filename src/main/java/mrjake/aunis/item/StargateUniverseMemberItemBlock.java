@@ -18,7 +18,7 @@ public class StargateUniverseMemberItemBlock extends ItemBlock {
 	}
 	
 	@Override
-	public String getTranslationKey(ItemStack stack) {		
+	public String getUnlocalizedName(ItemStack stack) {
 		EnumMemberVariant variant = AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK.getStateFromMeta(stack.getMetadata()).getValue(AunisProps.MEMBER_VARIANT);
 		
 		switch (variant) {
@@ -29,7 +29,7 @@ public class StargateUniverseMemberItemBlock extends ItemBlock {
 				return "tile.aunis.stargate_universe_ring_block";
 				
 			default:
-				return stack.getTranslationKey();
+				return stack.getUnlocalizedName();
 		}
 	}	
 }

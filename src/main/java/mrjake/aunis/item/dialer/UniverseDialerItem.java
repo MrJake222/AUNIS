@@ -48,10 +48,16 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 
 	public UniverseDialerItem() {
 		setRegistryName(new ResourceLocation(Aunis.ModID, ITEM_NAME));
-		setTranslationKey(Aunis.ModID + "." + ITEM_NAME);
+		setUnlocalizedName(Aunis.ModID + "." + ITEM_NAME);
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
 		setMaxStackSize(1);
+	}
+
+	//ToDo replace with capabilities. If item will have NBT like "display:Name" it will not init custom NBT!
+	private static void checkNBT(ItemStack stack){
+		if(!stack.hasTagCompound())
+			initNBT(stack);
 	}
 	
 	private static void initNBT(ItemStack stack) {
@@ -109,6 +115,7 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
 		if (!world.isRemote) {
+			checkNBT(stack);
 			NBTTagCompound compound = stack.getTagCompound();
 			
 			if (world.getTotalWorldTime() % 20 == 0 && isSelected) {
@@ -214,6 +221,7 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
 		if (!world.isRemote) {
+			checkNBT(player.getHeldItem(hand));
 			NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
 			UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
 			int selected = compound.getByte("selected");

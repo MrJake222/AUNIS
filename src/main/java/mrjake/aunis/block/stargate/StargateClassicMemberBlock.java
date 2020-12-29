@@ -54,7 +54,7 @@ public abstract class StargateClassicMemberBlock extends Block {
 		super(Material.IRON);
 		
 		setRegistryName(Aunis.ModID + ":" + getBlockName());
-		setTranslationKey(Aunis.ModID + "." + getBlockName());
+		setUnlocalizedName(Aunis.ModID + "." + getBlockName());
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -135,7 +135,7 @@ public abstract class StargateClassicMemberBlock extends Block {
 		return getDefaultState()
 				.withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.byId((meta >> 3) & 0x01))
 				.withProperty(AunisProps.RENDER_BLOCK, (meta & 0x04) != 0)
-				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.byHorizontalIndex(meta & 0x03));
+				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.getHorizontal(meta & 0x03));
 	}
 	
 	
@@ -386,7 +386,7 @@ public abstract class StargateClassicMemberBlock extends Block {
 	}
 	
 	@Override
-	public BlockRenderLayer getRenderLayer() {
+	public BlockRenderLayer getBlockLayer() {
 		return BlockRenderLayer.SOLID;
 	}
 		

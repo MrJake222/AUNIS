@@ -41,23 +41,24 @@ public class NotebookRecipe extends Impl<IRecipe> implements IRecipe {
 		
 		for (int i=0; i<inv.getSizeInventory(); i++) {
 			ItemStack stack = inv.getStackInSlot(i);
-			NBTTagCompound compound = stack.getTagCompound();
-			
-			if (stack.getItem() == AunisItems.NOTEBOOK_ITEM) {
-				NBTTagList notebookTags = compound.getTagList("addressList", NBT.TAG_COMPOUND);
-				
-				for (NBTBase tag : notebookTags) {
-					if (!tagListContains(tagList, (NBTTagCompound) tag)) {
-						tagList.appendTag(tag);
+			if(stack.hasTagCompound()) {
+				NBTTagCompound compound = stack.getTagCompound();
+
+				if (stack.getItem() == AunisItems.NOTEBOOK_ITEM && compound.hasKey("addressList", NBT.TAG_COMPOUND)) {
+					NBTTagList notebookTags = compound.getTagList("addressList", NBT.TAG_COMPOUND);
+
+					for (NBTBase tag : notebookTags) {
+						if (!tagListContains(tagList, (NBTTagCompound) tag)) {
+							tagList.appendTag(tag);
+						}
 					}
-				}
-				
-				outputCount++;
-			}
-			
-			else if (stack.getItem() == AunisItems.PAGE_NOTEBOOK_ITEM) {
-				if (!tagListContains(tagList, compound)) {
-					tagList.appendTag(compound);
+
+					outputCount++;
+				} else if (stack.getItem() == AunisItems.PAGE_NOTEBOOK_ITEM) {
+					//ToDo change NBT to capability + filter NBT values
+					if (!tagListContains(tagList, compound)) {
+						tagList.appendTag(compound);
+					}
 				}
 			}
 		}

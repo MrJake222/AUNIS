@@ -82,7 +82,7 @@ public class StargateGenerator {
 		if (world.isChunkGeneratedAt(chunkX, chunkZ))
 			return null;
 		
-		Chunk chunk = world.getChunk(chunkX, chunkZ);
+		Chunk chunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
 		
 		int y = chunk.getHeightValue(8, 8);
 		
@@ -90,7 +90,7 @@ public class StargateGenerator {
 			return null;
 		
 		BlockPos pos = new BlockPos(chunkX*16, y, chunkZ*16);
-		String biomeName = chunk.getBiome(pos, world.getBiomeProvider()).getRegistryName().getPath();
+		String biomeName = chunk.getBiome(pos, world.getBiomeProvider()).getRegistryName().getResourcePath();
 					
 		boolean desert = biomeName.contains("desert");		
 		
@@ -159,7 +159,7 @@ public class StargateGenerator {
 		MinecraftServer server = world.getMinecraftServer();
 
 		Biome biome = world.getBiome(pos);
-		boolean desert = biome.getRegistryName().getPath().contains("desert");		
+		boolean desert = biome.getRegistryName().getResourcePath().contains("desert");
 		
 		String templateName = "sg_";
 		templateName += desert ? "desert" : "plains";
@@ -213,7 +213,7 @@ public class StargateGenerator {
 			StargateGenerationHelper.updateLinkedGate(world, gatePos, dhdPos);
 			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(gatePos);
 						
-			return new GeneratedStargate(gateTile.getStargateAddress(SymbolTypeEnum.MILKYWAY), biome.getRegistryName().getPath());
+			return new GeneratedStargate(gateTile.getStargateAddress(SymbolTypeEnum.MILKYWAY), biome.getRegistryName().getResourcePath());
 		}
 		
 		else {

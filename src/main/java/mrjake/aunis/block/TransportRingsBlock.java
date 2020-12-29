@@ -28,7 +28,7 @@ private static final String blockName = "transportrings_block";
 		super(Material.IRON);
 		
 		setRegistryName(Aunis.ModID + ":" + blockName);
-		setTranslationKey(Aunis.ModID + "." + blockName);
+		setUnlocalizedName(Aunis.ModID + "." + blockName);
 		
 		setSoundType(SoundType.STONE); 
 		setCreativeTab(Aunis.aunisCreativeTab);
