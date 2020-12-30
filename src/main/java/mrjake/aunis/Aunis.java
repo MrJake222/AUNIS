@@ -135,7 +135,7 @@ public class Aunis {
     }
 
     public static boolean isInDebugMode(){
-        return AunisConfig.debugMode;
+        return AunisConfig.debugConfig.debugMode;
     }
 
 	public static void debug(String msg) {

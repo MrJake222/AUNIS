@@ -10,9 +10,6 @@ import java.util.List;
 
 @Config(modid="aunis", name="aunis")
 public class AunisConfig {
-
-	@Name("Debug mode")
-	public static boolean debugMode = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"); // Will be true by default in dev environment
 	
 	@Name("Stargate size")
 	@RequiresWorldRestart
@@ -173,6 +170,10 @@ public class AunisConfig {
 	}
 	
 	public static class DebugConfig {
+
+		@Name("Debug mode")
+		public boolean debugMode = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"); // Will be true by default in dev environment
+
 		@Name("Check gate merge")
 		public boolean checkGateMerge = true;
 		
