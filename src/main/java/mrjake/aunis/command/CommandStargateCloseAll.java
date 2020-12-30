@@ -93,7 +93,7 @@ public class CommandStargateCloseAll extends CommandBase {
 			throw new WrongUsageException("commands.sgquery.number_expected");
 		}
 		
-		Aunis.info("force : " +force);
+		Aunis.debug("force : " +force);
 		
 		notifyCommandListener(sender, this, "commands.sgcloseall.closing", checkDim ? dimId : "any", (queryBox != null ? queryBox.toString() : "box=infinite"));
 		

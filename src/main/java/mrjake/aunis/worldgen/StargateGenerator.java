@@ -53,7 +53,7 @@ public class StargateGenerator {
 		} while (pos == null && tries < 100);
 		
 		if (tries == 100) {
-			Aunis.log("Failed to find place");
+			Aunis.debug("Failed to find place");
 			
 			return null;
 		}
@@ -111,12 +111,12 @@ public class StargateGenerator {
 			}
 			
 			else {
-				Aunis.log("too steep");
+				Aunis.debug("too steep");
 			}
 		}
 		
 		else {
-			Aunis.log("failed, " + biomeName);
+			Aunis.debug("failed, " + biomeName);
 		}
 		
 		return null;
@@ -217,7 +217,7 @@ public class StargateGenerator {
 		}
 		
 		else {
-			Aunis.info("template null");
+			Aunis.logger.error("template null");
 		}
 		
 		return null;
