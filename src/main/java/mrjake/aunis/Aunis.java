@@ -35,7 +35,7 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-@Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion, dependencies = "required-after:cofhcore@[4.6.0,);after:opencomputers" )
+@Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion, dependencies = "after:cofhcore@[4.6.0,);after:opencomputers" )
 public class Aunis {	
     public static final String ModID = "aunis";
     public static final String Name = "AUNIS";
@@ -85,7 +85,11 @@ public class Aunis {
     @EventHandler
     public void init(FMLInitializationEvent event) {
     	GameRegistry.registerWorldGenerator(new AunisWorldGen(), 0);
-    	ThermalIntegration.registerRecipes();
+
+    	// ThermalExpansion recipes
+    	if(Loader.isModLoaded("thermalexpansion"))
+    	    ThermalIntegration.registerRecipes();
+
     	NetworkRegistry.INSTANCE.registerGuiHandler(instance, new AunisGuiHandler());
     	ItemEndpointCapability.register();
 		ForgeChunkManager.setForcedChunkLoadingCallback(Aunis.instance, ChunkLoadingCallback.INSTANCE);
