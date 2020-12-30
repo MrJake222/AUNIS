@@ -18,11 +18,11 @@ public class FolderLoader {
 		List<String> out = new ArrayList<>();
 		
 		String classPath = Aunis.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		Aunis.info(String.format("classPath was '%s'.", classPath));
+		Aunis.debug(String.format("classPath was '%s'.", classPath));
 		
 		classPath = classPath.replaceAll("%20", " ");
 		
-		Aunis.info(String.format("classPath is  '%s'.", classPath));
+		Aunis.debug(String.format("classPath is  '%s'.", classPath));
 		
 		int separatorIndex = classPath.indexOf("!");
 				

@@ -1273,7 +1273,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		StargateEnergyRequired energyRequired = new StargateEnergyRequired(AunisConfig.powerConfig.openingBlockToEnergyRatio, AunisConfig.powerConfig.keepAliveBlockToEnergyRatioPerTick);
 		energyRequired = energyRequired.mul(distance).add(StargateDimensionConfig.getCost(world.provider.getDimensionType(), targetDim));
 		
-		Aunis.info(String.format("Energy required to dial [distance=%,d, from=%s, to=%s] = %,d / keepAlive: %,d/t, stored=%,d", 
+		Aunis.debug(String.format("Energy required to dial [distance=%,d, from=%s, to=%s] = %,d / keepAlive: %,d/t, stored=%,d",
 				Math.round(distance),
 				sourceDim,
 				targetDim,
@@ -1374,8 +1374,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		}
 		
 		catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
-			Aunis.info("Exception at reading NBT");
-			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
+			Aunis.logger.warn("Exception at reading NBT");
+			Aunis.logger.warn("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
 
 			e.printStackTrace();
 		}

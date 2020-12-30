@@ -147,7 +147,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		dialedAddress.addAll(network.getNetherGate().subList(0, StargateDimensionConfig.netherOverworld8thSymbol() ? 7 : 6));
 		dialedAddress.addSymbol(SymbolMilkyWayEnum.ORIGIN);
 		
-		Aunis.info("Orlin's dialed address: " + dialedAddress);
+		Aunis.debug("Orlin's dialed address: " + dialedAddress);
 	}
 	
 	public StargateEnergyRequired getEnergyRequiredToDial() {
@@ -207,7 +207,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 						break;
 						
 					case NOT_ENOUGH_POWER:
-						Aunis.info("Orlin's gate - Not enough power");
+						Aunis.debug("Orlin's gate - Not enough power");
 						break;
 						
 					case ABORTED:

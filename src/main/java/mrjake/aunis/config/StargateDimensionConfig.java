@@ -110,7 +110,7 @@ public class StargateDimensionConfig {
 				
 				catch (IllegalArgumentException ex) {
 					// Probably removed a mod
-					Aunis.info("DimensionType not found: " + dimName);
+					Aunis.logger.debug("DimensionType not found: " + dimName);
 				}
 			}
 		}

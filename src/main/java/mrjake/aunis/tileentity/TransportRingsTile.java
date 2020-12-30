@@ -278,7 +278,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 					Block newBlock = newState.getBlock();
 					
 					if (!newBlock.isAir(newState, world, newPos) && !newBlock.isReplaceable(world, newPos)) {
-						Aunis.info(newPos + " obstructed with " + world.getBlockState(newPos));
+						Aunis.debug(newPos + " obstructed with " + world.getBlockState(newPos));
 						return true;
 					}
 				}
@@ -501,8 +501,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			targetRingsPos = BlockPos.fromLong(compound.getLong("targetRingsPos"));
 			
 		} catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
-			Aunis.info("Exception at reading NBT");
-			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
+			Aunis.logger.warn("Exception at reading NBT");
+			Aunis.logger.warn("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
 
 			e.printStackTrace();
 		}

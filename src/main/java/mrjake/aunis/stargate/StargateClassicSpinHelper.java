@@ -97,7 +97,7 @@ public class StargateClassicSpinHelper {
 	
 	private float calculate(float tick) {
 		if (tick < 0) {
-			Aunis.info("Negative argument");
+			Aunis.logger.warn("Negative argument");
 			return 0;
 		}
 		

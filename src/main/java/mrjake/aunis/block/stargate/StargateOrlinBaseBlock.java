@@ -150,7 +150,7 @@ public class StargateOrlinBaseBlock extends Block {
 				
 				gateTile.updateNetherAddress();
 				
-				Aunis.info("nether address: " + network.getNetherGate());
+				Aunis.debug("nether address: " + network.getNetherGate());
 			}
 		}
 	}

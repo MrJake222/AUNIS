@@ -1,23 +1,18 @@
 package mrjake.aunis.config;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.Config.Comment;
-import net.minecraftforge.common.config.Config.Name;
-import net.minecraftforge.common.config.Config.RangeDouble;
-import net.minecraftforge.common.config.Config.RangeInt;
-import net.minecraftforge.common.config.Config.RequiresMcRestart;
-import net.minecraftforge.common.config.Config.RequiresWorldRestart;
-import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.common.config.Config.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Config(modid="aunis", name="aunis")
 public class AunisConfig {
+
+	@Name("Debug mode")
+	public static boolean debugMode = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"); // Will be true by default in dev environment
 	
 	@Name("Stargate size")
 	@RequiresWorldRestart

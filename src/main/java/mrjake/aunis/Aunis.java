@@ -2,6 +2,9 @@ package mrjake.aunis;
 
 import java.io.IOException;
 
+import mrjake.aunis.config.AunisConfig;
+import net.minecraft.launchwrapper.Launch;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import mrjake.aunis.capability.endpoint.ItemEndpointCapability;
@@ -43,8 +46,7 @@ public class Aunis {
     public static final int DATA_VERSION = 7;
 
     public static final String MCVersion = "${mcversion}";
- 
-    public static final boolean DEBUG = false;
+
     public static final String CLIENT = "mrjake.aunis.proxy.ProxyClient";
     public static final String SERVER = "mrjake.aunis.proxy.ProxyServer";
     
@@ -55,7 +57,7 @@ public class Aunis {
     
     @SidedProxy(clientSide = Aunis.CLIENT, serverSide = Aunis.SERVER)
     public static IProxy proxy;
-    public static Logger logger;
+    public static Logger logger = LogManager.getLogger("Aunis");
         
     // ------------------------------------------------------------------------
     // OpenComputers
@@ -72,8 +74,6 @@ public class Aunis {
         	
     @EventHandler
     public void preInit(FMLPreInitializationEvent event){
-        logger = event.getModLog();
-        
         AunisPacketHandler.registerPackets();
         AunisFluids.registerFluids();
         
@@ -133,14 +133,14 @@ public class Aunis {
     public void serverStarted(FMLServerStartedEvent event) throws IOException {    	
     	StargateDimensionConfig.update();
     }
-    
-	public static void log(String msg) {
-		if (DEBUG) {
+
+    public static boolean isInDebugMode(){
+        return AunisConfig.debugMode;
+    }
+
+	public static void debug(String msg) {
+		if (isInDebugMode()) {
 			logger.info(msg);
 		}
 	}
-	
-	public static void info(String msg) {
-    	logger.info(msg);
-    }
 }

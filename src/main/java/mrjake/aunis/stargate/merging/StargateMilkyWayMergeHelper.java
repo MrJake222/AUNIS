@@ -156,7 +156,7 @@ public class StargateMilkyWayMergeHelper extends StargateClassicMergeHelper {
 	 * @param targetStargateSize Target Stargate size as defined in config.
 	 */
 	public void convertToPattern(World world, BlockPos basePos, EnumFacing baseFacing, StargateSizeEnum currentStargateSize, StargateSizeEnum targetStargateSize) {
-		Aunis.info(basePos + ": Converting Stargate from " + currentStargateSize + " to " + targetStargateSize);
+		Aunis.debug(basePos + ": Converting Stargate from " + currentStargateSize + " to " + targetStargateSize);
 		List<BlockPos> oldPatternBlocks = new ArrayList<BlockPos>();
 		
 		switch (currentStargateSize) {
