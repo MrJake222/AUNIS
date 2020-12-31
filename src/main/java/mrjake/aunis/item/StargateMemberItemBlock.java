@@ -19,7 +19,9 @@ public abstract class StargateMemberItemBlock extends ItemBlock {
 
     @Override
     public final String getUnlocalizedName(ItemStack stack) {
-        EnumMemberVariant variant = block.getStateFromMeta(stack.getMetadata()).getValue(AunisProps.MEMBER_VARIANT);
+        @SuppressWarnings("deprecation")
+		EnumMemberVariant variant = block.getStateFromMeta(stack.getMetadata()).getValue(AunisProps.MEMBER_VARIANT);
+        
         switch (variant) {
             case CHEVRON:
                 return getChevronUnlocalizedName();

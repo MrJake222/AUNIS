@@ -82,8 +82,8 @@ public final class StargateOrlinBaseBlock extends StargateAbstractBaseBlock {
 	}
 
 	@Override
-	protected IBlockState createMemberState(IBlockState state, EnumFacing facing, int meta) {
-		return state.withProperty(AunisProps.RENDER_BLOCK, true)
+	protected IBlockState createMemberState(IBlockState memberState, EnumFacing facing, int meta) {
+		return memberState.withProperty(AunisProps.RENDER_BLOCK, true)
 				.withProperty(AunisProps.ORLIN_VARIANT, facing);
 	}
 

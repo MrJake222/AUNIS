@@ -20,6 +20,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -76,39 +77,55 @@ public abstract class StargateAbstractBaseBlock extends Block {
                 showGateInfo(player, world, pos);
             }
         }
+        
         return !player.isSneaking();
     }
 
     protected abstract void showGateInfo(EntityPlayer player, World world, BlockPos pos);
 
-    protected boolean tryAutobuild(EntityPlayer player, World world, BlockPos basePos, EnumHand hand){
+    protected boolean tryAutobuild(EntityPlayer player, World world, BlockPos basePos, EnumHand hand) {
         final StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) world.getTileEntity(basePos);
         final EnumFacing facing = gateTile.getFacing();
-        if(!gateTile.isMerged()) {
-            final StargateAbstractMergeHelper mergeHelper = gateTile.getMergeHelper();
-            final ItemStack stack = player.getHeldItem(hand);
-            if(stack.getItem() instanceof ItemBlock) {
-                if(((ItemBlock) stack.getItem()).getBlock().equals(mergeHelper.getMemberBlock())) {
-                    List<BlockPos> posList = getAbsentBlockPositions(mergeHelper, world, basePos, facing, stack.getMetadata());
-
-                    BlockPos pos;
-                    if(!posList.isEmpty() && world.getBlockState( pos = posList.get(0) ).getBlock().isReplaceable(world, pos)) {
-                        world.setBlockState(pos, createMemberState(mergeHelper.getMemberBlock().getDefaultState(), facing, stack.getMetadata()));
+        
+        StargateAbstractMergeHelper mergeHelper = gateTile.getMergeHelper();
+        ItemStack stack = player.getHeldItem(hand);
+        
+        if(!gateTile.isMerged() && stack.getItem() instanceof ItemBlock) {
+            ItemBlock itemBlock = ((ItemBlock) stack.getItem());
+//            
+            if (mergeHelper.matchMember(itemBlock.getBlock().getDefaultState())) {
+                List<BlockPos> posList = getAbsentBlockPositions(mergeHelper, world, basePos, facing, stack.getMetadata());
+                Aunis.debug(posList.toString());
+                
+                if(!posList.isEmpty()) {
+                	BlockPos pos = posList.get(0);
+                	
+                	if (world.getBlockState(pos).getBlock().isReplaceable(world, pos)) {
+                		IBlockState memberState = mergeHelper.getMemberBlock().getDefaultState();
+                		world.setBlockState(pos, createMemberState(memberState, facing, stack.getMetadata()));
+                        
+                		SoundType soundtype = memberState.getBlock().getSoundType(memberState, world, pos, player);
+        				world.playSound(null, pos, soundtype.getBreakSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+                		
                         if(!player.capabilities.isCreativeMode)
                             stack.shrink(1);
+                        
+                        // If it was the last chevron/ring
                         if(posList.size() == 1)
                             gateTile.updateMergeState(gateTile.getMergeHelper().checkBlocks(world, basePos, facing), facing);
-                    }
+                        
+                        return true;
+                	} 
                 }
             }
-            return true;
         }
+        
         return false;
     }
 
     protected abstract List<BlockPos> getAbsentBlockPositions(StargateAbstractMergeHelper mergeHelper, World world, BlockPos basePos, EnumFacing facing, int meta);
 
-    protected abstract IBlockState createMemberState(IBlockState state, EnumFacing facing, int meta);
+    protected abstract IBlockState createMemberState(IBlockState memberState, EnumFacing facing, int meta);
 
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {

@@ -56,8 +56,8 @@ public abstract class StargateClassicBaseBlock extends StargateAbstractBaseBlock
 	}
 
 	@Override
-	protected IBlockState createMemberState(IBlockState state, EnumFacing facing, int meta) {
-		return state.withProperty(AunisProps.RENDER_BLOCK, true)
+	protected IBlockState createMemberState(IBlockState memberState, EnumFacing facing, int meta) {
+		return memberState.withProperty(AunisProps.RENDER_BLOCK, true)
 				.withProperty(AunisProps.FACING_HORIZONTAL, facing)
 				.withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.byId((meta >> 3) & 0x01));
 	}
