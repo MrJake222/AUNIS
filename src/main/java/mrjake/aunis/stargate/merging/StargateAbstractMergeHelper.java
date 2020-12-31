@@ -1,10 +1,13 @@
 package mrjake.aunis.stargate.merging;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import mrjake.aunis.Aunis;
+import mrjake.aunis.block.stargate.StargateMemberBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.config.AunisConfig;
@@ -22,19 +25,42 @@ import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+//ToDo Well, idk if getRingBlocks() should be relative... Maybe return absolute positions too. But not sure
 public abstract class StargateAbstractMergeHelper {
 	
 	/**
-	 * @return {@link List} of {@link BlockPos} pointing to ring blocks.
+	 * @return {@link List} of {@link BlockPos} pointing to ring blocks. Positions are relative
 	 */
 	@Nonnull
 	public abstract List<BlockPos> getRingBlocks();
+
+	/**
+	 * @return {@link List} of {@link BlockPos} pointing to absent ring blocks. Positions are absolute
+	 */
+	@Nonnull
+	public List<BlockPos> getAbsentRingBlocks(IBlockAccess world, BlockPos basePos, EnumFacing facing) {
+		return getRingBlocks().stream()
+				.map(pos -> pos.rotate(FacingToRotation.get(facing)).add(basePos))
+				.filter(pos -> !matchMember(world.getBlockState(pos)))
+				.collect(Collectors.toList());
+	}
 	
 	/**
-	 * @return {@link List} of {@link BlockPos} pointing to chevron blocks.
+	 * @return {@link List} of {@link BlockPos} pointing to chevron blocks. Positions are relative
 	 */
 	@Nonnull
 	public abstract List<BlockPos> getChevronBlocks();
+
+	/**
+	 * @return {@link List} of {@link BlockPos} pointing to absent ring blocks. Positions are absolute
+	 */
+	@Nonnull
+	public List<BlockPos> getAbsentChevronBlocks(IBlockAccess world, BlockPos basePos, EnumFacing facing) {
+		return getChevronBlocks().stream()
+				.map(pos -> pos.rotate(FacingToRotation.get(facing)).add(basePos))
+				.filter(pos -> !matchMember(world.getBlockState(pos)))
+				.collect(Collectors.toList());
+	}
 	
 	/**
 	 * @return Max box where to search for the base.
@@ -56,7 +82,7 @@ public abstract class StargateAbstractMergeHelper {
 	/**
 	 * @return Member block.
 	 */
-	public abstract Block getMemberBlock();
+	public abstract StargateMemberBlock getMemberBlock();
 	
 	/**
 	 * Method searches for a {@link StargateMilkyWayBaseBlock} within {@link this#BASE_SEARCH_BOX}

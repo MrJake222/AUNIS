@@ -7,6 +7,7 @@ import java.util.Map;
 
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.block.stargate.StargateOrlinMemberBlock;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
@@ -66,7 +67,7 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 	}
 	
 	@Override
-	public Block getMemberBlock() {
+	public StargateOrlinMemberBlock getMemberBlock() {
 		return AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK;
 	}
 	

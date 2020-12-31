@@ -8,6 +8,7 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
+import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.stargate.EnumMemberVariant;
@@ -141,7 +142,7 @@ public class StargateMilkyWayMergeHelper extends StargateClassicMergeHelper {
 	}
 	
 	@Override
-	public Block getMemberBlock() {
+	public StargateMilkyWayMemberBlock getMemberBlock() {
 		return AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK;
 	}
 	

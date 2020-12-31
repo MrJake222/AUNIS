@@ -52,6 +52,19 @@ public abstract class StargateClassicBaseBlock extends StargateBaseBlock {
 		player.openGui(Aunis.instance, GuiIdEnum.GUI_STARGATE.id, world, pos.getX(), pos.getY(), pos.getZ());
 	}
 
+	@Override
+	protected List<BlockPos> getAbsentBlockPositions(StargateAbstractMergeHelper mergeHelper, World world, BlockPos basePos, EnumFacing facing, int meta){
+		final EnumMemberVariant variant = this instanceof StargateClassicBaseBlock ? EnumMemberVariant.byId((meta >> 3) & 0x01) : null;
+		return (variant == EnumMemberVariant.CHEVRON) ? mergeHelper.getAbsentChevronBlocks(world, basePos, facing) : mergeHelper.getAbsentRingBlocks(world, basePos, facing);
+	}
+
+	@Override
+	protected IBlockState createMemberState(IBlockState state, EnumFacing facing, int meta) {
+		return state.withProperty(AunisProps.RENDER_BLOCK, true)
+				.withProperty(AunisProps.FACING_HORIZONTAL, facing)
+				.withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.byId((meta >> 3) & 0x01));
+	}
+
 	// --------------------------------------------------------------------------------------
 	// Rendering
 	

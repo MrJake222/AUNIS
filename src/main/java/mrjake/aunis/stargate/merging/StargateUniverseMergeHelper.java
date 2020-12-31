@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.block.stargate.StargateUniverseMemberBlock;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.block.Block;
@@ -71,7 +72,7 @@ public class StargateUniverseMergeHelper extends StargateClassicMergeHelper {
 	}
 	
 	@Override
-	public Block getMemberBlock() {
+	public StargateUniverseMemberBlock getMemberBlock() {
 		return AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK;
 	}
 }

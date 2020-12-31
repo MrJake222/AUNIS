@@ -74,7 +74,7 @@ public abstract class StargateBaseBlock extends Block {
     @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if(!world.isRemote) {
-            if(!player.isSneaking()) {
+            if(!player.isSneaking() && !tryAutobuild(player, world, pos, hand)) {
                 showGateInfo(player, world, pos);
             }
         }
@@ -82,6 +82,35 @@ public abstract class StargateBaseBlock extends Block {
     }
 
     protected abstract void showGateInfo(EntityPlayer player, World world, BlockPos pos);
+
+    protected boolean tryAutobuild(EntityPlayer player, World world, BlockPos basePos, EnumHand hand){
+        final StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) world.getTileEntity(basePos);
+        final EnumFacing facing = gateTile.getFacing();
+        if(!gateTile.isMerged()) {
+            final StargateAbstractMergeHelper mergeHelper = gateTile.getMergeHelper();
+            final ItemStack stack = player.getHeldItem(hand);
+            if(stack.getItem() instanceof ItemBlock) {
+                if(((ItemBlock) stack.getItem()).getBlock().equals(mergeHelper.getMemberBlock())) {
+                    List<BlockPos> posList = getAbsentBlockPositions(mergeHelper, world, basePos, facing, stack.getMetadata());
+
+                    BlockPos pos;
+                    if(!posList.isEmpty() && world.getBlockState( pos = posList.get(0) ).getBlock().isReplaceable(world, pos)) {
+                        world.setBlockState(pos, createMemberState(mergeHelper.getMemberBlock().getDefaultState(), facing, stack.getMetadata()));
+                        if(!player.capabilities.isCreativeMode)
+                            stack.shrink(1);
+                        if(posList.size() == 1)
+                            gateTile.updateMergeState(gateTile.getMergeHelper().checkBlocks(world, basePos, facing), facing);
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    protected abstract List<BlockPos> getAbsentBlockPositions(StargateAbstractMergeHelper mergeHelper, World world, BlockPos basePos, EnumFacing facing, int meta);
+
+    protected abstract IBlockState createMemberState(IBlockState state, EnumFacing facing, int meta);
 
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {

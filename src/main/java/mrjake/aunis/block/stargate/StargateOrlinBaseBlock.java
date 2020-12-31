@@ -87,6 +87,17 @@ public final class StargateOrlinBaseBlock extends StargateBaseBlock {
 	}
 
 	@Override
+	protected List<BlockPos> getAbsentBlockPositions(StargateAbstractMergeHelper mergeHelper, World world, BlockPos basePos, EnumFacing facing, int meta){
+		return mergeHelper.getAbsentRingBlocks(world, basePos, facing);
+	}
+
+	@Override
+	protected IBlockState createMemberState(IBlockState state, EnumFacing facing, int meta) {
+		return state.withProperty(AunisProps.RENDER_BLOCK, true)
+				.withProperty(AunisProps.ORLIN_VARIANT, facing);
+	}
+
+	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
 		EnumFacing facing = placer.getHorizontalFacing().getOpposite();
