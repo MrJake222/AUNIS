@@ -48,29 +48,16 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
-public abstract class StargateClassicMemberBlock extends Block {	
+public abstract class StargateClassicMemberBlock extends StargateMemberBlock {
 	
-	public StargateClassicMemberBlock() {
-		super(Material.IRON);
-		
-		setRegistryName(Aunis.ModID + ":" + getBlockName());
-		setUnlocalizedName(Aunis.ModID + "." + getBlockName());
-		
-		setSoundType(SoundType.METAL); 
-		setCreativeTab(Aunis.aunisCreativeTab);
-		
+	public StargateClassicMemberBlock(String blockName) {
+		super(blockName);
+
 		setDefaultState(blockState.getBaseState()
 				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.NORTH)
 				.withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING)
 				.withProperty(AunisProps.RENDER_BLOCK, true));
-		
-		setHardness(3.0f);
-		setHarvestLevel("pickaxe", 3);
 	}
-	
-	protected abstract String getBlockName();
-	protected abstract StargateClassicMemberTile getTileEntity();
-	protected abstract StargateAbstractMergeHelper getMergeHelper();
 	
 	@Override
 	public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {	
@@ -367,15 +354,6 @@ public abstract class StargateClassicMemberBlock extends Block {
 	}
 	
 	// ------------------------------------------------------------------------
-	@Override
-	public boolean hasTileEntity(IBlockState state) {
-		return true;
-	}
-	
-	@Override
-	public TileEntity createTileEntity(World world, IBlockState state) {
-		return getTileEntity();
-	}
 
 	@Override
 	public int getLightOpacity(IBlockState state) {		
@@ -388,31 +366,6 @@ public abstract class StargateClassicMemberBlock extends Block {
 	@Override
 	public BlockRenderLayer getBlockLayer() {
 		return BlockRenderLayer.SOLID;
-	}
-		
-	@Override
-	public EnumBlockRenderType getRenderType(IBlockState state) {
-//		return EnumBlockRenderType.MODEL;
-		
-		if (state.getValue(AunisProps.RENDER_BLOCK))
-			return EnumBlockRenderType.MODEL;
-		else
-			return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
-    }
-	
-	@Override
-	public boolean isOpaqueCube(IBlockState state) {
-		return false;
-	}
-	
-	@Override
-	public boolean isFullCube(IBlockState state) {
-		return false;
-	}
-	
-	@Override
-	public boolean isFullBlock(IBlockState state) {
-		return false;
 	}
 	
 	@Override
