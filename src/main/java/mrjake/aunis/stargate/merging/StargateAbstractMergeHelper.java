@@ -6,8 +6,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import mrjake.aunis.Aunis;
-import mrjake.aunis.block.stargate.StargateMemberBlock;
+import mrjake.aunis.block.stargate.StargateAbstractMemberBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.config.AunisConfig;
@@ -16,7 +15,6 @@ import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -82,7 +80,7 @@ public abstract class StargateAbstractMergeHelper {
 	/**
 	 * @return Member block.
 	 */
-	public abstract StargateMemberBlock getMemberBlock();
+	public abstract StargateAbstractMemberBlock getMemberBlock();
 	
 	/**
 	 * Method searches for a {@link StargateMilkyWayBaseBlock} within {@link this#BASE_SEARCH_BOX}

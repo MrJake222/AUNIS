@@ -1,11 +1,13 @@
 package mrjake.aunis.block.stargate;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
-import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -21,13 +23,9 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.function.Predicate;
+public abstract class StargateAbstractBaseBlock extends Block {
 
-public abstract class StargateBaseBlock extends Block {
-
-    public StargateBaseBlock(String blockName) {
+    public StargateAbstractBaseBlock(String blockName) {
         super(Material.IRON);
 
         setRegistryName(Aunis.ModID + ":" + blockName);

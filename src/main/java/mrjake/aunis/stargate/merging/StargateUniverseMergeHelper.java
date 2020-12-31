@@ -7,7 +7,6 @@ import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.stargate.StargateUniverseMemberBlock;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.util.math.BlockPos;

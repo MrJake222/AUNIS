@@ -1,13 +1,13 @@
 package mrjake.aunis.item;
 
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.block.stargate.StargateMemberBlock;
+import mrjake.aunis.block.stargate.StargateAbstractMemberBlock;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 
 public abstract class StargateMemberItemBlock extends ItemBlock {
-    public StargateMemberItemBlock(StargateMemberBlock block) {
+    public StargateMemberItemBlock(StargateAbstractMemberBlock block) {
         super(block);
         setRegistryName(block.getRegistryName());
         setHasSubtypes(true);

@@ -5,8 +5,6 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateAbstractMemberTile;
-import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
-import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -16,9 +14,9 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public abstract class StargateMemberBlock extends Block {
+public abstract class StargateAbstractMemberBlock extends Block {
 
-    public StargateMemberBlock(String blockName) {
+    public StargateAbstractMemberBlock(String blockName) {
         super(Material.IRON);
 
         setRegistryName(Aunis.ModID + ":" + blockName);

@@ -8,15 +8,12 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
-import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
-import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateClassicMemberTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -30,9 +27,7 @@ import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
@@ -48,7 +43,7 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
-public abstract class StargateClassicMemberBlock extends StargateMemberBlock {
+public abstract class StargateClassicMemberBlock extends StargateAbstractMemberBlock {
 	
 	public StargateClassicMemberBlock(String blockName) {
 		super(blockName);
