@@ -3,6 +3,8 @@ package mrjake.aunis.block.stargate;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateAbstractMemberTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import net.minecraft.block.Block;
@@ -37,8 +39,8 @@ public abstract class StargateMemberBlock extends Block {
 
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
-        StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
-        StargateOrlinBaseTile gateTile = memberTile.getBaseTile(world);
+        StargateAbstractMemberTile memberTile = (StargateAbstractMemberTile) world.getTileEntity(pos);
+        StargateAbstractBaseTile gateTile = memberTile.getBaseTile(world);
 
         if (gateTile != null) {
             gateTile.updateMergeState(false, world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL));

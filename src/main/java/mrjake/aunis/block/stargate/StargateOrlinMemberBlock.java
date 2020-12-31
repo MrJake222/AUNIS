@@ -105,16 +105,6 @@ public final class StargateOrlinMemberBlock extends StargateMemberBlock {
 			}				
 		}
 	}
-
-	@Override
-	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-		StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
-		StargateOrlinBaseTile gateTile = memberTile.getBaseTile(world);
-
-		if (gateTile != null) {
-			gateTile.updateMergeState(false, world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL));
-		}
-	}
 	
 	@Override
 	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {

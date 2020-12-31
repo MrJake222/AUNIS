@@ -339,18 +339,13 @@ public abstract class StargateClassicMemberBlock extends StargateMemberBlock {
 	
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-		if (!world.isRemote) {
+		super.breakBlock(world, pos, state);
+
+		if(!world.isRemote) {
 			StargateClassicMemberTile memberTile = (StargateClassicMemberTile) world.getTileEntity(pos);
-			StargateClassicBaseTile gateTile = memberTile.getBaseTile(world);
-			
-			if (gateTile != null && memberTile.isMerged())
-				gateTile.updateMergeState(false, state.getValue(AunisProps.FACING_HORIZONTAL));
-			
 			if (memberTile.getCamoItemStack() != null)
 				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), memberTile.getCamoItemStack());
 		}
-		
-		super.breakBlock(world, pos, state);
 	}
 	
 	// ------------------------------------------------------------------------
