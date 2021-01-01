@@ -6,6 +6,7 @@ import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.renderer.AunisFontRenderer;
 import mrjake.aunis.item.renderer.ItemRenderHelper;
 import mrjake.aunis.loader.ElementEnum;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
@@ -74,7 +75,7 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 			GlStateManager.scale(0.3f, 0.3f, 0.3f);
 		}
 		
-		ElementEnum.UNIVERSE_DIALER.bindTextureAndRender();
+		ElementEnum.UNIVERSE_DIALER.bindTextureAndRender(BiomeOverlayEnum.NORMAL);
 		
 		// Translate rendered text
 		GlStateManager.translate(0, 0.20f, 0.1f);

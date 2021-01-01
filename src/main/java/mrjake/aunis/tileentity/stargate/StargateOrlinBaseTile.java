@@ -38,6 +38,7 @@ import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
+import mrjake.aunis.util.BlockHelpers;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -231,7 +232,11 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 	public StargateAbstractMergeHelper getMergeHelper() {
 		return StargateOrlinMergeHelper.INSTANCE;
 	}
-		
+	
+	@Override
+	public boolean isGateDirectlyUnderSky() {
+		return BlockHelpers.isBlockDirectlyUnderSky(world, new BlockPos(0, 2, 0).add(pos));
+	}
 	
 	// ------------------------------------------------------------------------
 	// Killing

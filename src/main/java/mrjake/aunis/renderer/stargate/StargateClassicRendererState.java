@@ -1,6 +1,7 @@
 package mrjake.aunis.renderer.stargate;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.StargateClassicSpinHelper;
 import mrjake.aunis.stargate.network.SymbolInterface;
@@ -19,10 +20,10 @@ public abstract class StargateClassicRendererState extends StargateAbstractRende
 	}
 	
 	@Override
-	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing) {
+	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing, BiomeOverlayEnum biomeOverlay) {
 		chevronTextureList.initClient();
 		
-		return super.initClient(pos, facing);
+		return super.initClient(pos, facing, biomeOverlay);
 	}
 	
 	protected abstract String getChevronTextureBase();
