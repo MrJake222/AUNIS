@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -36,11 +37,16 @@ public class StargateDimensionConfig {
 	private static Map<DimensionType, StargateDimensionConfigEntry> dimensionMap;
 	
 	public static StargateEnergyRequired getCost(DimensionType from, DimensionType to) {
-		StargateDimensionConfigEntry reqFrom = dimensionMap.get(from);
-		StargateDimensionConfigEntry reqTo = dimensionMap.get(to);
+		StargateDimensionConfigEntry reqFrom = dimensionMap.get(fixDimType(from));
+		StargateDimensionConfigEntry reqTo = dimensionMap.get(fixDimType(to));
 		
 		if (reqFrom == null || reqTo == null) {
 			Aunis.logger.error("Tried to get a cost of a non-existing dimension. This is a bug.");
+			Aunis.logger.error("FromId: {}, FromName: {}, ToId: {}, ToName: {}, FromEntryNull: {}, ToEntryNull: {}", from.getId(), from.getName(), to.getId(), to.getName(), reqFrom == null, reqTo == null);
+			Aunis.logger.error("Aunis dimension entries:{}{}", System.lineSeparator(), dimensionMap.entrySet().stream()
+					.map(en -> en.getKey().getName() + " | " + en.getValue().toString())
+					.collect(Collectors.joining(System.lineSeparator()))
+			);
 			return new StargateEnergyRequired(0, 0);
 		}
 		
@@ -51,17 +57,27 @@ public class StargateDimensionConfig {
 	}
 		
 	public static boolean isGroupEqual(DimensionType from, DimensionType to) {
-		StargateDimensionConfigEntry reqFrom = dimensionMap.get(from);
-		StargateDimensionConfigEntry reqTo = dimensionMap.get(to);
+		StargateDimensionConfigEntry reqFrom = dimensionMap.get(fixDimType(from));
+		StargateDimensionConfigEntry reqTo = dimensionMap.get(fixDimType(to));
 		
 		if (reqFrom == null || reqTo == null) {
 			Aunis.logger.error("Tried to perform a group check for a non-existing dimension. This is a bug.");
+			Aunis.logger.error("FromId: {}, FromName: {}, ToId: {}, ToName: {}, FromEntryNull: {}, ToEntryNull: {}", from.getId(), from.getName(), to.getId(), to.getName(), reqFrom == null, reqTo == null);
+			Aunis.logger.error("Aunis dimension entries:{}{}", System.lineSeparator(), dimensionMap.entrySet().stream()
+					.map(en -> en.getKey().getName() + " | " + en.getValue().toString())
+					.collect(Collectors.joining(System.lineSeparator()))
+			);
 			return false;
 		}
-		
-		Aunis.info("[from="+from+", to="+to+", isGroupEqual="+reqFrom.isGroupEqual(reqTo)+"]");
+
+		//ToDo add debug-only stuff
+		//Aunis.info("[from="+from+", to="+to+", isGroupEqual="+reqFrom.isGroupEqual(reqTo)+"]");
 		
 		return reqFrom.isGroupEqual(reqTo);
+	}
+
+	private static DimensionType fixDimType(DimensionType type) {
+		return type.getName().equals("Nether") && type.getId() == -1 ? DimensionType.NETHER : type;
 	}
 	
 	public static boolean netherOverworld8thSymbol() {
@@ -93,7 +109,7 @@ public class StargateDimensionConfig {
 				
 				catch (IllegalArgumentException ex) {
 					// Probably removed a mod
-					Aunis.info("DimensionType not found: " + dimName);
+					Aunis.logger.debug("DimensionType not found: " + dimName);
 				}
 			}
 		}
@@ -103,7 +119,7 @@ public class StargateDimensionConfig {
 		for (DimensionType dimType : DimensionManager.getRegisteredDimensions().keySet()) {
 			if (!dimensionMap.containsKey(dimType)) {
 				// Biomes O' Plenty Nether fix
-				if (dimType.getName().equals("Nether"))
+				if (dimType.getName().equals("Nether") && dimType.getId() == -1)
 					dimType = DimensionType.NETHER;
 				
 				if (DEFAULTS_MAP.containsKey(dimType.getName()))

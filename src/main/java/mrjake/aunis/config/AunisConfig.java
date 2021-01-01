@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
@@ -173,6 +174,10 @@ public class AunisConfig {
 	}
 	
 	public static class DebugConfig {
+
+		@Name("Debug mode")
+		public boolean debugMode = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"); // Will be true by default in dev environment
+
 		@Name("Check gate merge")
 		public boolean checkGateMerge = true;
 		

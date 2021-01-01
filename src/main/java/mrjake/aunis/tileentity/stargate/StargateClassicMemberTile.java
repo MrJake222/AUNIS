@@ -16,12 +16,9 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -34,7 +31,7 @@ import net.minecraftforge.items.ItemStackHandler;
  * 
  * @author MrJake
  */
-public class StargateClassicMemberTile extends TileEntity implements StateProviderInterface {
+public abstract class StargateClassicMemberTile extends StargateAbstractMemberTile implements StateProviderInterface {
 	
 	private TargetPoint targetPoint;
 	
@@ -135,39 +132,13 @@ public class StargateClassicMemberTile extends TileEntity implements StateProvid
 			return null;
 		}
 	}
-	
-	// ---------------------------------------------------------------------------------
-	private BlockPos basePos;
-	
-	public boolean isMerged() {
-		return basePos != null;
-	}
-	
-	public BlockPos getBasePos() {
-		return basePos;
-	}
-	
-	public StargateClassicBaseTile getBaseTile(World world) {
-		if (basePos != null)
-			return (StargateClassicBaseTile) world.getTileEntity(basePos);
-		
-		return null;
-	}
-	
-	public void setBasePos(BlockPos basePos) {
-		this.basePos = basePos;
-		
-		markDirty();
-	}
+
 	// ---------------------------------------------------------------------------------
 	// NBT
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-		compound.setBoolean("isLitUp", isLitUp);		
-		
-		if (basePos != null)
-			compound.setLong("basePos", basePos.toLong());
+		compound.setBoolean("isLitUp", isLitUp);
 		
 		if (camoBlockState != null) {
 			compound.setString("doubleSlabBlock", camoBlockState.getBlock().getRegistryName().toString());
@@ -181,9 +152,6 @@ public class StargateClassicMemberTile extends TileEntity implements StateProvid
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {		
 		isLitUp = compound.getBoolean("isLitUp");
-		
-		if (compound.hasKey("basePos"))
-			basePos = BlockPos.fromLong(compound.getLong("basePos"));
 		
 		if (compound.hasKey("doubleSlabBlock")) {
 			Block dblSlabBlock = Block.getBlockFromName(compound.getString("doubleSlabBlock"));
@@ -245,10 +213,5 @@ public class StargateClassicMemberTile extends TileEntity implements StateProvid
 			default:
 				break;
 		}
-	}	
-	
-	@Override
-	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
-		return oldState.getBlock() != newState.getBlock();
 	}
 }
