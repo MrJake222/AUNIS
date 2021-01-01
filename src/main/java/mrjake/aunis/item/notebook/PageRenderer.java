@@ -69,7 +69,9 @@ public class PageRenderer {
 			
 			ItemRenderHelper.renderArmFirstPersonSide(0, handSide, 0, null);
 		    GlStateManager.popMatrix();
-			GlStateManager.translate(mainhand ? 0.5f : -0.25f, 0.2f, 0);
+		    
+		    float narrow = AunisConfig.avConfig.pageNarrowing;
+		    GlStateManager.translate(mainhand ? 0.5f-narrow : -0.25f+narrow, 0.2f, 0);
 		}
 		
 		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("aunis:textures/gui/notebook_background.png"));		

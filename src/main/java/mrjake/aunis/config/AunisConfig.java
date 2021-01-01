@@ -249,5 +249,13 @@ public class AunisConfig {
 		@Name("Aunis volume")
 		@RangeDouble(min=0, max=1)
 		public float volume = 1;
+		
+		@Name("Notebook Page offset")
+		@Comment({
+			"Greater values render the Page more to the center of the screen, smaller render it closer to the borders.",
+			"0 - for standard 16:9 (default),",
+			"0.2 - for 4:3.",
+		})
+		public float pageNarrowing = 0;
 	}
 }
