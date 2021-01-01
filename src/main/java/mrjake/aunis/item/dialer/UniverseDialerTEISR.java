@@ -27,41 +27,56 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 	@Override
 	public void renderByItem(ItemStack stack) {
 		float partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
-		
-		boolean mainhand = AunisItems.UNIVERSE_DIALER.getLastTransform() == TransformType.FIRST_PERSON_RIGHT_HAND;
-		EnumHandSide handSide = mainhand ? EnumHandSide.RIGHT : EnumHandSide.LEFT;
-		
-		EntityPlayer player = Minecraft.getMinecraft().player;
-        float pitch = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * partialTicks;
-        float angle = ItemRenderHelper.getMapAngleFromPitch(pitch);
-          
-        renderArms(handSide, angle, partialTicks);
-		angle = 1 - angle;
+		TransformType transformType = AunisItems.UNIVERSE_DIALER.getLastTransform();
 		
 		GlStateManager.pushMatrix();
 		
-		if (handSide == EnumHandSide.RIGHT) {
-			GlStateManager.translate(0.8, 0, -0.5);
-			GlStateManager.rotate(35, 1, 0, 0);
-			GlStateManager.rotate(15, 0, 0, 1);
-					
-			GlStateManager.translate(0, 0.3*angle, -0.1*angle);
-			GlStateManager.rotate(25*angle, 1, 0, 0);
+		// Item frame
+		if (transformType == TransformType.FIXED) {
+			GlStateManager.translate(0.53, 0.50, 0.5);
+			GlStateManager.rotate(90, 1, 0, 0);
+			GlStateManager.rotate(180, 0, 0, 1);
+			
+			GlStateManager.scale(0.2f, 0.2f, 0.2f);
 		}
 		
 		else {
-			GlStateManager.translate(-0.2, 0, -0.55);
-			GlStateManager.rotate(30, 1, 0, 0);
-			GlStateManager.rotate(-20, 0, 0, 1);
-			GlStateManager.rotate(25, 0, 1, 0);
+			boolean mainhand = AunisItems.UNIVERSE_DIALER.getLastTransform() == TransformType.FIRST_PERSON_RIGHT_HAND;
+			EnumHandSide handSide = mainhand ? EnumHandSide.RIGHT : EnumHandSide.LEFT;
 			
-			GlStateManager.translate(0, 0.3*angle, -0.0*angle);
-			GlStateManager.rotate(25*angle, 1, 0, 0);
+			EntityPlayer player = Minecraft.getMinecraft().player;
+	        float pitch = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * partialTicks;
+	        float angle = ItemRenderHelper.getMapAngleFromPitch(pitch);
+	          
+	        renderArms(handSide, angle, partialTicks);
+			angle = 1 - angle;
+		
+		
+			if (handSide == EnumHandSide.RIGHT) {
+				GlStateManager.translate(0.8, 0, -0.5);
+				GlStateManager.rotate(35, 1, 0, 0);
+				GlStateManager.rotate(15, 0, 0, 1);
+						
+				GlStateManager.translate(0, 0.3*angle, -0.1*angle);
+				GlStateManager.rotate(25*angle, 1, 0, 0);
+			}
+			
+			else {
+				GlStateManager.translate(-0.2, 0, -0.55);
+				GlStateManager.rotate(30, 1, 0, 0);
+				GlStateManager.rotate(-20, 0, 0, 1);
+				GlStateManager.rotate(25, 0, 1, 0);
+				
+				GlStateManager.translate(0, 0.3*angle, -0.0*angle);
+				GlStateManager.rotate(25*angle, 1, 0, 0);
+			}
+			
+			GlStateManager.scale(0.3f, 0.3f, 0.3f);
 		}
 		
-		GlStateManager.scale(0.3f, 0.3f, 0.3f);
 		ElementEnum.UNIVERSE_DIALER.bindTextureAndRender();
 		
+		// Translate rendered text
 		GlStateManager.translate(0, 0.20f, 0.1f);
 		GlStateManager.rotate(-90, 1, 0, 0);
 				
