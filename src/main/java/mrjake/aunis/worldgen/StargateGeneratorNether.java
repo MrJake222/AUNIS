@@ -89,7 +89,7 @@ public class StargateGeneratorNether {
 		Entry<EnumFacing, DirectionResult> frontResult = null;
 		
 		while (found == null) {
-			Aunis.debug("count: " + count + ", pass: " + pass + ", current: " + current);
+			Aunis.logger.debug("StargateGeneratorNether: count: " + count + ", pass: " + pass + ", current: " + current);
 			
 			for (MutableBlockPos pos : MutableBlockPos.getAllInBoxMutable(current, current.add(16, 16, 16))) {
 				if (world.isAirBlock(pos.down()))
@@ -137,7 +137,7 @@ public class StargateGeneratorNether {
 				count = 0;
 		}
 
-		Aunis.debug("/tp " + found.getX() + " " + found.getY() + " " + found.getZ());
+		Aunis.logger.debug("StargateGeneratorNether: /tp " + found.getX() + " " + found.getY() + " " + found.getZ());
 		
 		Rotation rotation;
 		

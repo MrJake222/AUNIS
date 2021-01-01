@@ -473,7 +473,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				}
 				
 				else {
-					Aunis.debug("Giving Notebook page of address " + symbolType);
+					Aunis.logger.debug("Giving Notebook page of address " + symbolType);
 	
 					NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(
 							gateAddressMap.get(symbolType),
@@ -698,7 +698,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				}
 			}
 				
-			Aunis.debug("Updated to power tier: " + powerTier);
+			Aunis.logger.debug("Updated to power tier: " + powerTier);
 		}
 	}
 	

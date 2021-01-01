@@ -24,7 +24,7 @@ public class StargateNetworkReader18 {
 			address.generate(random);
 			StargatePos stargatePos = new StargatePos(dim, pos, address);
 			
-			Aunis.debug("Adding old gate: " + address);
+			Aunis.logger.debug("Adding old gate: " + address);
 			network.addStargate(address, stargatePos);
 		}
 	}

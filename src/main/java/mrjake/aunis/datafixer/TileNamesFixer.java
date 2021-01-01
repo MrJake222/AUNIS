@@ -26,7 +26,7 @@ public class TileNamesFixer implements IFixableData {
 		Block newBlock = AunisBlocks.remapBlock(compound.getString("id"));
 		
 		if (newBlock != null) {
-			Aunis.debug("Fixing block id " + compound.getString("id") + ", now: " + newBlock.getRegistryName().toString());
+			Aunis.logger.debug("Fixing block id " + compound.getString("id") + ", now: " + newBlock.getRegistryName().toString());
 			
 			compound.setString("id", newBlock.getRegistryName().toString());
 			compound.setInteger("DataVersion", getFixVersion());

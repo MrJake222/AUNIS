@@ -278,7 +278,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 					Block newBlock = newState.getBlock();
 					
 					if (!newBlock.isAir(newState, world, newPos) && !newBlock.isReplaceable(world, newPos)) {
-						Aunis.debug(newPos + " obstructed with " + world.getBlockState(newPos));
+						Aunis.logger.info("TransportRings: " + newPos + " obstructed with " + world.getBlockState(newPos));
 						return true;
 					}
 				}

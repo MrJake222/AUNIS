@@ -96,7 +96,7 @@ public class Texture {
 		
 		@Override
 		public void run() {
-			Aunis.debug(String.format("Starting thread (%d, %d) to (%d, %d)", x, y, x+w, y+h));
+			Aunis.logger.debug(String.format("Starting thread (%d, %d) to (%d, %d)", x, y, x+w, y+h));
 			
 			float[] pixel = new float[3];
         	float gray;
@@ -120,7 +120,7 @@ public class Texture {
         		}	            		
         	}
 						
-			Aunis.debug(String.format("Finished thread (%d, %d) to (%d, %d)", x, y, x+w, y+h));
+			Aunis.logger.debug(String.format("Finished thread (%d, %d) to (%d, %d)", x, y, x+w, y+h));
 		}
 	}
 }

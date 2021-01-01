@@ -33,6 +33,11 @@ import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 
+/**
+ * TODO Unify this and {@link StargateGeneratorNether} (replace this)
+ * 
+ * @author MrJake222
+ */
 public class StargateGenerator {
 	
 	public static GeneratedStargate generateStargate(World world) {
@@ -53,7 +58,7 @@ public class StargateGenerator {
 		} while (pos == null && tries < 100);
 		
 		if (tries == 100) {
-			Aunis.debug("Failed to find place");
+			Aunis.logger.debug("StargateGenerator: Failed to find place");
 			
 			return null;
 		}
@@ -111,12 +116,12 @@ public class StargateGenerator {
 			}
 			
 			else {
-				Aunis.debug("too steep");
+				Aunis.logger.debug("StargateGenerator: too steep");
 			}
 		}
 		
 		else {
-			Aunis.debug("failed, " + biomeName);
+			Aunis.logger.debug("StargateGenerator: failed, " + biomeName);
 		}
 		
 		return null;

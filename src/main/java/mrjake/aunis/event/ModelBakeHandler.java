@@ -1,5 +1,6 @@
 package mrjake.aunis.event;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.renderer.CustomModelItemInterface;
@@ -24,6 +25,8 @@ public class ModelBakeHandler {
 		
 		for (Item item : AunisItems.getItems()) {
 			if (item instanceof CustomModelItemInterface) {
+				Aunis.logger.debug("Registering custom model for: " + item);
+				
 				((CustomModelItemInterface) item).registerCustomModel(registry);
 			}
 		}

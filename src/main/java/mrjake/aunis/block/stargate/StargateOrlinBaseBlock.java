@@ -106,7 +106,7 @@ public final class StargateOrlinBaseBlock extends StargateAbstractBaseBlock {
 				
 				gateTile.updateNetherAddress();
 				
-				Aunis.debug("nether address: " + network.getNetherGate());
+				Aunis.logger.debug("nether address: " + network.getNetherGate());
 			}
 		}
 	}

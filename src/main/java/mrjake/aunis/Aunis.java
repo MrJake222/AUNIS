@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import mrjake.aunis.capability.endpoint.ItemEndpointCapability;
 import mrjake.aunis.chunkloader.ChunkLoadingCallback;
 import mrjake.aunis.command.AunisCommands;
-import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateDimensionConfig;
 import mrjake.aunis.datafixer.TileNamesFixer;
 import mrjake.aunis.fluid.AunisFluids;
@@ -40,7 +39,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class Aunis {	
     public static final String ModID = "aunis";
     public static final String Name = "Aunis";
-    public static final String Version = "${version}";
+    public static final String Version = "${version}"; // It works only in final builds.
     public static final int DATA_VERSION = 7;
 
     public static final String MCVersion = "${mcversion}";
@@ -133,14 +132,4 @@ public class Aunis {
     public void serverStarted(FMLServerStartedEvent event) throws IOException {    	
     	StargateDimensionConfig.update();
     }
-
-    public static boolean isInDebugMode(){
-        return AunisConfig.debugConfig.debugMode;
-    }
-
-	public static void debug(String msg) {
-		if (isInDebugMode()) {
-			logger.info(msg);
-		}
-	}
 }

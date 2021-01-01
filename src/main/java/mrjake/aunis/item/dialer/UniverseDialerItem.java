@@ -260,7 +260,6 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 							
 						default:
 							player.sendStatusMessage(new TextComponentTranslation("item.aunis.universe_dialer.gate_busy"), true);
-							Aunis.debug("state: " + gateTile.getStargateState());
 							break;
 					}
 					
