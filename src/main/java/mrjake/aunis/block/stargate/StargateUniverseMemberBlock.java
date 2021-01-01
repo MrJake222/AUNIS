@@ -1,5 +1,7 @@
 package mrjake.aunis.block.stargate;
 
+import mrjake.aunis.AunisProps;
+import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.merging.StargateUniverseMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateUniverseMemberTile;
@@ -10,6 +12,9 @@ import net.minecraft.world.World;
 public final class StargateUniverseMemberBlock extends StargateClassicMemberBlock {
 
 	public static final String BLOCK_NAME = "stargate_universe_member_block";
+	
+	public final int RING_META = getMetaFromState(getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING));
+	public final int CHEVRON_META = getMetaFromState(getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.CHEVRON));
 	
 	public StargateUniverseMemberBlock() {
 		super(BLOCK_NAME);

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
@@ -17,6 +19,8 @@ import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -113,6 +117,27 @@ public class StargateMilkyWayMergeHelper extends StargateClassicMergeHelper {
 			default:
 				return null;
 		}
+	}
+	
+	@Override
+	@Nullable
+	public EnumMemberVariant getMemberVariantFromItemStack(ItemStack stack) {
+		if (!(stack.getItem() instanceof ItemBlock))
+			return null;
+		
+		// No need to use .equals() because blocks are singletons
+		if (((ItemBlock) stack.getItem()).getBlock() != AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK)
+			return null;
+		
+		int meta = stack.getMetadata();
+		
+		if (meta == AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.RING_META)
+			return EnumMemberVariant.RING;
+		
+		if (meta == AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.CHEVRON_META)
+			return EnumMemberVariant.CHEVRON;
+		
+		return null;
 	}
 	
 	@Override

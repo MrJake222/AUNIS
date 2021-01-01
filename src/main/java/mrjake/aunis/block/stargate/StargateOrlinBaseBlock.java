@@ -5,7 +5,6 @@ import java.util.List;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
-import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.stargate.network.StargateNetwork;
 import mrjake.aunis.stargate.power.StargateEnergyRequired;
@@ -74,11 +73,6 @@ public final class StargateOrlinBaseBlock extends StargateAbstractBaseBlock {
 		String left = String.format("%.2f", secondsLeft);
 
 		player.sendMessage(new TextComponentTranslation("chat.orlins.energyStored", (hasEnergy ? TextFormatting.GREEN : TextFormatting.RED) + energy, TextFormatting.DARK_GREEN + required, TextFormatting.DARK_GREEN + left));
-	}
-
-	@Override
-	protected List<BlockPos> getAbsentBlockPositions(StargateAbstractMergeHelper mergeHelper, World world, BlockPos basePos, EnumFacing facing, int meta){
-		return mergeHelper.getAbsentRingBlocks(world, basePos, facing);
 	}
 
 	@Override

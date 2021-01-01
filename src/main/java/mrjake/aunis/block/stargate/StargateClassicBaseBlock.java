@@ -1,13 +1,10 @@
 package mrjake.aunis.block.stargate;
 
-import java.util.List;
-
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.stargate.BoundingHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
-import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -47,12 +44,6 @@ public abstract class StargateClassicBaseBlock extends StargateAbstractBaseBlock
 	@Override
 	protected void showGateInfo(EntityPlayer player, World world, BlockPos pos) {
 		player.openGui(Aunis.instance, GuiIdEnum.GUI_STARGATE.id, world, pos.getX(), pos.getY(), pos.getZ());
-	}
-
-	@Override
-	protected List<BlockPos> getAbsentBlockPositions(StargateAbstractMergeHelper mergeHelper, World world, BlockPos basePos, EnumFacing facing, int meta){
-		final EnumMemberVariant variant = this instanceof StargateClassicBaseBlock ? EnumMemberVariant.byId((meta >> 3) & 0x01) : null;
-		return (variant == EnumMemberVariant.CHEVRON) ? mergeHelper.getAbsentChevronBlocks(world, basePos, facing) : mergeHelper.getAbsentRingBlocks(world, basePos, facing);
 	}
 
 	@Override

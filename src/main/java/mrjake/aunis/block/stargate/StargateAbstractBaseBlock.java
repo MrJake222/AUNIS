@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import net.minecraft.block.Block;
@@ -14,7 +15,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
@@ -90,12 +90,13 @@ public abstract class StargateAbstractBaseBlock extends Block {
         StargateAbstractMergeHelper mergeHelper = gateTile.getMergeHelper();
         ItemStack stack = player.getHeldItem(hand);
         
-        if(!gateTile.isMerged() && stack.getItem() instanceof ItemBlock) {
-            ItemBlock itemBlock = ((ItemBlock) stack.getItem());
-//            
-            if (mergeHelper.matchMember(itemBlock.getBlock().getDefaultState())) {
-                List<BlockPos> posList = getAbsentBlockPositions(mergeHelper, world, basePos, facing, stack.getMetadata());
-                Aunis.debug(posList.toString());
+        if(!gateTile.isMerged()) {
+        	
+        	// This check ensures that stack represents matching member block.
+        	EnumMemberVariant variant = mergeHelper.getMemberVariantFromItemStack(stack);
+        	            
+            if (variant != null) {            	
+                List<BlockPos> posList = mergeHelper.getAbsentBlockPositions(world, basePos, facing, variant);
                 
                 if(!posList.isEmpty()) {
                 	BlockPos pos = posList.get(0);
@@ -117,14 +118,12 @@ public abstract class StargateAbstractBaseBlock extends Block {
                         return true;
                 	} 
                 }
-            }
+            } // variant == null, wrong block held
         }
         
         return false;
     }
-
-    protected abstract List<BlockPos> getAbsentBlockPositions(StargateAbstractMergeHelper mergeHelper, World world, BlockPos basePos, EnumFacing facing, int meta);
-
+    
     protected abstract IBlockState createMemberState(IBlockState memberState, EnumFacing facing, int meta);
 
     @Override

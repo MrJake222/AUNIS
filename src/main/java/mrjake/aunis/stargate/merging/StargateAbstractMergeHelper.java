@@ -16,6 +16,7 @@ import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -31,17 +32,6 @@ public abstract class StargateAbstractMergeHelper {
 	 */
 	@Nonnull
 	public abstract List<BlockPos> getRingBlocks();
-
-	/**
-	 * @return {@link List} of {@link BlockPos} pointing to absent ring blocks. Positions are absolute
-	 */
-	@Nonnull
-	public List<BlockPos> getAbsentRingBlocks(IBlockAccess world, BlockPos basePos, EnumFacing facing) {
-		return getRingBlocks().stream()
-				.map(pos -> pos.rotate(FacingToRotation.get(facing)).add(basePos))
-				.filter(pos -> !matchMember(world.getBlockState(pos)))
-				.collect(Collectors.toList());
-	}
 	
 	/**
 	 * @return {@link List} of {@link BlockPos} pointing to chevron blocks. Positions are relative
@@ -50,15 +40,30 @@ public abstract class StargateAbstractMergeHelper {
 	public abstract List<BlockPos> getChevronBlocks();
 
 	/**
-	 * @return {@link List} of {@link BlockPos} pointing to absent ring blocks. Positions are absolute
+	 * @return {@link List} of {@link BlockPos} pointing to absent blocks of variant given. Positions are absolute.
 	 */
 	@Nonnull
-	public List<BlockPos> getAbsentChevronBlocks(IBlockAccess world, BlockPos basePos, EnumFacing facing) {
-		return getChevronBlocks().stream()
+	public List<BlockPos> getAbsentBlockPositions(IBlockAccess world, BlockPos basePos, EnumFacing facing, EnumMemberVariant variant) {
+		List<BlockPos> blocks = null;
+		
+		switch (variant) {
+			case CHEVRON:
+				blocks = getChevronBlocks();
+				break;
+				
+			case RING:
+				blocks = getRingBlocks();
+				break;
+		}
+		
+		return blocks.stream()
 				.map(pos -> pos.rotate(FacingToRotation.get(facing)).add(basePos))
 				.filter(pos -> !matchMember(world.getBlockState(pos)))
 				.collect(Collectors.toList());
 	}
+	
+	@Nullable
+	public abstract EnumMemberVariant getMemberVariantFromItemStack(ItemStack stack);
 	
 	/**
 	 * @return Max box where to search for the base.
@@ -167,4 +172,5 @@ public abstract class StargateAbstractMergeHelper {
 		
 		for (BlockPos pos : getChevronBlocks())
 			updateMemberMergeStatus(world, pos, basePos, baseFacing, shouldBeMerged);
-	}}
+	}
+}
