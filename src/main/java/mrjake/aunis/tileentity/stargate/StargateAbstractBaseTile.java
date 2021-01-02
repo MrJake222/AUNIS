@@ -29,6 +29,7 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.particle.ParticleWhiteSmoke;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState.StargateAbstractRendererStateBuilder;
 import mrjake.aunis.sound.AunisSoundHelper;
@@ -752,6 +753,15 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			energyTransferedLastTick = getEnergyStorage().getEnergyStored() - energyStoredLastTick;
 			energyStoredLastTick = getEnergyStorage().getEnergyStored();
 		}
+		
+		else {
+			// Client
+			
+			// Each 2s
+			if (world.getTotalWorldTime() % 40 == 0) {
+				rendererStateClient.biomeOverlay = isGateDirectlyUnderSky() ? BiomeOverlayEnum.getOverlayFromBiome(this) : BiomeOverlayEnum.NORMAL;
+			}
+		}
 	}
 	
 	/**
@@ -975,6 +985,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		markDirty();
 	}
 	
+	public abstract boolean isGateDirectlyUnderSky();
 	
 	// ------------------------------------------------------------------------
 	// AutoClose
@@ -1061,8 +1072,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		switch (stateType) {
 			case RENDERER_STATE:
 				EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
+				BiomeOverlayEnum biomeOverlay = isGateDirectlyUnderSky() ? BiomeOverlayEnum.getOverlayFromBiome(this) : BiomeOverlayEnum.NORMAL;
 
-				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing));
+				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing, biomeOverlay));
 				updateFacing(facing, false);
 				
 				break;

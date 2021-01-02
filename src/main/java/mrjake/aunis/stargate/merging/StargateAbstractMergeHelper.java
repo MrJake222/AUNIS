@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.block.stargate.StargateAbstractMemberBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
@@ -39,6 +40,25 @@ public abstract class StargateAbstractMergeHelper {
 	@Nonnull
 	public abstract List<BlockPos> getChevronBlocks();
 
+	private BlockPos topChevron; 
+	
+	public BlockPos getTopChevron() {
+		if (topChevron == null) {
+			int maxy = 0;
+			
+			for (BlockPos chevron : getChevronBlocks()) {
+				if (chevron.getY() > maxy) {
+					maxy = chevron.getY();
+					topChevron = chevron;
+				}
+			}
+			
+			Aunis.logger.info(this + ": top " + topChevron);
+		}
+		
+		return topChevron;
+	}
+	
 	/**
 	 * @return {@link List} of {@link BlockPos} pointing to absent blocks of variant given. Positions are absolute.
 	 */

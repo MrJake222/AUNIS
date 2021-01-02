@@ -2,6 +2,7 @@ package mrjake.aunis.renderer;
 
 import mrjake.aunis.loader.ElementEnum;
 import mrjake.aunis.loader.model.ModelLoader;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 import mrjake.aunis.tileentity.DHDTile;
 import net.minecraft.client.renderer.GlStateManager;
@@ -14,15 +15,17 @@ public class DHDRenderer extends TileEntitySpecialRenderer<DHDTile> {
 		DHDRendererState rendererState = te.getRendererStateClient();
 		
 		if (rendererState != null) {	
+			BiomeOverlayEnum biomeOverlay = BiomeOverlayEnum.getOverlayFromBiome(te);
+			
 			GlStateManager.pushMatrix();
 			
 			GlStateManager.translate(x+0.5, y, z+0.5);
 			GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 			
-			ElementEnum.MILKYWAY_DHD.bindTextureAndRender();
+			ElementEnum.MILKYWAY_DHD.bindTextureAndRender(biomeOverlay);
 			
 			for (SymbolMilkyWayEnum symbol : SymbolMilkyWayEnum.values()) {
-				rendererDispatcher.renderEngine.bindTexture(rendererState.getButtonTexture(symbol));
+				rendererDispatcher.renderEngine.bindTexture(rendererState.getButtonTexture(symbol, biomeOverlay));
 				ModelLoader.getModel(symbol.modelResource).render();
 			}
 			

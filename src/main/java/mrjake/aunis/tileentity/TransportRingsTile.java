@@ -92,7 +92,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		}
 		
 		else {
-			renderer = new TransportRingsRenderer(world, LOCAL_TELEPORT_BOX);
+			renderer = new TransportRingsRenderer(world, pos, LOCAL_TELEPORT_BOX);
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_STATE));
 		}
 	}

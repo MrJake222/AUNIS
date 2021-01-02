@@ -1,6 +1,7 @@
 package mrjake.aunis.renderer.stargate;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.renderer.stargate.StargateAbstractRenderer.EnumVortexState;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
 import mrjake.aunis.stargate.EnumStargateState;
@@ -18,7 +19,7 @@ public class StargateAbstractRendererState extends State {
 		}
 	}
 	
-	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing) {
+	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing, BiomeOverlayEnum biomeOverlay) {
 		this.pos = pos;
 		this.facing = facing;
 		
@@ -26,6 +27,7 @@ public class StargateAbstractRendererState extends State {
 			facing = facing.getOpposite();
 		
 		this.horizontalRotation = facing.getHorizontalAngle();
+		this.biomeOverlay = biomeOverlay;
 		
 		return this;
 	}
@@ -35,6 +37,7 @@ public class StargateAbstractRendererState extends State {
 	public BlockPos pos;
 	public EnumFacing facing;
 	public float horizontalRotation;
+	public BiomeOverlayEnum biomeOverlay;
 	
 	// Gate
 	// Saved
