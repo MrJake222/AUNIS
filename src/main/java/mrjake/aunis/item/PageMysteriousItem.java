@@ -1,11 +1,12 @@
 package mrjake.aunis.item;
 
-import java.util.List;
-
 import mrjake.aunis.Aunis;
 import mrjake.aunis.item.notebook.PageNotebookItem;
-import mrjake.aunis.worldgen.StargateGenerator;
-import mrjake.aunis.worldgen.StargateGenerator.GeneratedStargate;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
+import mrjake.aunis.worldgen.AbstractStargateGenerator;
+import mrjake.aunis.worldgen.AbstractStargateGenerator.GeneratedStargate;
+import mrjake.aunis.worldgen.OverworldStargateGenerator;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -16,6 +17,9 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+
+import java.util.List;
 
 public class PageMysteriousItem extends Item {
 	public static final String ITEM_NAME = "page_mysterious";
@@ -36,10 +40,10 @@ public class PageMysteriousItem extends Item {
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
 		
 		if (!world.isRemote) {
-			GeneratedStargate stargate = StargateGenerator.generateStargate(world);
+			GeneratedStargate<StargateMilkyWayBaseTile> stargate = OverworldStargateGenerator.INSTANCE.generateStargate((WorldServer) world, null);
 			
 			if (stargate != null) {
-				NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(stargate.address, false, stargate.path);
+				NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(stargate.getAddress(SymbolTypeEnum.MILKYWAY), false, stargate.getWorld().getBiome(stargate.getPos()).getRegistryName().getResourcePath());
 				
 				ItemStack stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
 				stack.setTagCompound(compound);

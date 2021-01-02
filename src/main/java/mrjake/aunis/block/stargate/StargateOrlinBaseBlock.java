@@ -7,6 +7,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.stargate.network.StargateNetwork;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.power.StargateEnergyRequired;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.worldgen.StargateGeneratorNether;
@@ -101,7 +102,7 @@ public final class StargateOrlinBaseBlock extends StargateAbstractBaseBlock {
 				StargateNetwork network = StargateNetwork.get(world);
 				
 				if (!network.hasNetherGate()) {
-					network.setNetherGate(StargateGeneratorNether.place(world.getMinecraftServer().getWorld(DimensionType.NETHER.getId()), new BlockPos(pos.getX()/8, 32, pos.getZ()/8)));
+					network.setNetherGate(StargateGeneratorNether.INSTANCE.generateStargate(world.getMinecraftServer().getWorld(DimensionType.NETHER.getId()), new BlockPos(pos.getX()/8, 32, pos.getZ()/8)).getAddress(SymbolTypeEnum.MILKYWAY));
 				}
 				
 				gateTile.updateNetherAddress();
