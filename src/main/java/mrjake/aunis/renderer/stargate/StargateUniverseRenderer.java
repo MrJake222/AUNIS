@@ -77,7 +77,7 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 		GlStateManager.pushMatrix();
 		
 		GlStateManager.rotate(-chevron.rotation, 0, 1, 0);
-		TextureLoader.getTexture(rendererState.chevronTextureList.get(BiomeOverlayEnum.NORMAL, chevron)).bindTexture(); // TODO Add frost support, rendererState.biomeOverlay
+		TextureLoader.getTexture(rendererState.chevronTextureList.get(rendererState.biomeOverlay != BiomeOverlayEnum.MOSSY ? rendererState.biomeOverlay : BiomeOverlayEnum.NORMAL, chevron)).bindTexture(); // TODO Mossy
 		ElementEnum.UNIVERSE_CHEVRON.render();
 		
 		GlStateManager.popMatrix();

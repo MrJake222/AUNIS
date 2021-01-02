@@ -45,7 +45,6 @@ import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.BeamerTile;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
-import mrjake.aunis.util.BlockHelpers;
 import mrjake.aunis.util.EnumKeyInterface;
 import mrjake.aunis.util.EnumKeyMap;
 import mrjake.aunis.util.FacingToRotation;
@@ -338,11 +337,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	@Override
 	protected AunisAxisAlignedBB getRenderBoundingBoxRaw() {
 		return RENDER_BOX;
-	}
-	
-	@Override
-	public boolean isGateDirectlyUnderSky() {
-		return BlockHelpers.isBlockDirectlyUnderSky(world, getMergeHelper().getTopChevron().add(pos));
 	}
 	
 	// -----------------------------------------------------------------

@@ -1,9 +1,9 @@
 package mrjake.aunis.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
@@ -68,32 +68,46 @@ public class AunisConfig {
 		})
 		public boolean disableAnimatedEventHorizon = false;
 
+		// ---------------------------------------------------------------------------------------
+		// Kawoosh blocks
+		
 		@Name("Kawoosh invincible blocks")
-		@Comment({"Format: \"modid:blockid:meta\". Example: \"minecraft:wool:7\""})
+		@Comment({
+			"Format: \"modid:blockid[:meta]\", for example: ",
+			"\"minecraft:wool:7\"",
+			"\"minecraft:stone\""
+		})
 		public String[] kawooshInvincibleBlocks = {};
 
-		private List<StargateBlockConfigEntry> cachedInvincibleBlocks = null;
+		private List<IBlockState> cachedInvincibleBlocks = null;
 
 		public boolean canKawooshDestroyBlock(IBlockState state) {
 			if (cachedInvincibleBlocks == null) {
-				cachedInvincibleBlocks = new ArrayList<>();
-
-				for (String line : kawooshInvincibleBlocks) {
-					StargateBlockConfigEntry en = StargateBlockConfigEntry.fromString(line);
-					
-					if(en != null) {
-						cachedInvincibleBlocks.add(en);
-					}
-				}
+				cachedInvincibleBlocks = BlockMetaParser.parseConfig(kawooshInvincibleBlocks);
 			}
-
-			for(StargateBlockConfigEntry en : cachedInvincibleBlocks) {
-				if(en.contains(state)) {
-					return false;
-				}
+			
+			return !cachedInvincibleBlocks.contains(state);
+		}
+		
+		
+		// ---------------------------------------------------------------------------------------
+		// Jungle biomes
+		@Name("Biomes in which blocks should be mossy")
+		@Comment({
+			"Format: \"modid:biomename\", for example: ",
+			"\"minecraft:dark_forest\"",
+			"\"minecraft:forest\""
+		})
+		public String[] jungleBiomes = {"minecraft:jungle", "minecraft:jungle_hills", "minecraft:jungle_edge", "minecraft:mutated_jungle", "minecraft:mutated_jungle_edge"};
+		
+		private List<Biome> cachedJungleBiomes = null;
+		
+		public boolean isJungleBiome(Biome biome) {
+			if (cachedJungleBiomes == null) {
+				cachedJungleBiomes = BiomeParser.parseConfig(jungleBiomes);
 			}
-
-			return true;
+			
+			return cachedJungleBiomes.contains(biome);
 		}
 	}
 	
@@ -257,5 +271,10 @@ public class AunisConfig {
 			"0.2 - for 4:3.",
 		})
 		public float pageNarrowing = 0;
+	}
+	
+	public static void resetCache() {
+		stargateConfig.cachedInvincibleBlocks = null;
+		stargateConfig.cachedJungleBiomes = null;
 	}
 }

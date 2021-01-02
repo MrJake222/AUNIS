@@ -8,7 +8,6 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.UniverseActivation;
-import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.stargate.network.StargateAddressDynamic;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
@@ -26,12 +25,12 @@ public class StargateUniverseRendererState extends StargateClassicRendererState 
 	}
 
 	@Override
-	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing, BiomeOverlayEnum biomeOverlay) {
+	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing) {
 		for (SymbolUniverseEnum symbol : SymbolUniverseEnum.values()) {
 			symbolStateMap.put(symbol, getFloatValue(dialedAddress.contains(symbol)));
 		}
 		
-		return super.initClient(pos, facing, biomeOverlay);
+		return super.initClient(pos, facing);
 	}
 	
 	@Override

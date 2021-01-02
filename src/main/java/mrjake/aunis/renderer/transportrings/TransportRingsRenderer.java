@@ -22,13 +22,11 @@ public class TransportRingsRenderer implements RendererInterface {
 	public static final double ANIMATION_SPEED_DIVISOR = 2.7; 
 	
 	private World world;
-	private BlockPos pos;
 	private AunisAxisAlignedBB localTeleportBox;
 	private List<Ring> rings;
 		
 	public TransportRingsRenderer(World world, BlockPos pos, AunisAxisAlignedBB localTeleportBox) {
 		this.world = world;
-		this.pos = pos;
 		this.localTeleportBox = localTeleportBox;
 		
 		rings = new ArrayList<>();
@@ -56,7 +54,7 @@ public class TransportRingsRenderer implements RendererInterface {
 		GlStateManager.scale(0.5, 0.5, 0.5);
 		
 		for (Ring ring : rings)
-			ring.render(partialTicks, BiomeOverlayEnum.getOverlayFromBiome(world.getTileEntity(pos)));
+			ring.render(partialTicks, BiomeOverlayEnum.NORMAL); // Rings appear from underground, no frost/moss here.
 		
 		GlStateManager.popMatrix();
 		

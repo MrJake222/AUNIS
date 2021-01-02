@@ -19,7 +19,7 @@ public class StargateAbstractRendererState extends State {
 		}
 	}
 	
-	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing, BiomeOverlayEnum biomeOverlay) {
+	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing) {
 		this.pos = pos;
 		this.facing = facing;
 		
@@ -27,7 +27,7 @@ public class StargateAbstractRendererState extends State {
 			facing = facing.getOpposite();
 		
 		this.horizontalRotation = facing.getHorizontalAngle();
-		this.biomeOverlay = biomeOverlay;
+		this.biomeOverlay = BiomeOverlayEnum.NORMAL;
 		
 		return this;
 	}
