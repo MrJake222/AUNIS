@@ -1072,6 +1072,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 				
 				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing));
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
+
 				updateFacing(facing, false);
 				
 				break;

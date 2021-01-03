@@ -4,7 +4,6 @@ import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.loader.ElementEnum;
 import mrjake.aunis.loader.model.ModelLoader;
 import mrjake.aunis.loader.texture.TextureLoader;
-import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
@@ -77,7 +76,7 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 		GlStateManager.pushMatrix();
 		
 		GlStateManager.rotate(-chevron.rotation, 0, 1, 0);
-		TextureLoader.getTexture(rendererState.chevronTextureList.get(rendererState.biomeOverlay != BiomeOverlayEnum.MOSSY ? rendererState.biomeOverlay : BiomeOverlayEnum.NORMAL, chevron)).bindTexture(); // TODO Mossy
+		TextureLoader.getTexture(rendererState.chevronTextureList.get(rendererState.biomeOverlay, chevron)).bindTexture();
 		ElementEnum.UNIVERSE_CHEVRON.render();
 		
 		GlStateManager.popMatrix();

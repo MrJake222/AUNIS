@@ -25,14 +25,14 @@ public enum ElementEnum {
 	MILKYWAY_CHEVRON_MOVING("milkyway/chevronMoving.obj", "milkyway/chevron0"),
 	MILKYWAY_CHEVRON_BACK("milkyway/chevronBack.obj", "milkyway/gatering7"),
 
-	ORLIN_GATE("orlin/gate_orlin.obj", "orlin/gate_orlin", false), // TODO Mossy
+	ORLIN_GATE("orlin/gate_orlin.obj", "orlin/gate_orlin"),
 
 	
 	// --------------------------------------------------------------------------------------------
 	// Universe
 	
-	UNIVERSE_GATE("universe/universe_gate.obj", "universe/universe_gate", false), // TODO Mossy
-	UNIVERSE_CHEVRON("universe/universe_chevron.obj", "universe/universe_chevron10", false), // TODO Mossy
+	UNIVERSE_GATE("universe/universe_gate.obj", "universe/universe_gate"),
+	UNIVERSE_CHEVRON("universe/universe_chevron.obj", "universe/universe_chevron10"),
 	UNIVERSE_DIALER("universe/universe_dialer.obj", "universe/universe_dialer"),
 	
 	
@@ -46,20 +46,14 @@ public enum ElementEnum {
 	
 	// --------------------------------------------------------------------------------------------
 
-	private boolean supportsMossy;
 	public ResourceLocation modelResource;
 	public Map<BiomeOverlayEnum, ResourceLocation> biomeTextureResourceMap = new HashMap<>();
 	
-	private ElementEnum(String model, String texture, boolean supportsMossy) {
-		this.supportsMossy = supportsMossy;
+	private ElementEnum(String model, String texture) {
 		this.modelResource = ModelLoader.getModelResource(model);
 				
 		for (BiomeOverlayEnum biomeOverlay : BiomeOverlayEnum.values())
 			biomeTextureResourceMap.put(biomeOverlay, TextureLoader.getTextureResource(texture + biomeOverlay.suffix + ".jpg"));
-	}
-	
-	private ElementEnum(String model, String texture) {
-		this(model, texture, true);
 	}
 	
 	public void render() {
@@ -69,9 +63,6 @@ public enum ElementEnum {
 	private List<BiomeOverlayEnum> nonExistingReported = new ArrayList<>();
 	
 	public void bindTexture(BiomeOverlayEnum biomeOverlay) {
-		if (biomeOverlay == BiomeOverlayEnum.MOSSY && !supportsMossy)
-			biomeOverlay = BiomeOverlayEnum.NORMAL;
-		
 		ResourceLocation resourceLocation = biomeTextureResourceMap.get(biomeOverlay);
 		
 		if (!TextureLoader.isTextureLoaded(resourceLocation)) {

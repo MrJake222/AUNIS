@@ -304,6 +304,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			case RENDERER_STATE:
 				float horizontalRotation = world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
 				rendererStateClient = ((DHDRendererState) state).initClient(pos, horizontalRotation);
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
 				
 				break;
 		
