@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.block.stargate.StargateAbstractMemberBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
@@ -15,6 +14,7 @@ import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
+import mrjake.aunis.util.BlockHelpers;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -40,23 +40,24 @@ public abstract class StargateAbstractMergeHelper {
 	@Nonnull
 	public abstract List<BlockPos> getChevronBlocks();
 
-	private BlockPos topChevron; 
+	private BlockPos topBlock = null; 
 	
-	public BlockPos getTopChevron() {
-		if (topChevron == null) {
-			int maxy = 0;
-			
-			for (BlockPos chevron : getChevronBlocks()) {
-				if (chevron.getY() > maxy) {
-					maxy = chevron.getY();
-					topChevron = chevron;
-				}
-			}
-			
-			Aunis.logger.info(this + ": top " + topChevron);
-		}
-		
-		return topChevron;
+	/**
+	 * For Classic gate returns top chevron position (relative).
+	 * For Orlin's gate returns top ring position (no chevrons).
+	 * 
+	 * @return Gate's top block.
+	 */
+	public BlockPos getTopBlock() {
+		// null - not initialized
+		if (topBlock == null)
+			topBlock = BlockHelpers.getHighest(getChevronBlocks());
+
+		// Still null - chevron list empty (Orlin's gate)
+		if (topBlock == null)
+			topBlock = BlockHelpers.getHighest(getRingBlocks());
+
+		return topBlock;
 	}
 	
 	/**

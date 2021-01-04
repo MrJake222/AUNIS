@@ -14,6 +14,7 @@ import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.packet.StateUpdateRequestToServer;
 import mrjake.aunis.renderer.DHDRendererState;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.stargate.network.StargateAddressDynamic;
@@ -172,6 +173,15 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 				reactorState = ReactorStateEnum.NO_CRYSTAL;
 			}
 		}
+		
+		else {
+			// Client
+			
+			// Each 2s check for the sky
+			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null) {
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
+			}
+		}
 	}
 	
 	private boolean hadControlCrystal;
@@ -294,6 +304,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			case RENDERER_STATE:
 				float horizontalRotation = world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
 				rendererStateClient = ((DHDRendererState) state).initClient(pos, horizontalRotation);
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
 				
 				break;
 		

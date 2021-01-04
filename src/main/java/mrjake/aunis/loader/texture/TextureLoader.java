@@ -28,6 +28,15 @@ public class TextureLoader {
 		return LOADED_TEXTURES.get(resourceLocation);
 	}
 	
+	/**
+	 * Checks if the texture is loaded. If not, it probably doesn't exist.
+	 * 
+	 * @return True if the texture exists and it's loaded, False otherwise.
+	 */
+	public static boolean isTextureLoaded(ResourceLocation resourceLocation) {
+		return LOADED_TEXTURES.containsKey(resourceLocation);
+	}
+	
 	public static void reloadTextures(IResourceManager resourceManager) throws IOException {		
 		for (Texture texture : LOADED_TEXTURES.values())
 			texture.deleteTexture();

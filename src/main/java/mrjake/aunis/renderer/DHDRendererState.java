@@ -52,6 +52,7 @@ public class DHDRendererState extends State {
 	public DHDRendererState initClient(BlockPos pos, float horizontalRotation) {
 		this.pos = pos;
 		this.horizontalRotation = horizontalRotation;
+		this.biomeOverlay = BiomeOverlayEnum.NORMAL;
 		
 		for (SymbolMilkyWayEnum symbol : SymbolMilkyWayEnum.values()) {			
 			if (symbol.brb())
@@ -68,6 +69,7 @@ public class DHDRendererState extends State {
 	// Not saved
 	public BlockPos pos;
 	public float horizontalRotation;
+	public BiomeOverlayEnum biomeOverlay;
 	
 	// Symbols
 	// Not saved

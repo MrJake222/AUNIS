@@ -757,9 +757,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		else {
 			// Client
 			
-			// Each 2s
-			if (world.getTotalWorldTime() % 40 == 0) {
-				rendererStateClient.biomeOverlay = isGateDirectlyUnderSky() ? BiomeOverlayEnum.getOverlayFromBiome(this) : BiomeOverlayEnum.NORMAL;
+			// Each 2s check for the sky
+			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null) {
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos));
 			}
 		}
 	}
@@ -984,9 +984,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		markDirty();
 	}
-	
-	public abstract boolean isGateDirectlyUnderSky();
-	
+		
 	// ------------------------------------------------------------------------
 	// AutoClose
 	
@@ -1072,9 +1070,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		switch (stateType) {
 			case RENDERER_STATE:
 				EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
-				BiomeOverlayEnum biomeOverlay = isGateDirectlyUnderSky() ? BiomeOverlayEnum.getOverlayFromBiome(this) : BiomeOverlayEnum.NORMAL;
+				
+				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing));
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
 
-				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing, biomeOverlay));
 				updateFacing(facing, false);
 				
 				break;
