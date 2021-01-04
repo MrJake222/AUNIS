@@ -17,7 +17,7 @@ import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
-import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import mrjake.aunis.transportrings.TransportRings;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
@@ -165,13 +165,10 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 											
 											StargateAbstractBaseTile targetGateTile = stargatePos.getTileEntity();
 											
-											if (!(targetGateTile instanceof StargateAbstractBaseTile))
+											if (!(targetGateTile instanceof StargateClassicBaseTile))
 												continue;
 											
 											if (!targetGateTile.isMerged())
-												continue;
-											
-											if (targetGateTile instanceof StargateOrlinBaseTile)
 												continue;
 											
 											nearbyList.appendTag(entry.getKey().serializeNBT());
