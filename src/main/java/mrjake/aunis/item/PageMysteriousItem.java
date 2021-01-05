@@ -5,7 +5,6 @@ import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.notebook.PageNotebookItem;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import mrjake.aunis.worldgen.AbstractStargateGenerator;
 import mrjake.aunis.worldgen.AbstractStargateGenerator.GeneratedStargate;
 import mrjake.aunis.worldgen.OverworldStargateGenerator;
 import net.minecraft.client.util.ITooltipFlag;
