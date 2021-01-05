@@ -212,6 +212,10 @@ public class AunisConfig {
 		@Name("Chance of despawning DHD")
 		@RangeDouble(min=0, max=1)
 		public double despawnDhdChance = 0.05;
+
+		@Name("Mysterious page cooldown")
+		@RangeInt(min=0)
+		public int pageCooldown = 40;
 	}
 	
 	public static class AutoCloseConfig {

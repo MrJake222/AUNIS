@@ -1,6 +1,7 @@
 package mrjake.aunis.item;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.item.notebook.PageNotebookItem;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
@@ -58,6 +59,9 @@ public class PageMysteriousItem extends Item {
 					player.setHeldItem(hand, held);
 					player.addItemStackToInventory(stack);
 				}
+
+				if(AunisConfig.mysteriousConfig.pageCooldown > 0)
+					player.getCooldownTracker().setCooldown(this, AunisConfig.mysteriousConfig.pageCooldown);
 			}
 		}
 		
