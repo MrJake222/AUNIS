@@ -6,7 +6,7 @@ import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.GuiIdEnum;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
-import mrjake.aunis.stargate.BoundingHelper;
+import mrjake.aunis.stargate.CamoPropertiesHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
@@ -346,11 +346,8 @@ public abstract class StargateClassicMemberBlock extends StargateAbstractMemberB
 	// ------------------------------------------------------------------------
 
 	@Override
-	public int getLightOpacity(IBlockState state) {		
-		if (state.getValue(AunisProps.RENDER_BLOCK))
-			return 255;
-		else
-			return 0;
+	public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+		return CamoPropertiesHelper.getLightOpacity(state, world, pos);
 	}
 	
 	@Override
@@ -360,11 +357,11 @@ public abstract class StargateClassicMemberBlock extends StargateAbstractMemberB
 	
 	@Override
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
-		return BoundingHelper.getStargateBlockBoundingBox(state, access, pos);
+		return CamoPropertiesHelper.getStargateBlockBoundingBox(state, access, pos, false);
 	}
 	
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
-		return BoundingHelper.getStargateBlockBoundingBox(state, access, pos);
+		return CamoPropertiesHelper.getStargateBlockBoundingBox(state, access, pos, true);
 	}
 }

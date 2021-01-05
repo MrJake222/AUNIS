@@ -3,7 +3,7 @@ package mrjake.aunis.block.stargate;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.gui.GuiIdEnum;
-import mrjake.aunis.stargate.BoundingHelper;
+import mrjake.aunis.stargate.CamoPropertiesHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import net.minecraft.block.state.IBlockState;
@@ -58,11 +58,11 @@ public abstract class StargateClassicBaseBlock extends StargateAbstractBaseBlock
 	
 	@Override
 	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
-		return BoundingHelper.getStargateBlockBoundingBox(state, access, pos);
+		return CamoPropertiesHelper.getStargateBlockBoundingBox(state, access, pos, false);
 	}
 	
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
-		return BoundingHelper.getStargateBlockBoundingBox(state, access, pos);
+		return CamoPropertiesHelper.getStargateBlockBoundingBox(state, access, pos, true);
 	}
 }
