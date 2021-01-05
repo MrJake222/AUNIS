@@ -1,5 +1,10 @@
 package mrjake.aunis.crafting;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import mrjake.aunis.Aunis;
 import mrjake.aunis.item.AunisItems;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
@@ -44,7 +49,7 @@ public class NotebookRecipe extends Impl<IRecipe> implements IRecipe {
 			if(stack.hasTagCompound()) {
 				NBTTagCompound compound = stack.getTagCompound();
 
-				if (stack.getItem() == AunisItems.NOTEBOOK_ITEM && compound.hasKey("addressList", NBT.TAG_COMPOUND)) {
+				if (stack.getItem() == AunisItems.NOTEBOOK_ITEM && compound.hasKey("addressList", NBT.TAG_LIST)) {
 					NBTTagList notebookTags = compound.getTagList("addressList", NBT.TAG_COMPOUND);
 
 					for (NBTBase tag : notebookTags) {
