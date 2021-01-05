@@ -26,11 +26,15 @@ public class ModelLoader {
 		List<String> modelPaths = FolderLoader.getAllFiles(MODELS_PATH, ".obj");
 		ProgressBar progressBar = ProgressManager.push("Aunis - Loading models", modelPaths.size());
 		
+		long start = System.currentTimeMillis();
+		
 		for (String modelPath : modelPaths) {
 			String modelResourcePath = modelPath.replaceFirst("assets/aunis/", "");
 			progressBar.step(modelResourcePath);
 			LOADED_MODELS.put(new ResourceLocation(Aunis.ModID, modelResourcePath), OBJLoader.loadModel(modelPath));
 		}
+		
+		Aunis.logger.debug("Loaded "+modelPaths.size()+" models in "+(System.currentTimeMillis()-start)+" ms");
 		
 		ProgressManager.pop(progressBar);
 	}

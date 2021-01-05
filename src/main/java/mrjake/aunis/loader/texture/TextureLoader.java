@@ -44,6 +44,8 @@ public class TextureLoader {
 		List<String> texturePaths = FolderLoader.getAllFiles(TEXTURES_PATH, ".png", ".jpg");
 		ProgressBar progressBar = ProgressManager.push("Aunis - Loading textures", texturePaths.size());
 		
+		long start = System.currentTimeMillis();
+		
 		for (String texturePath : texturePaths) {
 			texturePath = texturePath.replaceFirst("assets/aunis/", "");
 			progressBar.step(texturePath);
@@ -73,6 +75,8 @@ public class TextureLoader {
 	            IOUtils.closeQuietly((Closeable)resource);
 			}
 		}
+		
+		Aunis.logger.debug("Loaded "+texturePaths.size()+" textures in "+(System.currentTimeMillis()-start)+" ms");
 		
 		ProgressManager.pop(progressBar);
 	}
