@@ -3,6 +3,7 @@ package mrjake.aunis.worldgen;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -76,9 +77,8 @@ public abstract class AbstractStargateGenerator<T extends StargateAbstractBaseTi
         if(processRes.basePos == null)
             throw new StargateGenerationException("BasePos is null in placeStargate after processDataBlocks");
 
-        //ToDo WARNING this will work for MilkyWay stargate only. I should change this probably but it's 7 AM lol. I mean... I need to sleep. Sorry
         if(processRes.dhdPos != null)
-            StargateGenerationHelper.updateLinkedGate(world, processRes.basePos, processRes.dhdPos);
+            LinkingHelper.updateLinkedGate(world, processRes.basePos, processRes.dhdPos);
 
         return new GeneratedStargate<>((T) world.getTileEntity(processRes.basePos));
     }
