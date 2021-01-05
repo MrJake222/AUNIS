@@ -13,6 +13,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Retrieve version and change beta to alpha
+      run: |
+        export AUNIS_VERSION_ONLY=$(grep mod_version gradle.properties | cut -d= -f2 | cut -d- -f1)
+        sed -i "s/beta/alpha-`date +%Y-%m-%d`/g" gradle.properties
+        export AUNIS_VERSION_DATE=$(grep mod_version gradle.properties | cut -d= -f2)
+        export MC_VERSION=$(grep -E "^mc_version" gradle.properties | cut -d= -f2)
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
@@ -21,5 +27,23 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
-    - name: List files
-      run: ls -R
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.AUNIS_VERSION_ONLY }}
+        release_name: Release aunis-${{ env.AUNIS_VERSION_DATE }}
+        draft: false
+        prerelease: true
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./build/libs/aunis-${{ env.MC_VERSION }}-${{ env.AUNIS_VERSION_DATE }}.jar
+        asset_name: aunis-${{ env.MC_VERSION }}-${{ env.AUNIS_VERSION_DATE }}.jar
+        asset_content_type: application/x-java-archive
