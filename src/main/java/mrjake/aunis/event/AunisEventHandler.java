@@ -39,40 +39,35 @@ public class AunisEventHandler {
 	public static void onRightClickEmpty(RightClickEmpty event) {	
 		onRightClick(event);
 	}
-	
+
 	private static void onRightClick(PlayerInteractEvent event) {		
 		EntityPlayer player = event.getEntityPlayer();
 		World world = player.getEntityWorld();
 		
 		if (!player.isSneaking() && !player.isSpectator()) {
 			BlockPos pos = player.getPosition();
-			EnumFacing playerFacing = EnumFacing.getDirectionFromEntityLiving(pos, player).getOpposite();
-			
-			if (playerFacing != EnumFacing.UP && playerFacing != EnumFacing.DOWN) { 
-				EnumFacing left = playerFacing.rotateYCCW();
-				EnumFacing right = playerFacing.rotateY();
-								
-				Iterable<BlockPos> blocks = BlockPos.getAllInBox(pos.offset(left).down(), pos.offset(right, 2).up().offset(playerFacing));
-				
-				for (BlockPos activatedBlock : blocks) {
-					Block block = world.getBlockState(activatedBlock).getBlock();
-	
-					/*
-					 * This only activates the DHD block, on both sides and
-					 * cancels the event. A packet is sent to the server by onActivated
-					 * only on main hand click.
-					 */
-					if (block == AunisBlocks.DHD_BLOCK && RaycasterDHD.INSTANCE.onActivated(world, activatedBlock, player, event.getHand())) {
-						
-						if (event.isCancelable()) {
-							event.setCanceled(true);
-						}
+			EnumFacing playerFacing = player.getHorizontalFacing(); //EnumFacing.getDirectionFromEntityLiving(pos, player).getOpposite()
+
+			EnumFacing left = playerFacing.rotateYCCW();
+			EnumFacing right = playerFacing.rotateY();
+
+			Iterable<BlockPos> blocks = BlockPos.getAllInBox(pos.offset(left).down().offset(playerFacing.getOpposite()), pos.offset(right).up().offset(playerFacing));
+
+			for (BlockPos activatedBlock : blocks) {
+				Block block = world.getBlockState(activatedBlock).getBlock();
+
+				/*
+				 * This only activates the DHD block, on both sides and
+				 * cancels the event. A packet is sent to the server by onActivated
+				 * only on main hand click.
+				 */
+				if (block == AunisBlocks.DHD_BLOCK && RaycasterDHD.INSTANCE.onActivated(world, activatedBlock, player, event.getHand())) {
+
+					if (event.isCancelable()) {
+						event.setCanceled(true);
 					}
 				}
 			}
-			
-			else
-				Aunis.logger.warn("Facing down when activating DHD");
 		}
     }
 
