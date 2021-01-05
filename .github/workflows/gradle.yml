@@ -14,6 +14,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Retrieve version and change beta to alpha
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       run: |
         echo ::set-env name=AUNIS_VERSION_ONLY::$(grep mod_version gradle.properties | cut -d= -f2 | cut -d- -f1)
         sed -i "s/beta/alpha-`date +%Y-%m-%d`/g" gradle.properties
