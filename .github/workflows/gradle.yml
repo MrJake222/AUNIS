@@ -15,10 +15,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Retrieve version and change beta to alpha
       run: |
-        export AUNIS_VERSION_ONLY=$(grep mod_version gradle.properties | cut -d= -f2 | cut -d- -f1)
+        echo ::set-env name=AUNIS_VERSION_ONLY::$(grep mod_version gradle.properties | cut -d= -f2 | cut -d- -f1)
         sed -i "s/beta/alpha-`date +%Y-%m-%d`/g" gradle.properties
-        export AUNIS_VERSION_DATE=$(grep mod_version gradle.properties | cut -d= -f2)
-        export MC_VERSION=$(grep -E "^mc_version" gradle.properties | cut -d= -f2)
+        echo ::set-env name=AUNIS_VERSION_DATE::$(grep mod_version gradle.properties | cut -d= -f2)
+        echo ::set-env name=MC_VERSION::$(grep -E "^mc_version" gradle.properties | cut -d= -f2)
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
