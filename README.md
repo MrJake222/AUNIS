@@ -2,8 +2,11 @@
 
 **All You Need is Stargate** is a Stargate-based Minecraft mod. It aims to closely resemble the franchise and be the most immersive Stargate mod out there.
 
->Created and coded by MrJake222
->Models by MarcelMPL
+>Created and coded by MrJake222<br>
+Models by MarcelMPL
+
+[![Aunis Curse statistics](http://cf.way2muchnoise.eu/aunis.svg)](http://minecraft.curseforge.com/projects/aunis)<br>
+
 
 ## Resources used by AUNIS
 * Stargate, transport rings sounds and textures from **Carter's Addon Pack**
