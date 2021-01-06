@@ -1,7 +1,7 @@
 # AUNIS
 
 [![Aunis Curse statistics](http://cf.way2muchnoise.eu/aunis.svg)](http://minecraft.curseforge.com/projects/aunis)
-[![Discord invite](https://img.shields.io/discord/595152041962373120?logo=discord&color=%236478BF&style=flat-square)](https://discord.gg/wfba6Dcyxe)
+[![Discord invite](https://img.shields.io/discord/595152041962373120?logo=discord&color=%235D70B3&style=flat-square)](https://discord.gg/wfba6Dcyxe)
 
 [![Releases](https://img.shields.io/github/v/release/MrJake222/AUNIS?color=%23B3451B&include_prereleases&label=alpha&style=flat-square)](https://github.com/MrJake222/AUNIS/releases)
 
