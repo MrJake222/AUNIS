@@ -1,5 +1,9 @@
 package mrjake.aunis.config;
 
+import java.util.List;
+
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
@@ -63,6 +67,48 @@ public class AunisConfig {
 			"Just press F3+Q once in-game."
 		})
 		public boolean disableAnimatedEventHorizon = false;
+
+		// ---------------------------------------------------------------------------------------
+		// Kawoosh blocks
+		
+		@Name("Kawoosh invincible blocks")
+		@Comment({
+			"Format: \"modid:blockid[:meta]\", for example: ",
+			"\"minecraft:wool:7\"",
+			"\"minecraft:stone\""
+		})
+		public String[] kawooshInvincibleBlocks = {};
+
+		private List<IBlockState> cachedInvincibleBlocks = null;
+
+		public boolean canKawooshDestroyBlock(IBlockState state) {
+			if (cachedInvincibleBlocks == null) {
+				cachedInvincibleBlocks = BlockMetaParser.parseConfig(kawooshInvincibleBlocks);
+			}
+			
+			return !cachedInvincibleBlocks.contains(state);
+		}
+		
+		
+		// ---------------------------------------------------------------------------------------
+		// Jungle biomes
+		@Name("Biomes in which blocks should be mossy")
+		@Comment({
+			"Format: \"modid:biomename\", for example: ",
+			"\"minecraft:dark_forest\"",
+			"\"minecraft:forest\""
+		})
+		public String[] jungleBiomes = {"minecraft:jungle", "minecraft:jungle_hills", "minecraft:jungle_edge", "minecraft:mutated_jungle", "minecraft:mutated_jungle_edge"};
+		
+		private List<Biome> cachedJungleBiomes = null;
+		
+		public boolean isJungleBiome(Biome biome) {
+			if (cachedJungleBiomes == null) {
+				cachedJungleBiomes = BiomeParser.parseConfig(jungleBiomes);
+			}
+			
+			return cachedJungleBiomes.contains(biome);
+		}
 	}
 	
 	public static class PowerConfig {
@@ -166,6 +212,10 @@ public class AunisConfig {
 		@Name("Chance of despawning DHD")
 		@RangeDouble(min=0, max=1)
 		public double despawnDhdChance = 0.05;
+
+		@Name("Mysterious page cooldown")
+		@RangeInt(min=0)
+		public int pageCooldown = 40;
 	}
 	
 	public static class AutoCloseConfig {
@@ -217,5 +267,18 @@ public class AunisConfig {
 		@Name("Aunis volume")
 		@RangeDouble(min=0, max=1)
 		public float volume = 1;
+		
+		@Name("Notebook Page offset")
+		@Comment({
+			"Greater values render the Page more to the center of the screen, smaller render it closer to the borders.",
+			"0 - for standard 16:9 (default),",
+			"0.2 - for 4:3.",
+		})
+		public float pageNarrowing = 0;
+	}
+	
+	public static void resetCache() {
+		stargateConfig.cachedInvincibleBlocks = null;
+		stargateConfig.cachedJungleBiomes = null;
 	}
 }

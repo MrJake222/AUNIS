@@ -9,7 +9,7 @@ public class ItemHelper {
 		Item item = new Item();
 		
 		item.setRegistryName(Aunis.ModID + ":" + name);
-		item.setTranslationKey(Aunis.ModID + "." + name);
+		item.setUnlocalizedName(Aunis.ModID + "." + name);
 		
 		item.setCreativeTab(Aunis.aunisCreativeTab);
 		

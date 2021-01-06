@@ -28,12 +28,23 @@ public class TextureLoader {
 		return LOADED_TEXTURES.get(resourceLocation);
 	}
 	
+	/**
+	 * Checks if the texture is loaded. If not, it probably doesn't exist.
+	 * 
+	 * @return True if the texture exists and it's loaded, False otherwise.
+	 */
+	public static boolean isTextureLoaded(ResourceLocation resourceLocation) {
+		return LOADED_TEXTURES.containsKey(resourceLocation);
+	}
+	
 	public static void reloadTextures(IResourceManager resourceManager) throws IOException {		
 		for (Texture texture : LOADED_TEXTURES.values())
 			texture.deleteTexture();
 		
 		List<String> texturePaths = FolderLoader.getAllFiles(TEXTURES_PATH, ".png", ".jpg");
 		ProgressBar progressBar = ProgressManager.push("Aunis - Loading textures", texturePaths.size());
+		
+		long start = System.currentTimeMillis();
 		
 		for (String texturePath : texturePaths) {
 			texturePath = texturePath.replaceFirst("assets/aunis/", "");
@@ -64,6 +75,8 @@ public class TextureLoader {
 	            IOUtils.closeQuietly((Closeable)resource);
 			}
 		}
+		
+		Aunis.logger.debug("Loaded "+texturePaths.size()+" textures in "+(System.currentTimeMillis()-start)+" ms");
 		
 		ProgressManager.pop(progressBar);
 	}

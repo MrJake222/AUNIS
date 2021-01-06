@@ -32,10 +32,10 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 		GlStateManager.rotate((float) angularRotation + 0.6f, 0, 1, 0);
 		renderChevrons(rendererState, partialTicks);
 					
-		ElementEnum.UNIVERSE_GATE.bindTextureAndRender();
+		ElementEnum.UNIVERSE_GATE.bindTextureAndRender(rendererState.biomeOverlay);
 		
 		GlStateManager.disableLighting();
-		ElementEnum.UNIVERSE_CHEVRON.bindTexture();
+		ElementEnum.UNIVERSE_CHEVRON.bindTexture(rendererState.biomeOverlay);
 		
 		for (SymbolUniverseEnum symbol : SymbolUniverseEnum.values()) {
 			if (symbol.modelResource != null) {
@@ -76,7 +76,7 @@ public class StargateUniverseRenderer extends StargateClassicRenderer<StargateUn
 		GlStateManager.pushMatrix();
 		
 		GlStateManager.rotate(-chevron.rotation, 0, 1, 0);
-		TextureLoader.getTexture(rendererState.chevronTextureList.get(chevron)).bindTexture();
+		TextureLoader.getTexture(rendererState.chevronTextureList.get(rendererState.biomeOverlay, chevron)).bindTexture();
 		ElementEnum.UNIVERSE_CHEVRON.render();
 		
 		GlStateManager.popMatrix();

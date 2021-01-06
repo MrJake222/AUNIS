@@ -12,6 +12,6 @@ public class AunisBlockFluid extends BlockFluidClassic {
 		super(fluid, Material.LAVA);
 		
 		setRegistryName(new ResourceLocation(Aunis.ModID, name));
-		setTranslationKey(getRegistryName().toString());
+		setUnlocalizedName(getRegistryName().toString());
 	}	
 }

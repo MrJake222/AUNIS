@@ -7,12 +7,11 @@ import net.minecraft.item.ItemStack;
 public class AunisCreativeTab extends CreativeTabs {
 	
 	public AunisCreativeTab() {
-		
 		super(Aunis.ModID);
 	}
 	
 	@Override
-	public ItemStack createIcon() {
+	public ItemStack getTabIconItem() {
 		return new ItemStack(AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK);
 	}
 }

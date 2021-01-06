@@ -25,7 +25,7 @@ public class AunisFontRenderer extends FontRenderer {
 			fontRenderer = new AunisFontRenderer(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.renderEngine, false);
 			((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(fontRenderer);
 			
-			Aunis.info("Created custom FontRenderer");
+			Aunis.logger.debug("Created custom FontRenderer");
 		}
 		
 		return fontRenderer;

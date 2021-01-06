@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.template.ITemplateProcessor;
 import net.minecraft.world.gen.structure.template.Template.BlockInfo;
 
-public class StargateNetherTemplateProcessor implements ITemplateProcessor {
+public final class StargateNetherTemplateProcessor implements ITemplateProcessor {
 
 	@Override
 	public BlockInfo processBlock(World world, BlockPos pos, BlockInfo blockInfoIn) {

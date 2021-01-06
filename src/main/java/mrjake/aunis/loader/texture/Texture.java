@@ -17,7 +17,7 @@ public class Texture {
 		this.textureId = TextureUtil.glGenTextures();
 		
 		if (desaturate) {
-			Aunis.info("Started desaturation of the event horizon texture");
+			Aunis.logger.info("Started desaturation of the event horizon texture");
 			
         	WritableRaster raster = bufferedImage.getRaster();
         	
@@ -44,7 +44,7 @@ public class Texture {
         		e.printStackTrace();
         	}
         	
-			Aunis.info("Finished desaturation of the event horizon texture");
+			Aunis.logger.info("Finished desaturation of the event horizon texture");
 
 			// Single threaded code
 //        	float[] pixel = new float[3];
@@ -96,7 +96,7 @@ public class Texture {
 		
 		@Override
 		public void run() {
-			Aunis.info(String.format("Starting thread (%d, %d) to (%d, %d)", x, y, x+w, y+h));
+			Aunis.logger.debug(String.format("Starting thread (%d, %d) to (%d, %d)", x, y, x+w, y+h));
 			
 			float[] pixel = new float[3];
         	float gray;
@@ -120,7 +120,7 @@ public class Texture {
         		}	            		
         	}
 						
-			Aunis.info(String.format("Finished thread (%d, %d) to (%d, %d)", x, y, x+w, y+h));
+			Aunis.logger.debug(String.format("Finished thread (%d, %d) to (%d, %d)", x, y, x+w, y+h));
 		}
 	}
 }

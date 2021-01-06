@@ -17,7 +17,7 @@ import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.network.SymbolUniverseEnum;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
-import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import mrjake.aunis.transportrings.TransportRings;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
@@ -48,10 +48,18 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 
 	public UniverseDialerItem() {
 		setRegistryName(new ResourceLocation(Aunis.ModID, ITEM_NAME));
-		setTranslationKey(Aunis.ModID + "." + ITEM_NAME);
+		setUnlocalizedName(Aunis.ModID + "." + ITEM_NAME);
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
 		setMaxStackSize(1);
+	}
+
+	// TODO replace with capabilities. If item will have NBT like "display:Name" it will not init custom NBT! -- slava110
+	// MrJake: Capabilities are meh in 1.12. Hope they've fixed them in 1.16.
+	private static void checkNBT(ItemStack stack) {
+		if(!stack.hasTagCompound()) {
+			initNBT(stack);
+		}
 	}
 	
 	private static void initNBT(ItemStack stack) {
@@ -109,6 +117,7 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
 		if (!world.isRemote) {
+			checkNBT(stack);
 			NBTTagCompound compound = stack.getTagCompound();
 			
 			if (world.getTotalWorldTime() % 20 == 0 && isSelected) {
@@ -156,13 +165,10 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 											
 											StargateAbstractBaseTile targetGateTile = stargatePos.getTileEntity();
 											
-											if (!(targetGateTile instanceof StargateAbstractBaseTile))
+											if (!(targetGateTile instanceof StargateClassicBaseTile))
 												continue;
 											
 											if (!targetGateTile.isMerged())
-												continue;
-											
-											if (targetGateTile instanceof StargateOrlinBaseTile)
 												continue;
 											
 											nearbyList.appendTag(entry.getKey().serializeNBT());
@@ -214,6 +220,7 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
 		if (!world.isRemote) {
+			checkNBT(player.getHeldItem(hand));
 			NBTTagCompound compound = player.getHeldItem(hand).getTagCompound();
 			UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
 			int selected = compound.getByte("selected");
@@ -250,7 +257,6 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 							
 						default:
 							player.sendStatusMessage(new TextComponentTranslation("item.aunis.universe_dialer.gate_busy"), true);
-							Aunis.info("state: " + gateTile.getStargateState());
 							break;
 					}
 					

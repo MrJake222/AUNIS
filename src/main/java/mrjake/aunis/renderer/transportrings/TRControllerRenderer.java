@@ -8,18 +8,16 @@ import mrjake.vector.Vector3f;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class TRControllerRenderer implements RendererInterface {
 
+	private TRControllerTile controllerTile;
 	private EnumFacing facing;
 	
 	public TRControllerRenderer(TRControllerTile controllerTile) {
-		World world = controllerTile.getWorld();
-		BlockPos pos = controllerTile.getPos();
+		this.controllerTile = controllerTile;
 		
-		IBlockState blockState = world.getBlockState(pos);
+		IBlockState blockState = controllerTile.getWorld().getBlockState(controllerTile.getPos());
 		facing = blockState.getValue(AunisProps.FACING_HORIZONTAL);
 	}
 
@@ -77,8 +75,8 @@ public class TRControllerRenderer implements RendererInterface {
 		GlStateManager.translate(tr.x, tr.y, tr.z);
 		GlStateManager.rotate(rot, 0, 1, 0);
 		
-		ElementEnum.RINGSCONTROLLER_GOAULD.bindTextureAndRender();
-		ElementEnum.RINGSCONTROLLER_GOAULD_BUTTONS.bindTextureAndRender();
+		ElementEnum.RINGSCONTROLLER_GOAULD.bindTextureAndRender(controllerTile.getBiomeOverlay());
+		ElementEnum.RINGSCONTROLLER_GOAULD_BUTTONS.bindTextureAndRender(controllerTile.getBiomeOverlay());
 		
 		GlStateManager.popMatrix();
 	}
