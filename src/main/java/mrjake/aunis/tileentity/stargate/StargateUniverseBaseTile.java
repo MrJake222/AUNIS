@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity.stargate;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import mrjake.aunis.config.AunisConfig;
@@ -7,6 +8,7 @@ import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.renderer.stargate.StargateClassicRendererState.StargateClassicRendererStateBuilder;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.renderer.stargate.StargateUniverseRendererState;
 import mrjake.aunis.renderer.stargate.StargateUniverseRendererState.StargateUniverseRendererStateBuilder;
 import mrjake.aunis.sound.AunisSoundHelper;
@@ -123,6 +125,17 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 	@Override
 	protected int getOpenSoundDelay() {
 		return super.getOpenSoundDelay() + 10;
+	}
+	
+	public static final EnumSet<BiomeOverlayEnum> SUPPORTED_OVERLAYS = EnumSet.of(
+			BiomeOverlayEnum.NORMAL,
+			BiomeOverlayEnum.FROST,
+			BiomeOverlayEnum.MOSSY,
+			BiomeOverlayEnum.AGED);
+	
+	@Override
+	protected EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
+		return SUPPORTED_OVERLAYS;
 	}
 	
 	// --------------------------------------------------------------------------------

@@ -767,10 +767,12 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			
 			// Each 2s check for the sky
 			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null) {
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos));
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos), getSupportedOverlays());
 			}
 		}
 	}
+	
+	protected abstract EnumSet<BiomeOverlayEnum> getSupportedOverlays();
 	
 	/**
 	 * Method for closing the gate using Autoclose mechanism.
@@ -1080,7 +1082,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 				
 				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing));
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, getSupportedOverlays());
 
 				updateFacing(facing, false);
 				

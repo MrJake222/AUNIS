@@ -1,6 +1,7 @@
 package mrjake.aunis.tileentity;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 import mrjake.aunis.Aunis;
@@ -179,10 +180,15 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			
 			// Each 2s check for the sky
 			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null) {
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, SUPPORTED_OVERLAYS);
 			}
 		}
 	}
+	
+	public static final EnumSet<BiomeOverlayEnum> SUPPORTED_OVERLAYS = EnumSet.of(
+			BiomeOverlayEnum.NORMAL,
+			BiomeOverlayEnum.FROST,
+			BiomeOverlayEnum.MOSSY);
 	
 	private boolean hadControlCrystal;
 	
@@ -304,7 +310,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			case RENDERER_STATE:
 				float horizontalRotation = world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
 				rendererStateClient = ((DHDRendererState) state).initClient(pos, horizontalRotation);
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
+				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, SUPPORTED_OVERLAYS);
 				
 				break;
 		

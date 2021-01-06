@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity.stargate;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -8,6 +9,7 @@ import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateDimensionConfig;
 import mrjake.aunis.config.StargateSizeEnum;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRendererState;
 import mrjake.aunis.renderer.stargate.StargateMilkyWayRendererState.StargateMilkyWayRendererStateBuilder;
@@ -329,6 +331,16 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		}
 	}
 	
+	public static final EnumSet<BiomeOverlayEnum> SUPPORTED_OVERLAYS = EnumSet.of(
+			BiomeOverlayEnum.NORMAL,
+			BiomeOverlayEnum.FROST,
+			BiomeOverlayEnum.MOSSY,
+			BiomeOverlayEnum.AGED);
+	
+	@Override
+	protected EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
+		return SUPPORTED_OVERLAYS;
+	}
 	
 	// ------------------------------------------------------------------------
 	// Killing and block vaporizing                                                                          

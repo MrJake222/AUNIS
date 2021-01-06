@@ -1,6 +1,7 @@
 package mrjake.aunis.tileentity.stargate;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 
@@ -14,6 +15,7 @@ import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateDimensionConfig;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.renderer.stargate.StargateAbstractRendererState;
 import mrjake.aunis.renderer.stargate.StargateOrlinRendererState;
 import mrjake.aunis.sound.AunisSoundHelper;
@@ -176,6 +178,16 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 			if (!world.getBlockState(pos).getValue(AunisProps.RENDER_BLOCK) && rendererStateClient != null)
 				Aunis.proxy.orlinRendererSpawnParticles(world, getRendererStateClient());
 		}
+	}
+	
+	public static final EnumSet<BiomeOverlayEnum> SUPPORTED_OVERLAYS = EnumSet.of(
+			BiomeOverlayEnum.NORMAL,
+			BiomeOverlayEnum.FROST,
+			BiomeOverlayEnum.MOSSY);
+	
+	@Override
+	protected EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
+		return SUPPORTED_OVERLAYS;
 	}
 	
 	

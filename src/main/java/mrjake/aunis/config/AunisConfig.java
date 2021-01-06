@@ -68,6 +68,12 @@ public class AunisConfig {
 		})
 		public boolean disableAnimatedEventHorizon = false;
 
+		@Name("Temperature threshold for frosty overlay")
+		@Comment({
+			"Below this biome temperature the gate will receive frosty texture"
+		})
+		public float frostyTemperatureThreshold = 0.1f;
+		
 		// ---------------------------------------------------------------------------------------
 		// Kawoosh blocks
 		

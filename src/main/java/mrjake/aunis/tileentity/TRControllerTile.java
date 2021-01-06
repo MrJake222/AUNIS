@@ -1,5 +1,7 @@
 package mrjake.aunis.tileentity;
 
+import java.util.EnumSet;
+
 import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.renderer.transportrings.TRControllerRenderer;
 import mrjake.aunis.tesr.RendererInterface;
@@ -23,7 +25,7 @@ public class TRControllerTile extends TileEntity implements ITickable, ILinkable
 	public void onLoad() {
 		if (world.isRemote) {
 			renderer = new TRControllerRenderer(this);
-			biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
+			biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, SUPPORTED_OVERLAYS);
 		}
 	}
 	
@@ -33,10 +35,15 @@ public class TRControllerTile extends TileEntity implements ITickable, ILinkable
 			// Client
 			
 			if (world.getTotalWorldTime() % 40 == 0) {
-				biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
+				biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, SUPPORTED_OVERLAYS);
 			}
 		}
 	}
+	
+	public static final EnumSet<BiomeOverlayEnum> SUPPORTED_OVERLAYS = EnumSet.of(
+			BiomeOverlayEnum.NORMAL,
+			BiomeOverlayEnum.FROST,
+			BiomeOverlayEnum.MOSSY);
 	
 	// ------------------------------------------------------------------------
 	// Rings 
