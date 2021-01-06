@@ -10,7 +10,6 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.loader.texture.TextureLoader;
 import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.StargateActivation;
-import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
@@ -27,17 +26,11 @@ public class ChevronTextureList {
 	private Map<ChevronEnum, Integer> CHEVRON_STATE_MAP = new HashMap<>(9);
 	private List<Activation<ChevronEnum>> activationList = new ArrayList<>();
 	
-	private final Map<BiomeOverlayEnum, Map<Integer, ResourceLocation>> CHEVRON_RESOURCE_MAP = new HashMap<>();
+	private final Map<Integer, ResourceLocation> CHEVRON_RESOURCE_MAP = new HashMap<>();
 	
 	public ChevronTextureList(String chevronTextureBase) {		
-		for (BiomeOverlayEnum biomeOverlay : BiomeOverlayEnum.values()) {
-			Map<Integer, ResourceLocation> map = new HashMap<>();
-			
-			for (int i=0; i<=10; i++) {
-				map.put(i, TextureLoader.getTextureResource(chevronTextureBase + i + biomeOverlay.suffix + ".jpg"));
-			}
-			
-			CHEVRON_RESOURCE_MAP.put(biomeOverlay, map);
+		for (int i=0; i<=10; i++) {
+			CHEVRON_RESOURCE_MAP.put(i, TextureLoader.getTextureResource(chevronTextureBase + i + ".jpg"));
 		}
 	}
 	
@@ -114,8 +107,8 @@ public class ChevronTextureList {
 		});
 	}
 	
-	public ResourceLocation get(BiomeOverlayEnum overlayEnum, ChevronEnum chevron) {
-		return CHEVRON_RESOURCE_MAP.get(overlayEnum).get(CHEVRON_STATE_MAP.get(chevron));
+	public ResourceLocation get(ChevronEnum chevron) {
+		return CHEVRON_RESOURCE_MAP.get(CHEVRON_STATE_MAP.get(chevron));
 	}
 	
 	public void toBytes(ByteBuf buf) {

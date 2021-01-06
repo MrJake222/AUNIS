@@ -2,21 +2,28 @@ package mrjake.aunis.block.stargate;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
-import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
+import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -24,24 +31,30 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public final class StargateOrlinMemberBlock extends StargateAbstractMemberBlock {
+public class StargateOrlinMemberBlock extends Block {
+
+	private static final String BLOCK_NAME = "stargate_orlin_member_block";
 	
 	public StargateOrlinMemberBlock() {
-		super("stargate_orlin_member_block");
-
+		super(Material.IRON);
+		
+		setRegistryName(Aunis.ModID + ":" + BLOCK_NAME);
+		setTranslationKey(Aunis.ModID + "." + BLOCK_NAME);
+		
+		setSoundType(SoundType.METAL); 
+		setCreativeTab(Aunis.aunisCreativeTab);
+		
 		setDefaultState(blockState.getBaseState()
 				.withProperty(AunisProps.RENDER_BLOCK, true)
 				.withProperty(AunisProps.ORLIN_VARIANT, EnumFacing.DOWN));
 		
 		setLightOpacity(0);
+		
+		setHardness(3.0f);
 		setResistance(16.0f);
+		setHarvestLevel("pickaxe", 3);
 	}
-
-	@Override
-	protected StargateAbstractMergeHelper getMergeHelper() {
-		return StargateOrlinMergeHelper.INSTANCE;
-	}
-
+	
 	@Override
 	public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
 		if (stack.hasTagCompound()) {
@@ -71,7 +84,7 @@ public final class StargateOrlinMemberBlock extends StargateAbstractMemberBlock 
 	public IBlockState getStateFromMeta(int meta) {		
 		return getDefaultState()
 				.withProperty(AunisProps.RENDER_BLOCK, (meta & 0x08) != 0)
-				.withProperty(AunisProps.ORLIN_VARIANT, EnumFacing.getFront(meta & 0x07));
+				.withProperty(AunisProps.ORLIN_VARIANT, EnumFacing.byIndex(meta & 0x07));
 	}
 	
 	
@@ -90,12 +103,22 @@ public final class StargateOrlinMemberBlock extends StargateAbstractMemberBlock 
 			world.setBlockState(pos, state, 0);
 			memberTile.initializeFromItemStack(stack);
 			
-			StargateAbstractBaseTile gateTile = getMergeHelper().findBaseTile(world, pos, facing);
+			StargateAbstractBaseTile gateTile = StargateOrlinMergeHelper.INSTANCE.findBaseTile(world, pos, facing);
 			
 			if (gateTile != null) {
-				gateTile.updateMergeState(getMergeHelper().checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), facing);
+				gateTile.updateMergeState(StargateOrlinMergeHelper.INSTANCE.checkBlocks(world, gateTile.getPos(), world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL)), facing);
 			}				
 		}
+	}
+	
+	@Override
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {
+		StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
+		StargateOrlinBaseTile gateTile = memberTile.getBaseTile(world);
+		
+		if (gateTile != null) {
+			gateTile.updateMergeState(false, world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL));
+		}	
 	}
 	
 	@Override
@@ -104,6 +127,18 @@ public final class StargateOrlinMemberBlock extends StargateAbstractMemberBlock 
 		
 		gateTile.addDrops(drops);
 	}
+	
+	@Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        if (willHarvest) return true; //If it will harvest, delay deletion of the block until after getDrops
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+	
+    @Override
+    public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack tool) {
+        super.harvestBlock(world, player, pos, state, te, tool);
+        world.setBlockToAir(pos);
+    }
 	
 	// ------------------------------------------------------------------------
 	// Render
@@ -168,7 +203,35 @@ public final class StargateOrlinMemberBlock extends StargateAbstractMemberBlock 
 	}
 	
 	@Override
+	public boolean hasTileEntity(IBlockState state) {
+		return true;
+	}
+	
+	@Override
 	public TileEntity createTileEntity(World world, IBlockState state) {
 		return new StargateOrlinMemberTile();
+	}
+	
+	@Override
+	public EnumBlockRenderType getRenderType(IBlockState state) {
+		if (state.getValue(AunisProps.RENDER_BLOCK))
+			return EnumBlockRenderType.MODEL;
+		else
+			return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
+	}
+	
+	@Override
+	public boolean isOpaqueCube(IBlockState state) {
+		return false;
+	}
+	
+	@Override
+	public boolean isFullCube(IBlockState state) {
+		return false;
+	}
+	
+	@Override
+	public boolean isFullBlock(IBlockState state) {
+		return false;
 	}
 }

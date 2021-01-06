@@ -3,17 +3,12 @@ package mrjake.aunis.stargate.merging;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.stargate.StargateUniverseMemberBlock;
-import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
 public class StargateUniverseMergeHelper extends StargateClassicMergeHelper {
@@ -61,27 +56,6 @@ public class StargateUniverseMergeHelper extends StargateClassicMergeHelper {
 	}
 	
 	@Override
-	@Nullable
-	public EnumMemberVariant getMemberVariantFromItemStack(ItemStack stack) {
-		if (!(stack.getItem() instanceof ItemBlock))
-			return null;
-		
-		// No need to use .equals() because blocks are singletons
-		if (((ItemBlock) stack.getItem()).getBlock() != AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK)
-			return null;
-		
-		int meta = stack.getMetadata();
-		
-		if (meta == AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK.RING_META)
-			return EnumMemberVariant.RING;
-		
-		if (meta == AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK.CHEVRON_META)
-			return EnumMemberVariant.CHEVRON;
-		
-		return null;
-	}
-	
-	@Override
 	public AunisAxisAlignedBB getBaseSearchBox() {
 		return BASE_SEARCH_BOX;
 	}
@@ -97,7 +71,7 @@ public class StargateUniverseMergeHelper extends StargateClassicMergeHelper {
 	}
 	
 	@Override
-	public StargateUniverseMemberBlock getMemberBlock() {
+	public Block getMemberBlock() {
 		return AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK;
 	}
 }

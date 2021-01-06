@@ -30,7 +30,7 @@ public class StargateOrlinRenderer extends StargateAbstractRenderer<StargateAbst
 	protected void renderGate(StargateAbstractRendererState rendererState, double partialTicks) {
 		GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 		
-		ElementEnum.ORLIN_GATE.bindTextureAndRender(rendererState.biomeOverlay);
+		ElementEnum.ORLIN_GATE.bindTextureAndRender();
 	}
 
 	@Override

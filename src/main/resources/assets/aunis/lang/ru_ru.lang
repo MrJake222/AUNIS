@@ -1,109 +1,102 @@
 itemGroup.aunis=Aunis
-soundCategory.aunis=Aunis
 
 item.aunis.analyzer_ancient.name=Анализатор Древних
-item.aunis.crystal_control_dhd.name=Контрольный кристалл наборного устройства
-item.aunis.dialer_fast.name=Быстрый Набор (отладка)
+item.aunis.crystal_control_dhd.name=Контрольный Кристалл Наборного Устройства
+item.aunis.dialer_fast.name=Быстрый Набор (Отладка)
 
-item.aunis.crystal_glyph_dhd.name=Символьный кристалл наборного устройства
-item.aunis.crystal_glyph_stargate.name=Символьный кристалл звёздных врат
-item.aunis.crystal_glyph_milkyway.name=Кристалл адреса Млечного Пути
-item.aunis.crystal_glyph_pegasus.name=Кристалл адреса Пегаса
-item.aunis.crystal_glyph_universe.name=Кристалл адреса Вселенной
+item.aunis.crystal_glyph_dhd.name=Кристалл Улучшения Наборного Устройства
+item.aunis.crystal_glyph_stargate.name=Кристалл Улучшения Звёздных Врат
+item.aunis.crystal_glyph_milkyway.name=Кристалл Адреса Млёчного Пути
+item.aunis.crystal_glyph_pegasus.name=Кристалл Адреса Пегаса
+item.aunis.crystal_glyph_universe.name=Кристалл Адреса Вселенной
 
-tile.aunis.naquadah_ore.name=Руда наквадаха
-tile.aunis.naquadah_ore_stone.name=Руда наквадаха (в камне)
-tile.aunis.naquadah_block.name=Блок наквадаха
-item.aunis.naquadah_shard.name=Осколок наквадаха
-item.aunis.naquadah_alloy.name=Обработанный слиток из сплава наквадаха
-item.aunis.naquadah_alloy_raw.name=Слиток из сплава наквадаха
+tile.aunis.naquadah_ore.name=Руда Наквадаха
+tile.aunis.naquadah_block.name=Блок Наквадаха
+item.aunis.naquadah_shard.name=Осколок Наквадаха
+item.aunis.naquadah_alloy.name=Очищенный Слиток Сплава Наквадаха
+item.aunis.naquadah_alloy_raw.name=Слиток Сплава Наквадаха
 
-tile.aunis.invisible_block.name=Невидимый блок :P
+tile.aunis.invisible_block.name=Ты не можешь увидеть меня блок
 
-tile.aunis.stargate_milkyway_base_block.name=Основание звёздных врат (Млечный Путь)
-tile.aunis.stargate_milkyway_ring_block.name=Кольцо звёздных врат (Млечный Путь)
-tile.aunis.stargate_milkyway_chevron_block.name=Шеврон звёздных врат (Млечный Путь)
-tile.aunis.dhd_block.name=Наборное устройство
+tile.aunis.stargate_milkyway_base_block.name=Основание Звёздных Врат (Млечный Путь)
+tile.aunis.stargate_milkyway_ring_block.name=Кольцо Звёздных Врат(Млечный Путь)
+tile.aunis.stargate_milkyway_chevron_block.name=Шеврон Звёздных Врат (Млечный Путь)
+tile.aunis.dhd_block.name=Наборное Устройство
 tile.aunis.capacitor_block.name=Конденсатор
-tile.aunis.capacitor_block_empty.name=Конденсатор (пустой)
+tile.aunis.capacitor_block_empty.name=Конденсатор (Пустой)
 
-tile.aunis.stargate_orlin_base_block.open_count=Накопленная энергия: %s / %s
-tile.aunis.stargate_orlin_base_block.name=Основание звёздных врат (Орлин)
-tile.aunis.stargate_orlin_member_block.name=Кольцо звёздных врат (Орлин)
+tile.aunis.stargate_orlin_base_block.name=Основание Звёздных Врат (Орлин)
+tile.aunis.stargate_orlin_member_block.name=Кольцо Звёздных Врат (Орлин)
 
-tile.aunis.stargate_universe_base_block.name=Основание звёздных врат (Вселенная)
-tile.aunis.stargate_universe_chevron_block.name=Шеврон звёздных врат (Вселенная)
-tile.aunis.stargate_universe_ring_block.name=Кольцо звёздных врат (Вселенная)
+tile.aunis.stargate_universe_base_block.name=Основание Звёздных Врат (Вселенная)
+tile.aunis.stargate_universe_chevron_block.name=Шеврон Звёздных Врат (Вселенная)
+tile.aunis.stargate_universe_ring_block.name=Кольцо Звёздных Врат (Вселенная)
 
-item.aunis.crystal_fragment.name=Семя кристалла
-item.aunis.crystal_blank.name=Пустой кристалл
-item.aunis.crystal_blue.name=Телепортационный кристалл
-item.aunis.crystal_red.name=Энергетический кристалл
-item.aunis.crystal_ender.name=Эндер кристалл
-item.aunis.crystal_yellow.name=Световой кристалл
-item.aunis.crystal_white.name=Белый кристалл
+item.aunis.crystal_fragment.name=Семя Кристалла
+item.aunis.crystal_blank.name=Пустой Кристалл
+item.aunis.crystal_blue.name=Кристалл Телепортации
+item.aunis.crystal_red.name=Энергетический Кристалл
+item.aunis.crystal_ender.name=Эндер Кристалл
+item.aunis.crystal_yellow.name=Кристалл Света
+item.aunis.crystal_white.name=Белый Кристалл
 
-item.aunis.circuit_control_base.name=Основа главной микросхемы
-item.aunis.circuit_control_naquadah.name=Главная микросхема из наквадаха
-item.aunis.circuit_control_crystal.name=Кристальная главная микросхема
+item.aunis.circuit_control_base.name=Основание Микросхемы Управления
+item.aunis.circuit_control_naquadah.name=Микросхема Управления Из Наквадаха
+item.aunis.circuit_control_crystal.name=Кристальная Микросхема Управления
 
-item.aunis.dhd_brb.name=Большая красная кнопка
+item.aunis.dhd_brb.name=Большая Красная Кнопка
 
-item.aunis.stargate_ring_fragment.name=Сегмент кольца звёздных врат
-item.aunis.universe_ring_fragment.name=Сегмент кольца звёздных врат (Вселенная)
-item.aunis.holder_crystal.name=Держатель кристалла
+item.aunis.stargate_ring_fragment.name=Фрагмент Кольца Звёздных Врат (Млечный Путь)
+item.aunis.universe_ring_fragment.name=Фрагмент Кольца Звёздных Врат (Вселенная)
+item.aunis.holder_crystal.name=Держатель Кристалла
 
-item.aunis.page_notebook.name=Страница блокнота
-item.aunis.page_mysterious.name=Мистическая страница
+item.aunis.page_notebook.name=Страница Блокнота
+item.aunis.page_mysterious.name=Загадочная Страница
 item.aunis.page_mysterious.empty=Пусто
-item.aunis.mysterious_page.tooltip=Никто не знает куда она ведёт
+item.aunis.mysterious_page.tooltip=Кто Знает Куда Она Ведёт
 
-fluid.silicon_molten_black=Расплавленный силикон
-fluid.silicon_molten_white=Обработанный силикон
-fluid.silicon_molten_red=Энергетическая смесь
-fluid.silicon_molten_blue=Телепортационная смесь
-fluid.silicon_molten_ender=Эндер смесь
-fluid.silicon_molten_yellow=Световая смесь
-fluid.naquadah_molten_raw=Жидкий наквадах
-fluid.naquadah_molten_refined=Обработанный наквадах
-fluid.naquadah_molten_alloy=Жидкий сплав из наквадаха
+fluid.silicon_molten_black=Расплавленный Силикон
+fluid.silicon_molten_white=Очищенный Силикон
+fluid.silicon_molten_red=Энергетическая Смесь
+fluid.silicon_molten_blue=Телепортационная Смесь
+fluid.silicon_molten_ender=Эндер Смесь
+fluid.silicon_molten_yellow=Смесь Света
+fluid.naquadah_molten_raw=Жидкий Наквадах
+fluid.naquadah_molten_refined=Очищенный Наквадах
+fluid.naquadah_molten_alloy=Жидкий Сплав Наквадаха
 
 
 
-tile.aunis.dhd_block.incoming_wormhole_warn=Невозможно закрыть с этой стороны
-tile.aunis.dhd_block.not_linked_warn=Наборное устройство не подключено к вратам
-tile.aunis.dhd_block.no_crystal_warn=Наборное устройство не имеет контрольного кристалла
-tile.aunis.dhd_block.no_enough_power=Наборному устройству необходимо минимум 10,000uI для корректной работы
-tile.aunis.dhd_block.computer_dial=Запущен набор с компьютера
+tile.aunis.dhd_block.incoming_wormhole_warn=Невозможно Закрыть Врата С Этой Стороны
+tile.aunis.dhd_block.not_linked_warn=Наборное Устройство Не Подключено
+tile.aunis.dhd_block.no_crystal_warn=Наборное Устройство Не Имеет Контрольного Кристалла
+tile.aunis.dhd_block.no_enough_power=Наборному Устройству Необходимо Как Минимум 10,000uI Что бы Работать Нормально
+tile.aunis.dhd_block.computer_dial=Уже Идёт Набор С Помощью OpenComputers
 
-tile.aunis.stargatebase_block.not_enough_power=Недостаточно энергии
+tile.aunis.stargatebase_block.not_enough_power=Недостаточно Энергии
 
-item.aunis.transportrings_ring_fragment.name=Фрагмент транспортных колец
-tile.aunis.transportrings_controller_block.name=Контроллер транспортных колец
-tile.aunis.transportrings_controller_block.not_linked=Контроллер не подключён
+item.aunis.transportrings_ring_fragment.name=Фрагмент Транспортного Кольца
+tile.aunis.transportrings_controller_block.name=Контроллер Транспортных Колец
+tile.aunis.transportrings_controller_block.not_linked=Контроллер Не Подключён
 
-tile.aunis.transportrings_block.name=Транспортные кольца
-tile.aunis.transportrings_block.non_existing_address=Невозможно достигнуть адрес
-tile.aunis.transportrings_block.duplicate_address=Повторяющийся адрес
-tile.aunis.transportrings_block.wrong_address=Неправильный адрес, должен быть 1-6
-tile.aunis.transportrings_block.obstructed=Кольца заблокированы, очистите зону 5x5 вокруг колец
-tile.aunis.transportrings_block.obstructed_target=Заданные кольца заблокированы, очистите зону 5x5 вокруг заданных колец
-tile.aunis.transportrings_block.busy=Кольца заняты
-tile.aunis.transportrings_block.busy_target=Заданные кольца заняты
-tile.aunis.transportrings_block.rings_no=Кольца No. %s
-tile.aunis.transportrings_block.rings_not_in_grid=Кольца не настроены
+tile.aunis.transportrings_block.name=Транспортные Кольца
+tile.aunis.transportrings_block.non_existing_address=Невозможно Достигнуть Адрес
+tile.aunis.transportrings_block.duplicate_address=Адрес Уже Сущевстувет
+tile.aunis.transportrings_block.wrong_address=Неправильный Адрес, Должен Быть 1-6
+tile.aunis.transportrings_block.obstructed=Кольца Заблокированы, Очистите Зону 5х5 Для Работы Колец
+tile.aunis.transportrings_block.obstructed_target=Заданные Кольца Заблокированы, Очистите Зону 5х5 Для Работы Заданных Колец
+tile.aunis.transportrings_block.busy=Кольца Заняты
+tile.aunis.transportrings_block.busy_target=Заданные Кольца Заняты
+tile.aunis.transportrings_block.rings_no=Кольца Но. %s
+tile.aunis.transportrings_block.rings_not_in_grid=Кольца Не В Сетке
 tile.aunis.transportrings_block.rings_address=Адрес
-tile.aunis.transportrings_block.rings_name=Название
+tile.aunis.transportrings_block.rings_name=Имя
 tile.aunis.transportrings_block.rings_save=Сохранить
 
 commands.sgquery.usage=/sgquery [(x y z) (x y z)] [dim=X] [map=Y] [id=Z]
 commands.sgquery.number_expected=Number expected
 commands.sgquery.no_map=No such map
 commands.sgquery.stargates=Stargates %s
-commands.sgquery.wrong_id=Wrong ID or not given any
-commands.sgquery.wrong_map=Wrong map or not given any
-commands.sgquery.wrong_sender=Wrong sender (not a player)
-commands.sgquery.giving_page=Giving page to %s
 commands.sggivepage.usage=/sggivepage (player) (map=X) [biome=Y] (Symbol)x8/6
 commands.sggivepage.no_map=No map or wrong map given
 commands.sggivepage.give_page=Giving Page to %s
@@ -114,13 +107,13 @@ commands.sgsetaddress.wrongaddress=Address should be a space-separated list of 7
 commands.sgsetaddress.wrongsymbol=Wrong %s. symbol name
 commands.sgsetaddress.duplicatesymbol=Duplicate %s. symbol name
 commands.sgsetaddress.exists=Stargate with given address already exists
-commands.sgsetaddress.success=Set Stargate's address at %s to %s
+commands.sgsetaddress.success=Set Stargate's address at %s to %s 
 commands.sgcloseall.usage=/sgcloseall [(x y z) (x y z)] [dim=X]
 commands.sgcloseall.closing=Closing Stargates in dim=%s, %s.
 commands.sgcloseall.closed=Closed %s gates.
 commands.sgcloseall.number_expected=Number or "current" expected as dimension ID
 
-death.attack.eventHorizon=%s был кремирован кавушем
+death.attack.eventHorizon=%s Был Кремирован Нестабильным Всплеском
 
 
 glyph.aunis.milkyway.sculptor=Sculptor
@@ -240,94 +233,90 @@ glyph.aunis.universe.g36=Glyph 36
 
 gui.upgrades=Улучшения
 
-gui.dhd.fusion=Холодный синтез
-gui.dhd.crystalStatus=Контролирующий кристалл:
-gui.dhd.no_crystal=Отсутствует
-gui.dhd.crystal_ok=На месте
-gui.dhd.linkStatus=Подпространственное соединение:
-gui.dhd.linked=Подключено
-gui.dhd.not_linked=Нет соединения
-gui.dhd.reactorStatus=Реактор холодного синтеза:
+gui.dhd.fusion=Холодный Синтез
+gui.dhd.crystalStatus=Контрольный Кристалл:
+gui.dhd.no_crystal=Отсутсвует
+gui.dhd.crystal_ok=На Месте
+gui.dhd.linkStatus=Статус Соединения По Подпространству:
+gui.dhd.linked=Соединено
+gui.dhd.not_linked=Не Соединено
+gui.dhd.reactorStatus=Реактор Холодного Синтеза:
 gui.dhd.running=Работает
-gui.dhd.standby=В ожидании
-gui.dhd.no_fuel=Нет топлива
+gui.dhd.standby=Ожидание
+gui.dhd.no_fuel=Нет Топлива
 
-gui.stargate.milky_way_address=Адрес млечного пути
-gui.stargate.pegasus_address=Адрес пегаса
-gui.stargate.universe_address=Адрес вселенной
+gui.stargate.milky_way_address=Адрес Млёчного Пути
+gui.stargate.pegasus_address=Адрес Пегаса
+gui.stargate.universe_address=Адрес Вселенной
 gui.stargate.capacitors=Конденсаторы
-gui.stargate.energyBuffer=Буфер энергии
+gui.stargate.energyBuffer=Буфер Энергии
 
 gui.capacitor.name=Конденсатор
 
-tile.aunis.beamer_block.name=Лучевой передатчик
-item.aunis.beamer_crystal_power.name=Энергетический кристалл излучателя
-item.aunis.beamer_crystal_fluid.name=Жидкосный кристалл излучателя
-item.aunis.beamer_crystal_items.name=Предметный кристалл излучателя
-gui.beamer.name=Лучевой передатчик
-gui.beamer.beamer_status=Статус:
-gui.beamer.beamer_ok=Излучатель обнаружил врата
-gui.beamer.beamer_link_status=Соединение:
-gui.beamer.beamer_link_ok=Соединено
-gui.beamer.role_status=Роль:
-gui.beamer.role_ok=Выбрана
-gui.beamer.disabled=Излучатель отключён
-gui.beamer.disabled_target=Излучатель на той стороне отключён
+tile.aunis.beamer_block.name=Излучатель
+item.aunis.beamer_crystal_power.name=Энергетический Кристалл Излучателя
+item.aunis.beamer_crystal_fluid.name=Жидкостный Кристалл Излучателя
+item.aunis.beamer_crystal_items.name=Предметный Кристалл Излучателя
+gui.beamer.name=Излучатель Врат
+gui.beamer.beamer_status=Статус Излучателя:
+gui.beamer.beamer_ok=Излучатель Направлен На Врата
+gui.beamer.beamer_link_status=Соединение Излучателя:
+gui.beamer.beamer_link_ok=Соединение Излучателя Есть
+gui.beamer.role_status=Статус Роли:
+gui.beamer.role_ok=Роль Есть
+gui.beamer.disabled=Излучатель Отключён
+gui.beamer.disabled_target=Заданный Излучатель Отключён
 gui.beamer.obstructed=Заблокирован
-gui.beamer.obstructed_target=Излучатель на той стороне заблокирован
-gui.beamer.two_transmitters=Два передатчика
-gui.beamer.two_receivers=Два приёмника
-gui.beamer.mode_mismatch=Режимы несовпадают
-gui.beamer.no_beamer=Излучатель не найден
-gui.beamer.closed=Врата закрыты
-gui.beamer.incoming=Входящая червоточина
-gui.beamer.disabled_by_logic=Отключён извне
-gui.beamer.disabled_by_logic_target=Отключен извне (Цель)
-gui.beamer.running=Работает
-gui.beamer.no_crystal=Нет кристалла
+gui.beamer.obstructed_target=Заблокирован (Цель)
+gui.beamer.two_transmitters=Два Передатчика
+gui.beamer.two_receivers=Два Приёмника
+gui.beamer.mode_mismatch=Режим Дублирован
+gui.beamer.no_beamer=Излучатель Не найден
+gui.beamer.closed=Врата Закрыты
+gui.beamer.incoming=Входящий Гипертонелль
+gui.beamer.disabled_by_logic=Отключен С Помощью Логистики
+gui.beamer.disabled_by_logic_target=Отключен С Помощью Логистики (Цель)
+gui.beamer.running=Запущен
+gui.beamer.no_crystal=Нет Кристалла
 
 gui.beamer.transmit=Передача
 gui.beamer.receive=Получение
-gui.beamer.disabled=Отключен
-gui.beamer.activation=Включение излучателя
+gui.beamer.disabled=Выключен
+gui.beamer.activation=Активация Излучателя
 gui.beamer.auto=Авто
-gui.beamer.on_high=При сигнале
-gui.beamer.on_low=Без сигнала
+gui.beamer.on_high=С Помощью Сигнала
+gui.beamer.on_low=Без Сигнала
 gui.beamer.ignored=Игнорировать
 gui.beamer.activate_below=Активировать ниже [%%]
 gui.beamer.deactivate_over=Деактивировать выше [%%]
-gui.beamer.deactivate=Деактивировать при
-gui.beamer.after_inactivity=Неактивность [s]
+gui.beamer.deactivate=Деактивировать после
+gui.beamer.after_inactivity=Не Активности [s]
 gui.beamer.save=Сохранить
-gui.beamer.invalid=Неправильно
+gui.beamer.invalid=Не Правильно
 
-chat.orlins.energyStored=Накоплено Энергии: %s RF (Необходимо: %s RF, %s s)
+chat.orlins.energyStored=Энергии Накоплено: %s / %s RF
 
-item.aunis.universe_dialer.name=Портативный наборщик
-item.aunis.universe_dialer.not_linked=Не подключено
-item.aunis.universe_dialer.gate_busy=Врата заняты
-item.aunis.universe_dialer.mode_scan=Ближайшие
-item.aunis.universe_dialer.mode_saved=Память
-item.aunis.universe_dialer.mode_rings=Кольца
+item.aunis.universe_dialer.name=Пулть КИНО
+item.aunis.universe_dialer.not_linked=Not linked
+item.aunis.universe_dialer.gate_busy=Gate is busy
+item.aunis.universe_dialer.mode_scan=Nearby
+item.aunis.universe_dialer.mode_saved=Memory
+item.aunis.universe_dialer.mode_rings=Rings
 item.aunis.universe_dialer.mode_oc=OpnCom
-item.aunis.universe_dialer.aborting=Отменить набор
-item.aunis.universe_dialer.oc_name=Введите имя
-item.aunis.universe_dialer.oc_address=Адрес модема OpenComputers (Оставьте пустым для трансляции)
-item.aunis.universe_dialer.oc_port=Порт модема
-item.aunis.universe_dialer.oc_data=Параметры OpenComputers (разделение точкой)
-item.aunis.universe_dialer.oc_save=Сохранить
-item.aunis.universe_dialer.oc_port_invalid=Неправильный порт
-item.aunis.universe_dialer.oc_message_received=Полученный отклик:
-item.aunis.notebook.name=Блокнот
-item.aunis.notebook.rename_gui=Новое имя
-item.aunis.notebook.unnamed=<Не названо>
-config.aunis.mode_scroll=Прокрутка режимов (портативный наборщик)
-config.aunis.mode_up=Предыдущий режим (портативный наборщик)
-config.aunis.mode_down=Следующий режим (портативный наборщик)
-config.aunis.address_scroll=Прокрутка адресов (портативный наборщик)
-config.aunis.address_up=Предыдущий адрес (портативный наборщик)
-config.aunis.address_down=Следующий адрес (портативный наборщик)
-config.aunis.address_remove=Удалить адрес (портативный наборщик)
-config.aunis.universe_dialer.abort=Отменить набор (портативный наборщик)
-config.aunis.universe_dialer.oc_program=Сообщение OpenComputers (портативный наборщик)
-config.aunis.page_notebook.rename=Переименовать страницу блокнота
+item.aunis.universe_dialer.aborting=Aborting dial
+item.aunis.universe_dialer.oc_name=Entry name
+item.aunis.universe_dialer.oc_address=OpenComputers' modem's address
+item.aunis.universe_dialer.oc_port=Modem's port
+item.aunis.universe_dialer.oc_data=OpenComputers parameters (comma separated)
+item.aunis.universe_dialer.oc_save=Save
+item.aunis.universe_dialer.oc_port_invalid=Invalid port
+item.aunis.universe_dialer.oc_message_received=Received response: 
+config.aunis.mode_scroll=Universe dialer mode scroll
+config.aunis.mode_up=Universe dialer mode up
+config.aunis.mode_down=Universe dialer mode down
+config.aunis.address_scroll=Universe dialer address scroll
+config.aunis.address_up=Universe dialer address up
+config.aunis.address_down=Universe dialer address down
+config.aunis.address_remove=Universe dialer remove address
+config.aunis.universe_dialer.abort=Universe dialer abort dialing
+config.aunis.universe_dialer.oc_program=Universe dialer program OC message

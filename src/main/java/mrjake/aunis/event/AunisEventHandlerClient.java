@@ -3,7 +3,6 @@ package mrjake.aunis.event;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.config.AunisConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiButton;
@@ -26,7 +25,6 @@ public class AunisEventHandlerClient {
     public static void onConfigChangedEvent(OnConfigChangedEvent event) {		
         if (event.getModID().equals(Aunis.ModID)) {
             ConfigManager.sync(Aunis.ModID, Type.INSTANCE);
-            AunisConfig.resetCache();
         }
 	}
 	
@@ -41,8 +39,8 @@ public class AunisEventHandlerClient {
 			boolean cancelled = false;
 			
 			cancelled |= block == AunisBlocks.DHD_BLOCK;
-			cancelled |= (block == AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK || block == AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
-			cancelled |= (block == AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK || block == AunisBlocks.STARGATE_UNIVERSE_BASE_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
+			cancelled |= (block == (Block) AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK || block == AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
+			cancelled |= (block == (Block) AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK || block == AunisBlocks.STARGATE_UNIVERSE_BASE_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
 			cancelled |= (block == AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK) && !blockState.getValue(AunisProps.RENDER_BLOCK);
 			
 			event.setCanceled(cancelled);

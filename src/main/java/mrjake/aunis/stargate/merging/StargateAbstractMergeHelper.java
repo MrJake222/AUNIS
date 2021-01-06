@@ -1,12 +1,10 @@
 package mrjake.aunis.stargate.merging;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import mrjake.aunis.block.stargate.StargateAbstractMemberBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.config.AunisConfig;
@@ -14,10 +12,9 @@ import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
-import mrjake.aunis.util.BlockHelpers;
 import mrjake.aunis.util.FacingToRotation;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -25,66 +22,19 @@ import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-//ToDo Well, idk if getRingBlocks() should be relative... Maybe return absolute positions too. But not sure
 public abstract class StargateAbstractMergeHelper {
 	
 	/**
-	 * @return {@link List} of {@link BlockPos} pointing to ring blocks. Positions are relative
+	 * @return {@link List} of {@link BlockPos} pointing to ring blocks.
 	 */
 	@Nonnull
 	public abstract List<BlockPos> getRingBlocks();
 	
 	/**
-	 * @return {@link List} of {@link BlockPos} pointing to chevron blocks. Positions are relative
+	 * @return {@link List} of {@link BlockPos} pointing to chevron blocks.
 	 */
 	@Nonnull
 	public abstract List<BlockPos> getChevronBlocks();
-
-	private BlockPos topBlock = null; 
-	
-	/**
-	 * For Classic gate returns top chevron position (relative).
-	 * For Orlin's gate returns top ring position (no chevrons).
-	 * 
-	 * @return Gate's top block.
-	 */
-	public BlockPos getTopBlock() {
-		// null - not initialized
-		if (topBlock == null)
-			topBlock = BlockHelpers.getHighest(getChevronBlocks());
-
-		// Still null - chevron list empty (Orlin's gate)
-		if (topBlock == null)
-			topBlock = BlockHelpers.getHighest(getRingBlocks());
-
-		return topBlock;
-	}
-	
-	/**
-	 * @return {@link List} of {@link BlockPos} pointing to absent blocks of variant given. Positions are absolute.
-	 */
-	@Nonnull
-	public List<BlockPos> getAbsentBlockPositions(IBlockAccess world, BlockPos basePos, EnumFacing facing, EnumMemberVariant variant) {
-		List<BlockPos> blocks = null;
-		
-		switch (variant) {
-			case CHEVRON:
-				blocks = getChevronBlocks();
-				break;
-				
-			case RING:
-				blocks = getRingBlocks();
-				break;
-		}
-		
-		return blocks.stream()
-				.map(pos -> pos.rotate(FacingToRotation.get(facing)).add(basePos))
-				.filter(pos -> !matchMember(world.getBlockState(pos)))
-				.collect(Collectors.toList());
-	}
-	
-	@Nullable
-	public abstract EnumMemberVariant getMemberVariantFromItemStack(ItemStack stack);
 	
 	/**
 	 * @return Max box where to search for the base.
@@ -106,7 +56,7 @@ public abstract class StargateAbstractMergeHelper {
 	/**
 	 * @return Member block.
 	 */
-	public abstract StargateAbstractMemberBlock getMemberBlock();
+	public abstract Block getMemberBlock();
 	
 	/**
 	 * Method searches for a {@link StargateMilkyWayBaseBlock} within {@link this#BASE_SEARCH_BOX}
@@ -193,5 +143,4 @@ public abstract class StargateAbstractMergeHelper {
 		
 		for (BlockPos pos : getChevronBlocks())
 			updateMemberMergeStatus(world, pos, basePos, baseFacing, shouldBeMerged);
-	}
-}
+	}}

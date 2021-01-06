@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mrjake.aunis.config.AunisConfig;
-import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.state.TransportRingsRendererState;
 import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class TransportRingsRenderer implements RendererInterface {
@@ -25,7 +23,7 @@ public class TransportRingsRenderer implements RendererInterface {
 	private AunisAxisAlignedBB localTeleportBox;
 	private List<Ring> rings;
 		
-	public TransportRingsRenderer(World world, BlockPos pos, AunisAxisAlignedBB localTeleportBox) {
+	public TransportRingsRenderer(World world, AunisAxisAlignedBB localTeleportBox) {
 		this.world = world;
 		this.localTeleportBox = localTeleportBox;
 		
@@ -54,7 +52,7 @@ public class TransportRingsRenderer implements RendererInterface {
 		GlStateManager.scale(0.5, 0.5, 0.5);
 		
 		for (Ring ring : rings)
-			ring.render(partialTicks, BiomeOverlayEnum.NORMAL); // Rings appear from underground, no frost/moss here.
+			ring.render(partialTicks);
 		
 		GlStateManager.popMatrix();
 		

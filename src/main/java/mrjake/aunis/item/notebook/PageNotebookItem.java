@@ -29,7 +29,7 @@ public class PageNotebookItem extends Item implements CustomModelItemInterface {
 
 	public PageNotebookItem() {
 		setRegistryName(Aunis.ModID + ":" + ITEM_NAME);
-		setUnlocalizedName(Aunis.ModID + "." + ITEM_NAME);
+		setTranslationKey(Aunis.ModID + "." + ITEM_NAME);
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
 		
@@ -119,7 +119,7 @@ public class PageNotebookItem extends Item implements CustomModelItemInterface {
 	}
 	
 	public static String getRegistryPathFromWorld(World world, BlockPos pos) {
-		return world.getBiome(pos).getRegistryName().getResourcePath();
+		return world.getBiome(pos).getRegistryName().getPath();
 	}
 	
 	public static NBTTagCompound getCompoundFromAddress(StargateAddress address, boolean hasUpgrade, String registryPath) {

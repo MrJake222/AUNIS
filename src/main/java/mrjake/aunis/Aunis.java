@@ -35,15 +35,16 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-@Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion, dependencies = "after:cofhcore@[4.6.0,);after:opencomputers" )
+@Mod( modid = Aunis.ModID, name = Aunis.Name, version = Aunis.Version, acceptedMinecraftVersions = Aunis.MCVersion, dependencies = "required-after:cofhcore@[4.6.0,);after:opencomputers" )
 public class Aunis {	
     public static final String ModID = "aunis";
-    public static final String Name = "Aunis";
-    public static final String Version = "${version}"; // It works only in final builds.
+    public static final String Name = "AUNIS";
+    public static final String Version = "1.9.10-beta";
     public static final int DATA_VERSION = 7;
 
-    public static final String MCVersion = "${mcversion}";
-
+    public static final String MCVersion = "[1.12.2]";
+ 
+    public static final boolean DEBUG = false;
     public static final String CLIENT = "mrjake.aunis.proxy.ProxyClient";
     public static final String SERVER = "mrjake.aunis.proxy.ProxyServer";
     
@@ -70,8 +71,8 @@ public class Aunis {
     }
         	
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        logger = event.getModLog(); // This is the recommended way of getting a logger
+    public void preInit(FMLPreInitializationEvent event){
+        logger = event.getModLog();
         
         AunisPacketHandler.registerPackets();
         AunisFluids.registerFluids();
@@ -84,11 +85,7 @@ public class Aunis {
     @EventHandler
     public void init(FMLInitializationEvent event) {
     	GameRegistry.registerWorldGenerator(new AunisWorldGen(), 0);
-
-    	// ThermalExpansion recipes
-    	if(Loader.isModLoaded("thermalexpansion"))
-    	    ThermalIntegration.registerRecipes();
-
+    	ThermalIntegration.registerRecipes();
     	NetworkRegistry.INSTANCE.registerGuiHandler(instance, new AunisGuiHandler());
     	ItemEndpointCapability.register();
 		ForgeChunkManager.setForcedChunkLoadingCallback(Aunis.instance, ChunkLoadingCallback.INSTANCE);
@@ -131,5 +128,15 @@ public class Aunis {
     @EventHandler
     public void serverStarted(FMLServerStartedEvent event) throws IOException {    	
     	StargateDimensionConfig.update();
+    }
+    
+	public static void log(String msg) {
+		if (DEBUG) {
+			logger.info(msg);
+		}
+	}
+	
+	public static void info(String msg) {
+    	logger.info(msg);
     }
 }

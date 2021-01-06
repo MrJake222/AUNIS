@@ -20,6 +20,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public interface CustomModelItemInterface {
 		
 	default public void registerCustomModel(IRegistry<ModelResourceLocation, IBakedModel> registry) {
+		Aunis.info("Registering custom model for: " + this);
 		ModelResourceLocation modelResourceLocation = new ModelResourceLocation(((Item) this).getRegistryName(), "inventory");
 		
 		IBakedModel defaultModel = registry.getObject(modelResourceLocation);

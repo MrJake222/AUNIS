@@ -9,7 +9,6 @@ import io.netty.buffer.ByteBuf;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.renderer.activation.Activation;
 import mrjake.aunis.renderer.activation.DHDActivation;
-import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.stargate.network.StargateAddressDynamic;
 import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
@@ -24,23 +23,13 @@ public class DHDRendererState extends State {
 	private static final String SYMBOL_TEXTURE_BASE = "textures/tesr/milkyway/symbol";
 	private static final String BRB_TEXTURE_BASE = "textures/tesr/milkyway/brb";
 	
-	private static final Map<BiomeOverlayEnum, TextureContainer> BIOME_TEXTURE_MAP = new HashMap<>();
-	
-	private static class TextureContainer {
-		public final Map<Integer, ResourceLocation> SYMBOL_RESOURCE_MAP = new HashMap<>();
-		public final Map<Integer, ResourceLocation> BRB_RESOURCE_MAP = new HashMap<>();
-	}
+	private static final Map<Integer, ResourceLocation> SYMBOL_RESOURCE_MAP = new HashMap<>();
+	private static final Map<Integer, ResourceLocation> BRB_RESOURCE_MAP = new HashMap<>();
 	
 	static {
-		for (BiomeOverlayEnum biomeOverlay : BiomeOverlayEnum.values()) {
-			TextureContainer container = new TextureContainer();
-			
-			for (int i=0; i<=5; i++) {
-				container.SYMBOL_RESOURCE_MAP.put(i, new ResourceLocation(Aunis.ModID, SYMBOL_TEXTURE_BASE + i + biomeOverlay.suffix + ".jpg"));
-				container.BRB_RESOURCE_MAP.put(i, new ResourceLocation(Aunis.ModID, BRB_TEXTURE_BASE + i + biomeOverlay.suffix + ".jpg"));
-			}
-			
-			BIOME_TEXTURE_MAP.put(biomeOverlay, container);
+		for (int i=0; i<=5; i++) {
+			SYMBOL_RESOURCE_MAP.put(i, new ResourceLocation(Aunis.ModID, SYMBOL_TEXTURE_BASE + i + ".jpg"));
+			BRB_RESOURCE_MAP.put(i, new ResourceLocation(Aunis.ModID, BRB_TEXTURE_BASE + i + ".jpg"));
 		}
 	}
 	
@@ -52,7 +41,6 @@ public class DHDRendererState extends State {
 	public DHDRendererState initClient(BlockPos pos, float horizontalRotation) {
 		this.pos = pos;
 		this.horizontalRotation = horizontalRotation;
-		this.biomeOverlay = BiomeOverlayEnum.NORMAL;
 		
 		for (SymbolMilkyWayEnum symbol : SymbolMilkyWayEnum.values()) {			
 			if (symbol.brb())
@@ -69,7 +57,6 @@ public class DHDRendererState extends State {
 	// Not saved
 	public BlockPos pos;
 	public float horizontalRotation;
-	public BiomeOverlayEnum biomeOverlay;
 	
 	// Symbols
 	// Not saved
@@ -101,13 +88,11 @@ public class DHDRendererState extends State {
 		});
 	}
 	
-	public ResourceLocation getButtonTexture(SymbolMilkyWayEnum symbol, BiomeOverlayEnum biomeOverlay) {
-		TextureContainer container = BIOME_TEXTURE_MAP.get(biomeOverlay);
-		
+	public ResourceLocation getButtonTexture(SymbolMilkyWayEnum symbol) {
 		if (symbol.brb())
-			return container.BRB_RESOURCE_MAP.get(BUTTON_STATE_MAP.get(symbol));
+			return BRB_RESOURCE_MAP.get(BUTTON_STATE_MAP.get(symbol));
 
-		return container.SYMBOL_RESOURCE_MAP.get(BUTTON_STATE_MAP.get(symbol));
+		return SYMBOL_RESOURCE_MAP.get(BUTTON_STATE_MAP.get(symbol));
 	}
 	
 	

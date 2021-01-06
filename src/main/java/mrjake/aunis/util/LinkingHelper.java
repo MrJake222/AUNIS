@@ -4,8 +4,6 @@ import javax.annotation.Nullable;
 
 import li.cil.oc.api.event.RackMountableRenderEvent.TileEntity;
 import mrjake.aunis.config.AunisConfig;
-import mrjake.aunis.tileentity.DHDTile;
-import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -57,14 +55,4 @@ public class LinkingHelper {
 		
 		return new BlockPos(xz, y ,xz);
 	}
-
-    public static void updateLinkedGate(World world, BlockPos gatePos, BlockPos dhdPos) {
-        StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(gatePos);
-        DHDTile dhdTile = (DHDTile) world.getTileEntity(dhdPos);
-
-        if (dhdTile != null) {
-            dhdTile.setLinkedGate(gatePos);
-            gateTile.setLinkedDHD(dhdPos);
-        }
-    }
 }

@@ -5,19 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.block.stargate.StargateOrlinMemberBlock;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -55,19 +51,6 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 	}
 
 	@Override
-	@Nullable
-	public EnumMemberVariant getMemberVariantFromItemStack(ItemStack stack) {
-		if (!(stack.getItem() instanceof ItemBlock))
-			return null;
-		
-		// No need to use .equals() because blocks are singletons
-		if (((ItemBlock) stack.getItem()).getBlock() != AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK)
-			return null;
-		
-		return EnumMemberVariant.RING;
-	}
-	
-	@Override
 	public AunisAxisAlignedBB getBaseSearchBox() {
 		return BASE_SEARCH_BOX;
 	}
@@ -83,7 +66,7 @@ public class StargateOrlinMergeHelper extends StargateAbstractMergeHelper {
 	}
 	
 	@Override
-	public StargateOrlinMemberBlock getMemberBlock() {
+	public Block getMemberBlock() {
 		return AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK;
 	}
 	

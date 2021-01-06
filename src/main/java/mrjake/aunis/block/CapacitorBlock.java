@@ -36,7 +36,7 @@ public class CapacitorBlock extends Block {
 		super(Material.IRON);
 		
 		setRegistryName(Aunis.ModID + ":" + BLOCK_NAME);
-		setUnlocalizedName(Aunis.ModID + "." + BLOCK_NAME);
+		setTranslationKey(Aunis.ModID + "." + BLOCK_NAME);
 		
 		setSoundType(SoundType.METAL); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -65,7 +65,7 @@ public class CapacitorBlock extends Block {
 	@Override
 	public IBlockState getStateFromMeta(int meta) {		
 		return getDefaultState()
-				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.getHorizontal(meta & 0x03));
+				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.byHorizontalIndex(meta & 0x03));
 	}
 	
 	@Override
@@ -141,7 +141,7 @@ public class CapacitorBlock extends Block {
 	// Rendering
 	
 	@Override
-	public BlockRenderLayer getBlockLayer() {
+	public BlockRenderLayer getRenderLayer() {
 		return BlockRenderLayer.CUTOUT;
 	}
 }

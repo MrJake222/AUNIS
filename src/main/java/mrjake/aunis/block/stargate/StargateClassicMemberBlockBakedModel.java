@@ -41,7 +41,7 @@ public class StargateClassicMemberBlockBakedModel implements IBakedModel {
 		        	}
 		        	
 		        	catch (IllegalArgumentException e) {
-						Aunis.logger.error("IllegalArgumentException in StargateClassicMemberBlockBakedModel: Unsupported block as camo");
+						Aunis.logger.error("Unsupported block as camo");
 					}
 		        }
 			}

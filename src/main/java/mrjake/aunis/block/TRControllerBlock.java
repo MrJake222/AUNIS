@@ -11,7 +11,6 @@ import mrjake.aunis.util.LinkingHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -33,7 +32,7 @@ public class TRControllerBlock extends Block {
 		super(Material.ROCK);
 		
 		setRegistryName(Aunis.ModID + ":" + blockName);
-		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		setTranslationKey(Aunis.ModID + "." + blockName);
 		
 		setSoundType(SoundType.STONE); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -61,7 +60,7 @@ public class TRControllerBlock extends Block {
 	@Override
 	public IBlockState getStateFromMeta(int meta) {		
 		return getDefaultState()
-				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.getHorizontal(meta & 0x03));
+				.withProperty(AunisProps.FACING_HORIZONTAL, EnumFacing.byHorizontalIndex(meta & 0x03));
 	}
 	
 	
@@ -165,11 +164,6 @@ public class TRControllerBlock extends Block {
 	@Override
 	public boolean isFullBlock(IBlockState state) {
 		return false;
-	}
-
-	@Override
-	public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
-		return BlockFaceShape.UNDEFINED;
 	}
 	
 	@Override

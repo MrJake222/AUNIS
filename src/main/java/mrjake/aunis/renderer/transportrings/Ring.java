@@ -1,7 +1,6 @@
 package mrjake.aunis.renderer.transportrings;
 
 import mrjake.aunis.loader.ElementEnum;
-import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -33,12 +32,12 @@ public class Ring {
 		this.yMax = 4-index + 1.5;
 	}
 
-	public void render(double partialTicks, BiomeOverlayEnum biomeOverlay) {		
+	public void render(double partialTicks) {		
 		if (shouldRender) {
 			GlStateManager.pushMatrix();				
 			GlStateManager.translate(0, y, 0);
 			
-			ElementEnum.RINGS_BLACK.bindTextureAndRender(biomeOverlay);
+			ElementEnum.RINGS_BLACK.bindTextureAndRender();
 			GlStateManager.popMatrix();
 
 		}
