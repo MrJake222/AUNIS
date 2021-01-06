@@ -25,7 +25,6 @@ compileJava {
 minecraft {
     version = "${mc_version}-${forge_version}"
     mappings = mappings_version
-    // makeObfSourceJar = false
 
     replaceIn "src/main/java/mrjake/aunis/Aunis.java"
     replace '${version}', mod_version
@@ -75,6 +74,15 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'deobf'
+}
+
+artifacts {
+    archives deobfJar
 }
 
 runClient {
