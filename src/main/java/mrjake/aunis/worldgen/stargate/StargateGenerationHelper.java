@@ -1,14 +1,14 @@
-package mrjake.aunis.worldgen;
+package mrjake.aunis.worldgen.stargate;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -60,10 +60,10 @@ public class StargateGenerationHelper {
 			return direction;
 		}
 		
-		public boolean checkDown(IBlockState blockState, List<BlockMatcher> matchers) {
+		public boolean checkDown(IBlockState blockState, List<Predicate<IBlockState>> matchers) {
 			if (checkDown) {				
-				for (BlockMatcher matcher : matchers) {
-					if (matcher.apply(blockState))
+				for (Predicate<IBlockState> matcher : matchers) {
+					if (matcher.test(blockState))
 						return true;
 				}
 				
@@ -117,7 +117,7 @@ public class StargateGenerationHelper {
 		}
 	}
 	
-	public static DirectionResult getFreeSpaceInDirection(IBlockAccess blockAccess, BlockPos start, Direction direction, int maxDistance, List<BlockMatcher> allowedBlocksBelow) {
+	public static DirectionResult getFreeSpaceInDirection(IBlockAccess blockAccess, BlockPos start, Direction direction, int maxDistance, List<Predicate<IBlockState>> allowedBlocksBelow) {
 		int distance = 0;
 		int ydiff = 0;
 		
@@ -152,7 +152,7 @@ public class StargateGenerationHelper {
 	}
 	
 	@Nullable
-	public static FreeSpace getFreeSpaceInDirections(IBlockAccess blockAccess, BlockPos start, List<Direction> directions, int maxDistance, List<BlockMatcher> allowedBlocksBelow) {
+	public static FreeSpace getFreeSpaceInDirections(IBlockAccess blockAccess, BlockPos start, List<Direction> directions, int maxDistance, List<Predicate<IBlockState>> allowedBlocksBelow) {
 		FreeSpace freeSpace = new FreeSpace();
 		
 		for (Direction direction : directions) {

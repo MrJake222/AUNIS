@@ -8,6 +8,7 @@ import mrjake.aunis.capability.endpoint.ItemEndpointCapability;
 import mrjake.aunis.chunkloader.ChunkLoadingCallback;
 import mrjake.aunis.command.AunisCommands;
 import mrjake.aunis.config.StargateDimensionConfig;
+import mrjake.aunis.config.StargateGeneratorConfig;
 import mrjake.aunis.datafixer.TileNamesFixer;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.gui.AunisGuiHandler;
@@ -27,11 +28,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
@@ -77,6 +74,7 @@ public class Aunis {
         AunisFluids.registerFluids();
         
     	StargateDimensionConfig.load(event.getModConfigurationDirectory());
+        StargateGeneratorConfig.load(event.getModConfigurationDirectory());
     	
         proxy.preInit(event);
     }

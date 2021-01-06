@@ -1,4 +1,4 @@
-package mrjake.aunis.worldgen;
+package mrjake.aunis.worldgen.stargate;
 
 public final class StargateGenerationException extends RuntimeException {
 
