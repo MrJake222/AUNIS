@@ -1,21 +1,25 @@
 package mrjake.aunis.block.stargate;
 
+import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
 
-public final class StargateMilkyWayBaseBlock extends StargateClassicBaseBlock {
+public class StargateMilkyWayBaseBlock extends StargateClassicBaseBlock {
 
-	public static final String BLOCK_NAME = "stargate_milkyway_base_block";
-	
+	private static final String BLOCK_NAME = "stargate_milkyway_base_block";
+
 	public StargateMilkyWayBaseBlock() {
-		super(BLOCK_NAME);
+		super();
+		
 		setResistance(2000.0f);
+	}
+	
+	@Override
+	protected String getBlockName() {
+		return BLOCK_NAME;
 	}
 
 	@Override
-	public TileEntity createTileEntity(World world, IBlockState state) {
+	protected StargateClassicBaseTile getTileEntity() {
 		return new StargateMilkyWayBaseTile();
 	}
 }

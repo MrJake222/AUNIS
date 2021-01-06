@@ -10,7 +10,6 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumHand;
-import org.lwjgl.input.Keyboard;
 
 public class PageRenameGui extends GuiScreen {
 
@@ -31,8 +30,7 @@ public class PageRenameGui extends GuiScreen {
 	}
 	
 	@Override
-	public void initGui() {
-		Keyboard.enableRepeatEvents(true);
+	public void initGui() {		
 		guiLeft = (this.width - 242) / 2;
 		guiTop = (this.height - 64) / 2;
 		
@@ -97,10 +95,5 @@ public class PageRenameGui extends GuiScreen {
 		
 		AunisPacketHandler.INSTANCE.sendToServer(new PageNotebookSetNameToServer(hand, name, notebook));
 		keyTyped(' ', 1); // close GUI
-	}
-
-	@Override
-	public void onGuiClosed() {
-		Keyboard.enableRepeatEvents(false);
 	}
 }

@@ -4,23 +4,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
-import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateSizeEnum;
 import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -120,27 +116,6 @@ public class StargateMilkyWayMergeHelper extends StargateClassicMergeHelper {
 	}
 	
 	@Override
-	@Nullable
-	public EnumMemberVariant getMemberVariantFromItemStack(ItemStack stack) {
-		if (!(stack.getItem() instanceof ItemBlock))
-			return null;
-		
-		// No need to use .equals() because blocks are singletons
-		if (((ItemBlock) stack.getItem()).getBlock() != AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK)
-			return null;
-		
-		int meta = stack.getMetadata();
-		
-		if (meta == AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.RING_META)
-			return EnumMemberVariant.RING;
-		
-		if (meta == AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.CHEVRON_META)
-			return EnumMemberVariant.CHEVRON;
-		
-		return null;
-	}
-	
-	@Override
 	public AunisAxisAlignedBB getBaseSearchBox() {
 		switch (AunisConfig.stargateSize) {
 			case SMALL:
@@ -166,7 +141,7 @@ public class StargateMilkyWayMergeHelper extends StargateClassicMergeHelper {
 	}
 	
 	@Override
-	public StargateMilkyWayMemberBlock getMemberBlock() {
+	public Block getMemberBlock() {
 		return AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK;
 	}
 	
@@ -181,7 +156,7 @@ public class StargateMilkyWayMergeHelper extends StargateClassicMergeHelper {
 	 * @param targetStargateSize Target Stargate size as defined in config.
 	 */
 	public void convertToPattern(World world, BlockPos basePos, EnumFacing baseFacing, StargateSizeEnum currentStargateSize, StargateSizeEnum targetStargateSize) {
-		Aunis.logger.debug(basePos + ": Converting Stargate from " + currentStargateSize + " to " + targetStargateSize);
+		Aunis.info(basePos + ": Converting Stargate from " + currentStargateSize + " to " + targetStargateSize);
 		List<BlockPos> oldPatternBlocks = new ArrayList<BlockPos>();
 		
 		switch (currentStargateSize) {

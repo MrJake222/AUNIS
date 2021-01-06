@@ -3,6 +3,7 @@ package mrjake.aunis.block;
 import javax.annotation.Nullable;
 
 import mrjake.aunis.Aunis;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.block.stargate.StargateOrlinBaseBlock;
@@ -12,6 +13,7 @@ import mrjake.aunis.block.stargate.StargateUniverseMemberBlock;
 import mrjake.aunis.item.CapacitorItemBlock;
 import mrjake.aunis.item.StargateMilkyWayMemberItemBlock;
 import mrjake.aunis.item.StargateUniverseMemberItemBlock;
+import mrjake.aunis.stargate.EnumMemberVariant;
 import mrjake.aunis.tileentity.BeamerTile;
 import mrjake.aunis.tileentity.CapacitorTile;
 import mrjake.aunis.tileentity.DHDTile;
@@ -42,7 +44,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 public class AunisBlocks {
 	public static final NaquadahOreBlock ORE_NAQUADAH_BLOCK = new NaquadahOreBlock("naquadah_ore");
 	public static final NaquadahOreBlock ORE_NAQUADAH_BLOCK_STONE = new NaquadahOreBlock("naquadah_ore_stone");
-	public static final Block NAQUADAH_BLOCK = new Block(Material.IRON).setRegistryName(Aunis.ModID, "naquadah_block").setUnlocalizedName(Aunis.ModID + ".naquadah_block");
+	public static final Block NAQUADAH_BLOCK = new Block(Material.IRON).setRegistryName(Aunis.ModID, "naquadah_block").setTranslationKey(Aunis.ModID + ".naquadah_block");
 	
 	public static final StargateMilkyWayBaseBlock STARGATE_MILKY_WAY_BASE_BLOCK = new StargateMilkyWayBaseBlock();	
 	public static final StargateUniverseBaseBlock STARGATE_UNIVERSE_BASE_BLOCK = new StargateUniverseBaseBlock();	
@@ -125,10 +127,13 @@ public class AunisBlocks {
 			ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(block), 0, new ModelResourceLocation(block.getRegistryName(), "inventory"));
 		}
 		
-		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK), STARGATE_MILKY_WAY_MEMBER_BLOCK.RING_META, new ModelResourceLocation("aunis:stargate_milkyway_ring_block"));
-		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK), STARGATE_MILKY_WAY_MEMBER_BLOCK.CHEVRON_META, new ModelResourceLocation("aunis:stargate_milkyway_chevron_block"));
-		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_UNIVERSE_MEMBER_BLOCK), STARGATE_UNIVERSE_MEMBER_BLOCK.RING_META, new ModelResourceLocation("aunis:stargate_universe_ring_block"));
-		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_UNIVERSE_MEMBER_BLOCK), STARGATE_UNIVERSE_MEMBER_BLOCK.CHEVRON_META, new ModelResourceLocation("aunis:stargate_universe_chevron_block"));
+		int ringMeta = STARGATE_MILKY_WAY_MEMBER_BLOCK.getMetaFromState(STARGATE_MILKY_WAY_MEMBER_BLOCK.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING));
+		int chevronMeta = STARGATE_MILKY_WAY_MEMBER_BLOCK.getMetaFromState(STARGATE_MILKY_WAY_MEMBER_BLOCK.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.CHEVRON));
+		
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK), ringMeta, new ModelResourceLocation("aunis:stargate_milkyway_ring_block"));
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK), chevronMeta, new ModelResourceLocation("aunis:stargate_milkyway_chevron_block"));
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_UNIVERSE_MEMBER_BLOCK), ringMeta, new ModelResourceLocation("aunis:stargate_universe_ring_block"));
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_UNIVERSE_MEMBER_BLOCK), chevronMeta, new ModelResourceLocation("aunis:stargate_universe_chevron_block"));
 		
 		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(CAPACITOR_BLOCK), 0, new ModelResourceLocation(CAPACITOR_BLOCK.getRegistryName(), "inventory"));
 	}

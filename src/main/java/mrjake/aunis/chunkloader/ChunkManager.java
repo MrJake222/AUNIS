@@ -31,7 +31,7 @@ public class ChunkManager {
 	}
 	
 	public static void forceChunk(World world, ChunkPos chunk) {
-		Aunis.logger.debug("Forcing chunk " + chunk + ", in world: " + world.provider);
+		Aunis.info("Forcing chunk " + chunk + ", in world: " + world.provider);
 		
 		Ticket ticket = requestTicket(world);
 		ForgeChunkManager.forceChunk(ticket, chunk);

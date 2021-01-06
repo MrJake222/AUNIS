@@ -26,7 +26,7 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 		GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 		renderChevrons(rendererState, partialTicks);
 		
-		ElementEnum.MILKYWAY_GATE.bindTextureAndRender(rendererState.biomeOverlay);
+		ElementEnum.MILKYWAY_GATE.bindTextureAndRender();
 	}
 	
 	// ----------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 		
 		GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 		
-		ElementEnum.MILKYWAY_RING.bindTextureAndRender(rendererState.biomeOverlay);
+		ElementEnum.MILKYWAY_RING.bindTextureAndRender();
 		
 		GlStateManager.popMatrix();
 	}
@@ -103,7 +103,7 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 			
 		GlStateManager.rotate(chevron.rotation, 0, 0, 1);
 		
-		TextureLoader.getTexture(rendererState.chevronTextureList.get(rendererState.biomeOverlay, chevron)).bindTexture();
+		TextureLoader.getTexture(rendererState.chevronTextureList.get(chevron)).bindTexture();
 					
 		if (chevron.isFinal()) {
 			float chevronOffset = calculateTopChevronOffset(rendererState, partialTicks);
@@ -124,7 +124,7 @@ public class StargateMilkyWayRenderer extends StargateClassicRenderer<StargateMi
 			ElementEnum.MILKYWAY_CHEVRON_LIGHT.render();
 		}			
 		
-		ElementEnum.MILKYWAY_CHEVRON_FRAME.bindTextureAndRender(rendererState.biomeOverlay);
+		ElementEnum.MILKYWAY_CHEVRON_FRAME.bindTextureAndRender();
 		ElementEnum.MILKYWAY_CHEVRON_BACK.render();
 
 		

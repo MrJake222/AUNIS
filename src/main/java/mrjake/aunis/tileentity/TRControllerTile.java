@@ -1,40 +1,20 @@
 package mrjake.aunis.tileentity;
 
-import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.renderer.transportrings.TRControllerRenderer;
 import mrjake.aunis.tesr.RendererInterface;
 import mrjake.aunis.tesr.RendererProviderInterface;
 import mrjake.aunis.util.ILinkable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class TRControllerTile extends TileEntity implements ITickable, ILinkable, RendererProviderInterface {
-	
-	private BiomeOverlayEnum biomeOverlay = BiomeOverlayEnum.NORMAL;
-	
-	public BiomeOverlayEnum getBiomeOverlay() {
-		return biomeOverlay;
-	}
-	
+public class TRControllerTile extends TileEntity implements ILinkable, RendererProviderInterface {
+
 	@Override
 	public void onLoad() {
 		if (world.isRemote) {
 			renderer = new TRControllerRenderer(this);
-			biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
-		}
-	}
-	
-	@Override
-	public void update() {
-		if (world.isRemote) {
-			// Client
-			
-			if (world.getTotalWorldTime() % 40 == 0) {
-				biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos);
-			}
 		}
 	}
 	

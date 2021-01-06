@@ -7,11 +7,14 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
 public class StargateGenerationHelper {
 	
@@ -165,5 +168,15 @@ public class StargateGenerationHelper {
 		}
 				
 		return freeSpace;
+	}
+	
+	public static void updateLinkedGate(World world, BlockPos gatePos, BlockPos dhdPos) {
+		StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(gatePos);
+		DHDTile dhdTile = (DHDTile) world.getTileEntity(dhdPos);
+		
+		if (dhdTile != null) {
+			dhdTile.setLinkedGate(gatePos);
+			gateTile.setLinkedDHD(dhdPos);
+		}
 	}
 }

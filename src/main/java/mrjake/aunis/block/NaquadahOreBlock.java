@@ -21,7 +21,7 @@ public class NaquadahOreBlock extends Block {
 		super(Material.ROCK);
 		
 		setRegistryName(Aunis.ModID + ":" + blockName);
-		setUnlocalizedName(Aunis.ModID + "." + blockName);
+		setTranslationKey(Aunis.ModID + "." + blockName);
 		
 		setSoundType(SoundType.STONE); 
 		setCreativeTab(Aunis.aunisCreativeTab);
@@ -40,7 +40,7 @@ public class NaquadahOreBlock extends Block {
 	}
 	
 	@Override
-	public BlockRenderLayer getBlockLayer() {
+	public BlockRenderLayer getRenderLayer() {
 		return BlockRenderLayer.CUTOUT;
 	}
 }

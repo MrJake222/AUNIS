@@ -79,9 +79,8 @@ public abstract class StargateAbstractRenderer<S extends StargateAbstractRendere
 				
 				for (Map.Entry<BlockPos, IBlockState> entry : getMemberBlockStates(te.getMergeHelper(), rendererState.facing).entrySet()) {				
 					BlockPos pos = entry.getKey().rotate(FacingToRotation.get(rendererState.facing));
-
-					BlockPos absolutePos = pos.add(rendererState.pos);
-					if (getWorld().getBlockState(absolutePos).getBlock().isReplaceable(getWorld(), absolutePos))
+					
+					if (getWorld().isAirBlock(pos.add(rendererState.pos)))
 						BlockRenderer.render(getWorld(), pos, entry.getValue());
 				}
 				

@@ -473,7 +473,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				}
 				
 				else {
-					Aunis.logger.debug("Giving Notebook page of address " + symbolType);
+					Aunis.info("Giving Notebook page of address " + symbolType);
 	
 					NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(
 							gateAddressMap.get(symbolType),
@@ -515,23 +515,20 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 		else {
 			float distance = spinDirection.getDistance(currentRingSymbol, targetRingSymbol);
 			
-			if (distance > 180) {
+			if (distance < StargateClassicSpinHelper.getMinimalDistance()) {
 				spinDirection = spinDirection.opposite();
 				distance = spinDirection.getDistance(currentRingSymbol, targetRingSymbol);
 			}
 			
-			int duration = StargateClassicSpinHelper.getAnimationDuration(distance);
+			else if (distance > 180 && (360-distance) > StargateClassicSpinHelper.getMinimalDistance()) {
+				spinDirection = spinDirection.opposite();
+				distance = spinDirection.getDistance(currentRingSymbol, targetRingSymbol);
+			}
 			
-			Aunis.logger.debug("addSymbolToAddressManual: "
-					+ "current:" + currentRingSymbol + ", "
-					+ "target:" + targetSymbol + ", "
-					+ "direction:" + spinDirection + ", "
-					+ "distance:" + distance + ", "
-					+ "duration:" + duration + ", "
-					+ "moveOnly:" + moveOnly);
+			// Aunis.info("position: " + currentRingSymbol + ", target: " + targetSymbol + ", direction: " + spinDirection + ", distance: " + distance + ", animEnd: " + StargateSpinHelper.getAnimationDuration(distance) + ", moveOnly: " + moveOnly + ", locking: " + locking);
 			
 			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.SPIN_STATE, new StargateSpinState(targetRingSymbol, spinDirection, false)), targetPoint);
-			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, duration-5));
+			addTask(new ScheduledTask(EnumScheduledTask.STARGATE_SPIN_FINISHED, StargateClassicSpinHelper.getAnimationDuration(distance) - 5));
 			playPositionedSound(StargateSoundPositionedEnum.GATE_RING_ROLL, true);
 			
 			isSpinning = true;
@@ -701,7 +698,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				}
 			}
 				
-			Aunis.logger.debug("Updated to power tier: " + powerTier);
+			Aunis.info("Updated to power tier: " + powerTier);
 		}
 	}
 	

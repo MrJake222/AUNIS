@@ -92,7 +92,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		}
 		
 		else {
-			renderer = new TransportRingsRenderer(world, pos, LOCAL_TELEPORT_BOX);
+			renderer = new TransportRingsRenderer(world, LOCAL_TELEPORT_BOX);
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_STATE));
 		}
 	}
@@ -278,7 +278,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 					Block newBlock = newState.getBlock();
 					
 					if (!newBlock.isAir(newState, world, newPos) && !newBlock.isReplaceable(world, newPos)) {
-						Aunis.logger.info("TransportRings: " + newPos + " obstructed with " + world.getBlockState(newPos));
+						Aunis.info(newPos + " obstructed with " + world.getBlockState(newPos));
 						return true;
 					}
 				}
@@ -501,8 +501,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			targetRingsPos = BlockPos.fromLong(compound.getLong("targetRingsPos"));
 			
 		} catch (NullPointerException | IndexOutOfBoundsException | ClassCastException e) {
-			Aunis.logger.warn("Exception at reading NBT");
-			Aunis.logger.warn("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
+			Aunis.info("Exception at reading NBT");
+			Aunis.info("If loading world used with previous version and nothing game-breaking doesn't happen, please ignore it");
 
 			e.printStackTrace();
 		}

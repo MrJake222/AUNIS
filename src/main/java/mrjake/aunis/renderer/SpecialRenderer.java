@@ -14,7 +14,7 @@ public class SpecialRenderer extends TileEntitySpecialRenderer<TileEntity> {
 		}
 		
 		catch (ClassCastException e) {
-			Aunis.logger.warn("RendererProviderInterface is not implemented on " + te.getClass().getName());
+			Aunis.info("RendererProviderInterface is not implemented on " + te.getClass().getName());
 		}
 	}
 }

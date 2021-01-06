@@ -92,7 +92,9 @@ public class CommandStargateCloseAll extends CommandBase {
 		catch (NumberFormatException e) {
 			throw new WrongUsageException("commands.sgquery.number_expected");
 		}
-				
+		
+		Aunis.info("force : " +force);
+		
 		notifyCommandListener(sender, this, "commands.sgcloseall.closing", checkDim ? dimId : "any", (queryBox != null ? queryBox.toString() : "box=infinite"));
 		
 		StargateNetwork network = StargateNetwork.get(sender.getEntityWorld());

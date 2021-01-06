@@ -127,14 +127,10 @@ public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
 					return symbol;
 				
 				try {
-					int index = Integer.parseInt(englishName);
-					if (index < 1 || index > 36)
-						return null;
-					
-					return SymbolUniverseEnum.values()[index];
+					return SymbolUniverseEnum.valueOf(englishName.toUpperCase());
 				}
 				
-				catch (NumberFormatException ex) {
+				catch (IllegalArgumentException ex) {
 					return null;
 				}
 		}
