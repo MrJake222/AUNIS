@@ -11,6 +11,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -42,8 +43,11 @@ public abstract class StargateClassicBaseBlock extends StargateAbstractBaseBlock
 	}
 
 	@Override
-	protected void showGateInfo(EntityPlayer player, World world, BlockPos pos) {
-		player.openGui(Aunis.instance, GuiIdEnum.GUI_STARGATE.id, world, pos.getX(), pos.getY(), pos.getZ());
+	protected void showGateInfo(EntityPlayer player, EnumHand hand, World world, BlockPos pos) {
+		StargateClassicBaseTile tile = (StargateClassicBaseTile) world.getTileEntity(pos);
+		if(!tile.tryInsertUpgrade(player, hand)) {
+			player.openGui(Aunis.instance, GuiIdEnum.GUI_STARGATE.id, world, pos.getX(), pos.getY(), pos.getZ());
+		}
 	}
 
 	@Override

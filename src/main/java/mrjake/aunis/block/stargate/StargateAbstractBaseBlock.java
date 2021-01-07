@@ -76,14 +76,14 @@ public abstract class StargateAbstractBaseBlock extends Block {
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if(!world.isRemote) {
             if(!player.isSneaking() && !tryAutobuild(player, world, pos, hand)) {
-                showGateInfo(player, world, pos);
+                showGateInfo(player, hand, world, pos);
             }
         }
         
         return !player.isSneaking();
     }
 
-    protected abstract void showGateInfo(EntityPlayer player, World world, BlockPos pos);
+    protected abstract void showGateInfo(EntityPlayer player, EnumHand hand, World world, BlockPos pos);
 
     protected boolean tryAutobuild(EntityPlayer player, World world, BlockPos basePos, EnumHand hand) {
         final StargateAbstractBaseTile gateTile = (StargateAbstractBaseTile) world.getTileEntity(basePos);

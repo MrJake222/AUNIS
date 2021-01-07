@@ -4,7 +4,6 @@ import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.beamer.BeamerLinkingHelper;
 import mrjake.aunis.gui.GuiIdEnum;
-import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.SoundPositionedEnum;
 import mrjake.aunis.tileentity.BeamerTile;
@@ -16,7 +15,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
@@ -27,7 +25,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class BeamerBlock extends Block {
 	
@@ -91,28 +88,12 @@ public class BeamerBlock extends Block {
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		
-		if (!player.isSneaking()) {
-			ItemStack heldStack = player.getHeldItem(hand);
-			Item heldItem = heldStack.getItem();
-			
-			BeamerTile beamerTile = (BeamerTile) world.getTileEntity(pos);
-			ItemStackHandler itemStackHandler = (ItemStackHandler) beamerTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-			ItemStack currentStack = itemStackHandler.getStackInSlot(0);
-			
-			if ((heldItem == AunisItems.BEAMER_CRYSTAL_POWER || heldItem == AunisItems.BEAMER_CRYSTAL_FLUID || heldItem == AunisItems.BEAMER_CRYSTAL_ITEMS) && currentStack.getItem() != heldStack.getItem()) {
-				
-				ItemStack copy = heldStack.copy();
-				copy.setCount(1);
-				itemStackHandler.setStackInSlot(0, copy);
-				heldStack.shrink(1);
-				
-				if (!currentStack.isEmpty()) {
-					player.addItemStackToInventory(currentStack);
+		if (!world.isRemote && !player.isSneaking()) {
+			if (!FluidUtil.interactWithFluidHandler(player, hand, world, pos, null)) {
+				BeamerTile tile = (BeamerTile) world.getTileEntity(pos);
+				if(!tile.tryInsertUpgrade(player, hand)) {
+					player.openGui(Aunis.instance, GuiIdEnum.GUI_BEAMER.id, world, pos.getX(), pos.getY(), pos.getZ());
 				}
-			}
-			
-			else if (!FluidUtil.interactWithFluidHandler(player, hand, world, pos, null)) {
-				player.openGui(Aunis.instance, GuiIdEnum.GUI_BEAMER.id, world, pos.getX(), pos.getY(), pos.getZ());
 			}
 		}
 				

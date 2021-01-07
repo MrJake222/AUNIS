@@ -19,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -53,7 +54,7 @@ public final class StargateOrlinBaseBlock extends StargateAbstractBaseBlock {
 	// Block behavior
 
 	@Override
-	protected void showGateInfo(EntityPlayer player, World world, BlockPos pos) {
+	protected void showGateInfo(EntityPlayer player, EnumHand hand, World world, BlockPos pos) {
 		StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
 		IEnergyStorage energyStorage = gateTile.getCapability(CapabilityEnergy.ENERGY, null);
 

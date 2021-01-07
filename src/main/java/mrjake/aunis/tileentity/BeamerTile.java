@@ -1,9 +1,8 @@
 package mrjake.aunis.tileentity;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import com.google.common.collect.Iterators;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
@@ -40,10 +39,7 @@ import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
-import mrjake.aunis.tileentity.util.ComparatorHelper;
-import mrjake.aunis.tileentity.util.RedstoneModeEnum;
-import mrjake.aunis.tileentity.util.ScheduledTask;
-import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
+import mrjake.aunis.tileentity.util.*;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.Block;
@@ -51,11 +47,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -77,7 +75,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
-public class BeamerTile extends TileEntity implements ITickable, StateProviderInterface, ScheduledTaskExecutorInterface, Environment {
+public class BeamerTile extends TileEntity implements ITickable, IUpgradable, StateProviderInterface, ScheduledTaskExecutorInterface, Environment {
 	
 	// -----------------------------------------------------------------------------
 	// Ticking & loading
@@ -730,14 +728,19 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		}
 	}
 	
-	private ItemStackHandlerBeamer itemStackHandler = new ItemStackHandlerBeamer(5);
+	private final ItemStackHandlerBeamer itemStackHandler = new ItemStackHandlerBeamer(5);
 	
 	private void updateMode() {		
 		beamerMode = getModeFromItem(itemStackHandler.getStackInSlot(0).getItem());
 		markDirty();
 		syncToClient();
 	}
-	
+
+	@Override
+	public Iterator<Integer> getUpgradeSlotsIterator() {
+		return Iterators.singletonIterator(0);
+	}
+
 	public static BeamerModeEnum getModeFromItem(Item crystal) {
 		if (crystal == AunisItems.BEAMER_CRYSTAL_POWER)
 			return BeamerModeEnum.POWER;

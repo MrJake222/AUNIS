@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
 
@@ -43,12 +44,15 @@ import mrjake.aunis.state.StargateSpinState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.BeamerTile;
+import mrjake.aunis.tileentity.DHDTile;
+import mrjake.aunis.tileentity.util.IUpgradable;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.EnumKeyInterface;
 import mrjake.aunis.util.EnumKeyMap;
 import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.ItemHandlerHelper;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -56,6 +60,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -63,6 +68,7 @@ import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 /**
@@ -72,7 +78,7 @@ import net.minecraftforge.items.ItemStackHandler;
  * @author MrJake222
  *
  */
-public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
+public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile implements IUpgradable {
 	
 	// ------------------------------------------------------------------------
 	// Stargate state
@@ -565,7 +571,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	// -----------------------------------------------------------------------------
 	// Item handler
 	
-	private ItemStackHandler itemStackHandler = new ItemStackHandler(10) {
+	private final ItemStackHandler itemStackHandler = new ItemStackHandler(10) {
 		
 		@Override
 		public boolean isItemValid(int slot, ItemStack stack) {
@@ -576,7 +582,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 				case 1:
 				case 2:
 				case 3:
-					return StargateUpgradeEnum.contains(item);
+					return StargateUpgradeEnum.contains(item) && !hasUpgradeInstalled(item);
 					
 				case 4:
 				case 5:
@@ -636,7 +642,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 			return item;
 		}
 		
-		private static EnumKeyMap<Item, StargateUpgradeEnum> idMap = new EnumKeyMap<Item, StargateClassicBaseTile.StargateUpgradeEnum>(values());
+		private static final EnumKeyMap<Item, StargateUpgradeEnum> idMap = new EnumKeyMap<Item, StargateClassicBaseTile.StargateUpgradeEnum>(values());
 		
 		public static StargateUpgradeEnum valueOf(Item item) {
 			return idMap.valueOf(item);
@@ -648,19 +654,27 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	}
 	
 	public boolean hasUpgradeInstalled(StargateUpgradeEnum upgrade) {
+		return hasUpgradeInstalled(upgrade.item);
+	}
+
+	public boolean hasUpgradeInstalled(Item upgrade) {
 		for (int slot=0; slot<4; slot++) {
-			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade.item)
+			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade)
 				return true;
 		}
-		
+
 		return false;
 	}
-	
+
+	@Override
+	public Iterator<Integer> getUpgradeSlotsIterator() {
+		return IntStream.range(0, 7).iterator();
+	}
 	
 	// -----------------------------------------------------------------------------
 	// Power system
 	
-	private StargateClassicEnergyStorage energyStorage = new StargateClassicEnergyStorage() {
+	private final StargateClassicEnergyStorage energyStorage = new StargateClassicEnergyStorage() {
 		
 		@Override
 		protected void onEnergyChanged() {
@@ -727,7 +741,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile {
 	// -----------------------------------------------------------------
 	// Beamers
 	
-	private List<BlockPos> linkedBeamers = new ArrayList<>();
+	private final List<BlockPos> linkedBeamers = new ArrayList<>();
 	
 	public void addLinkedBeamer(BlockPos pos) {
 		if (stargateState.engaged()) {

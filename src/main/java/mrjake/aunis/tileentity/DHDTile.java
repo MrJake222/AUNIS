@@ -25,15 +25,18 @@ import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
+import mrjake.aunis.tileentity.util.IUpgradable;
 import mrjake.aunis.tileentity.util.ReactorStateEnum;
 import mrjake.aunis.util.ILinkable;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -48,9 +51,10 @@ import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class DHDTile extends TileEntity implements ILinkable, StateProviderInterface, ITickable {
+public class DHDTile extends TileEntity implements ILinkable, IUpgradable, StateProviderInterface, ITickable {
 	
 	// ---------------------------------------------------------------------------------------------------
 	// Gate linking
@@ -340,7 +344,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	public static final List<Item> SUPPORTED_UPGRADES = Arrays.asList(
 			AunisItems.CRYSTAL_GLYPH_DHD);
 	
-	private ItemStackHandler itemStackHandler = new ItemStackHandler(5) {
+	private final ItemStackHandler itemStackHandler = new ItemStackHandler(5) {
 		
 		@Override
 		public boolean isItemValid(int slot, ItemStack stack) {
@@ -354,7 +358,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 				case 2:
 				case 3:
 				case 4:
-					return SUPPORTED_UPGRADES.contains(item);
+					return SUPPORTED_UPGRADES.contains(item) && upgradeInstalledCount(item) == 0;
 					
 				default:
 					return true;
@@ -406,12 +410,16 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 			
 		}
 	}
-	
+
 	public int upgradeInstalledCount(DHDUpgradeEnum upgrade) {
+		return upgradeInstalledCount(upgrade.item);
+	}
+	
+	public int upgradeInstalledCount(Item upgrade) {
 		int count = 0;
 		
 		for (int slot=1; slot<5; slot++) {
-			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade.item)
+			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade)
 				count++;
 		}
 		
@@ -421,7 +429,7 @@ public class DHDTile extends TileEntity implements ILinkable, StateProviderInter
 	// -----------------------------------------------------------------------------
 	// Fluid handler
 	
-	private FluidTank fluidHandler = new FluidTank(new FluidStack(AunisFluids.moltenNaquadahRefined, 0), AunisConfig.dhdConfig.fluidCapacity) {
+	private final FluidTank fluidHandler = new FluidTank(new FluidStack(AunisFluids.moltenNaquadahRefined, 0), AunisConfig.dhdConfig.fluidCapacity) {
 		
 		@Override
 		public boolean canFillFluidType(FluidStack fluid) {
