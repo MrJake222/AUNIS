@@ -82,7 +82,6 @@ public final class StargateGeneratorConfig {
         config.stargate.upgrades.chevronUpgrade = true;
 
         config.dhd.despawnChance = 0;
-        config.dhd.fuel = 3600;
         config.dhd.upgrades.chevronUpgrade = true;
 
         final JsonArray biomeWhitelist = new JsonArray();
@@ -107,7 +106,6 @@ public final class StargateGeneratorConfig {
         config.stargate.upgrades.chevronUpgrade = true;
 
         config.dhd.despawnChance = 0;
-        config.dhd.fuel = 3600;
         config.dhd.upgrades.chevronUpgrade = true;
 
         config.dimWhitelist = Collections.singletonList(-1);

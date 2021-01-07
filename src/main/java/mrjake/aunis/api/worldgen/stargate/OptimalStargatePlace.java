@@ -14,4 +14,8 @@ public final class OptimalStargatePlace {
         this.pos = found;
         this.rotation = rotation;
     }
+
+    public final boolean isInvalid() {
+        return pos == null || rotation == null;
+    }
 }

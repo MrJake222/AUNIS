@@ -103,9 +103,12 @@ public final class JsonStargateGenerator {
         else {
             DHDTile tile = (DHDTile) world.getTileEntity(dhdPos);
 
-            if(config.dhd.fuel > 0) {
+            if(config.dhd.maxFuel > 0) {
                 FluidTank tank = (FluidTank) tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
-                tank.fillInternal(new FluidStack(AunisFluids.moltenNaquadahRefined, Math.min(config.dhd.fuel, tank.getCapacity())), true);
+
+                int fuelAmount = randomBetween(world.rand, betweenTwo(config.dhd.minFuel, 0, tank.getCapacity()), betweenTwo(config.dhd.maxFuel, 0, tank.getCapacity()));
+
+                tank.fillInternal(new FluidStack(AunisFluids.moltenNaquadahRefined, fuelAmount), true);
             }
 
             IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null); //0 control crystal, 1-3 upgrades
@@ -115,7 +118,28 @@ public final class JsonStargateGenerator {
         return dhdPos;
     }
 
+    /**
+     * Random between two numbers
+     * If min < max will return random between min and max
+     * If min > max will return random between max and min
+     * If min == max will return min
+     * @param rand random
+     * @param min minimum value
+     * @param max maximum value
+     * @return random number between min and max
+     */
+    private final int randomBetween(Random rand, int min, int max) {
+        return min < max ? min + rand.nextInt(max - min) : min > max ? max + rand.nextInt(min - max) : min;
+    }
+
+    private final int betweenTwo(int value, int min, int max){
+        return Math.min(Math.max(value, min), max);
+    }
+
     private GeneratedStargate placeStargate(WorldServer world, OptimalStargatePlace place){
+        if(place == null || place.isInvalid())
+            throw new StargateGenerationException("Place for stargate not found!");
+
         Template template = getTemplate(world, world.getStructureTemplateManager(), place.pos);
 
         if(template == null)
@@ -166,6 +190,7 @@ public final class JsonStargateGenerator {
 
     static {
         registerPlaceFinder("overworld", OptimalPlaceFinderOverworld::new);
+        registerPlaceFinder("surface", OptimalPlaceFinderSurface::new);
         registerPlaceFinder("nether", OptimalPlaceFinderNether::new);
     }
 }

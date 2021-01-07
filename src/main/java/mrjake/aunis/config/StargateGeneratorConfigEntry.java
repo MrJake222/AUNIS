@@ -73,7 +73,8 @@ public final class StargateGeneratorConfigEntry {
         public int datablockOffsetY = -1;
         public int datablockOffsetZ = 0;
         public double despawnChance = AunisConfig.mysteriousConfig.despawnDhdChance;
-        public int fuel = AunisConfig.powerConfig.stargateEnergyStorage / AunisConfig.dhdConfig.energyPerNaquadah;
+        public int minFuel = 6000;
+        public int maxFuel = 9000;
         public DHDUpgrades upgrades = new DHDUpgrades();
     }
 
