@@ -2,9 +2,12 @@ package mrjake.aunis.item;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import mrjake.aunis.block.CapacitorBlock;
 import mrjake.aunis.capability.CapacitorCapabilityProvider;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
+import mrjake.aunis.stargate.power.StargateItemEnergyStorage;
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -33,7 +36,7 @@ public class CapacitorItemBlock extends ItemBlock {
 			items.add(new ItemStack(this));
 			
 			ItemStack stack = new ItemStack(this);
-			StargateAbstractEnergyStorage energyStorage = (StargateAbstractEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null);
+			StargateItemEnergyStorage energyStorage = (StargateItemEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null);
 			energyStorage.setEnergyStored(energyStorage.getMaxEnergyStored());
 			items.add(stack);
 		}
@@ -53,8 +56,8 @@ public class CapacitorItemBlock extends ItemBlock {
 	}
 	
 	@Override
-	public ICapabilityProvider initCapabilities(ItemStack stack, NBTTagCompound nbt) {
-		return new CapacitorCapabilityProvider();
+	public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt) {
+		return new CapacitorCapabilityProvider(stack, nbt);
 	}
 	
 	@Override
@@ -67,26 +70,5 @@ public class CapacitorItemBlock extends ItemBlock {
 		IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
 
 		return 1 - (energyStorage.getEnergyStored() / (double)energyStorage.getMaxEnergyStored());
-	}
-	
-	@Override
-	public boolean getShareTag() {
-		return true;
-	}
-	
-	@Override
-	public NBTTagCompound getNBTShareTag(ItemStack stack) {
-		NBTTagCompound compound = new NBTTagCompound();
-		
-		compound.setInteger("energy", stack.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored());
-		
-		return compound;
-	}
-	
-	@Override
-	public void readNBTShareTag(ItemStack stack, NBTTagCompound compound) {
-		if (compound != null) {
-			((StargateAbstractEnergyStorage) stack.getCapability(CapabilityEnergy.ENERGY, null)).setEnergyStored(compound.getInteger("energy"));
-		}
 	}
 }
