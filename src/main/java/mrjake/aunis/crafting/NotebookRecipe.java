@@ -1,10 +1,5 @@
 package mrjake.aunis.crafting;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import mrjake.aunis.Aunis;
 import mrjake.aunis.item.AunisItems;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;

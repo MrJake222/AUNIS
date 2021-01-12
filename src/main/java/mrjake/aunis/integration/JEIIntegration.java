@@ -1,13 +1,8 @@
 package mrjake.aunis.integration;
 
-import java.util.Collections;
-
 import mezz.jei.api.*;
-import mezz.jei.api.ingredients.IModIngredientRegistration;
-import mezz.jei.api.ingredients.VanillaTypes;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.item.AunisItems;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.oredict.OreDictionary;

@@ -1,6 +1,10 @@
 package mrjake.aunis.tileentity;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.Iterators;
 
@@ -39,7 +43,11 @@ import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
-import mrjake.aunis.tileentity.util.*;
+import mrjake.aunis.tileentity.util.ComparatorHelper;
+import mrjake.aunis.tileentity.util.IUpgradable;
+import mrjake.aunis.tileentity.util.RedstoneModeEnum;
+import mrjake.aunis.tileentity.util.ScheduledTask;
+import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
 import net.minecraft.block.Block;
@@ -47,13 +55,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;

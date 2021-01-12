@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 
 import mrjake.aunis.block.CapacitorBlock;
 import mrjake.aunis.capability.CapacitorCapabilityProvider;
-import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
 import mrjake.aunis.stargate.power.StargateItemEnergyStorage;
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
