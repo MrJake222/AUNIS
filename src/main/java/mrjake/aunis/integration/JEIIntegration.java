@@ -1,6 +1,9 @@
 package mrjake.aunis.integration;
 
-import mezz.jei.api.*;
+import mezz.jei.api.IModPlugin;
+import mezz.jei.api.IModRegistry;
+import mezz.jei.api.ISubtypeRegistry;
+import mezz.jei.api.JEIPlugin;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.item.AunisItems;
 import net.minecraft.item.ItemStack;
