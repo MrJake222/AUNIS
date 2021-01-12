@@ -14,7 +14,8 @@ public enum BiomeOverlayEnum {
 	NORMAL(""),
 	FROST("_frost"),
 	MOSSY("_mossy"),
-	AGED("_aged");
+	AGED("_aged"),
+	SOOTY("_sooty");
 	
 	public String suffix;
 
@@ -44,7 +45,7 @@ public enum BiomeOverlayEnum {
 		Biome biome = world.getBiome(topmostBlock);
 
 		if (biome == Biomes.HELL)
-			return AGED;
+			return SOOTY;
 
 		if (!BlockHelpers.isBlockDirectlyUnderSky(world, topmostBlock))
 			return NORMAL;

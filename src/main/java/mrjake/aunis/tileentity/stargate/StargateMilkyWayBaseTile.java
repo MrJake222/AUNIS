@@ -335,7 +335,8 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 			BiomeOverlayEnum.NORMAL,
 			BiomeOverlayEnum.FROST,
 			BiomeOverlayEnum.MOSSY,
-			BiomeOverlayEnum.AGED);
+			BiomeOverlayEnum.AGED,
+			BiomeOverlayEnum.SOOTY);
 	
 	@Override
 	protected EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
