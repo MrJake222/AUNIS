@@ -2,8 +2,11 @@ package mrjake.aunis.tileentity;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.Iterators;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
@@ -41,6 +44,7 @@ import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import mrjake.aunis.tileentity.util.ComparatorHelper;
+import mrjake.aunis.tileentity.util.IUpgradable;
 import mrjake.aunis.tileentity.util.RedstoneModeEnum;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
@@ -77,7 +81,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
-public class BeamerTile extends TileEntity implements ITickable, StateProviderInterface, ScheduledTaskExecutorInterface, Environment {
+public class BeamerTile extends TileEntity implements ITickable, IUpgradable, StateProviderInterface, ScheduledTaskExecutorInterface, Environment {
 	
 	// -----------------------------------------------------------------------------
 	// Ticking & loading
@@ -730,14 +734,19 @@ public class BeamerTile extends TileEntity implements ITickable, StateProviderIn
 		}
 	}
 	
-	private ItemStackHandlerBeamer itemStackHandler = new ItemStackHandlerBeamer(5);
+	private final ItemStackHandlerBeamer itemStackHandler = new ItemStackHandlerBeamer(5);
 	
 	private void updateMode() {		
 		beamerMode = getModeFromItem(itemStackHandler.getStackInSlot(0).getItem());
 		markDirty();
 		syncToClient();
 	}
-	
+
+	@Override
+	public Iterator<Integer> getUpgradeSlotsIterator() {
+		return Iterators.singletonIterator(0);
+	}
+
 	public static BeamerModeEnum getModeFromItem(Item crystal) {
 		if (crystal == AunisItems.BEAMER_CRYSTAL_POWER)
 			return BeamerModeEnum.POWER;

@@ -127,7 +127,7 @@ public enum SymbolTypeEnum implements EnumKeyInterface<Integer> {
 					return symbol;
 				
 				try {
-					int index = Integer.parseInt(englishName);
+					int index = Integer.parseInt(englishName.replace("G", ""));
 					if (index < 1 || index > 36)
 						return null;
 					

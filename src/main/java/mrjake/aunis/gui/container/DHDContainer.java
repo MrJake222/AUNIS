@@ -85,7 +85,7 @@ public class DHDContainer extends Container {
         		}
         	}
         	
-        	else if (DHDTile.SUPPORTED_UPGRADES.contains(stack.getItem())) {
+        	else if (DHDTile.SUPPORTED_UPGRADES.contains(stack.getItem()) && dhdTile.upgradeInstalledCount(stack.getItem()) == 0) {
         		for (int i=1; i<5; i++) {
         			if (!getSlot(i).getHasStack()) {
         				ItemStack stack1 = stack.copy();

@@ -1,4 +1,4 @@
-package mrjake.aunis.worldgen;
+package mrjake.aunis.worldgen.stargate;
 
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.stargate.merging.StargateMilkyWayMergeHelper;

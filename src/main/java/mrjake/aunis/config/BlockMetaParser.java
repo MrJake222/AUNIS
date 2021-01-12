@@ -10,7 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 
-public class BlockMetaParser {
+public final class BlockMetaParser {
 	
 	/**
 	 * Parses array of configured blocks. For format see {@link BlockMetaParser#getBlockStateFromString(String)}
@@ -19,7 +19,7 @@ public class BlockMetaParser {
 	 * @return List of {@link IBlockState}s or empty list.
 	 */
 	@Nonnull
-	static List<IBlockState> parseConfig(String[] config) {
+	public static List<IBlockState> parseConfig(String[] config) {
 		List<IBlockState> list = new ArrayList<>();
 
 		for (String line : config) {
@@ -41,7 +41,7 @@ public class BlockMetaParser {
 	 */
 	@Nullable
 	@SuppressWarnings("deprecation")
-	static IBlockState getBlockStateFromString(String line) {
+	public static IBlockState getBlockStateFromString(String line) {
         String[] parts = line.trim().split(":", 3);
         Block block = Block.getBlockFromName(parts[0] + ":" + parts[1]);
 

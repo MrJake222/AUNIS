@@ -1,16 +1,12 @@
-package mrjake.aunis.worldgen;
+package mrjake.aunis.worldgen.stargate.finders;
+
+import com.google.gson.JsonObject;
 
 import mrjake.aunis.Aunis;
-import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.api.worldgen.stargate.OptimalPlaceFinderAbstract;
+import mrjake.aunis.api.worldgen.stargate.OptimalStargatePlace;
 import mrjake.aunis.config.AunisConfig;
-import mrjake.aunis.config.StargateSizeEnum;
-import mrjake.aunis.fluid.AunisFluids;
-import mrjake.aunis.item.AunisItems;
-import mrjake.aunis.stargate.merging.StargateMilkyWayMergeHelper;
-import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -19,18 +15,19 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.structure.template.Template;
-import net.minecraft.world.gen.structure.template.TemplateManager;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.items.CapabilityItemHandler;
 
-public final class OverworldStargateGenerator extends AbstractStargateGenerator<StargateMilkyWayBaseTile> {
-    public static OverworldStargateGenerator INSTANCE = new OverworldStargateGenerator();
+/**
+ * Temporary solution
+ * TODO FIX IT OR REMOVE because it doesn't work currently. It will try to search for optimal place and it will fail because of {@link #isBiomeAllowed(Biome)} check in method {@link #checkForPlace(World, int, int)}
+ */
+public final class OptimalPlaceFinderOverworld extends OptimalPlaceFinderAbstract {
+
+    public OptimalPlaceFinderOverworld(JsonObject settings){
+        super(settings);
+    }
 
     @Override
-    protected OptimalStargatePlace findOptimalPlace(WorldServer world, BlockPos startPos) {
+    public OptimalStargatePlace findOptimalPlace(WorldServer world, BlockPos startPos) {
 //		boolean nether = rand.nextFloat() < AunisConfig.mysteriousConfig.netherChance;
         BlockPos pos;
         int tries = 0;
@@ -60,7 +57,7 @@ public final class OverworldStargateGenerator extends AbstractStargateGenerator<
     private static final int SG_SIZE_X_PLAINS = 11;
     private static final int SG_SIZE_Z_PLAINS = 11;
 
-    private static BlockPos checkForPlace(World world, int chunkX, int chunkZ) {
+    private BlockPos checkForPlace(World world, int chunkX, int chunkZ) {
         if (world.isChunkGeneratedAt(chunkX, chunkZ))
             return null;
 
@@ -72,7 +69,13 @@ public final class OverworldStargateGenerator extends AbstractStargateGenerator<
             return null;
 
         BlockPos pos = new BlockPos(chunkX*16, y, chunkZ*16);
-        String biomeName = chunk.getBiome(pos, world.getBiomeProvider()).getRegistryName().getResourcePath();
+
+        Biome biome = chunk.getBiome(pos, world.getBiomeProvider());
+
+        if(!isBiomeAllowed(biome))
+            return null;
+
+        String biomeName = biome.getRegistryName().getResourcePath();
 
         boolean desert = biomeName.contains("desert");
 
@@ -140,51 +143,5 @@ public final class OverworldStargateGenerator extends AbstractStargateGenerator<
             case EAST:  return Rotation.NONE;
             default:    return Rotation.NONE;
         }
-    }
-
-    @Override
-    protected Template getTemplate(WorldServer world, TemplateManager templateManager, BlockPos pos) {
-        Biome biome = world.getBiome(pos);
-        boolean desert = biome.getRegistryName().getResourcePath().contains("desert");
-
-        String templateName = "sg_";
-        templateName += desert ? "desert" : "plains";
-        templateName += AunisConfig.stargateSize == StargateSizeEnum.LARGE ? "_large" : "_small";
-
-        return templateManager.getTemplate(world.getMinecraftServer(), new ResourceLocation(Aunis.ModID, templateName));
-    }
-
-    @Override
-    protected BlockPos placeStargateBase(WorldServer world, BlockPos dataPos) {
-        final BlockPos gatePos = dataPos.add(0, -3, 0);
-
-        StargateMilkyWayBaseTile tile = (StargateMilkyWayBaseTile) world.getTileEntity(gatePos);
-
-        tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(4, new ItemStack(AunisBlocks.CAPACITOR_BLOCK), false);
-
-        StargateMilkyWayMergeHelper.INSTANCE.updateMembersBasePos(world, gatePos, tile.getFacing());
-
-        world.setBlockToAir(dataPos);
-        world.setBlockToAir(dataPos.down()); // save block
-        return gatePos;
-    }
-
-    @Override
-    protected BlockPos placeDHD(WorldServer world, BlockPos dataPos) {
-        world.setBlockToAir(dataPos);
-        final BlockPos dhdPos = dataPos.down();
-
-        if (world.rand.nextFloat() < AunisConfig.mysteriousConfig.despawnDhdChance) {
-            world.setBlockToAir(dhdPos);
-            return null;
-        }
-
-        else {
-            int fluid = AunisConfig.powerConfig.stargateEnergyStorage / AunisConfig.dhdConfig.energyPerNaquadah;
-
-            world.getTileEntity(dhdPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).insertItem(0, new ItemStack(AunisItems.CRYSTAL_CONTROL_DHD), false);
-            ((FluidTank) world.getTileEntity(dhdPos).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)).fillInternal(new FluidStack(AunisFluids.moltenNaquadahRefined, fluid), true);
-        }
-        return dhdPos;
     }
 }

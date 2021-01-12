@@ -5,12 +5,11 @@ import java.util.List;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.config.StargateGeneratorConfig;
 import mrjake.aunis.stargate.merging.StargateOrlinMergeHelper;
 import mrjake.aunis.stargate.network.StargateNetwork;
-import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.power.StargateEnergyRequired;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
-import mrjake.aunis.worldgen.StargateGeneratorNether;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
@@ -20,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -54,7 +54,7 @@ public final class StargateOrlinBaseBlock extends StargateAbstractBaseBlock {
 	// Block behavior
 
 	@Override
-	protected void showGateInfo(EntityPlayer player, World world, BlockPos pos) {
+	protected void showGateInfo(EntityPlayer player, EnumHand hand, World world, BlockPos pos) {
 		StargateOrlinBaseTile gateTile = (StargateOrlinBaseTile) world.getTileEntity(pos);
 		IEnergyStorage energyStorage = gateTile.getCapability(CapabilityEnergy.ENERGY, null);
 
@@ -102,7 +102,7 @@ public final class StargateOrlinBaseBlock extends StargateAbstractBaseBlock {
 				StargateNetwork network = StargateNetwork.get(world);
 				
 				if (!network.hasNetherGate()) {
-					network.setNetherGate(StargateGeneratorNether.INSTANCE.generateStargate(world.getMinecraftServer().getWorld(DimensionType.NETHER.getId()), new BlockPos(pos.getX()/8, 32, pos.getZ()/8)).getAddress(SymbolTypeEnum.MILKYWAY));
+					network.setNetherGate(StargateGeneratorConfig.findGenerator("orlin").generateStargate(world.rand, pos).getAddress());
 				}
 				
 				gateTile.updateNetherAddress();

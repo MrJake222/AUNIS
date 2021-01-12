@@ -99,7 +99,7 @@ public class StargateContainer extends Container {
         		}
         	}
         	
-        	else if (StargateUpgradeEnum.contains(stack.getItem())) {
+        	else if (StargateUpgradeEnum.contains(stack.getItem()) && !gateTile.hasUpgradeInstalled(stack.getItem())) {
         		for (int i=0; i<4; i++) {
         			if (!getSlot(i).getHasStack()) {
         				ItemStack stack1 = stack.copy();
