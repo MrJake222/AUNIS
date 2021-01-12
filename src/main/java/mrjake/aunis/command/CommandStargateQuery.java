@@ -45,6 +45,7 @@ public class CommandStargateQuery extends CommandBase {
 		int dimId = 0;
 		int idCheck = -1;
 		boolean givePage = false;
+		int givePageCount = 1;
 		
 		try {
 			if (args.length >= 6) {
@@ -77,7 +78,18 @@ public class CommandStargateQuery extends CommandBase {
 					idCheck = Integer.valueOf(args[i].substring(3));
 				}
 				
-				else if (args[i].equals("page")) {
+				else if (args[i].toLowerCase().startsWith("givepage")) {
+					if (args[i].length() > 8) {
+						// quantity given
+						try {
+							givePageCount = Integer.valueOf(args[i].substring(9));
+						}
+						
+						catch (NumberFormatException|StringIndexOutOfBoundsException e) {
+							throw new WrongUsageException("commands.sgquery.wrong_quantity");
+						}
+					}
+					
 					givePage = true;
 				}
 			}
@@ -163,7 +175,7 @@ public class CommandStargateQuery extends CommandBase {
 				throw new WrongUsageException("commands.sgquery.wrong_sender");
 			}
 			
-			ItemStack stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 64, 1);
+			ItemStack stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, givePageCount, 1);
 			stack.setTagCompound(PageNotebookItem.getCompoundFromAddress(selectedAddress, true, PageNotebookItem.getRegistryPathFromWorld(selectedStargatePos.getWorld(), selectedStargatePos.gatePos)));
 			((EntityPlayer) sender).addItemStackToInventory(stack);
 			

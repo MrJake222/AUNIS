@@ -103,6 +103,7 @@ commands.sgquery.stargates=Stargates %s
 commands.sgquery.wrong_id=Wrong ID or not given any
 commands.sgquery.wrong_map=Wrong map or not given any
 commands.sgquery.wrong_sender=Wrong sender (not a player)
+commands.sgquery.wrong_quantity=Wrong quantity of pages given
 commands.sgquery.giving_page=Giving page to %s
 commands.sggivepage.usage=/sggivepage (player) (map=X) [biome=Y] (Symbol)x8/6
 commands.sggivepage.no_map=No map or wrong map given
