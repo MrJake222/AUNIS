@@ -1,0 +1,11 @@
+{
+    "name": "Milky Way Stargate",
+    "icon": "aunis:crystal_glyph_milkyway",
+    "category": "Portablewiki:Stargates",
+    "pages": [
+        {
+            "type": "text",
+            "text": "While the most recognizable Stargate, these$(br)stargates comprise the second generation of the$(br)Alteran wormhole technology."
+        }
+    ]
+}
