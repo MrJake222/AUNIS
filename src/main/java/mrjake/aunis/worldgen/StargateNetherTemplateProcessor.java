@@ -1,4 +1,4 @@
-package mrjake.aunis.worldgen.stargate;
+package mrjake.aunis.worldgen;
 
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.stargate.merging.StargateMilkyWayMergeHelper;
@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.template.ITemplateProcessor;
 import net.minecraft.world.gen.structure.template.Template.BlockInfo;
 
-public final class StargateNetherTemplateProcessor implements ITemplateProcessor {
+public class StargateNetherTemplateProcessor implements ITemplateProcessor {
 
 	@Override
 	public BlockInfo processBlock(World world, BlockPos pos, BlockInfo blockInfoIn) {
