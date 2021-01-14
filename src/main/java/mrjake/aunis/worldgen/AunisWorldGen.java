@@ -5,6 +5,7 @@ import java.util.Random;
 import com.google.common.base.Predicate;
 
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.config.AunisConfig;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.init.Blocks;
@@ -25,7 +26,10 @@ public class AunisWorldGen implements IWorldGenerator {
 		
 		switch(world.provider.getDimensionType()) {
 			case NETHER:
-				runGenerator(AunisBlocks.ORE_NAQUADAH_BLOCK.getDefaultState(), 8, 16, 0, 256, BlockMatcher.forBlock(Blocks.NETHERRACK), world, rand, chunkX, chunkZ);
+				if (AunisConfig.worldgenConfig.naquadahEnable) {
+					runGenerator(AunisBlocks.ORE_NAQUADAH_BLOCK.getDefaultState(), AunisConfig.worldgenConfig.naquadahVeinSize, AunisConfig.worldgenConfig.naquadahMaxVeinInChunk, 0, 128, BlockMatcher.forBlock(Blocks.NETHERRACK), world, rand, chunkX, chunkZ);
+				}
+				
 				break;
 				
 			default:
@@ -42,11 +46,13 @@ public class AunisWorldGen implements IWorldGenerator {
 		WorldGenMinable generator = new WorldGenMinable(blockToGen, blockAmount, blockToReplace);
 		
 		int heightDiff = maxHeight - minHeight;
-		
+		int bx = chunkX * 16 + 2;
+		int bz = chunkZ * 16 + 2;
+				
 		for(int i=0; i<chancesToSpawn; i++) {
-			int x = chunkX * 16 +rand.nextInt(16);
+			int x = bx + rand.nextInt(16-4);
 			int y = minHeight + rand.nextInt(heightDiff);
-			int z = chunkZ * 16 + rand.nextInt(16);
+			int z = bz + rand.nextInt(16-4);
 			
 			generator.generate(world, rand, new BlockPos(x,y,z));
 		}
