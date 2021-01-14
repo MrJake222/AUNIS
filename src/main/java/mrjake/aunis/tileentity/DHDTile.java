@@ -189,7 +189,8 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 	public static final EnumSet<BiomeOverlayEnum> SUPPORTED_OVERLAYS = EnumSet.of(
 			BiomeOverlayEnum.NORMAL,
 			BiomeOverlayEnum.FROST,
-			BiomeOverlayEnum.MOSSY);
+			BiomeOverlayEnum.MOSSY,
+			BiomeOverlayEnum.SOOTY);
 	
 	private boolean hadControlCrystal;
 	
