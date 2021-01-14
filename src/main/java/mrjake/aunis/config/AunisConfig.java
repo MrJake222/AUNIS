@@ -49,6 +49,9 @@ public class AunisConfig {
 	@Name("Audio/Video")
 	public static AudioVideoConfig avConfig = new AudioVideoConfig();
 	
+	@Name("WorldGen config")
+	public static WorldGenConfig worldgenConfig = new WorldGenConfig();
+	
 	public static class StargateConfig {
 		@Name("Orlin's gate max open count")
 		@RangeInt(min=0)
@@ -281,6 +284,17 @@ public class AunisConfig {
 			"0.2 - for 4:3.",
 		})
 		public float pageNarrowing = 0;
+	}
+	
+	public static class WorldGenConfig {
+		@Name("Enable Naquadah ore generation")
+		public boolean naquadahEnable = true;
+		
+		@Name("Naquadah vein size")
+		public int naquadahVeinSize = 8;
+		
+		@Name("Naquadah max veins in chunk")
+		public int naquadahMaxVeinInChunk = 16;
 	}
 	
 	public static void resetCache() {
