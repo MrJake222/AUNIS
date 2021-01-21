@@ -470,7 +470,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 				if (stack.getItem() == AunisItems.UNIVERSE_DIALER) {
 					NBTTagList saved = stack.getTagCompound().getTagList("saved", NBT.TAG_COMPOUND);
 					NBTTagCompound compound = gateAddressMap.get(symbolType).serializeNBT();
-					compound.setBoolean("hasUpgrade", hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE));
+					compound.setBoolean("hasUpgrade", hasUpgrade(StargateUpgradeEnum.CHEVRON_UPGRADE));
 					saved.appendTag(compound);
 				}
 				
@@ -479,7 +479,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 	
 					NBTTagCompound compound = PageNotebookItem.getCompoundFromAddress(
 							gateAddressMap.get(symbolType),
-							hasUpgradeInstalled(StargateUpgradeEnum.CHEVRON_UPGRADE),
+							hasUpgrade(StargateUpgradeEnum.CHEVRON_UPGRADE),
 							PageNotebookItem.getRegistryPathFromWorld(world, pos));
 					
 					stack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
@@ -578,7 +578,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 				case 1:
 				case 2:
 				case 3:
-					return StargateUpgradeEnum.contains(item) && !hasUpgradeInstalled(item);
+					return StargateUpgradeEnum.contains(item) && !hasUpgrade(item);
 					
 				case 4:
 				case 5:
@@ -647,19 +647,6 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 		public static boolean contains(Item item) {
 			return idMap.contains(item);
 		}
-	}
-	
-	public boolean hasUpgradeInstalled(StargateUpgradeEnum upgrade) {
-		return hasUpgradeInstalled(upgrade.item);
-	}
-
-	public boolean hasUpgradeInstalled(Item upgrade) {
-		for (int slot=0; slot<4; slot++) {
-			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade)
-				return true;
-		}
-
-		return false;
 	}
 
 	@Override

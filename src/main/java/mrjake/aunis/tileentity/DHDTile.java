@@ -28,6 +28,7 @@ import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.util.IUpgradable;
 import mrjake.aunis.tileentity.util.ReactorStateEnum;
+import mrjake.aunis.util.EnumKeyInterface;
 import mrjake.aunis.util.ILinkable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
@@ -362,7 +363,7 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 				case 2:
 				case 3:
 				case 4:
-					return SUPPORTED_UPGRADES.contains(item) && upgradeInstalledCount(item) == 0;
+					return SUPPORTED_UPGRADES.contains(item) && !hasUpgrade(item);
 					
 				default:
 					return true;
@@ -404,30 +405,19 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 		}
 	};
 	
-	public static enum DHDUpgradeEnum {
+	public static enum DHDUpgradeEnum implements EnumKeyInterface<Item> {
 		CHEVRON_UPGRADE(AunisItems.CRYSTAL_GLYPH_DHD);
 		
 		public Item item;
 
 		private DHDUpgradeEnum(Item item) {
 			this.item = item;
-			
 		}
-	}
 
-	public int upgradeInstalledCount(DHDUpgradeEnum upgrade) {
-		return upgradeInstalledCount(upgrade.item);
-	}
-	
-	public int upgradeInstalledCount(Item upgrade) {
-		int count = 0;
-		
-		for (int slot=1; slot<5; slot++) {
-			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade)
-				count++;
+		@Override
+		public Item getKey() {
+			return item;
 		}
-		
-		return count;
 	}
 	
 	// -----------------------------------------------------------------------------
