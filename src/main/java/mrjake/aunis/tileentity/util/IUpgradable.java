@@ -3,7 +3,9 @@ package mrjake.aunis.tileentity.util;
 import java.util.Iterator;
 import java.util.stream.IntStream;
 
+import mrjake.aunis.util.EnumKeyInterface;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -21,6 +23,23 @@ public interface IUpgradable {
 
     public default IItemHandler getItemHandler() {
         return getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+    }
+
+    public default boolean hasUpgrade(EnumKeyInterface<Item> upgrade) {
+        return hasUpgrade(upgrade.getKey());
+    }
+
+    public default boolean hasUpgrade(Item item) {
+        final IItemHandler itemHandler = getItemHandler();
+        final Iterator<Integer> iter = getUpgradeSlotsIterator();
+
+        while (iter.hasNext()) {
+            int slot = iter.next();
+            if(itemHandler.getStackInSlot(slot).getItem() == item) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

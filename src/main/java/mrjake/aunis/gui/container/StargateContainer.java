@@ -113,7 +113,7 @@ public class StargateContainer extends Container implements OpenTabHolderInterfa
         		}
         	}
         	
-        	else if (StargateUpgradeEnum.contains(stack.getItem()) && !gateTile.hasUpgradeInstalled(stack.getItem())) {
+        	else if (StargateUpgradeEnum.contains(stack.getItem()) && !gateTile.hasUpgrade(stack.getItem())) {
         		for (int i=0; i<4; i++) {
         			if (!getSlot(i).getHasStack()) {
         				ItemStack stack1 = stack.copy();

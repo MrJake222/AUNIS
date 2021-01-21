@@ -190,7 +190,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		sendState(StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(gateAction, chevronCount, modifyFinal));
 	}
 	
-	// TODO Convert to using this
+	// TODO Convert to using sendState
 	protected void sendState(StateTypeEnum type, State state) {
 		if (targetPoint != null) {
 			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, type, state), targetPoint);
