@@ -111,17 +111,10 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				
 		markDirty();
 	}
-	
+
+	@Override
 	protected int getMaxChevrons() {
-		if (isLinkedAndDHDOperational() && stargateState != EnumStargateState.DIALING_COMPUTER) {
-			switch (getLinkedDHD(world).upgradeInstalledCount(DHDUpgradeEnum.CHEVRON_UPGRADE)) {
-				case 0: return 7;
-				case 1: return 8;
-				case 2: return 9;
-			}
-		}
-		
-		return 9;
+		return isLinkedAndDHDOperational() && stargateState != EnumStargateState.DIALING_COMPUTER && !getLinkedDHD(world).hasUpgrade(DHDUpgradeEnum.CHEVRON_UPGRADE) ? 7 : 9;
 	}
 	
 	@Override

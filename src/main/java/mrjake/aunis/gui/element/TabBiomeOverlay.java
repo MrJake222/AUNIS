@@ -40,11 +40,6 @@ public class TabBiomeOverlay extends Tab {
 		Minecraft.getMinecraft().getTextureManager().bindTexture(bgTexLocation);
 		GlStateManager.color(1, 1, 1, 1);
 		Gui.drawModalRectWithCustomSizedTexture(guiLeft+currentOffsetX+5, guiTop+defaultY+24, slotTexX, slotTexY, 18, 18, textureSize, textureSize);
-		
-		
-		if (isVisible()) {
-			// TODO code
-		}
 	}
 	
 	@Override

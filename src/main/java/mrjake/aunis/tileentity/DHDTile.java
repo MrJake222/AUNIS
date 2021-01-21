@@ -30,6 +30,7 @@ import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.util.IUpgradable;
 import mrjake.aunis.tileentity.util.ReactorStateEnum;
 import mrjake.aunis.util.AunisItemStackHandler;
+import mrjake.aunis.util.EnumKeyInterface;
 import mrjake.aunis.util.ILinkable;
 import mrjake.aunis.util.ItemMetaPair;
 import net.minecraft.block.state.IBlockState;
@@ -403,7 +404,7 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 				case 2:
 				case 3:
 				case 4:
-					return SUPPORTED_UPGRADES.contains(item) && upgradeInstalledCount(item) == 0;
+					return SUPPORTED_UPGRADES.contains(item) && !hasUpgrade(item);
 					
 				case BIOME_OVERRIDE_SLOT:
 					BiomeOverlayEnum override = AunisConfig.stargateConfig.getBiomeOverrideItemMetaPairs().get(new ItemMetaPair(stack));
@@ -460,30 +461,20 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 		}
 	};
 	
-	public static enum DHDUpgradeEnum {
+	// TODO Get rid of EnumKeyInterface
+	public static enum DHDUpgradeEnum implements EnumKeyInterface<Item> {
 		CHEVRON_UPGRADE(AunisItems.CRYSTAL_GLYPH_DHD);
 		
 		public Item item;
 
 		private DHDUpgradeEnum(Item item) {
 			this.item = item;
-			
 		}
-	}
 
-	public int upgradeInstalledCount(DHDUpgradeEnum upgrade) {
-		return upgradeInstalledCount(upgrade.item);
-	}
-	
-	public int upgradeInstalledCount(Item upgrade) {
-		int count = 0;
-		
-		for (int slot=1; slot<5; slot++) {
-			if (itemStackHandler.getStackInSlot(slot).getItem() == upgrade)
-				count++;
+		@Override
+		public Item getKey() {
+			return item;
 		}
-		
-		return count;
 	}
 	
 	// -----------------------------------------------------------------------------
