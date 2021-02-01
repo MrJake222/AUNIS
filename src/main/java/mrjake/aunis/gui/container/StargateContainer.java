@@ -2,7 +2,6 @@ package mrjake.aunis.gui.container;
 
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.gui.util.ContainerHelper;
-import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.power.StargateClassicEnergyStorage;
@@ -24,16 +23,26 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
-public class StargateContainer extends Container {
+public class StargateContainer extends Container implements OpenTabHolderInterface {
 
 	public StargateClassicBaseTile gateTile;
-	public int openTabId = -1;
 	
 	private BlockPos pos;
 	private int lastEnergyStored;
 	private int energyTransferedLastTick;
 	private float lastEnergySecondsToClose;
 	private int lastProgress;
+	private int openTabId = -1;
+	
+	@Override
+	public int getOpenTabId() {
+		return openTabId;
+	}
+	
+	@Override
+	public void setOpenTabId(int tabId) {
+		openTabId = tabId;
+	}
 	
 	public StargateContainer(IInventory playerInventory, World world, int x, int y, int z) {
 		pos = new BlockPos(x, y, z);
@@ -52,8 +61,13 @@ public class StargateContainer extends Container {
 			addSlotToContainer(new SlotItemHandler(itemHandler, col+4, 115+18*col, 40));
 		}
 
-		for (int i=0; i<3; i++)
+		// Page slots (index 7-9)
+		for (int i=0; i<3; i++) {
 			addSlotToContainer(new SlotItemHandler(itemHandler, i+7, -22, 89+22*i));
+		}
+		
+		// Biome overlay slot (index 10)
+		addSlotToContainer(new SlotItemHandler(itemHandler, 10, 0, 0));
 		
 		for (Slot slot : ContainerHelper.generatePlayerSlots(playerInventory, 86))
 			addSlotToContainer(slot);
@@ -74,8 +88,8 @@ public class StargateContainer extends Container {
 		ItemStack stack = getSlot(index).getStack();
 		
 		// Transfering from Stargate to player's inventory
-        if (index < 10) {
-        	if (!mergeItemStack(stack, 10, inventorySlots.size(), false)) {
+        if (index < 11) {
+        	if (!mergeItemStack(stack, 11, inventorySlots.size(), false)) {
         		return ItemStack.EMPTY;
         	}
         	
@@ -113,7 +127,7 @@ public class StargateContainer extends Container {
         		}
         	}
         	
-        	else if ((stack.getItem() == AunisItems.PAGE_NOTEBOOK_ITEM && openTabId != -1) || (stack.getItem() == AunisItems.UNIVERSE_DIALER && openTabId == 2)) {        		
+        	else if (openTabId >= 0 && openTabId <= 2 && getSlot(7+openTabId).isItemValid(stack)) {        		
     			if (!getSlot(7+openTabId).getHasStack()) {
     				ItemStack stack1 = stack.copy();
     				stack1.setCount(1);
@@ -123,6 +137,19 @@ public class StargateContainer extends Container {
     				
     				return ItemStack.EMPTY;
     			}
+        	}
+        	
+        	// Biome override blocks
+        	else if (openTabId == 3 && getSlot(10).isItemValid(stack)) {
+        		if (!getSlot(10).getHasStack()) {
+        			ItemStack stack1 = stack.copy();
+    				stack1.setCount(1);
+    				
+    				putStackInSlot(10, stack1);
+    				stack.shrink(1);
+    				
+    				return ItemStack.EMPTY;
+        		}
         	}
         	
         	return ItemStack.EMPTY;

@@ -1,15 +1,26 @@
 package mrjake.aunis.gui.container;
 
+import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.gui.element.Diode;
 import mrjake.aunis.gui.element.Diode.DiodeStatus;
+import mrjake.aunis.gui.element.Tab.SlotTab;
+import mrjake.aunis.packet.AunisPacketHandler;
+import mrjake.aunis.packet.SetOpenTabToServer;
+import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.util.ReactorStateEnum;
 import mrjake.aunis.gui.element.FluidTankElement;
 import mrjake.aunis.gui.element.GuiHelper;
+import mrjake.aunis.gui.element.Tab;
+import mrjake.aunis.gui.element.TabBiomeOverlay;
+import mrjake.aunis.gui.element.TabSideEnum;
+import mrjake.aunis.gui.element.TabbedContainerInterface;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -18,8 +29,9 @@ import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.items.SlotItemHandler;
 
-public class DHDContainerGui extends GuiContainer {
+public class DHDContainerGui extends GuiContainer implements TabbedContainerInterface {
 
 	private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/gui/container_dhd.png");
 	
@@ -28,6 +40,9 @@ public class DHDContainerGui extends GuiContainer {
 	
 	private List<Diode> diodes = new ArrayList<Diode>(3);
 	
+	private List<Tab> tabs = new ArrayList<>();
+	private TabBiomeOverlay overlayTab;
+
 	public DHDContainerGui(DHDContainer container) {
 		super(container);
 		
@@ -81,17 +96,54 @@ public class DHDContainerGui extends GuiContainer {
 					}	
 				}));
 	}
+	
+	@SuppressWarnings("static-access")
+	@Override
+	public void initGui() {
+		super.initGui();
+		
+		tabs.clear();
+		
+		overlayTab = (TabBiomeOverlay) TabBiomeOverlay.builder()
+				.setSupportedOverlays(container.dhdTile.getSupportedOverlays())
+				.setSlotTexture(176, 86)
+				.setGuiSize(xSize, ySize)
+				.setGuiPosition(guiLeft, guiTop)
+				.setTabPosition(176-107, 2)
+				.setOpenX(176)
+				.setHiddenX(54)
+				.setTabSize(128, 51)
+				.setTabTitle(I18n.format("gui.stargate.biome_overlay"))
+				.setTabSide(TabSideEnum.RIGHT)
+				.setTexture(BACKGROUND_TEXTURE, 256)
+				.setBackgroundTextureLocation(0, 194)
+				.setIconRenderPos(107, 7)
+				.setIconSize(20, 18)
+				.setIconTextureLocation(176, 104).build();
+		
+		tabs.add(overlayTab);
+		
+		container.inventorySlots.set(DHDTile.BIOME_OVERRIDE_SLOT, overlayTab.createAndSaveSlot((SlotItemHandler) container.getSlot(DHDTile.BIOME_OVERRIDE_SLOT)));
+	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		drawDefaultBackground();
-				
+		
+		Tab.updatePositions(tabs);
+		
+		((SlotTab) container.getSlot(5)).updatePos();
+		
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		renderHoveredToolTip(mouseX, mouseY);
 	}
 	
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+		for (Tab tab : tabs) {
+			tab.render(fontRenderer, mouseX, mouseY);
+		}
+		
 		mc.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
 		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
         
@@ -152,5 +204,36 @@ public class DHDContainerGui extends GuiContainer {
 		}
 		
 		tank.renderTooltip(mouseX, mouseY);
+		
+		for (Tab tab : tabs) {
+			tab.renderFg(this, fontRenderer, mouseX, mouseY);
+		}
+	}
+	
+	@Override
+	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+		super.mouseClicked(mouseX, mouseY, mouseButton);
+		
+		for (int i=0; i<tabs.size(); i++) {
+			Tab tab = tabs.get(i);
+			
+			if (tab.isCursorOnTab(mouseX, mouseY)) {
+				if (Tab.tabsInteract(tabs, i))
+					container.setOpenTabId(i);
+				else
+					container.setOpenTabId(-1);
+				
+				AunisPacketHandler.INSTANCE.sendToServer(new SetOpenTabToServer(container.getOpenTabId()));
+				
+				break;
+			}
+		}
+	}
+	
+	@Override
+	public List<Rectangle> getGuiExtraAreas() {		
+		return tabs.stream()
+				.map(tab -> tab.getArea())
+				.collect(Collectors.toList());
 	}
 }

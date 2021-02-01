@@ -44,15 +44,16 @@ public class DHDRendererState extends State {
 		}
 	}
 	
-	public DHDRendererState(StargateAddressDynamic addressDialed, boolean brbActive) {
+	public DHDRendererState(StargateAddressDynamic addressDialed, boolean brbActive, BiomeOverlayEnum biomeOverride) {
 		this.addressDialed = addressDialed;
 		this.brbActive = brbActive;
+		this.biomeOverride = biomeOverride;
 	}
 	
-	public DHDRendererState initClient(BlockPos pos, float horizontalRotation) {
+	public DHDRendererState initClient(BlockPos pos, float horizontalRotation, BiomeOverlayEnum biomeOverlay) {
 		this.pos = pos;
 		this.horizontalRotation = horizontalRotation;
-		this.biomeOverlay = BiomeOverlayEnum.NORMAL;
+		this.biomeOverlay = biomeOverlay;
 		
 		for (SymbolMilkyWayEnum symbol : SymbolMilkyWayEnum.values()) {			
 			if (symbol.brb())
@@ -69,7 +70,7 @@ public class DHDRendererState extends State {
 	// Not saved
 	public BlockPos pos;
 	public float horizontalRotation;
-	public BiomeOverlayEnum biomeOverlay;
+	private BiomeOverlayEnum biomeOverlay;
 	
 	// Symbols
 	// Not saved
@@ -78,6 +79,21 @@ public class DHDRendererState extends State {
 	// Saved
 	public StargateAddressDynamic addressDialed;
 	public boolean brbActive;
+	
+	// Biome Override
+	// Saved
+	public BiomeOverlayEnum biomeOverride;
+	
+	public BiomeOverlayEnum getBiomeOverlay() {
+		if (biomeOverride != null)
+			return biomeOverride;
+		
+		return biomeOverlay;
+	}
+	
+	public void setBiomeOverlay(BiomeOverlayEnum biomeOverlay) {
+		this.biomeOverlay = biomeOverlay;
+	}
 	
 	private boolean isSymbolActiveClientSide(SymbolMilkyWayEnum symbol) {
 		return BUTTON_STATE_MAP.get(symbol) != 0;
@@ -114,11 +130,24 @@ public class DHDRendererState extends State {
 	public void toBytes(ByteBuf buf) {
 		addressDialed.toBytes(buf);
 		buf.writeBoolean(brbActive);
+		
+		if (biomeOverride != null) {
+			buf.writeBoolean(true);
+			buf.writeInt(biomeOverride.ordinal());
+		}
+		
+		else {
+			buf.writeBoolean(false);
+		}
 	}
 
 	public void fromBytes(ByteBuf buf) {
 		addressDialed = new StargateAddressDynamic(SymbolTypeEnum.MILKYWAY);		
 		addressDialed.fromBytes(buf);
 		brbActive = buf.readBoolean();
+		
+		if (buf.readBoolean()) {
+			biomeOverride = BiomeOverlayEnum.values()[buf.readInt()];
+		}
 	}
 }

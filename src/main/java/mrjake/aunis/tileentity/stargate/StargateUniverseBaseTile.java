@@ -134,7 +134,7 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 			BiomeOverlayEnum.AGED);
 	
 	@Override
-	protected EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
+	public EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
 		return SUPPORTED_OVERLAYS;
 	}
 	

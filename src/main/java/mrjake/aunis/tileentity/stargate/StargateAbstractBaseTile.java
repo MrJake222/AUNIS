@@ -187,8 +187,17 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 		
 	protected void sendRenderingUpdate(EnumGateAction gateAction, int chevronCount, boolean modifyFinal) {
+		sendState(StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(gateAction, chevronCount, modifyFinal));
+	}
+	
+	// TODO Convert to using this
+	protected void sendState(StateTypeEnum type, State state) {
 		if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(gateAction, chevronCount, modifyFinal)), targetPoint);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, type, state), targetPoint);
+		}
+		
+		else {
+			Aunis.logger.debug("targetPoint was null trying to send " + type + " from " + this.getClass().getCanonicalName());
 		}
 	}
 	
@@ -794,18 +803,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			energyTransferedLastTick = getEnergyStorage().getEnergyStored() - energyStoredLastTick;
 			energyStoredLastTick = getEnergyStorage().getEnergyStored();
 		}
-		
-		else {
-			// Client
-			
-			// Each 2s check for the sky
-			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null) {
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos), getSupportedOverlays());
-			}
-		}
 	}
 	
-	protected abstract EnumSet<BiomeOverlayEnum> getSupportedOverlays();
+	public abstract EnumSet<BiomeOverlayEnum> getSupportedOverlays();
 	
 	/**
 	 * Method for closing the gate using Autoclose mechanism.
@@ -1114,8 +1114,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			case RENDERER_STATE:
 				EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 				
-				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing));
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, getSupportedOverlays());
+				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing, BiomeOverlayEnum.updateBiomeOverlay(world, pos, getSupportedOverlays())));
 
 				updateFacing(facing, false);
 				

@@ -19,7 +19,7 @@ public class StargateAbstractRendererState extends State {
 		}
 	}
 	
-	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing) {
+	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing, BiomeOverlayEnum biomeOverlay) {
 		this.pos = pos;
 		this.facing = facing;
 		
@@ -27,7 +27,7 @@ public class StargateAbstractRendererState extends State {
 			facing = facing.getOpposite();
 		
 		this.horizontalRotation = facing.getHorizontalAngle();
-		this.biomeOverlay = BiomeOverlayEnum.NORMAL;
+		this.biomeOverlay = biomeOverlay;
 		
 		return this;
 	}
@@ -37,7 +37,7 @@ public class StargateAbstractRendererState extends State {
 	public BlockPos pos;
 	public EnumFacing facing;
 	public float horizontalRotation;
-	public BiomeOverlayEnum biomeOverlay;
+	private BiomeOverlayEnum biomeOverlay;
 	
 	// Gate
 	// Saved
@@ -69,6 +69,14 @@ public class StargateAbstractRendererState extends State {
 	public void closeGate(long totalWorldTime) {		
 		gateWaitClose = totalWorldTime;
 		vortexState = EnumVortexState.CLOSING;
+	}
+	
+	public BiomeOverlayEnum getBiomeOverlay() {
+		return biomeOverlay;
+	}
+	
+	public void setBiomeOverlay(BiomeOverlayEnum biomeOverlay) {
+		this.biomeOverlay = biomeOverlay;
 	}
 	
 	@Override

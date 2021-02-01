@@ -19,6 +19,9 @@ public final class JEIIntegration implements IModPlugin {
     public void register(IModRegistry registry) {
         // Hide invisible block in JEI
         registry.getJeiHelpers().getIngredientBlacklist().addIngredientToBlacklist(new ItemStack(AunisBlocks.INVISIBLE_BLOCK, 1, OreDictionary.WILDCARD_VALUE));
+        
+        // Tab handling
+        registry.addAdvancedGuiHandlers(new JEIAdvancedGuiHandler());
     }
 
     @Override

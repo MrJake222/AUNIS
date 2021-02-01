@@ -1,6 +1,7 @@
 package mrjake.aunis.renderer.stargate;
 
 import io.netty.buffer.ByteBuf;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.stargate.EnumSpinDirection;
 import mrjake.aunis.stargate.StargateClassicSpinHelper;
 import mrjake.aunis.stargate.network.SymbolInterface;
@@ -16,13 +17,14 @@ public abstract class StargateClassicRendererState extends StargateAbstractRende
 		
 		this.chevronTextureList = new ChevronTextureList(getChevronTextureBase(), builder.activeChevrons, builder.isFinalActive);
 		this.spinHelper = new StargateClassicSpinHelper(builder.symbolType, builder.currentRingSymbol, builder.spinDirection, builder.isSpinning, builder.targetRingSymbol, builder.spinStartTime);
+		this.biomeOverride = builder.biomeOverride;
 	}
 	
 	@Override
-	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing) {
+	public StargateAbstractRendererState initClient(BlockPos pos, EnumFacing facing, BiomeOverlayEnum biomeOverlay) {
 		chevronTextureList.initClient();
 		
-		return super.initClient(pos, facing);
+		return super.initClient(pos, facing, biomeOverlay);
 	}
 	
 	protected abstract String getChevronTextureBase();
@@ -36,6 +38,18 @@ public abstract class StargateClassicRendererState extends StargateAbstractRende
 	public StargateClassicSpinHelper spinHelper;
 	
 	
+	// Biome override
+	// Saved
+	public BiomeOverlayEnum biomeOverride;
+	
+	@Override
+	public BiomeOverlayEnum getBiomeOverlay() {
+		if (biomeOverride != null)
+			return biomeOverride;
+		
+		return super.getBiomeOverlay();
+	}
+	
 	// ------------------------------------------------------------------------
 	// Saving
 	
@@ -43,6 +57,15 @@ public abstract class StargateClassicRendererState extends StargateAbstractRende
 	public void toBytes(ByteBuf buf) {
 		chevronTextureList.toBytes(buf);
 		spinHelper.toBytes(buf);
+		
+		if (biomeOverride != null) {
+			buf.writeBoolean(true);
+			buf.writeInt(biomeOverride.ordinal());
+		}
+		
+		else {
+			buf.writeBoolean(false);
+		}
 		
 		super.toBytes(buf);
 	}
@@ -54,6 +77,10 @@ public abstract class StargateClassicRendererState extends StargateAbstractRende
 		
 		spinHelper = new StargateClassicSpinHelper();
 		spinHelper.fromBytes(buf);
+		
+		if (buf.readBoolean()) {
+			biomeOverride = BiomeOverlayEnum.values()[buf.readInt()];
+		}
 		
 		super.fromBytes(buf);
 	}
@@ -81,6 +108,9 @@ public abstract class StargateClassicRendererState extends StargateAbstractRende
 		protected boolean isSpinning;
 		protected SymbolInterface targetRingSymbol;
 		protected long spinStartTime;
+		
+		// Biome override
+		public BiomeOverlayEnum biomeOverride;
 		
 		public StargateClassicRendererStateBuilder(StargateAbstractRendererStateBuilder superBuilder) {
 			setStargateState(superBuilder.stargateState);
@@ -123,6 +153,11 @@ public abstract class StargateClassicRendererState extends StargateAbstractRende
 		
 		public StargateClassicRendererStateBuilder setSpinStartTime(long spinStartTime) {
 			this.spinStartTime = spinStartTime;
+			return this;
+		}
+		
+		public StargateClassicRendererStateBuilder setBiomeOverride(BiomeOverlayEnum biomeOverride) {
+			this.biomeOverride = biomeOverride;
 			return this;
 		}
 	}

@@ -1,7 +1,7 @@
 package mrjake.aunis.packet;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.gui.container.StargateContainer;
+import mrjake.aunis.gui.container.OpenTabHolderInterface;
 import net.minecraft.inventory.Container;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -33,8 +33,8 @@ public class SetOpenTabToServer implements IMessage {
 		public IMessage onMessage(SetOpenTabToServer message, MessageContext ctx) {
 			Container container = ctx.getServerHandler().player.openContainer;
 			
-			if (container instanceof StargateContainer) {
-				((StargateContainer) container).openTabId = message.openTabId;
+			if (container instanceof OpenTabHolderInterface) {
+				((OpenTabHolderInterface) container).setOpenTabId(message.openTabId);
 			}
 			
 			return null;

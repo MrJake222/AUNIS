@@ -339,7 +339,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 			BiomeOverlayEnum.SOOTY);
 	
 	@Override
-	protected EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
+	public EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
 		return SUPPORTED_OVERLAYS;
 	}
 	

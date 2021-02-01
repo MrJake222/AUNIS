@@ -22,13 +22,16 @@ import mrjake.aunis.stargate.network.StargateAddressDynamic;
 import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.state.DHDActivateButtonState;
+import mrjake.aunis.state.StargateBiomeOverrideState;
 import mrjake.aunis.state.State;
 import mrjake.aunis.state.StateProviderInterface;
 import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.util.IUpgradable;
 import mrjake.aunis.tileentity.util.ReactorStateEnum;
+import mrjake.aunis.util.AunisItemStackHandler;
 import mrjake.aunis.util.ILinkable;
+import mrjake.aunis.util.ItemMetaPair;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -180,17 +183,38 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 			// Client
 			
 			// Each 2s check for the sky
-			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null) {
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, SUPPORTED_OVERLAYS);
+			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null && getRendererStateClient().biomeOverride == null) {
+				rendererStateClient.setBiomeOverlay(BiomeOverlayEnum.updateBiomeOverlay(world, pos, SUPPORTED_OVERLAYS));
 			}
 		}
 	}
+	
+	// Server
+	private BiomeOverlayEnum determineBiomeOverride() {
+		ItemStack stack = itemStackHandler.getStackInSlot(BIOME_OVERRIDE_SLOT);
+		
+		if (stack.isEmpty()) {
+			return null;
+		}
+		
+		BiomeOverlayEnum biomeOverlay = AunisConfig.stargateConfig.getBiomeOverrideItemMetaPairs().get(new ItemMetaPair(stack));
+		
+		if (getSupportedOverlays().contains(biomeOverlay)) {
+			return biomeOverlay;
+		}
+		
+		return null;
+	}	
 	
 	public static final EnumSet<BiomeOverlayEnum> SUPPORTED_OVERLAYS = EnumSet.of(
 			BiomeOverlayEnum.NORMAL,
 			BiomeOverlayEnum.FROST,
 			BiomeOverlayEnum.MOSSY,
 			BiomeOverlayEnum.SOOTY);
+	
+	public static EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
+		return SUPPORTED_OVERLAYS;
+	}
 	
 	private boolean hadControlCrystal;
 	
@@ -203,9 +227,7 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 		
 		if (hadControlCrystal != hasControlCrystal) {
 			if (hasControlCrystal) {
-				if (targetPoint != null) {
-					AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_STATE, getState(StateTypeEnum.RENDERER_STATE)), targetPoint);
-				}
+				sendState(StateTypeEnum.RENDERER_STATE, getState(StateTypeEnum.RENDERER_STATE));
 			}
 			
 			else {
@@ -234,22 +256,28 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 		
         world.notifyNeighborsOfStateChange(pos, AunisBlocks.DHD_BLOCK, true);
         
-        if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(symbol)), targetPoint);
-		}
+        sendState(StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(symbol));
 	}
 	
 	public void clearSymbols() {
         world.notifyNeighborsOfStateChange(pos, AunisBlocks.DHD_BLOCK, true);
-		
-        if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(true)), targetPoint);
-		}
+        
+        sendState(StateTypeEnum.DHD_ACTIVATE_BUTTON, new DHDActivateButtonState(true));
 	}
 	
 	
 	// -----------------------------------------------------------------------------
 	// States
+	
+	protected void sendState(StateTypeEnum type, State state) {
+		if (targetPoint != null) {
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, type, state), targetPoint);
+		}
+		
+		else {
+			Aunis.logger.debug("targetPoint was null trying to send " + type + " from " + this.getClass().getCanonicalName());
+		}
+	}
 	
 	@Override
 	public State getState(StateTypeEnum stateType) {
@@ -277,10 +305,10 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 							break;
 					}
 					
-					return new DHDRendererState(address, brbActive);
+					return new DHDRendererState(address, brbActive, determineBiomeOverride());
 				}
 				
-				return new DHDRendererState(address, false);
+				return new DHDRendererState(address, false, determineBiomeOverride());
 				
 			default:
 				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
@@ -299,6 +327,9 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 			case GUI_UPDATE:
 				return new DHDContainerGuiUpdate();
 				
+			case BIOME_OVERRIDE_STATE:
+				return new StargateBiomeOverrideState();
+				
 			default:
 				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
 		}
@@ -311,8 +342,7 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 		switch (stateType) {
 			case RENDERER_STATE:
 				float horizontalRotation = world.getBlockState(pos).getValue(AunisProps.ROTATION_HORIZONTAL) * -22.5f;
-				rendererStateClient = ((DHDRendererState) state).initClient(pos, horizontalRotation);
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, SUPPORTED_OVERLAYS);
+				rendererStateClient = ((DHDRendererState) state).initClient(pos, horizontalRotation, BiomeOverlayEnum.updateBiomeOverlay(world, pos, SUPPORTED_OVERLAYS));
 				
 				break;
 		
@@ -336,6 +366,15 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 				
 				break;
 				
+			case BIOME_OVERRIDE_STATE:
+				StargateBiomeOverrideState overrideState = (StargateBiomeOverrideState) state;
+								
+				if (rendererStateClient != null) {
+					getRendererStateClient().biomeOverride = overrideState.biomeOverride;
+				}
+				
+				break;
+				
 			default:
 				throw new UnsupportedOperationException("EnumStateType."+stateType.name()+" not implemented on "+this.getClass().getName());
 		}
@@ -348,7 +387,9 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 	public static final List<Item> SUPPORTED_UPGRADES = Arrays.asList(
 			AunisItems.CRYSTAL_GLYPH_DHD);
 	
-	private final ItemStackHandler itemStackHandler = new ItemStackHandler(5) {
+	public static final int BIOME_OVERRIDE_SLOT = 5;
+	
+	private final ItemStackHandler itemStackHandler = new AunisItemStackHandler(6) {
 		
 		@Override
 		public boolean isItemValid(int slot, ItemStack stack) {
@@ -363,6 +404,13 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 				case 3:
 				case 4:
 					return SUPPORTED_UPGRADES.contains(item) && upgradeInstalledCount(item) == 0;
+					
+				case BIOME_OVERRIDE_SLOT:
+					BiomeOverlayEnum override = AunisConfig.stargateConfig.getBiomeOverrideItemMetaPairs().get(new ItemMetaPair(stack));
+					if (override == null)
+						return false;
+					
+					return getSupportedOverlays().contains(override);
 					
 				default:
 					return true;
@@ -398,8 +446,16 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 		
 		@Override
 		protected void onContentsChanged(int slot) {
-			super.onContentsChanged(slot);
+			switch (slot) {
+				case BIOME_OVERRIDE_SLOT:
+					sendState(StateTypeEnum.BIOME_OVERRIDE_STATE, new StargateBiomeOverrideState(determineBiomeOverride()));
+					break;
+					
+				default:
+					break;
+			}
 			
+			super.onContentsChanged(slot);
 			markDirty();
 		}
 	};

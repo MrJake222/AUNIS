@@ -256,6 +256,8 @@ gui.dhd.no_fuel=No fuel
 gui.stargate.milky_way_address=Milky Way address
 gui.stargate.pegasus_address=Pegasus address
 gui.stargate.universe_address=Universe address
+gui.stargate.biome_overlay=Biome overlay
+gui.stargate.biome_overlay.help=Insert blocks to override
 gui.stargate.capacitors=Capacitors
 gui.stargate.energyBuffer=Energy buffer
 

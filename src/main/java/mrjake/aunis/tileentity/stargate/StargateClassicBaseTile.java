@@ -15,12 +15,14 @@ import li.cil.oc.api.machine.Context;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.beamer.BeamerLinkingHelper;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.gui.container.StargateContainerGuiState;
 import mrjake.aunis.gui.container.StargateContainerGuiUpdate;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.notebook.PageNotebookItem;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
 import mrjake.aunis.renderer.stargate.StargateClassicRendererState;
 import mrjake.aunis.renderer.stargate.StargateClassicRendererState.StargateClassicRendererStateBuilder;
 import mrjake.aunis.sound.StargateSoundEventEnum;
@@ -38,6 +40,7 @@ import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
 import mrjake.aunis.stargate.power.StargateClassicEnergyStorage;
 import mrjake.aunis.stargate.power.StargateEnergyRequired;
+import mrjake.aunis.state.StargateBiomeOverrideState;
 import mrjake.aunis.state.StargateRendererActionState;
 import mrjake.aunis.state.StargateRendererActionState.EnumGateAction;
 import mrjake.aunis.state.StargateSpinState;
@@ -47,10 +50,12 @@ import mrjake.aunis.tileentity.BeamerTile;
 import mrjake.aunis.tileentity.util.IUpgradable;
 import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.util.AunisAxisAlignedBB;
+import mrjake.aunis.util.AunisItemStackHandler;
 import mrjake.aunis.util.EnumKeyInterface;
 import mrjake.aunis.util.EnumKeyMap;
 import mrjake.aunis.util.FacingToRotation;
 import mrjake.aunis.util.ItemHandlerHelper;
+import mrjake.aunis.util.ItemMetaPair;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -65,7 +70,6 @@ import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 /**
  * This class wraps common behavior for the fully-functional Stargates i.e.
@@ -167,7 +171,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 	
 	// ------------------------------------------------------------------------
 	// Loading and ticking
-	
+		
 	@Override
 	public void onLoad() {
 		super.onLoad();
@@ -208,6 +212,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 			}
 			
 			else {
+				// Client
 //				Aunis.info("lock: " + lockPage);
 					
 				if (lockPage && itemStackHandler.getStackInSlot(pageSlotId).isEmpty()) {
@@ -228,9 +233,31 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 						}
 					}
 				}
+				
+				// Each 2s check for the biome overlay
+				if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null && getRendererStateClient().biomeOverride == null) {
+					rendererStateClient.setBiomeOverlay(BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos), getSupportedOverlays()));
+				}
 			}
 		}
 	}
+	
+	// Server
+	private BiomeOverlayEnum determineBiomeOverride() {
+		ItemStack stack = itemStackHandler.getStackInSlot(BIOME_OVERRIDE_SLOT);
+		
+		if (stack.isEmpty()) {
+			return null;
+		}
+		
+		BiomeOverlayEnum biomeOverlay = AunisConfig.stargateConfig.getBiomeOverrideItemMetaPairs().get(new ItemMetaPair(stack));
+		
+		if (getSupportedOverlays().contains(biomeOverlay)) {
+			return biomeOverlay;
+		}
+		
+		return null;
+	}	
 	
 	@Override
 	protected boolean shouldAutoclose() {
@@ -281,7 +308,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 		if (compound.getBoolean("hasUpgrade")) {
 			itemStackHandler.setStackInSlot(0, new ItemStack(AunisItems.CRYSTAL_GLYPH_STARGATE));
 		}
-				
+		
 		isFinalActive = compound.getBoolean("isFinalActive");
 		
 		isSpinning = compound.getBoolean("isSpinning");
@@ -317,7 +344,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 	}
 	
 	@Override
-	protected StargateClassicRendererStateBuilder getRendererStateServer() {
+	protected StargateClassicRendererStateBuilder getRendererStateServer() {		
 		return new StargateClassicRendererStateBuilder(super.getRendererStateServer())
 				.setSymbolType(getSymbolType())
 				.setActiveChevrons(dialedAddress.size())
@@ -326,7 +353,8 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 				.setSpinDirection(spinDirection)
 				.setSpinning(isSpinning)
 				.setTargetRingSymbol(targetRingSymbol)
-				.setSpinStartTime(spinStartTime);
+				.setSpinStartTime(spinStartTime)
+				.setBiomeOverride(determineBiomeOverride());
 	}
 	
 	@Override
@@ -369,6 +397,9 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 				
 			case SPIN_STATE:
 				return new StargateSpinState();
+				
+			case BIOME_OVERRIDE_STATE:
+				return new StargateBiomeOverrideState();
 				
 			default:
 				return super.createState(stateType);
@@ -436,6 +467,15 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 				
 				else	
 					getRendererStateClient().spinHelper.initRotation(world.getTotalWorldTime(), spinState.targetSymbol, spinState.direction);
+				
+				break;
+				
+			case BIOME_OVERRIDE_STATE:
+				StargateBiomeOverrideState overrideState = (StargateBiomeOverrideState) state;
+								
+				if (rendererStateClient != null) {
+					getRendererStateClient().biomeOverride = overrideState.biomeOverride;
+				}
 				
 				break;
 				
@@ -567,7 +607,9 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 	// -----------------------------------------------------------------------------
 	// Item handler
 	
-	private final ItemStackHandler itemStackHandler = new ItemStackHandler(10) {
+	public static final int BIOME_OVERRIDE_SLOT = 10;
+	
+	private final AunisItemStackHandler itemStackHandler = new AunisItemStackHandler(11) {
 		
 		@Override
 		public boolean isItemValid(int slot, ItemStack stack) {
@@ -592,6 +634,13 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 				case 9:
 					return item == AunisItems.PAGE_NOTEBOOK_ITEM || item == AunisItems.UNIVERSE_DIALER;
 					
+				case BIOME_OVERRIDE_SLOT:
+					BiomeOverlayEnum override = AunisConfig.stargateConfig.getBiomeOverrideItemMetaPairs().get(new ItemMetaPair(stack));
+					if (override == null)
+						return false;
+					
+					return getSupportedOverlays().contains(override);
+					
 				default:
 					return true;
 			}
@@ -612,7 +661,11 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 				case 6:			
 					updatePowerTier();
 					break;
-					
+				
+				case BIOME_OVERRIDE_SLOT:
+					sendState(StateTypeEnum.BIOME_OVERRIDE_STATE, new StargateBiomeOverrideState(determineBiomeOverride()));
+					break;
+				
 				default:
 					break;
 			}
