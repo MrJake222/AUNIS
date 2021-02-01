@@ -1,7 +1,11 @@
 package mrjake.aunis.config;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
+import mrjake.aunis.util.ItemMetaPair;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.config.Config;
@@ -101,7 +105,7 @@ public class AunisConfig {
 		
 		// ---------------------------------------------------------------------------------------
 		// Jungle biomes
-		@Name("Biomes in which blocks should be mossy")
+		@Name("Biomes in which Stargates should be mossy")
 		@Comment({
 			"Format: \"modid:biomename\", for example: ",
 			"\"minecraft:dark_forest\"",
@@ -118,6 +122,63 @@ public class AunisConfig {
 			
 			return cachedJungleBiomes.contains(biome);
 		}
+		
+		
+		// ---------------------------------------------------------------------------------------
+		// Biome overlay override blocks
+		
+		@Name("Biome overlay override blocks")
+		@SuppressWarnings("serial")
+		@Comment({
+			"Format: \"modid:blockid[:meta]\", for example: ",
+			"\"minecraft:wool:7\"",
+			"\"minecraft:stone\""
+		})
+		public Map<String, String[]> biomeOverrideBlocks = new HashMap<String, String[]>() {
+			{
+				put(BiomeOverlayEnum.NORMAL.toString(), new String[] {"minecraft:stone"});
+				put(BiomeOverlayEnum.FROST.toString(), new String[] {"minecraft:ice"});
+				put(BiomeOverlayEnum.MOSSY.toString(), new String[] {"minecraft:vine"});
+				put(BiomeOverlayEnum.AGED.toString(), new String[] {"minecraft:cobblestone"});
+				put(BiomeOverlayEnum.SOOTY.toString(), new String[] {"minecraft:coal_block"});
+			}
+		};
+		
+		private Map<BiomeOverlayEnum, List<ItemMetaPair>> cachedBiomeOverrideBlocks = null;
+		private Map<ItemMetaPair, BiomeOverlayEnum> cachedBiomeOverrideBlocksReverse = null;
+		
+		private void genBiomeOverrideCache() {
+			cachedBiomeOverrideBlocks = new HashMap<>();
+			cachedBiomeOverrideBlocksReverse = new HashMap<>();
+			
+			for (Map.Entry<String, String[]> entry : biomeOverrideBlocks.entrySet()) {
+				List<ItemMetaPair> parsedList = ItemMetaParser.parseConfig(entry.getValue());
+				BiomeOverlayEnum biomeOverlay = BiomeOverlayEnum.fromString(entry.getKey());
+				
+				cachedBiomeOverrideBlocks.put(biomeOverlay, parsedList);
+				
+				for (ItemMetaPair stack : parsedList) {
+					cachedBiomeOverrideBlocksReverse.put(stack, biomeOverlay);
+				}
+			}
+		}
+		
+		public Map<BiomeOverlayEnum, List<ItemMetaPair>> getBiomeOverrideBlocks() {
+			if (cachedBiomeOverrideBlocks == null) {
+				genBiomeOverrideCache();
+			}
+			
+			return cachedBiomeOverrideBlocks;
+		}
+		
+		public Map<ItemMetaPair, BiomeOverlayEnum> getBiomeOverrideItemMetaPairs() {
+			if (cachedBiomeOverrideBlocksReverse == null) {
+				genBiomeOverrideCache();
+			}
+			
+			return cachedBiomeOverrideBlocksReverse;
+		}
+				
 	}
 	
 	public static class PowerConfig {
@@ -300,5 +361,7 @@ public class AunisConfig {
 	public static void resetCache() {
 		stargateConfig.cachedInvincibleBlocks = null;
 		stargateConfig.cachedJungleBiomes = null;
+		stargateConfig.cachedBiomeOverrideBlocks = null;
+		stargateConfig.cachedBiomeOverrideBlocksReverse = null;
 	}
 }

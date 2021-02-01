@@ -177,6 +177,11 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		if (world.isRemote) {
 			if (!world.getBlockState(pos).getValue(AunisProps.RENDER_BLOCK) && rendererStateClient != null)
 				Aunis.proxy.orlinRendererSpawnParticles(world, getRendererStateClient());
+			
+			// Each 2s check for the biome overlay
+			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null) {
+				rendererStateClient.setBiomeOverlay(BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos), getSupportedOverlays()));
+			}
 		}
 	}
 	
@@ -186,7 +191,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 			BiomeOverlayEnum.MOSSY);
 	
 	@Override
-	protected EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
+	public EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
 		return SUPPORTED_OVERLAYS;
 	}
 	

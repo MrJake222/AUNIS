@@ -7,20 +7,23 @@ import mrjake.aunis.util.BlockHelpers;
 import net.minecraft.init.Biomes;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
 public enum BiomeOverlayEnum {
-	NORMAL(""),
-	FROST("_frost"),
-	MOSSY("_mossy"),
-	AGED("_aged"),
-	SOOTY("_sooty");
+	NORMAL("", TextFormatting.GRAY),
+	FROST("_frost", TextFormatting.DARK_AQUA),
+	MOSSY("_mossy", TextFormatting.DARK_GREEN),
+	AGED("_aged", TextFormatting.GRAY),
+	SOOTY("_sooty", TextFormatting.DARK_GRAY);
 	
 	public String suffix;
+	public TextFormatting color;
 
-	BiomeOverlayEnum(String suffix) {
+	BiomeOverlayEnum(String suffix, TextFormatting color) {
 		this.suffix = suffix;
+		this.color = color;
 	}
 	
 	/**
@@ -57,5 +60,15 @@ public enum BiomeOverlayEnum {
 			return FROST;
 		
 		return NORMAL;
+	}
+
+	public static BiomeOverlayEnum fromString(String name) {
+		for (BiomeOverlayEnum biomeOverlay : values()) {
+			if (biomeOverlay.toString().equals(name)) {
+				return biomeOverlay;
+			}
+		}
+		
+		return null;
 	}
 }

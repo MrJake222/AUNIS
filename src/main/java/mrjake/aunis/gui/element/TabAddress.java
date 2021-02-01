@@ -7,6 +7,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraftforge.items.SlotItemHandler;
 
 public class TabAddress extends Tab {
 	
@@ -30,6 +31,11 @@ public class TabAddress extends Tab {
 	@Override
 	public void render(FontRenderer fontRenderer, int mouseX, int mouseY) {
 		super.render(fontRenderer, mouseX, mouseY);
+		
+		// Draw page slot
+		Minecraft.getMinecraft().getTextureManager().bindTexture(bgTexLocation);
+		GlStateManager.color(1, 1, 1, 1);
+		Gui.drawModalRectWithCustomSizedTexture(guiLeft+currentOffsetX+105, guiTop+defaultY+86, 6, 174, 18, 18, textureSize, textureSize);
 		
 		int shadow = 2;
 		float color = 1.0f;
@@ -74,6 +80,13 @@ public class TabAddress extends Tab {
 				}
 			}
 		}
+	}
+	
+	public SlotTab createSlot(SlotItemHandler slot) {
+		return new SlotTab(slot, (slotTab) -> {
+			slotTab.xPos = currentOffsetX + 106;
+			slotTab.yPos = defaultY + 87;
+		});
 	}
 	
 	public SymbolCoords getSymbolCoords(int symbol) {

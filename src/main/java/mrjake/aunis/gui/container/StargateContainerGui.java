@@ -1,15 +1,20 @@
 package mrjake.aunis.gui.container;
 
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.gui.element.Tab;
 import mrjake.aunis.gui.element.Tab.SlotTab;
 import mrjake.aunis.gui.element.TabAddress;
+import mrjake.aunis.gui.element.TabBiomeOverlay;
+import mrjake.aunis.gui.element.TabSideEnum;
+import mrjake.aunis.gui.element.TabbedContainerInterface;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.SetOpenTabToServer;
 import mrjake.aunis.stargate.network.SymbolMilkyWayEnum;
@@ -28,7 +33,7 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.SlotItemHandler;
 
-public class StargateContainerGui extends GuiContainer {
+public class StargateContainerGui extends GuiContainer implements TabbedContainerInterface {
 	
 	private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/gui/container_stargate.png");
 	
@@ -38,6 +43,7 @@ public class StargateContainerGui extends GuiContainer {
 	private TabAddress milkyWayAddressTab;
 	private TabAddress pegasusAddressTab;
 	private TabAddress universeAddressTab;
+	private TabBiomeOverlay overlayTab;
 	
 	private int energyStored;
 	private int maxEnergyStored;
@@ -59,52 +65,80 @@ public class StargateContainerGui extends GuiContainer {
 		milkyWayAddressTab = (TabAddress) TabAddress.builder()
 				.setGateTile(container.gateTile)
 				.setSymbolType(SymbolTypeEnum.MILKYWAY)
+				.setGuiSize(xSize, ySize)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2)
-				.setOpenPosition(-128)
+				.setOpenX(-128)
+				.setHiddenX(-6)
 				.setTabSize(128, 113)
 				.setTabTitle(I18n.format("gui.stargate.milky_way_address"))
+				.setTabSide(TabSideEnum.LEFT)
 				.setTexture(BACKGROUND_TEXTURE, 512)
 				.setBackgroundTextureLocation(176, 0)
 				.setIconRenderPos(1, 7)
 				.setIconSize(20, 18)
-				.setIconTextureLocation(128, 0).build();
+				.setIconTextureLocation(304, 0).build();
 		
 		pegasusAddressTab = (TabAddress) TabAddress.builder()
 				.setGateTile(container.gateTile)
 				.setSymbolType(SymbolTypeEnum.PEGASUS)
+				.setGuiSize(xSize, ySize)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2+22)
-				.setOpenPosition(-128)
+				.setOpenX(-128)
+				.setHiddenX(-6)
 				.setTabSize(128, 113)
 				.setTabTitle(I18n.format("gui.stargate.pegasus_address"))
+				.setTabSide(TabSideEnum.LEFT)
 				.setTexture(BACKGROUND_TEXTURE, 512)
 				.setBackgroundTextureLocation(176, 0)
 				.setIconRenderPos(1, 7)
 				.setIconSize(20, 18)
-				.setIconTextureLocation(128, 18).build();
+				.setIconTextureLocation(304, 18).build();
 		
 		universeAddressTab = (TabAddress) TabAddress.builder()
 				.setGateTile(container.gateTile)
 				.setSymbolType(SymbolTypeEnum.UNIVERSE)
+				.setGuiSize(xSize, ySize)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2+22*2)
-				.setOpenPosition(-128)
+				.setOpenX(-128)
+				.setHiddenX(-6)
 				.setTabSize(128, 113)
 				.setTabTitle(I18n.format("gui.stargate.universe_address"))
+				.setTabSide(TabSideEnum.LEFT)
 				.setTexture(BACKGROUND_TEXTURE, 512)
 				.setBackgroundTextureLocation(176, 0)
 				.setIconRenderPos(1, 7)
 				.setIconSize(20, 18)
-				.setIconTextureLocation(128, 18*2).build();
+				.setIconTextureLocation(304, 18*2).build();
+		
+		overlayTab = (TabBiomeOverlay) TabBiomeOverlay.builder()
+				.setSupportedOverlays(container.gateTile.getSupportedOverlays())
+				.setSlotTexture(6, 174)
+				.setGuiSize(xSize, ySize)
+				.setGuiPosition(guiLeft, guiTop)
+				.setTabPosition(176-107, 2)
+				.setOpenX(176)
+				.setHiddenX(54)
+				.setTabSize(128, 51)
+				.setTabTitle(I18n.format("gui.stargate.biome_overlay"))
+				.setTabSide(TabSideEnum.RIGHT)
+				.setTexture(BACKGROUND_TEXTURE, 512)
+				.setBackgroundTextureLocation(176, 113)
+				.setIconRenderPos(107, 7)
+				.setIconSize(20, 18)
+				.setIconTextureLocation(304, 54).build();
 		
 		tabs.add(milkyWayAddressTab);
 		tabs.add(pegasusAddressTab);
 		tabs.add(universeAddressTab);
+		tabs.add(overlayTab);
 		
-		container.inventorySlots.set(7, milkyWayAddressTab.new SlotTab((SlotItemHandler) container.getSlot(7)));
-		container.inventorySlots.set(8, pegasusAddressTab.new SlotTab((SlotItemHandler) container.getSlot(8)));
-		container.inventorySlots.set(9, universeAddressTab.new SlotTab((SlotItemHandler) container.getSlot(9)));
+		container.inventorySlots.set(7, milkyWayAddressTab.createSlot((SlotItemHandler) container.getSlot(7)));
+		container.inventorySlots.set(8, pegasusAddressTab.createSlot((SlotItemHandler) container.getSlot(8)));
+		container.inventorySlots.set(9, universeAddressTab.createSlot((SlotItemHandler) container.getSlot(9)));
+		container.inventorySlots.set(10, overlayTab.createAndSaveSlot((SlotItemHandler) container.getSlot(10)));
 	}
 
 	@Override
@@ -164,7 +198,7 @@ public class StargateContainerGui extends GuiContainer {
 			maxEnergyStored += energyStorage.getMaxEnergyStored();
 		}
 		
-		for (int i=7; i<10; i++)
+		for (int i=7; i<11; i++)
 			((SlotTab) container.getSlot(i)).updatePos();
 				
 		super.drawScreen(mouseX, mouseY, partialTicks);
@@ -243,14 +277,21 @@ public class StargateContainerGui extends GuiContainer {
 			
 			if (tab.isCursorOnTab(mouseX, mouseY)) {
 				if (Tab.tabsInteract(tabs, i))
-					container.openTabId = i;
+					container.setOpenTabId(i);
 				else
-					container.openTabId = -1;
+					container.setOpenTabId(-1);
 				
-				AunisPacketHandler.INSTANCE.sendToServer(new SetOpenTabToServer(container.openTabId));
+				AunisPacketHandler.INSTANCE.sendToServer(new SetOpenTabToServer(container.getOpenTabId()));
 				
 				break;
 			}
 		}
+	}
+	
+	@Override
+	public List<Rectangle> getGuiExtraAreas() {		
+		return tabs.stream()
+				.map(tab -> tab.getArea())
+				.collect(Collectors.toList());
 	}
 }

@@ -19,10 +19,10 @@ public class DHDRenderer extends TileEntitySpecialRenderer<DHDTile> {
 			GlStateManager.translate(x+0.5, y, z+0.5);
 			GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 			
-			ElementEnum.MILKYWAY_DHD.bindTextureAndRender(rendererState.biomeOverlay);
+			ElementEnum.MILKYWAY_DHD.bindTextureAndRender(rendererState.getBiomeOverlay());
 			
 			for (SymbolMilkyWayEnum symbol : SymbolMilkyWayEnum.values()) {
-				rendererDispatcher.renderEngine.bindTexture(rendererState.getButtonTexture(symbol, rendererState.biomeOverlay));
+				rendererDispatcher.renderEngine.bindTexture(rendererState.getButtonTexture(symbol, rendererState.getBiomeOverlay()));
 				ModelLoader.getModel(symbol.modelResource).render();
 			}
 			
