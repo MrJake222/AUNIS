@@ -170,12 +170,7 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 							if (!stargateWillLock(targetRingSymbol))
 								addTask(new ScheduledTask(EnumScheduledTask.STARGATE_DIAL_NEXT, 30));
 							else {
-								stargateState = EnumStargateState.IDLE;
-								StargateOpenResult result = attemptOpenDialed();
-								
-								if (!result.ok()) {
-									dialingFailed(result);
-								}
+								attemptOpenAndFail();
 							}
 						}
 					}

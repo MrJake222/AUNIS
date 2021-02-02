@@ -228,6 +228,8 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 						break;
 						
 					case ABORTED:
+					case ABORTED_BY_EVENT:
+					case CALLER_HUNG_UP:
 						break;
 				}
 			}
@@ -368,7 +370,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 					targetGatePos.getTileEntity().incomingWormhole(dialedAddress.size());
 				}
 				
-				attemptOpenDialed();
+				attemptOpenAndFail();
 				break;
 				
 			case STARGATE_ORLIN_SPARK:				

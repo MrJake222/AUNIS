@@ -79,13 +79,10 @@ public class DHDButtonClickedToServer extends PositionedPacket {
 					if (message.symbol.brb()) {
 						// BRB pressed on idling gate, attempt to open
 						
-						StargateOpenResult openResult = gateTile.attemptOpenDialed();
+						StargateOpenResult openResult = gateTile.attemptOpenAndFail();
 						
-						if (!openResult.ok()) {
-							gateTile.dialingFailed(openResult);
-							
-							if (openResult == StargateOpenResult.NOT_ENOUGH_POWER)
-								player.sendStatusMessage(new TextComponentTranslation("tile.aunis.stargatebase_block.not_enough_power"), true);
+						if (openResult == StargateOpenResult.NOT_ENOUGH_POWER) {							
+							player.sendStatusMessage(new TextComponentTranslation("tile.aunis.stargatebase_block.not_enough_power"), true);
 						}
 					}
 					
