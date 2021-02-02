@@ -507,11 +507,6 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 				
 				break;
 				
-			case STARGATE_MANUAL_OPEN:
-				attemptOpenDialed();
-				
-				break;
-				
 			case STARGATE_CHEVRON_DIM:
 				sendRenderingUpdate(EnumGateAction.CHEVRON_DIM, 0, false);
 				stargateState = EnumStargateState.IDLE;

@@ -29,7 +29,6 @@ import mrjake.aunis.sound.StargateSoundEventEnum;
 import mrjake.aunis.sound.StargateSoundPositionedEnum;
 import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumSpinDirection;
-import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.StargateClassicSpinHelper;
 import mrjake.aunis.stargate.StargateClosedReasonEnum;
 import mrjake.aunis.stargate.StargateOpenResult;
@@ -833,17 +832,13 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 			return new Object[] { null, "stargate_failure_not_merged", "Stargate is not merged" };
 		
 		if (stargateState.idle()) {
-			StargateOpenResult gateState = attemptOpenDialed();
+			StargateOpenResult gateState = attemptOpenAndFail();
 	
 			if (gateState.ok()) {
 				return new Object[] {"stargate_engage"};
 			}
 			
 			else {
-				stargateState = EnumStargateState.IDLE;
-				markDirty();
-				dialingFailed(gateState);
-				
 				sendSignal(null, "stargate_failed", new Object[] {});
 				return new Object[] {null, "stargate_failure_opening", "Stargate failed to open", gateState.toString()};
 			}
