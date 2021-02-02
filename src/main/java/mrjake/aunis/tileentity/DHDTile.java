@@ -271,6 +271,9 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 	// States
 	
 	protected void sendState(StateTypeEnum type, State state) {
+		if (world.isRemote)
+			return;
+		
 		if (targetPoint != null) {
 			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, type, state), targetPoint);
 		}
