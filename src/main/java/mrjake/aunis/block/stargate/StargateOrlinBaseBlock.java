@@ -13,6 +13,7 @@ import mrjake.aunis.worldgen.StargateGeneratorNether;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -49,6 +50,14 @@ public final class StargateOrlinBaseBlock extends StargateAbstractBaseBlock {
 		}
 	}
 	
+	@Override
+	public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items) {
+		ItemStack stack = new ItemStack(this);
+		NBTTagCompound compound = new NBTTagCompound();
+		compound.setInteger("openCount", 0);
+		stack.setTagCompound(compound);
+		items.add(stack);
+	}
 	
 	// ------------------------------------------------------------------------
 	// Block behavior
