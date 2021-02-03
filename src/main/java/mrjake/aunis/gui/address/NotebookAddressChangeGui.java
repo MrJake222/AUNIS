@@ -25,7 +25,6 @@ public class NotebookAddressChangeGui extends AbstractAddressChangeGui {
 	@Override
 	protected void generateAddressEntries() {
 		NBTTagList list = mainCompound.getTagList("addressList", NBT.TAG_COMPOUND);
-		int y = dispy+20;		
 		
 		for (int i=0; i<list.tagCount(); i++) {
 			NBTTagCompound compound = list.getCompoundTagAt(i);
@@ -35,9 +34,8 @@ public class NotebookAddressChangeGui extends AbstractAddressChangeGui {
 			StargateAddress stargateAddress = new StargateAddress(compound.getCompoundTag("address"));
 			int maxSymbols = symbolType.getMaxSymbolsDisplay(compound.getBoolean("hasUpgrade"));			
 			
-			NotebookAddressEntry entry = new NotebookAddressEntry(fontRenderer, dispx, y, i, hand, name, symbolType, stargateAddress, maxSymbols, (action, index) -> reloadAddressEntries(action, index));
+			NotebookAddressEntry entry = new NotebookAddressEntry(mc, i, list.tagCount(), hand, name, symbolType, stargateAddress, maxSymbols, (action, index) -> actionPerformed(action, index));
 			addressEntries.add(entry);
-			y += entry.getHeight();
 		}
 	}
 }

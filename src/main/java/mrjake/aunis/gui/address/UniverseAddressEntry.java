@@ -1,23 +1,22 @@
 package mrjake.aunis.gui.address;
 
-import mrjake.aunis.gui.address.AbstractAddressEntry.RefreshListener;
 import mrjake.aunis.packet.gui.address.AddressDataTypeEnum;
 import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumHand;
 
 public class UniverseAddressEntry extends AbstractAddressEntry {
 	
-	public UniverseAddressEntry(FontRenderer fontRenderer, int dx, int dy, int index, EnumHand hand, String name, SymbolTypeEnum symbolType, StargateAddress stargateAddress, int maxSymbols, RefreshListener reloadListener) {
-		super(fontRenderer, dx, dy, index, hand, name, symbolType, stargateAddress, maxSymbols, reloadListener);
+	public UniverseAddressEntry(Minecraft mc, int index, int maxIndex, EnumHand hand, String name2, SymbolTypeEnum type, StargateAddress addr, int maxSymbols, ActionListener reloadListener) {
+		super(mc, index, maxIndex, hand, name2, type, addr, maxSymbols, reloadListener);
 	}
 
 	
 	@Override
-	public void render() {
-		super.render();
+	public void renderAt(int dx, int dy, int mouseX, int mouseY, float partialTicks) {
+		super.renderAt(dx, dy, mouseX, mouseY, partialTicks);
 		
 		final int xSpace = 10;
 		final int width = 15;

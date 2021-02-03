@@ -36,6 +36,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -110,7 +111,16 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 	@Override
 	public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag flagIn) {
 		if (stack.hasTagCompound()) {
-			tooltip.add("Saved gates: " + stack.getTagCompound().getTagList("saved", NBT.TAG_COMPOUND).tagCount());
+			NBTTagList list = stack.getTagCompound().getTagList("saved", NBT.TAG_COMPOUND);
+			tooltip.add(TextFormatting.GRAY + Aunis.proxy.localize("item.aunis.universe_dialer.saved_gates", list.tagCount()));
+
+			for (int i=0; i<list.tagCount(); i++) {
+				NBTTagCompound compound = list.getCompoundTagAt(i);
+				
+				if (compound.hasKey("name")) {
+					tooltip.add(TextFormatting.AQUA + compound.getString("name"));
+				}
+			}
 		}
 	}
 	

@@ -1,14 +1,12 @@
 package mrjake.aunis.gui.address;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.gui.BetterButton;
-import mrjake.aunis.gui.BetterTextField;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gui.address.AddressDataTypeEnum;
 import mrjake.aunis.packet.gui.address.AddressActionEnum;
@@ -17,68 +15,54 @@ import mrjake.aunis.stargate.network.StargateAddress;
 import mrjake.aunis.stargate.network.SymbolInterface;
 import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.fml.client.config.GuiUtils;
 
 public abstract class AbstractAddressEntry {
-
-	protected FontRenderer fontRenderer;
-	protected int dx;
-	protected int dy;
+	
+	protected Minecraft mc;
 	protected int index;
+	protected int maxIndex;
 	protected EnumHand hand;
 	protected String name;
 	protected SymbolTypeEnum symbolType;
 	protected StargateAddress stargateAddress;
 	protected int maxSymbols;
-	private RefreshListener refreshListener;
+	
+	private ActionListener actionListener;
 	
 	protected GuiTextField nameField;
+	protected BetterButton upButton;
+	protected BetterButton downButton;
+	protected BetterButton removeButton;
 	
-	public AbstractAddressEntry(FontRenderer fontRenderer, int dx, int dy, int index, EnumHand hand, String name, SymbolTypeEnum symbolType, StargateAddress stargateAddress, int maxSymbols, RefreshListener reloadListener) {
-		this.fontRenderer = fontRenderer;
-		this.dx = dx;
-		this.dy = dy;
+	protected List<BetterButton> buttons = new ArrayList<>();
+	protected List<GuiTextField> textFields = new ArrayList<>();
+	
+	public AbstractAddressEntry(Minecraft mc, int index, int maxIndex, EnumHand hand, String name2, SymbolTypeEnum type, StargateAddress addr, int maxSymbols, ActionListener actionListener) {
+		this.mc = mc;
 		this.index = index;
+		this.maxIndex = maxIndex;
 		this.hand = hand;
-		this.name = name;
-		this.symbolType = symbolType;
-		this.stargateAddress = stargateAddress;
+		this.name = name2;
+		this.symbolType = type;
+		this.stargateAddress = addr;
 		this.maxSymbols = maxSymbols;
-		this.refreshListener = reloadListener;
-	}
-	
-	public void render() {
-//		fontRenderer.drawString(TextFormatting.GRAY + name, dx+160, dy, 0x00FFFFFF);
-	}
-	
-	protected List<GuiButton> getButtons(int id, boolean first, boolean last) {
-		List<GuiButton> list = new ArrayList<>();
-		int x = dx+100+160+20;
-		int y = dy+getButtonOffset();
+		this.actionListener = actionListener;
 		
-//		list.add(new BetterButton(id++, x, y, 60, 20, I18n.format("item.aunis.gui.rename")).setActionCallback(() -> rename())); x += 65;
-		list.add(new BetterButton(id++, x, y, 20, 20, "▲").setEnabled(!first).setFgColor(GuiUtils.getColorCode('a', true)).setActionCallback(() -> action(AddressActionEnum.MOVE_UP))); x += 25;
-		list.add(new BetterButton(id++, x, y, 20, 20, "▼").setEnabled(!last).setFgColor(GuiUtils.getColorCode('c', true)).setActionCallback(() -> action(AddressActionEnum.MOVE_DOWN))); x += 25;
-		list.add(new BetterButton(id++, x, y, 20, 20, "x").setFgColor(GuiUtils.getColorCode('c', true)).setActionCallback(() -> action(AddressActionEnum.REMOVE))); x += 25;
+		// ----------------------------------------------------------------------------------------------------
+		// Text fields
 		
-		return list;
-	}
-	
-	protected List<GuiTextField> getTextFields(int id) {
-		List<GuiTextField> list = new ArrayList<>();
-		int y = dy+getButtonOffset();
-		
-		nameField = new GuiTextField(id++, fontRenderer, dx+160+10, y, 100, 20) {
+		int tId = 0;
+		nameField = new GuiTextField(tId++, mc.fontRenderer, 0, 0, 100, 20) {
 			@Override
-			public void setFocused(boolean focused) {				
+			public void setFocused(boolean focused) {
 				if (isFocused() && !focused && !name.equals(getText())) {
+					// Unfocused and changed name
 					name = getText();
 					action(AddressActionEnum.RENAME);
 				}
@@ -89,17 +73,108 @@ public abstract class AbstractAddressEntry {
 		
 		nameField.setText(name);
 		nameField.setMaxStringLength(getMaxNameLength());
-		list.add(nameField);
+		textFields.add(nameField);
 		
-		return list;
+		
+		// ----------------------------------------------------------------------------------------------------
+		// Buttons
+		
+		int bId = 0;
+		upButton = new BetterButton(bId++, 0, 0, 20, 20, "▲")
+				.setFgColor(GuiUtils.getColorCode('a', true))
+				.setActionCallback(() -> action(AddressActionEnum.MOVE_UP));
+		
+		downButton = new BetterButton(bId++, 0, 0, 20, 20, "▼")
+				.setFgColor(GuiUtils.getColorCode('c', true))
+				.setActionCallback(() -> action(AddressActionEnum.MOVE_DOWN));
+		
+		removeButton = new BetterButton(bId++, 0, 0, 20, 20, "x")
+				.setFgColor(GuiUtils.getColorCode('c', true))
+				.setActionCallback(() -> action(AddressActionEnum.REMOVE));
+		
+		buttons.add(upButton);
+		buttons.add(downButton);
+		buttons.add(removeButton);
 	}
 	
-	protected void action(AddressActionEnum action) {
-		Aunis.info("reload");
-		AunisPacketHandler.INSTANCE.sendToServer(new AddressActionToServer(hand, getAddressDataType(), action, index, nameField.getText()));
+	public void renderAt(int dx, int dy, int mouseX, int mouseY, float partialTicks) {
+		dy += getButtonOffset();
 		
-		if (action.shouldRefresh) {
-			refreshListener.refresh(action, index);
+		// Fields
+		nameField.x = dx+160+10;
+		nameField.y = dy;
+		
+		for (GuiTextField tf : textFields) {
+			tf.drawTextBox();
+		}
+		
+		
+		// Buttons
+		boolean first = (index == 0);
+		boolean last = (index == maxIndex-1);
+		upButton.enabled = !first;
+		downButton.enabled = !last;
+		
+		int x = dx+280;
+		
+		for (GuiButton btn : buttons) {
+			btn.x = x;
+			btn.y = dy;
+			btn.drawButton(mc, mouseX, mouseY, partialTicks);
+			
+			x += 25;
+		}
+	}
+	
+	
+	// ----------------------------------------------------------------------------------------------------
+	// Actions
+	
+	protected void action(AddressActionEnum action) {
+		AunisPacketHandler.INSTANCE.sendToServer(new AddressActionToServer(hand, getAddressDataType(), action, index, nameField.getText()));
+		actionListener.action(action, index);
+	}
+	
+	
+	// ----------------------------------------------------------------------------------------------------
+	// Interactions
+	
+	/**
+	 * Called on mouse clicked on every instance of {@link AbstractAddressEntry}
+	 * @return {@code true} when an action was performed, {@code false} if no element was activated.
+	 */
+	public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) {
+		if (mouseButton != 0)
+			return false;
+
+		for (BetterButton btn : buttons) {
+			if (btn.mousePressed(mc, mouseX, mouseY)) {
+				// Mouse pressed inside of this button
+				btn.playPressSound(this.mc.getSoundHandler());
+				btn.performAction();
+				
+				return true;
+			}
+		}
+		
+		for (GuiTextField tf : textFields) {
+			if (tf.mouseClicked(mouseX, mouseY, mouseButton)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	protected void keyTyped(char typedChar, int keyCode) throws IOException {		
+		for (GuiTextField tf : textFields) {
+			tf.textboxKeyTyped(typedChar, keyCode);
+		}
+	}
+	
+	public void updateScreen() {		
+		for (GuiTextField tf : textFields) {
+			tf.updateCursorCounter();
 		}
 	}
 	
@@ -121,7 +196,7 @@ public abstract class AbstractAddressEntry {
 		GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 	}
 	
-	static interface RefreshListener {
-		public void refresh(AddressActionEnum action, int index);
+	static interface ActionListener {
+		public void action(AddressActionEnum action, int index);
 	}
 }

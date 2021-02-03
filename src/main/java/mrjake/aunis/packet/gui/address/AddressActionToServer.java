@@ -96,8 +96,13 @@ public class AddressActionToServer implements IMessage {
 							NBTTagCompound selectedCompound = list.getCompoundTagAt(message.index);
 							list.removeTag(message.index);
 							
+							if (list.tagCount() == 0)
+								player.setHeldItem(message.hand, ItemStack.EMPTY);
+							else
+								compound.setInteger("selected", Math.min(message.index, list.tagCount()-1));
+							
 							ItemStack pageStack = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
-							stack.setTagCompound(selectedCompound);
+							pageStack.setTagCompound(selectedCompound);
 							player.addItemStackToInventory(pageStack);
 							
 							break;
@@ -128,6 +133,7 @@ public class AddressActionToServer implements IMessage {
 							
 						case REMOVE:
 							list.removeTag(message.index);
+							compound.setByte("selected", (byte) Math.min(message.index, list.tagCount()-1));
 							
 							break;
 					}
