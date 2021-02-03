@@ -94,7 +94,7 @@ public class DHDBlock extends Block {
 	}
 	
 	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {		
 		if(!world.isRemote && !player.isSneaking()) {
 			EnumFacing dhdFacingOpposite = EnumFacing.getHorizontal( Math.round(state.getValue(AunisProps.ROTATION_HORIZONTAL)/4.0f) );
 
@@ -105,11 +105,12 @@ public class DHDBlock extends Block {
 						player.openGui(Aunis.instance, GuiIdEnum.GUI_DHD.id, world, pos.getX(), pos.getY(), pos.getZ());
 					}
 				}
+				
 				return true;
 			}
 		}
 
-		return !player.isSneaking();
+		return false;
 	}
 		
 	@Override

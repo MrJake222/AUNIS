@@ -277,4 +277,12 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 		
 		return super.onItemRightClick(world, player, hand);
 	}
+	
+	// ------------------------------------------------------------------------------------------------------------
+	// NBT handles
+	
+	public static void setMemoryNameForIndex(ItemStack stack, int index, String name) {
+		NBTTagList list = stack.getTagCompound().getTagList(UniverseDialerMode.MEMORY.tagListName, NBT.TAG_COMPOUND);
+		list.getCompoundTagAt(index).setString("name", name);
+	}
 }

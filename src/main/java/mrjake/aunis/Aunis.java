@@ -141,4 +141,12 @@ public class Aunis {
     public void serverStarted(FMLServerStartedEvent event) throws IOException {    	
     	StargateDimensionConfig.update();
     }
+
+    /**
+     * Shorthand for {@code Aunis.logger.info}.
+     * Only for temporary logging info.
+     */
+	public static void info(String string) {
+		logger.info(string);
+	}
 }

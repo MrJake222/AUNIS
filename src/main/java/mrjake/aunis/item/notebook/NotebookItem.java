@@ -59,9 +59,33 @@ public class NotebookItem extends Item implements CustomModelItemInterface {
 		return new NotebookTEISR();
 	}
 	
+	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		if (oldStack.getItem() != newStack.getItem())
+			return true;
+		
+		int oldSelected = oldStack.getTagCompound().getInteger("selected");
+		int newSelected = newStack.getTagCompound().getInteger("selected");
+		
+		return oldSelected != newSelected;
+	}
+	
+	
+	// ------------------------------------------------------------------------------------------------------------
+	// NBT handles
+	
 	public static NBTTagCompound getSelectedPageFromCompound(NBTTagCompound compound) {
 		int selected = compound.getInteger("selected");
 		NBTTagList list = compound.getTagList("addressList", NBT.TAG_COMPOUND);
 		return list.getCompoundTagAt(selected);
+	}
+	
+	public static void setNameForIndex(ItemStack stack, int index, String name) {
+		NBTTagList list = stack.getTagCompound().getTagList("addressList", NBT.TAG_COMPOUND);
+		NBTTagCompound page = list.getCompoundTagAt(index);
+		
+		NBTTagCompound display = new NBTTagCompound();
+		display.setString("Name", name);
+		page.setTag("display", display);
 	}
 }

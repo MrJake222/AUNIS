@@ -17,7 +17,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class PageRenderer {
 	
-	private static void renderSymbol(float x, float y, float w, float h, SymbolInterface symbol) {
+	public static void renderSymbol(float x, float y, float w, float h, SymbolInterface symbol) {
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableBlend();
 		GlStateManager.color(0, 0, 0, (float) AunisConfig.avConfig.glyphTransparency);

@@ -260,9 +260,6 @@ public class AunisConfig {
 		@Name("Check gate merge")
 		public boolean checkGateMerge = true;
 		
-		@Name("Allow charging the crystal by hand")
-		public boolean allowHandCrystalCharging = false;
-		
 		@Name("Render bounding boxes")
 		public boolean renderBoundingBoxes = false;
 		

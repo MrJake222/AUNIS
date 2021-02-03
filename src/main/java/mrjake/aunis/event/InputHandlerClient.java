@@ -9,6 +9,8 @@ import org.lwjgl.input.Keyboard;
 
 import mrjake.aunis.gui.OCMessageGui;
 import mrjake.aunis.gui.PageRenameGui;
+import mrjake.aunis.gui.address.NotebookAddressChangeGui;
+import mrjake.aunis.gui.address.UniverseAddressChangeGui;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.dialer.UniverseDialerActionEnum;
 import mrjake.aunis.item.dialer.UniverseDialerActionPacketToServer;
@@ -46,6 +48,9 @@ public class InputHandlerClient {
 	private static final KeyBinding ADDRESS_DOWN 	= new KeyBinding("config.aunis.address_down", 0, "Aunis");
 	private static final KeyBinding ADDRESS_REMOVE	= new KeyBinding("config.aunis.address_remove", Keyboard.KEY_DELETE, "Aunis");
 	
+	// Used to open common gui on Notebook/Universe dialer 
+	private static final KeyBinding ADDRESS_EDIT	= new KeyBinding("config.aunis.address_edit", Keyboard.KEY_INSERT, "Aunis");
+	
 	// Universe dialer bindings
 	private static final KeyBinding DIALER_ABORT		= new KeyBinding("config.aunis.universe_dialer.abort", Keyboard.KEY_K, "Aunis");
 	private static final KeyBinding DIALER_OC_PROGRAM	= new KeyBinding("config.aunis.universe_dialer.oc_program", Keyboard.KEY_O, "Aunis");
@@ -67,6 +72,8 @@ public class InputHandlerClient {
 			ADDRESS_DOWN,
 			ADDRESS_REMOVE,
 			
+			ADDRESS_EDIT,
+			
 			// Universe dialer bindings
 			DIALER_ABORT,
 			DIALER_OC_PROGRAM,
@@ -77,19 +84,9 @@ public class InputHandlerClient {
 	
 	// Init function, call from preInit
 	public static void registerKeybindings() {
-		ClientRegistry.registerKeyBinding(MODE_SCROLL);
-		ClientRegistry.registerKeyBinding(ADDRESS_SCROLL);
-		
-		ClientRegistry.registerKeyBinding(MODE_UP);
-		ClientRegistry.registerKeyBinding(MODE_DOWN);
-		ClientRegistry.registerKeyBinding(ADDRESS_UP);
-		ClientRegistry.registerKeyBinding(ADDRESS_DOWN);
-		ClientRegistry.registerKeyBinding(ADDRESS_REMOVE);
-		
-		ClientRegistry.registerKeyBinding(DIALER_ABORT);
-		ClientRegistry.registerKeyBinding(DIALER_OC_PROGRAM);
-		
-		ClientRegistry.registerKeyBinding(PAGE_RENAME);
+		for (KeyBinding keyb : KEY_BINDINGS) {
+			ClientRegistry.registerKeyBinding(keyb);
+		}
 	}
 	
 	
@@ -110,19 +107,20 @@ public class InputHandlerClient {
 		return hand;
 	}
 	
+	@Nullable
+	public static ItemStack getItemStack(EntityPlayer player, Item item) {
+		EnumHand hand = getHand(item);
+		
+		if (hand != null) {
+			return player.getHeldItem(hand);
+		}
+		
+		return null;
+	}
+	
 	// Check for item in both hands
 	public static boolean checkForItem(Item item) {
-		EntityPlayer player = Minecraft.getMinecraft().player;
-		
-		if (player == null)
-			return false;
-		
-		if (player.getHeldItemMainhand().getItem() == item)
-			return true;
-		else if (player.getHeldItemOffhand().getItem() == item)
-			return true;
-		
-		return false;
+		return getHand(item) != null;
 	}
 	
 	// ------------------------------------------------------------------------------------
@@ -178,6 +176,8 @@ public class InputHandlerClient {
 	public static void onKeyboardEvent(ClientTickEvent event) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		if (event.phase != Phase.END)
 			return;
+		
+		EntityPlayer player = Minecraft.getMinecraft().player;
 		
 		if (checkForItem(AunisItems.UNIVERSE_DIALER)) {
 			EnumHand hand = getHand(AunisItems.UNIVERSE_DIALER);
@@ -271,12 +271,30 @@ public class InputHandlerClient {
 			}
 		}
 		
+		if (ADDRESS_EDIT.isPressed()) {
+			tryOpenAddressGui(player);
+		}
+		
 		for (KeyBinding keyBinding : KEY_BINDINGS) {
 			// Skip modifiers
 			if (keyBinding == MODE_SCROLL || keyBinding == ADDRESS_SCROLL)
 				continue;
 			
 			METHOD_UNPRESS.invoke(keyBinding);
+		}
+	}
+	
+	private static void tryOpenAddressGui(EntityPlayer player) {
+		EnumHand hand = getHand(AunisItems.NOTEBOOK_ITEM);
+		if (hand != null) {
+			Minecraft.getMinecraft().displayGuiScreen(new NotebookAddressChangeGui(hand, getItemStack(player, AunisItems.NOTEBOOK_ITEM)));
+			return;
+		}
+		
+		hand = getHand(AunisItems.UNIVERSE_DIALER);
+		if (hand != null) {
+			Minecraft.getMinecraft().displayGuiScreen(new UniverseAddressChangeGui(hand, getItemStack(player, AunisItems.UNIVERSE_DIALER)));
+			return;
 		}
 	}
 }
