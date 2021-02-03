@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.gui.BetterButton;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.gui.address.AddressDataTypeEnum;
@@ -141,7 +142,7 @@ public abstract class AbstractAddressEntry {
 	
 	/**
 	 * Called on mouse clicked on every instance of {@link AbstractAddressEntry}
-	 * @return {@code true} when an action was performed, {@code false} if no element was activated.
+	 * @return {@code true} when a button was clicked, {@code false} if other or no element was activated.
 	 */
 	public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) {
 		if (mouseButton != 0)
@@ -158,9 +159,7 @@ public abstract class AbstractAddressEntry {
 		}
 		
 		for (GuiTextField tf : textFields) {
-			if (tf.mouseClicked(mouseX, mouseY, mouseButton)) {
-				return true;
-			}
+			tf.mouseClicked(mouseX, mouseY, mouseButton);
 		}
 		
 		return false;

@@ -17,12 +17,10 @@ public class PageNotebookSetNameToServer implements IMessage {
 	
 	private EnumHand hand;
 	private String name;
-	private boolean notebook;
 	
-	public PageNotebookSetNameToServer(EnumHand hand, String name, boolean notebook) {
+	public PageNotebookSetNameToServer(EnumHand hand, String name) {
 		this.hand = hand;
 		this.name = name;
-		this.notebook = notebook;
 	}
 	
 	@Override
@@ -30,7 +28,6 @@ public class PageNotebookSetNameToServer implements IMessage {
 		buf.writeInt(hand == EnumHand.MAIN_HAND ? 0 : 1);
 		buf.writeInt(name.length());
 		buf.writeCharSequence(name, StandardCharsets.UTF_8);
-		buf.writeBoolean(notebook);
 	}
 	
 	@Override
@@ -38,7 +35,6 @@ public class PageNotebookSetNameToServer implements IMessage {
 		hand = buf.readInt() == 0 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
 		int size = buf.readInt();
 		name = buf.readCharSequence(size, StandardCharsets.UTF_8).toString();
-		notebook = buf.readBoolean();
 	}
 	
 	
@@ -52,11 +48,7 @@ public class PageNotebookSetNameToServer implements IMessage {
 			world.addScheduledTask(() -> {
 				ItemStack stack = player.getHeldItem(message.hand);
 				NBTTagCompound compound = stack.getTagCompound();
-				
-				if (message.notebook) {
-					compound = NotebookItem.getSelectedPageFromCompound(compound);
-				}
-				
+								
 				NBTTagCompound display = new NBTTagCompound();
 				display.setString("Name", message.name);
 				compound.setTag("display", display);

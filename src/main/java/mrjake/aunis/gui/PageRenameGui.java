@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import mrjake.aunis.item.notebook.PageNotebookItem;
 import mrjake.aunis.item.notebook.PageNotebookSetNameToServer;
 import mrjake.aunis.packet.AunisPacketHandler;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import org.lwjgl.input.Keyboard;
 
@@ -20,16 +22,14 @@ public class PageRenameGui extends GuiScreen {
 	private List<LabeledTextBox> textBoxes = new ArrayList<>();
 	private GuiButton saveButton;
 	
-	private String originalName;
 	private EnumHand hand;
-	private boolean notebook;
+	private String originalName;
 	
-	public PageRenameGui(String name, EnumHand hand, boolean notebook) {
-		this.originalName = name;
+	public PageRenameGui(EnumHand hand, ItemStack stack) {
 		this.hand = hand;
-		this.notebook = notebook;
+		originalName = PageNotebookItem.getNameFromCompound(stack.getTagCompound());
 	}
-	
+
 	@Override
 	public void initGui() {
 		Keyboard.enableRepeatEvents(true);
@@ -95,7 +95,7 @@ public class PageRenameGui extends GuiScreen {
 	protected void actionPerformed(GuiButton button) throws IOException {
 		String name = textBoxes.get(0).textField.getText();
 		
-		AunisPacketHandler.INSTANCE.sendToServer(new PageNotebookSetNameToServer(hand, name, notebook));
+		AunisPacketHandler.INSTANCE.sendToServer(new PageNotebookSetNameToServer(hand, name));
 		keyTyped(' ', 1); // close GUI
 	}
 

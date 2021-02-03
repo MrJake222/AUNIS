@@ -7,7 +7,6 @@ import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -82,22 +81,6 @@ public class UniverseDialerActionPacketToServer implements IMessage {
 							
 							if (!message.next && selected > 0)
 								compound.setByte("selected", (byte) (selected-1));
-							
-							break;
-							
-							
-						case ADDRESS_REMOVE:
-							switch (mode) {
-								case MEMORY:
-								case OC:
-									NBTTagList addressList = compound.getTagList(mode.tagListName, NBT.TAG_COMPOUND);
-									
-									if (selected < addressList.tagCount())
-										addressList.removeTag(selected);					
-									
-								default:
-									break;
-							}
 							
 							break;
 							
