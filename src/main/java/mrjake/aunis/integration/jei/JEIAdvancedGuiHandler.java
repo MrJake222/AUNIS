@@ -1,4 +1,4 @@
-package mrjake.aunis.integration;
+package mrjake.aunis.integration.jei;
 
 import java.awt.Rectangle;
 import java.util.List;

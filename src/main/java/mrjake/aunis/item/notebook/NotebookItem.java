@@ -64,6 +64,9 @@ public class NotebookItem extends Item implements CustomModelItemInterface {
 		if (oldStack.getItem() != newStack.getItem())
 			return true;
 		
+		if (oldStack.hasTagCompound() != newStack.hasTagCompound())
+			return true;
+		
 		int oldSelected = oldStack.getTagCompound().getInteger("selected");
 		int newSelected = newStack.getTagCompound().getInteger("selected");
 		
@@ -82,9 +85,6 @@ public class NotebookItem extends Item implements CustomModelItemInterface {
 	
 	public static void setNameForIndex(NBTTagList list, int index, String name) {
 		NBTTagCompound page = list.getCompoundTagAt(index);
-		
-		NBTTagCompound display = new NBTTagCompound();
-		display.setString("Name", name);
-		page.setTag("display", display);
+		PageNotebookItem.setName(page, name);
 	}
 }

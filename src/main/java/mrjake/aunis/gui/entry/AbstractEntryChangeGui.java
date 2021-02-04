@@ -200,6 +200,14 @@ public abstract class AbstractEntryChangeGui extends GuiScreen {
 			case REMOVE:
 				entries.remove(index);
 				
+				if (entries.size() == 0) {
+					// Close gui
+					this.mc.displayGuiScreen((GuiScreen)null);
+					if (this.mc.currentScreen == null) {
+		                this.mc.setIngameFocus();
+		            }
+				}
+				
 				// Synchronize indexes
 				for (int i=index; i<entries.size(); i++) {
 					entries.get(i).index = i;

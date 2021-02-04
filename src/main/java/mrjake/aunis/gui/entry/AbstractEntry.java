@@ -1,6 +1,5 @@
 package mrjake.aunis.gui.entry;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -146,7 +145,7 @@ public abstract class AbstractEntry {
 		return false;
 	}
 	
-	protected void keyTyped(char typedChar, int keyCode) throws IOException {		
+	protected void keyTyped(char typedChar, int keyCode) {		
 		for (GuiTextField tf : textFields) {
 			tf.textboxKeyTyped(typedChar, keyCode);
 		}
