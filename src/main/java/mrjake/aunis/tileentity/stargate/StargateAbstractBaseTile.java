@@ -232,10 +232,16 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		eventHorizon.setMotion(entityId, motionVector);
 	}
 	
+	/**
+	 * Called to immediately teleport the entity (after entity has received motion from the client)
+	 */
 	public void teleportEntity(int entityId) {
 		eventHorizon.teleportEntity(entityId);
 	}
 	
+	/**
+	 * Called when entity tries to come through the gate on the back side
+	 */
 	public void removeEntity(int entityId) {
 		eventHorizon.removeEntity(entityId);
 	}

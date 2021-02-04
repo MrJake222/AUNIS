@@ -7,10 +7,9 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.input.Keyboard;
 
-import mrjake.aunis.gui.OCMessageGui;
 import mrjake.aunis.gui.PageRenameGui;
-import mrjake.aunis.gui.address.NotebookAddressChangeGui;
-import mrjake.aunis.gui.address.UniverseAddressChangeGui;
+import mrjake.aunis.gui.entry.NotebookEntryChangeGui;
+import mrjake.aunis.gui.entry.UniverseEntryChangeGui;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.dialer.UniverseDialerActionEnum;
 import mrjake.aunis.item.dialer.UniverseDialerActionPacketToServer;
@@ -47,11 +46,6 @@ public class InputHandlerClient {
 	// Used to open common gui on Notebook/Universe dialer 
 	private static final KeyBinding ADDRESS_EDIT	= new KeyBinding("config.aunis.address_edit", Keyboard.KEY_INSERT, "Aunis");
 	
-	// Universe dialer bindings
-	// TODO Unify DIALER_ABORT and DIALER_OC_PROGRAM into ADDRESS_EDIT
-	private static final KeyBinding DIALER_ABORT		= new KeyBinding("config.aunis.universe_dialer.abort", Keyboard.KEY_K, "Aunis");
-	private static final KeyBinding DIALER_OC_PROGRAM	= new KeyBinding("config.aunis.universe_dialer.oc_program", Keyboard.KEY_O, "Aunis");
-	
 	// Unpress
 	private static final Method METHOD_UNPRESS = ObfuscationReflectionHelper.findMethod(KeyBinding.class, "func_74505_d", void.class);
 	
@@ -65,11 +59,7 @@ public class InputHandlerClient {
 			ADDRESS_UP,
 			ADDRESS_DOWN,
 			
-			ADDRESS_EDIT,
-			
-			// Universe dialer bindings
-			DIALER_ABORT,
-			DIALER_OC_PROGRAM
+			ADDRESS_EDIT
 	};
 	
 	// Init function, call from preInit
@@ -194,13 +184,6 @@ public class InputHandlerClient {
 				next = true;
 			}
 			
-			else if (DIALER_ABORT.isPressed()) // TODO Merge DIALER_ABORT into AddressChangeGui
-				action = UniverseDialerActionEnum.ABORT;
-			
-			else if (DIALER_OC_PROGRAM.isPressed()) // TODO Merge DIALER_OC_PROGRAM into AddressChangeGui
-				Minecraft.getMinecraft().displayGuiScreen(new OCMessageGui());
-			
-			
 			// ---------------------------------------------
 			if (action != null) {
 				AunisPacketHandler.INSTANCE.sendToServer(new UniverseDialerActionPacketToServer(action, hand, next));
@@ -248,7 +231,7 @@ public class InputHandlerClient {
 			
 			if (stack.getMetadata() == 1) {
 				// Full page (not empty)
-				Minecraft.getMinecraft().displayGuiScreen(new PageRenameGui(hand, player.getHeldItem(hand)));
+				Minecraft.getMinecraft().displayGuiScreen(new PageRenameGui(hand, stack));
 			}
 			
 			return;
@@ -256,13 +239,13 @@ public class InputHandlerClient {
 		
 		hand = getHand(AunisItems.NOTEBOOK_ITEM);
 		if (hand != null) {
-			Minecraft.getMinecraft().displayGuiScreen(new NotebookAddressChangeGui(hand, player.getHeldItem(hand)));
+			Minecraft.getMinecraft().displayGuiScreen(new NotebookEntryChangeGui(hand, player.getHeldItem(hand).getTagCompound()));
 			return;
 		}
 		
 		hand = getHand(AunisItems.UNIVERSE_DIALER);
 		if (hand != null) {
-			Minecraft.getMinecraft().displayGuiScreen(new UniverseAddressChangeGui(hand, player.getHeldItem(hand)));
+			Minecraft.getMinecraft().displayGuiScreen(new UniverseEntryChangeGui(hand, player.getHeldItem(hand).getTagCompound()));
 			return;
 		}
 	}

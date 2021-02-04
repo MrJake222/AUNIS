@@ -280,6 +280,7 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 					
 				case OC:
 					UniverseDialerOCMessage message = new UniverseDialerOCMessage(selectedCompound);					
+					Aunis.logger.debug("Sending OC message: " + message.toString());
 					Aunis.ocWrapper.sendWirelessPacketPlayer(player, player.getHeldItem(hand), message.address, message.port, message.getData());
 					break;
 			}
@@ -291,8 +292,17 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 	// ------------------------------------------------------------------------------------------------------------
 	// NBT handles
 	
-	public static void setMemoryNameForIndex(ItemStack stack, int index, String name) {
-		NBTTagList list = stack.getTagCompound().getTagList(UniverseDialerMode.MEMORY.tagListName, NBT.TAG_COMPOUND);
+	public static void setMemoryNameForIndex(NBTTagList list, int index, String name) {
 		list.getCompoundTagAt(index).setString("name", name);
+	}
+	
+	public static void changeOCMessageAtIndex(NBTTagList list, int index, ChangeMessage changeMessage) {
+		UniverseDialerOCMessage message = new UniverseDialerOCMessage(list.getCompoundTagAt(index));
+		changeMessage.change(message);
+		list.set(index, message.serializeNBT());
+	}
+	
+	public static interface ChangeMessage {
+		public void change(UniverseDialerOCMessage message);
 	}
 }

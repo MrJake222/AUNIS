@@ -94,6 +94,14 @@ public class UniverseDialerActionPacketToServer implements IMessage {
 									gateTile.abort();
 									player.sendStatusMessage(new TextComponentTranslation("item.aunis.universe_dialer.aborting"), true);
 								}
+								
+								else {
+									player.sendStatusMessage(new TextComponentTranslation("item.aunis.universe_dialer.not_dialing"), true);
+								}
+							}
+							
+							else {
+								player.sendStatusMessage(new TextComponentTranslation("item.aunis.universe_dialer.not_linked"), true);
 							}
 							
 							break;

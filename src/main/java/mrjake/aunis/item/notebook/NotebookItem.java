@@ -80,8 +80,7 @@ public class NotebookItem extends Item implements CustomModelItemInterface {
 		return list.getCompoundTagAt(selected);
 	}
 	
-	public static void setNameForIndex(ItemStack stack, int index, String name) {
-		NBTTagList list = stack.getTagCompound().getTagList("addressList", NBT.TAG_COMPOUND);
+	public static void setNameForIndex(NBTTagList list, int index, String name) {
 		NBTTagCompound page = list.getCompoundTagAt(index);
 		
 		NBTTagCompound display = new NBTTagCompound();

@@ -1,4 +1,4 @@
-package mrjake.aunis.gui.address;
+package mrjake.aunis.gui.entry;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,15 +6,13 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
-import mrjake.aunis.Aunis;
 import mrjake.aunis.gui.BetterButton;
+import mrjake.aunis.gui.BetterTextField;
 import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.gui.address.AddressDataTypeEnum;
-import mrjake.aunis.packet.gui.address.AddressActionEnum;
-import mrjake.aunis.packet.gui.address.AddressActionToServer;
-import mrjake.aunis.stargate.network.StargateAddress;
+import mrjake.aunis.packet.gui.entry.EntryActionEnum;
+import mrjake.aunis.packet.gui.entry.EntryActionToServer;
+import mrjake.aunis.packet.gui.entry.EntryDataTypeEnum;
 import mrjake.aunis.stargate.network.SymbolInterface;
-import mrjake.aunis.stargate.network.SymbolTypeEnum;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -23,16 +21,13 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.fml.client.config.GuiUtils;
 
-public abstract class AbstractAddressEntry {
+public abstract class AbstractEntry {
 	
 	protected Minecraft mc;
 	protected int index;
 	protected int maxIndex;
 	protected EnumHand hand;
 	protected String name;
-	protected SymbolTypeEnum symbolType;
-	protected StargateAddress stargateAddress;
-	protected int maxSymbols;
 	
 	private ActionListener actionListener;
 	
@@ -44,33 +39,20 @@ public abstract class AbstractAddressEntry {
 	protected List<BetterButton> buttons = new ArrayList<>();
 	protected List<GuiTextField> textFields = new ArrayList<>();
 	
-	public AbstractAddressEntry(Minecraft mc, int index, int maxIndex, EnumHand hand, String name2, SymbolTypeEnum type, StargateAddress addr, int maxSymbols, ActionListener actionListener) {
+	public AbstractEntry(Minecraft mc, int index, int maxIndex, EnumHand hand, String name, ActionListener actionListener) {
 		this.mc = mc;
 		this.index = index;
 		this.maxIndex = maxIndex;
 		this.hand = hand;
-		this.name = name2;
-		this.symbolType = type;
-		this.stargateAddress = addr;
-		this.maxSymbols = maxSymbols;
+		this.name = name;
 		this.actionListener = actionListener;
 		
 		// ----------------------------------------------------------------------------------------------------
 		// Text fields
 		
 		int tId = 0;
-		nameField = new GuiTextField(tId++, mc.fontRenderer, 0, 0, 100, 20) {
-			@Override
-			public void setFocused(boolean focused) {
-				if (isFocused() && !focused && !name.equals(getText())) {
-					// Unfocused and changed name
-					name = getText();
-					action(AddressActionEnum.RENAME);
-				}
-				
-				super.setFocused(focused);
-			}
-		};
+		nameField = new BetterTextField(tId++, mc.fontRenderer, 0, 0, 100, 20, name)
+				.setActionCallback(() -> action(EntryActionEnum.RENAME));
 		
 		nameField.setText(name);
 		nameField.setMaxStringLength(getMaxNameLength());
@@ -83,15 +65,15 @@ public abstract class AbstractAddressEntry {
 		int bId = 0;
 		upButton = new BetterButton(bId++, 0, 0, 20, 20, "▲")
 				.setFgColor(GuiUtils.getColorCode('a', true))
-				.setActionCallback(() -> action(AddressActionEnum.MOVE_UP));
+				.setActionCallback(() -> action(EntryActionEnum.MOVE_UP));
 		
 		downButton = new BetterButton(bId++, 0, 0, 20, 20, "▼")
 				.setFgColor(GuiUtils.getColorCode('c', true))
-				.setActionCallback(() -> action(AddressActionEnum.MOVE_DOWN));
+				.setActionCallback(() -> action(EntryActionEnum.MOVE_DOWN));
 		
 		removeButton = new BetterButton(bId++, 0, 0, 20, 20, "x")
 				.setFgColor(GuiUtils.getColorCode('c', true))
-				.setActionCallback(() -> action(AddressActionEnum.REMOVE));
+				.setActionCallback(() -> action(EntryActionEnum.REMOVE));
 		
 		buttons.add(upButton);
 		buttons.add(downButton);
@@ -99,14 +81,15 @@ public abstract class AbstractAddressEntry {
 	}
 	
 	public void renderAt(int dx, int dy, int mouseX, int mouseY, float partialTicks) {
-		dy += getButtonOffset();
+//		dy += getButtonOffset();
 		
-		// Fields
-		nameField.x = dx+160+10;
-		nameField.y = dy;
-		
+		// Fields		
 		for (GuiTextField tf : textFields) {
+			tf.x = dx;
+			tf.y = dy;
 			tf.drawTextBox();
+			
+			dx += tf.width + 10;
 		}
 		
 		
@@ -115,15 +98,13 @@ public abstract class AbstractAddressEntry {
 		boolean last = (index == maxIndex-1);
 		upButton.enabled = !first;
 		downButton.enabled = !last;
-		
-		int x = dx+280;
-		
+				
 		for (GuiButton btn : buttons) {
-			btn.x = x;
+			btn.x = dx;
 			btn.y = dy;
 			btn.drawButton(mc, mouseX, mouseY, partialTicks);
 			
-			x += 25;
+			dx += 25;
 		}
 	}
 	
@@ -131,8 +112,8 @@ public abstract class AbstractAddressEntry {
 	// ----------------------------------------------------------------------------------------------------
 	// Actions
 	
-	protected void action(AddressActionEnum action) {
-		AunisPacketHandler.INSTANCE.sendToServer(new AddressActionToServer(hand, getAddressDataType(), action, index, nameField.getText()));
+	protected void action(EntryActionEnum action) {
+		AunisPacketHandler.INSTANCE.sendToServer(new EntryActionToServer(hand, getEntryDataType(), action, index, nameField.getText()));
 		actionListener.action(action, index);
 	}
 	
@@ -141,7 +122,7 @@ public abstract class AbstractAddressEntry {
 	// Interactions
 	
 	/**
-	 * Called on mouse clicked on every instance of {@link AbstractAddressEntry}
+	 * Called on mouse clicked on every instance of {@link AbstractEntry}
 	 * @return {@code true} when a button was clicked, {@code false} if other or no element was activated.
 	 */
 	public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) {
@@ -178,9 +159,9 @@ public abstract class AbstractAddressEntry {
 	}
 	
 	protected abstract int getHeight();	
-	protected abstract int getButtonOffset();
+//	protected abstract int getButtonOffset();
 	protected abstract int getMaxNameLength();
-	protected abstract AddressDataTypeEnum getAddressDataType();
+	protected abstract EntryDataTypeEnum getEntryDataType();
 	
 	protected static void renderSymbol(int x, int y, int sizeX, int sizeY, SymbolInterface symbol) {
 		GlStateManager.enableTexture2D();
@@ -196,6 +177,6 @@ public abstract class AbstractAddressEntry {
 	}
 	
 	static interface ActionListener {
-		public void action(AddressActionEnum action, int index);
+		public void action(EntryActionEnum action, int index);
 	}
 }

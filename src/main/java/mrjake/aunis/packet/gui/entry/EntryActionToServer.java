@@ -1,4 +1,4 @@
-package mrjake.aunis.packet.gui.address;
+package mrjake.aunis.packet.gui.entry;
 
 import java.nio.charset.StandardCharsets;
 
@@ -19,16 +19,16 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class AddressActionToServer implements IMessage {
-	public AddressActionToServer() {}
+public class EntryActionToServer implements IMessage {
+	public EntryActionToServer() {}
 	
 	private EnumHand hand;
-	private AddressDataTypeEnum dataType;
-	private AddressActionEnum action;
+	private EntryDataTypeEnum dataType;
+	private EntryActionEnum action;
 	private int index;
 	private String name;
 	
-	public AddressActionToServer(EnumHand hand, AddressDataTypeEnum dataType, AddressActionEnum action, int index, String name) {
+	public EntryActionToServer(EnumHand hand, EntryDataTypeEnum dataType, EntryActionEnum action, int index, String name) {
 		this.hand = hand;
 		this.dataType = dataType;
 		this.action = action;
@@ -50,8 +50,8 @@ public class AddressActionToServer implements IMessage {
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		hand = EnumHand.values()[buf.readInt()];
-		dataType = AddressDataTypeEnum.values()[buf.readInt()];
-		action = AddressActionEnum.values()[buf.readInt()];
+		dataType = EntryDataTypeEnum.values()[buf.readInt()];
+		action = EntryActionEnum.values()[buf.readInt()];
 		index = buf.readInt();
 		
 		int size = buf.readInt();
@@ -59,10 +59,10 @@ public class AddressActionToServer implements IMessage {
 	}
 	
 	
-	public static class AddressActionServerHandler implements IMessageHandler<AddressActionToServer, IMessage> {
+	public static class EntryActionServerHandler implements IMessageHandler<EntryActionToServer, IMessage> {
 
 		@Override
-		public IMessage onMessage(AddressActionToServer message, MessageContext ctx) {
+		public IMessage onMessage(EntryActionToServer message, MessageContext ctx) {
 			EntityPlayerMP player = ctx.getServerHandler().player;
 			WorldServer world = player.getServerWorld();
 
@@ -75,21 +75,15 @@ public class AddressActionToServer implements IMessage {
 					
 					switch (message.action) {
 						case RENAME:
-							NotebookItem.setNameForIndex(stack, message.index, message.name);
+							NotebookItem.setNameForIndex(list, message.index, message.name);
 							break;
 						
 						case MOVE_UP:
-							NBTBase prev = list.get(message.index-1);
-							list.set(message.index-1, list.get(message.index));
-							list.set(message.index, prev);
-							
+							tagSwitchPlaces(list, message.index, message.index-1);
 							break;
 							
 						case MOVE_DOWN:
-							NBTBase next = list.get(message.index+1);
-							list.set(message.index+1, list.get(message.index));
-							list.set(message.index, next);
-							
+							tagSwitchPlaces(list, message.index, message.index+1);
 							break;
 							
 						case REMOVE:
@@ -114,26 +108,50 @@ public class AddressActionToServer implements IMessage {
 					
 					switch (message.action) {
 						case RENAME:
-							UniverseDialerItem.setMemoryNameForIndex(stack, message.index, message.name);
+							UniverseDialerItem.setMemoryNameForIndex(list, message.index, message.name);
 							break;
-						
-						case MOVE_UP:
-							NBTBase prev = list.get(message.index-1);
-							list.set(message.index-1, list.get(message.index));
-							list.set(message.index, prev);
 							
+						case MOVE_UP:
+							tagSwitchPlaces(list, message.index, message.index-1);
 							break;
 							
 						case MOVE_DOWN:
-							NBTBase next = list.get(message.index+1);
-							list.set(message.index+1, list.get(message.index));
-							list.set(message.index, next);
-							
+							tagSwitchPlaces(list, message.index, message.index+1);
 							break;
 							
 						case REMOVE:
 							list.removeTag(message.index);
-							compound.setByte("selected", (byte) Math.min(message.index, list.tagCount()-1));
+							
+							UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
+							if (mode == UniverseDialerMode.MEMORY)
+								compound.setByte("selected", (byte) Math.min(message.index, list.tagCount()-1));
+							
+							break;
+					}
+				}
+				
+				else if (message.dataType.oc()) {
+					NBTTagList list = compound.getTagList(UniverseDialerMode.OC.tagListName, NBT.TAG_COMPOUND);
+					
+					switch (message.action) {
+						case RENAME:
+							UniverseDialerItem.changeOCMessageAtIndex(list, message.index, (ocMessage) -> ocMessage.name = message.name);
+							break;
+						
+						case MOVE_UP:
+							tagSwitchPlaces(list, message.index, message.index-1);
+							break;
+							
+						case MOVE_DOWN:
+							tagSwitchPlaces(list, message.index, message.index+1);
+							break;
+							
+						case REMOVE:
+							list.removeTag(message.index);
+							
+							UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
+							if (mode == UniverseDialerMode.OC)
+								compound.setByte("selected", (byte) Math.min(message.index, list.tagCount()-1));
 							
 							break;
 					}
@@ -143,5 +161,11 @@ public class AddressActionToServer implements IMessage {
 			return null;
 		}
 		
+	}
+	
+	private static void tagSwitchPlaces(NBTTagList list, int a, int b) {
+		NBTBase tagA = list.get(a);
+		list.set(a, list.get(b));
+		list.set(b, tagA);
 	}
 }

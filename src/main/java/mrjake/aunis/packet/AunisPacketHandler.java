@@ -16,8 +16,10 @@ import mrjake.aunis.packet.SetOpenTabToServer.SetOpenTabServerHandler;
 import mrjake.aunis.packet.SoundPositionedPlayToClient.PlayPositionedSoundClientHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient.StateUpdateClientHandler;
 import mrjake.aunis.packet.StateUpdateRequestToServer.StateUpdateServerHandler;
-import mrjake.aunis.packet.gui.address.AddressActionToServer;
-import mrjake.aunis.packet.gui.address.AddressActionToServer.AddressActionServerHandler;
+import mrjake.aunis.packet.gui.entry.EntryActionToServer;
+import mrjake.aunis.packet.gui.entry.EntryActionToServer.EntryActionServerHandler;
+import mrjake.aunis.packet.gui.entry.OCActionToServer;
+import mrjake.aunis.packet.gui.entry.OCActionToServer.OCActionServerHandler;
 import mrjake.aunis.packet.stargate.DHDButtonClickedToServer;
 import mrjake.aunis.packet.stargate.DHDButtonClickedToServer.DHDButtonClickedServerHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToClient;
@@ -54,7 +56,8 @@ public class AunisPacketHandler {
 		INSTANCE.registerMessage(BeamerChangedInactivityServerHandler.class, BeamerChangedInactivityToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(NotebookActionPacketServerHandler.class, NotebookActionPacketToServer.class, id, Side.SERVER); id++;
 		INSTANCE.registerMessage(PageNotebookSetNameServerHandler.class, PageNotebookSetNameToServer.class, id, Side.SERVER); id++;
-		INSTANCE.registerMessage(AddressActionServerHandler.class, AddressActionToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(EntryActionServerHandler.class, EntryActionToServer.class, id, Side.SERVER); id++;
+		INSTANCE.registerMessage(OCActionServerHandler.class, OCActionToServer.class, id, Side.SERVER); id++;
 
 		
 		INSTANCE.registerMessage(RetrieveMotionClientHandler.class, StargateMotionToClient.class, id, Side.CLIENT); id++;
