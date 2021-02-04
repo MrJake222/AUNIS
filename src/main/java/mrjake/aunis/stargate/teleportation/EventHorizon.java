@@ -7,11 +7,13 @@ import java.util.Map;
 import javax.vecmath.Vector2f;
 
 import mrjake.aunis.AunisProps;
+import mrjake.aunis.api.event.StargateTeleportEntityEvent;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.stargate.StargateMotionToClient;
 import mrjake.aunis.sound.AunisSoundHelper;
 import mrjake.aunis.sound.SoundEventEnum;
 import mrjake.aunis.stargate.network.StargatePos;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -105,9 +107,14 @@ public class EventHorizon {
 	}
 	
 	public void teleportEntity(int entityId) {
-		scheduledTeleportMap.get(entityId).teleport();
+		TeleportPacket packet = scheduledTeleportMap.get(entityId);
 		
-		AunisSoundHelper.playSoundEvent(world, gateCenter, SoundEventEnum.WORMHOLE_GO);
+		if (!new StargateTeleportEntityEvent((StargateAbstractBaseTile) world.getTileEntity(pos), packet.getTargetGatePos().getTileEntity(), packet.getEntity()).post()) {
+			// Not cancelled
+			packet.teleport();
+			AunisSoundHelper.playSoundEvent(world, gateCenter, SoundEventEnum.WORMHOLE_GO);
+		};
+		
 		scheduledTeleportMap.remove(entityId);
 	}
 	
