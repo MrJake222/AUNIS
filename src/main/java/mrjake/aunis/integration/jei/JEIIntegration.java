@@ -27,6 +27,7 @@ public final class JEIIntegration implements IModPlugin {
         
         List<IRecipeWrapper> recipes = new ArrayList<>();
         recipes.addAll(JEINotebookRecipe.genAll());
+        recipes.add(new JEIUniverseDialerCloneRecipe());
 		registry.addRecipes(recipes, VanillaRecipeCategoryUid.CRAFTING);
     }
 

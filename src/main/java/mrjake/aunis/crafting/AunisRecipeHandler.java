@@ -11,5 +11,6 @@ public class AunisRecipeHandler {
 	@SubscribeEvent
 	public static void onRecipeRegister(Register<IRecipe> event) {
 		event.getRegistry().register(new NotebookRecipe());
+		event.getRegistry().register(new UniverseDialerCloneRecipe());
 	}
 }
