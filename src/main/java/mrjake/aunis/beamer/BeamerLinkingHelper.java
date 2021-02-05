@@ -22,6 +22,7 @@ public class BeamerLinkingHelper {
 		EnumFacing left = blockFacing.rotateYCCW();
 		EnumFacing right = blockFacing.rotateY();
 		
+		// TODO Change to dynamic reach
 		Iterable<MutableBlockPos> blocks = BlockPos.getAllInBoxMutable(pos.offset(left, SIDE).down(DOWN).offset(blockFacing, 1), pos.offset(right, SIDE).down().offset(blockFacing, 9));
 		
 		for (MutableBlockPos scanPos : blocks) {

@@ -337,13 +337,10 @@ item.aunis.gui.oc_port_invalid=Invalid port
 config.aunis.mode_scroll=Universe dialer mode scroll
 config.aunis.mode_up=Universe dialer mode up
 config.aunis.mode_down=Universe dialer mode down
-config.aunis.address_scroll=Universe dialer address scroll
-config.aunis.address_up=Universe dialer address up
-config.aunis.address_down=Universe dialer address down
-config.aunis.address_remove=Universe dialer remove address
-config.aunis.universe_dialer.abort=Universe dialer abort dialing
-config.aunis.universe_dialer.oc_program=Universe dialer program OC message
-config.aunis.page_notebook.rename=Rename notebook page
+config.aunis.address_scroll=Universe dialer/Notebook address scroll
+config.aunis.address_up=Universe dialer/Notebook address up
+config.aunis.address_down=Universe dialer/Notebook address down
+config.aunis.address_edit=Open address edit menu
 
 
 aunis.subtitle.dhd_milkyway_press=DHD symbol pressed
