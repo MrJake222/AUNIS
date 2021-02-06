@@ -13,7 +13,6 @@ import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
 import net.minecraftforge.common.config.Config.RangeDouble;
 import net.minecraftforge.common.config.Config.RangeInt;
-import net.minecraftforge.common.config.Config.RequiresMcRestart;
 import net.minecraftforge.common.config.Config.RequiresWorldRestart;
 
 @Config(modid="aunis", name="aunis")
@@ -317,13 +316,7 @@ public class AunisConfig {
 	}
 	
 	public static class RecipeConfig {
-		@Name("Enable silicon recipes")
-		@RequiresMcRestart
-		@Comment({
-			"Should Molten Silicon require Silicon (provided by other mods)",
-			"or just plain sand. Disable if having balance issues with AE/EnderIO silicon."
-		})
-		public boolean enableSiliconRecipes = true;
+		
 	}
 	
 	public static class AudioVideoConfig {
