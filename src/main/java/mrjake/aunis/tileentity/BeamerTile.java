@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Iterators;
 
 import li.cil.oc.api.machine.Arguments;
@@ -36,6 +39,7 @@ import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
+import mrjake.aunis.state.BeamerFluidUpdate;
 import mrjake.aunis.state.BeamerRendererActionState;
 import mrjake.aunis.state.BeamerRendererState;
 import mrjake.aunis.state.BeamerRendererUpdate;
@@ -539,15 +543,11 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	}
 	
 	private void syncToClient() {
-		if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_STATE, getState(StateTypeEnum.RENDERER_STATE)), targetPoint);
-		}
+		sendState(StateTypeEnum.RENDERER_STATE, getState(StateTypeEnum.RENDERER_STATE));
 	}
 	
 	private void sendRenderingAction(BeamerRendererAction action) {
-		if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_ACTION, new BeamerRendererActionState(action)), targetPoint);
-		}
+		sendState(StateTypeEnum.RENDERER_ACTION, new BeamerRendererActionState(action));
 	}
 	
 	public void gateEngaged(StargatePos targetGatePos, StargatePos sourceGatePos) {
@@ -869,11 +869,19 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	private FluidTank fluidHandler = new FluidTank(null, AunisConfig.beamerConfig.fluidCapacity) {
 		
 		protected void onContentsChanged() {
-			if (targetPoint != null) {
-				if (fluid == null || fluid.getFluid() != previouslyStoredFluid) {
-					AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, getState(StateTypeEnum.RENDERER_UPDATE)), targetPoint);
-					previouslyStoredFluid = fluid != null ? fluid.getFluid() : null;
+			if (beamerRole == BeamerRoleEnum.TRANSMIT && (fluid == null || fluid.getFluid() != previouslyStoredFluid)) {
+				// Transmitting and has fluid
+				Fluid fluidContained = fluid != null ? fluid.getFluid() : null;
+				BeamerFluidUpdate update = new BeamerFluidUpdate(fluidContained);
+				
+				sendState(StateTypeEnum.BEAMER_FLUID_UPDATE, update);
+				
+				// Sync update to target beamer
+				if (targetBeamerWorld != null && targetBeamerPos != null) {
+					BeamerTile targetTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
+					targetTile.sendState(StateTypeEnum.BEAMER_FLUID_UPDATE, update);
 				}
+				previouslyStoredFluid = fluidContained;
 			}
 			
 			markDirty();
@@ -984,17 +992,33 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	// ---------------------------------------------------------------------------------------------------
 	// States
 	
+	@Nullable
+	public Fluid lastFluidTransferred;
+	
 	public int beamLengthClient;
 	public float beamRadiusClient;
 	private boolean beamRadiusWiden;
 	private boolean beamRadiusShrink;
 	
+	// TODO Convert to using sendState
+	protected void sendState(StateTypeEnum type, State state) {
+		if (world.isRemote)
+			return;
+		
+		if (targetPoint != null) {
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, type, state), targetPoint);
+		}
+		
+		else {
+			Aunis.logger.debug("targetPoint was null trying to send " + type + " from " + this.getClass().getCanonicalName());
+		}
+	}
+	
 	@Override
 	public State getState(StateTypeEnum stateType) {
 		switch (stateType) {
 			case RENDERER_UPDATE:
-				FluidStack fluidStack = fluidHandler.getFluid();
-				return new BeamerRendererUpdate(beamerStatus, fluidStack != null ? fluidStack.getFluid() : null);
+				return new BeamerRendererUpdate(beamerStatus);
 				
 			case RENDERER_STATE:
 				int distance = 0;
@@ -1008,6 +1032,10 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 		
 			case GUI_UPDATE:
 				return new BeamerContainerGuiUpdate(energyStorage.getEnergyStored(), energyTransferredLastTick, fluidHandler.getFluid(), beamerRole, redstoneMode, start, stop, inactivity);
+			
+			case BEAMER_FLUID_UPDATE:
+				FluidStack fluidStack = fluidHandler.getFluid();
+				return new BeamerFluidUpdate(fluidStack != null ? fluidStack.getFluid() : null);
 				
 			default:
 				return null;
@@ -1028,6 +1056,9 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 		
 			case GUI_UPDATE:
 				return new BeamerContainerGuiUpdate();
+				
+			case BEAMER_FLUID_UPDATE:
+				return new BeamerFluidUpdate();
 				
 			default:
 				return null;
@@ -1054,12 +1085,6 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 				
 				beamRadiusClient = update.beamerStatus == BeamerStatusEnum.OK ? 0.1375f : 0;
 				AunisSoundHelperClient.playPositionedSoundClientSide(pos, SoundPositionedEnum.BEAMER_LOOP, update.beamerStatus == BeamerStatusEnum.OK);
-				
-				fluidHandler.setFluid(update.fluidContained != null ? new FluidStack(update.fluidContained, 1) : null);
-//				if (targetBeamerWorld != null && targetBeamerPos != null) {
-//					BeamerTile targetTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
-//					targetTile.fluidHandler.setf
-//				}
 				
 				break;
 				
@@ -1097,6 +1122,14 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 				if (screen instanceof BeamerContainerGui ) {
 					((BeamerContainerGui) screen).updateStartStopInactivity();
 				}
+				
+				break;
+				
+			case BEAMER_FLUID_UPDATE:
+				BeamerFluidUpdate fluidUpdate = (BeamerFluidUpdate) state;
+				
+				lastFluidTransferred = fluidUpdate.fluidContained;
+				Aunis.logger.debug("Received beamer fluid update: " + lastFluidTransferred);
 				
 				break;
 				

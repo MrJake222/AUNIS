@@ -38,10 +38,10 @@ public class BeamerRenderer extends TileEntitySpecialRenderer<BeamerTile> {
 	        float[] colors = te.getMode().colors;
 			
 	        if (te.getMode() == BeamerModeEnum.FLUID && AunisConfig.beamerConfig.enableFluidBeamColorization) {
-				FluidTank tank = (FluidTank) te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+//				FluidTank tank = (FluidTank) te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
 			
-				if (tank != null && tank.getFluid() != null) {
-					FloatColors fluidColors = FluidColors.getAverageColor(tank.getFluid().getFluid());
+				if (te.lastFluidTransferred != null) {
+					FloatColors fluidColors = FluidColors.getAverageColor(te.lastFluidTransferred);
 					
 					if (fluidColors != null) {
 						colors = fluidColors.colors;

@@ -11,35 +11,19 @@ public class BeamerRendererUpdate extends State {
 	public BeamerRendererUpdate() {}
 	
 	public BeamerStatusEnum beamerStatus;
-	public Fluid fluidContained;
 
-	public BeamerRendererUpdate(BeamerStatusEnum beamerStatus, Fluid fluid) {
+	public BeamerRendererUpdate(BeamerStatusEnum beamerStatus) {
 		this.beamerStatus = beamerStatus;
-		fluidContained = fluid;
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(beamerStatus.getKey());
-		buf.writeBoolean(fluidContained != null);
-		
-		if (fluidContained != null) { 
-			String string = FluidRegistry.getFluidName(fluidContained);
-			buf.writeInt(string.length());
-			buf.writeCharSequence(string, StandardCharsets.UTF_8);
-		}
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		beamerStatus = BeamerStatusEnum.valueOf(buf.readInt());
-		
-		if (buf.readBoolean()) {
-			// Had fluid stack
-			
-			int size = buf.readInt();
-			fluidContained = FluidRegistry.getFluid(buf.readCharSequence(size, StandardCharsets.UTF_8).toString());
-		}
 	}
 
 }
