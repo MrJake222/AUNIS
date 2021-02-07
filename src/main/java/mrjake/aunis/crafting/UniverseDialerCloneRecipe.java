@@ -16,7 +16,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry.Impl;
 public class UniverseDialerCloneRecipe extends Impl<IRecipe> implements IRecipe {
 
 	public UniverseDialerCloneRecipe() {
-		setRegistryName(AunisItems.UNIVERSE_DIALER.getRegistryName());
+		setRegistryName("universe_dialer_cloning");
 	}
 	
 	@Override

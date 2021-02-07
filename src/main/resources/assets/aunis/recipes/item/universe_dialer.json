@@ -1,0 +1,35 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"SGS",
+		"NIN",
+		"NYN"
+	],
+	
+	"key": {
+	    "S": {
+            "item": "minecraft:stone_button"
+        },
+	
+		"G": {
+            "item": "minecraft:glass_pane"
+        },
+        
+		"N": {
+			"item": "aunis:naquadah_alloy"
+		},
+		
+		"I": {
+			"item": "aunis:circuit_control_naquadah"
+		},
+		
+		"Y": {
+            "item": "aunis:crystal_yellow"
+        }
+	},
+	
+	"result": {
+		"item": "aunis:universe_dialer",
+		"count": 1
+	}
+}

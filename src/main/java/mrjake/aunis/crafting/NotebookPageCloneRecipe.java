@@ -12,7 +12,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry.Impl;
 public class NotebookPageCloneRecipe extends Impl<IRecipe> implements IRecipe {
 
 	public NotebookPageCloneRecipe() {
-		setRegistryName(AunisItems.NOTEBOOK_ITEM.getRegistryName());
+		setRegistryName("page_notebook_cloning");
 	}
 	
 	@Override

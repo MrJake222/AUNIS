@@ -16,7 +16,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry.Impl;
 public class NotebookRecipe extends Impl<IRecipe> implements IRecipe {
 
 	public NotebookRecipe() {
-		setRegistryName(AunisItems.NOTEBOOK_ITEM.getRegistryName());
+		setRegistryName("notebook_creation");
 	}
 	
 	@Override

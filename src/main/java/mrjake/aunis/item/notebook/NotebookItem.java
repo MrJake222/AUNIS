@@ -27,7 +27,7 @@ public class NotebookItem extends Item implements CustomModelItemInterface {
 		setRegistryName(Aunis.ModID + ":" + ITEM_NAME);
 		setUnlocalizedName(Aunis.ModID + "." + ITEM_NAME);
 		
-		setMaxStackSize(1);
+		// setMaxStackSize(1);
 	}
 	
 	@Override

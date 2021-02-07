@@ -52,7 +52,7 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 		setUnlocalizedName(Aunis.ModID + "." + ITEM_NAME);
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
-		setMaxStackSize(1);
+		// setMaxStackSize(1);
 	}
 
 	// TODO replace with capabilities. If item will have NBT like "display:Name" it will not init custom NBT! -- slava110
