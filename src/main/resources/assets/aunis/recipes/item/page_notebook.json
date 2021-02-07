@@ -23,6 +23,7 @@
 	
 	"result": {
 		"item": "aunis:page_notebook",
-		"count": 1
+		"count": 1,
+		"data": 0
 	}
 }

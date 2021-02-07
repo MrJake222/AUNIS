@@ -316,6 +316,16 @@ public class AunisConfig {
 		@Name("Item max transfer")
 		@RangeInt(min=1)
 		public int itemTransfer = 4;
+
+		@Name("Max gate-beamer distance")
+		public int reach = 10;
+		
+		@Name("Should the beam be responsive to fluid color")
+		public boolean enableFluidBeamColorization = true;
+
+		@Name("Interval of signals being send to OC about transfers (in ticks)")
+		@RangeInt(min=1)
+		public int signalIntervalTicks = 20;
 	}
 	
 	public static class RecipeConfig {
