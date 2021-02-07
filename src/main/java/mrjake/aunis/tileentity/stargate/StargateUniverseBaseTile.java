@@ -381,4 +381,9 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 	public StargateUniverseRendererState getRendererStateClient() {
 		return (StargateUniverseRendererState) super.getRendererStateClient();
 	}
+	
+	@Override
+	public int getSupportedCapacitors() {
+		return AunisConfig.powerConfig.universeCapacitors;
+	}
 }

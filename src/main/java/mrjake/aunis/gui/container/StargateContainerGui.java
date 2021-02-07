@@ -216,6 +216,11 @@ public class StargateContainerGui extends GuiContainer implements TabbedContaine
 		GlStateManager.color(1,1,1, 1);
 		drawModalRectWithCustomSizedTexture(guiLeft, guiTop, 0, 0, xSize, ySize, 512, 512);
 		
+		// Draw cross on inactive capacitors
+		for (int i=0; i<3-container.gateTile.getSupportedCapacitors(); i++) {
+			drawModalRectWithCustomSizedTexture(guiLeft+151 - 18*i, guiTop+40, 24, 175, 16, 16, 512, 512);
+		}
+		
 		for (int i=container.gateTile.getPowerTier(); i<4; i++)
 			drawModalRectWithCustomSizedTexture(guiLeft+10+39*i, guiTop+61, 0, 168, 39, 6, 512, 512);
 		

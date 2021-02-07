@@ -613,6 +613,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 		@Override
 		public boolean isItemValid(int slot, ItemStack stack) {
 			Item item = stack.getItem();
+			boolean isItemCapacitor = (item == Item.getItemFromBlock(AunisBlocks.CAPACITOR_BLOCK));
 			
 			switch (slot) {
 				case 0:				
@@ -622,9 +623,11 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 					return StargateUpgradeEnum.contains(item) && !hasUpgrade(item);
 					
 				case 4:
+					return isItemCapacitor && getSupportedCapacitors() >= 1;
 				case 5:
+					return isItemCapacitor && getSupportedCapacitors() >= 2;
 				case 6:
-					return item == Item.getItemFromBlock(AunisBlocks.CAPACITOR_BLOCK);
+					return isItemCapacitor && getSupportedCapacitors() >= 3;
 					
 				case 7:
 				case 8:
@@ -672,6 +675,8 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 			markDirty();
 		}
 	};
+	
+	public abstract int getSupportedCapacitors();
 	
 	public static enum StargateUpgradeEnum implements EnumKeyInterface<Item> {
 		MILKYWAY_GLYPHS(AunisItems.CRYSTAL_GLYPH_MILKYWAY),

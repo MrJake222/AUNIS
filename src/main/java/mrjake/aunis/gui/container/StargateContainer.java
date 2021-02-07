@@ -58,7 +58,15 @@ public class StargateContainer extends Container implements OpenTabHolderInterfa
 		
 		// Capacitors 1x3 (index 4-6)
 		for (int col=0; col<3; col++) {				
-			addSlotToContainer(new SlotItemHandler(itemHandler, col+4, 115+18*col, 40));
+			final int capacitorIndex = col;
+			
+			addSlotToContainer(new SlotItemHandler(itemHandler, col+4, 115+18*col, 40) {
+				@Override
+				public boolean isEnabled() {
+					// getHasStack() is a compatibility thing for when players already had their capacitors in the gate.
+					return (capacitorIndex+1 <= gateTile.getSupportedCapacitors()) || getHasStack();
+				}
+			});
 		}
 
 		// Page slots (index 7-9)
@@ -101,7 +109,7 @@ public class StargateContainer extends Container implements OpenTabHolderInterfa
         	// Capacitors
         	if (stack.getItem() == Item.getItemFromBlock(AunisBlocks.CAPACITOR_BLOCK)) {
         		for (int i=4; i<7; i++) {
-        			if (!getSlot(i).getHasStack()) {
+        			if (!getSlot(i).getHasStack() && getSlot(i).isItemValid(stack)) {
         				ItemStack stack1 = stack.copy();
         				stack1.setCount(1);
 

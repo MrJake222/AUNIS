@@ -208,6 +208,9 @@ public class AunisConfig {
 		@Name("Universe gate energy multiplier")
 		@RangeDouble(min=0)
 		public double stargateUniverseEnergyMul = 1.5;
+		
+		@Name("Capacitors supported by Universe gates")
+		public int universeCapacitors = 0;
 	}
 	
 	public static class RingsConfig {

@@ -527,4 +527,9 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		
 		super.executeTask(scheduledTask, customData);
 	}
+	
+	@Override
+	public int getSupportedCapacitors() {
+		return 3;
+	}
 }
