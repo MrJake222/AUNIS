@@ -45,7 +45,7 @@ public abstract class StargateClassicBaseBlock extends StargateAbstractBaseBlock
 	@Override
 	protected void showGateInfo(EntityPlayer player, EnumHand hand, World world, BlockPos pos) {
 		StargateClassicBaseTile tile = (StargateClassicBaseTile) world.getTileEntity(pos);
-		if(!tile.tryInsertUpgrade(player, hand)) {
+		if(!tile.tryInsertUpgrade(player, hand) && tile.isMerged()) {
 			player.openGui(Aunis.instance, GuiIdEnum.GUI_STARGATE.id, world, pos.getX(), pos.getY(), pos.getZ());
 		}
 	}
