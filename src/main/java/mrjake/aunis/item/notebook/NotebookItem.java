@@ -66,7 +66,7 @@ public class NotebookItem extends Item implements CustomModelItemInterface {
 		if (oldStack.getItem() != newStack.getItem())
 			return true;
 		
-		if (oldStack.hasTagCompound() != newStack.hasTagCompound())
+		if (!oldStack.hasTagCompound() || !newStack.hasTagCompound())
 			return true;
 		
 		int oldSelected = oldStack.getTagCompound().getInteger("selected");

@@ -9,6 +9,7 @@ import mezz.jei.api.JEIPlugin;
 import mezz.jei.api.recipe.IRecipeWrapper;
 import mezz.jei.api.recipe.VanillaRecipeCategoryUid;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.item.AunisItems;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -20,7 +21,9 @@ public final class JEIIntegration implements IModPlugin {
     @Override
     public void register(IModRegistry registry) {
         // Hide invisible block in JEI
-        registry.getJeiHelpers().getIngredientBlacklist().addIngredientToBlacklist(new ItemStack(AunisBlocks.INVISIBLE_BLOCK, 1, OreDictionary.WILDCARD_VALUE));
+    	registry.getJeiHelpers().getIngredientBlacklist().addIngredientToBlacklist(new ItemStack(AunisBlocks.INVISIBLE_BLOCK, 1, OreDictionary.WILDCARD_VALUE));
+    	// Hide Notebook from JEI
+        registry.getJeiHelpers().getIngredientBlacklist().addIngredientToBlacklist(new ItemStack(AunisItems.NOTEBOOK_ITEM, 1));
         
         // Tab handling
         registry.addAdvancedGuiHandlers(new JEIAdvancedGuiHandler());
