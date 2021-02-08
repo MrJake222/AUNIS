@@ -3,10 +3,7 @@ package mrjake.aunis.stargate.merging;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
-import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.EnumMemberVariant;
-import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateClassicMemberTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
 import mrjake.aunis.util.FacingToRotation;
@@ -17,7 +14,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public abstract class StargateClassicMergeHelper extends StargateAbstractMergeHelper {
 	
@@ -41,12 +37,13 @@ public abstract class StargateClassicMergeHelper extends StargateAbstractMergeHe
 				ItemStack camoStack = memberTile.getCamoItemStack();
 				if (camoStack != null) {
 					InventoryHelper.spawnItemStack(world, checkPos.getX(), checkPos.getY(), checkPos.getZ(), camoStack);
-					memberTile.setCamoState(null);
-					
-					TargetPoint point = new TargetPoint(world.provider.getDimension(), checkPos.getX(), checkPos.getY(), checkPos.getZ(), 512);
-					AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(checkPos, StateTypeEnum.CAMO_STATE, memberTile.getState(StateTypeEnum.CAMO_STATE)), point);
 				}
 				
+				if (memberTile.getCamoState() != null) {
+					memberTile.setCamoState(null);
+				}
+				
+				// This also sets merge status
 				memberTile.setBasePos(shouldBeMerged ? basePos : null);
 				
 				world.setBlockState(checkPos, state.withProperty(AunisProps.RENDER_BLOCK, !shouldBeMerged), 3);

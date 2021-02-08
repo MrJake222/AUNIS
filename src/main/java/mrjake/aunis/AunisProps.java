@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import mrjake.aunis.block.BeamerBlock;
 import mrjake.aunis.block.CapacitorBlock;
+import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.block.InvisibleBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.block.stargate.StargateOrlinMemberBlock;
@@ -76,4 +77,9 @@ public class AunisProps {
 	 * Used by {@link BeamerBlock} to display textures.
 	 */
 	public static final PropertyBeamerMode BEAMER_MODE = PropertyBeamerMode.create("mode");
+	
+	/**
+	 * Used by {@link DHDBlock} to determine whether it's snow layer on the bottom should be rendered.
+	 */
+	public static final PropertyBool SNOWY = PropertyBool.create("snowy");
 }

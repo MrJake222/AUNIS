@@ -7,6 +7,7 @@ import mrjake.aunis.AunisProps;
 import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateAbstractMemberTile;
+import mrjake.aunis.tileentity.stargate.StargateClassicMemberTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -46,7 +47,7 @@ public abstract class StargateAbstractMemberBlock extends Block {
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
         StargateAbstractMemberTile memberTile = (StargateAbstractMemberTile) world.getTileEntity(pos);
         StargateAbstractBaseTile gateTile = memberTile.getBaseTile(world);
-
+        
         if (gateTile != null) {
             gateTile.updateMergeState(false, world.getBlockState(gateTile.getPos()).getValue(AunisProps.FACING_HORIZONTAL));
         }
@@ -104,7 +105,15 @@ public abstract class StargateAbstractMemberBlock extends Block {
     }
 
     @Override
-    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
-        return BlockFaceShape.UNDEFINED;
+    public BlockFaceShape getBlockFaceShape(IBlockAccess world, IBlockState state, BlockPos pos, EnumFacing facing) {
+    	if (state.getValue(AunisProps.RENDER_BLOCK)) {
+    		// Rendering some block
+    		StargateClassicMemberTile memberTile = (StargateClassicMemberTile) world.getTileEntity(pos);
+			if (memberTile != null && memberTile.getCamoState() != null) {
+				return memberTile.getCamoState().getBlockFaceShape(world, pos, facing);
+			}
+    	}
+        
+    	return BlockFaceShape.UNDEFINED;
     }
 }

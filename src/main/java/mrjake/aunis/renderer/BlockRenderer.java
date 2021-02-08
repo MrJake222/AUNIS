@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -19,12 +20,16 @@ public class BlockRenderer {
 		IBakedModel model = blockRendererDispatcher.getModelForState(state);
 
         GlStateManager.disableLighting();
-		
+		Minecraft.getMinecraft().entityRenderer.disableLightmap();
+		Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        
 		Tessellator tessellator = Tessellator.getInstance();
         tessellator.getBuffer().begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
         blockRendererDispatcher.getBlockModelRenderer().renderModelFlat(world, model, state, pos, tessellator.getBuffer(), false, 0);
 		tessellator.draw();
 		
         GlStateManager.enableLighting();
+		Minecraft.getMinecraft().entityRenderer.enableLightmap();
+
 	}
 }

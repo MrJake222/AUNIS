@@ -17,8 +17,10 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
@@ -46,7 +48,8 @@ public class DHDBlock extends Block {
 		setCreativeTab(Aunis.aunisCreativeTab);
 		
 		setDefaultState(blockState.getBaseState()
-				.withProperty(AunisProps.ROTATION_HORIZONTAL, 0));
+				.withProperty(AunisProps.ROTATION_HORIZONTAL, 0)
+				.withProperty(AunisProps.SNOWY, false));
 		
 		setLightOpacity(0);
 		
@@ -58,7 +61,7 @@ public class DHDBlock extends Block {
 	// ------------------------------------------------------------------------
 	@Override
 	protected BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, AunisProps.ROTATION_HORIZONTAL);
+		return new BlockStateContainer(this, AunisProps.ROTATION_HORIZONTAL, AunisProps.SNOWY);
 	}
 	
 	@Override
@@ -71,6 +74,26 @@ public class DHDBlock extends Block {
 	public IBlockState getStateFromMeta(int meta) {
 		return getDefaultState()
 				.withProperty(AunisProps.ROTATION_HORIZONTAL, meta);
+	}
+	
+	public final static BlockMatcher SNOW_MATCHER = BlockMatcher.forBlock(Blocks.SNOW_LAYER);
+	
+	@Override
+	public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+		return state.withProperty(AunisProps.SNOWY, isSnowAroundBlock(world, pos));
+	}
+	
+	public static boolean isSnowAroundBlock(IBlockAccess world, BlockPos inPos) {
+				
+		// Check if 4 adjacent blocks are snow layers
+		for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+			BlockPos pos = inPos.offset(facing);
+			if (!SNOW_MATCHER.apply(world.getBlockState(pos))) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	// ------------------------------------------------------------------------

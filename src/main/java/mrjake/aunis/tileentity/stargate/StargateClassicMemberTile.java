@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity.stargate;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.StateUpdatePacketToClient;
@@ -62,13 +63,6 @@ public abstract class StargateClassicMemberTile extends StargateAbstractMemberTi
 	 */
 	private boolean isLitUp;
 	
-	public void syncLightUp() {
-//		Aunis.info("Syncing light state for chevron");
-		if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.LIGHT_STATE, getState(StateTypeEnum.LIGHT_STATE)), targetPoint);
-		}
-	}
-	
 	public void setLitUp(boolean isLitUp) {
 		boolean sync = isLitUp != this.isLitUp;
 		
@@ -76,7 +70,7 @@ public abstract class StargateClassicMemberTile extends StargateAbstractMemberTi
 		markDirty();
 
 		if (sync) {
-			syncLightUp();
+			sendState(StateTypeEnum.LIGHT_STATE, getState(StateTypeEnum.LIGHT_STATE));
 		}
 	}
 	
@@ -88,10 +82,25 @@ public abstract class StargateClassicMemberTile extends StargateAbstractMemberTi
 	// ---------------------------------------------------------------------------------	
 	private IBlockState camoBlockState;
 	
-	public void setCamoState(IBlockState doubleSlabState) {
-		this.camoBlockState = doubleSlabState;
+	/**
+	 * Should only be called from server. Updates camoBlockState and
+	 * syncs the change to clients.
+	 * 
+	 * @param camoBlockState Camouflage block state.
+	 */
+	public void setCamoState(IBlockState camoBlockState) {
+		// Aunis.logger.debug("Setting camo for " + pos + " to " + camoBlockState);
 		
+		this.camoBlockState = camoBlockState;
 		markDirty();
+		
+		if (!world.isRemote) {
+			sendState(StateTypeEnum.CAMO_STATE, getState(StateTypeEnum.CAMO_STATE));
+		}
+		
+		else {
+			Aunis.logger.warn("Tried to set camoBlockState from client. This won't work!");
+		}
 	}
 	
 	public IBlockState getCamoState() {
@@ -101,6 +110,10 @@ public abstract class StargateClassicMemberTile extends StargateAbstractMemberTi
 	public ItemStack getCamoItemStack() {
 		if (camoBlockState != null) {
 			Block block = camoBlockState.getBlock();
+			
+			if (block == Blocks.SNOW_LAYER)
+				return null;
+			
 			int quantity = 1;
 			int meta;
 			
@@ -164,6 +177,19 @@ public abstract class StargateClassicMemberTile extends StargateAbstractMemberTi
 	
 	// ---------------------------------------------------------------------------------
 	// States
+	
+	protected void sendState(StateTypeEnum type, State state) {
+		if (world.isRemote)
+			return;
+		
+		if (targetPoint != null) {
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, type, state), targetPoint);
+		}
+		
+		else {
+			Aunis.logger.debug("targetPoint was null trying to send " + type + " from " + this.getClass().getCanonicalName());
+		}
+	}
 	
 	@Override
 	public State getState(StateTypeEnum stateType) {
