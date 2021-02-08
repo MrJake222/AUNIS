@@ -24,9 +24,10 @@ tile.aunis.stargate_milkyway_base_block.name=Base StarGate (Voie lactée)
 tile.aunis.stargate_milkyway_ring_block.name=Anneau StarGate (Voie lactée)
 tile.aunis.stargate_milkyway_chevron_block.name=Chevron StarGate (Voie lactée)
 tile.aunis.dhd_block.name=Dial Home Device (DHD)
-tile.aunis.capacitor_block.name=Batterie
-tile.aunis.capacitor_block_empty.name=Batterie vide
+tile.aunis.capacitor_block.name=Banque de condensateurs
+tile.aunis.capacitor_block_empty.name=Banque de condensateurs (vide)
 
+tile.aunis.stargate_orlin_base_block.open_count=Comptage ouvert : %s / %s
 tile.aunis.stargate_orlin_base_block.name=Base StarGate (Orlin)
 tile.aunis.stargate_orlin_member_block.name=Anneau StarGate (Orlin)
 
@@ -44,7 +45,7 @@ item.aunis.crystal_white.name=Cristal blanc
 
 item.aunis.circuit_control_base.name=Base du circuit de contrôle
 item.aunis.circuit_control_naquadah.name=Circuit de contrôle de Naquadah 
-item.aunis.circuit_control_crystal.name=Circuit de contrôle de cristal 
+item.aunis.circuit_control_crystal.name=Circuit de contrôle de cristal
 
 item.aunis.dhd_brb.name=Bouton rouge lumineux (BRB)
 
@@ -57,7 +58,7 @@ item.aunis.page_mysterious.name=Page mystérieuse
 item.aunis.page_mysterious.empty=Vierge
 item.aunis.mysterious_page.tooltip=Qui sait où cela mène
 
-fluid.silicon_molten_black=Silicium fondu
+fluid.silicon_molten_black=Molten Silicon
 fluid.silicon_molten_white=Silicium raffiné
 fluid.silicon_molten_red=Mélange de puissance
 fluid.silicon_molten_blue=Mélange de téléportation
@@ -102,6 +103,7 @@ commands.sgquery.stargates=Stargates %s
 commands.sgquery.wrong_id=ID incorrect ou aucune donnée
 commands.sgquery.wrong_map=Mauvaise carte ou aucune donnée
 commands.sgquery.wrong_sender=Mauvais expéditeur (pas un joueur)
+commands.sgquery.wrong_quantity=Mauvaise quantité de pages données
 commands.sgquery.giving_page=Donner la page à %s
 commands.sggivepage.usage=/sggivepage (player) (map=X) [biome=Y] (Symbol)x8/6
 commands.sggivepage.no_map=Aucune carte ou mauvaise carte donnée
@@ -254,10 +256,17 @@ gui.dhd.no_fuel=Pas de carburant
 gui.stargate.milky_way_address=Adresse de la Voie lactée
 gui.stargate.pegasus_address=Adresse de Pegasus
 gui.stargate.universe_address=Adresse de l'univers
-gui.stargate.capacitors=Batteries
-gui.stargate.energyBuffer=Tampon énergétique
+gui.stargate.biome_overlay=Superposition de biomes
+gui.stargate.biome_overlay.help=Insérer des blocs pour passer outre
+gui.stargate.biome_overlay.normal=Normal
+gui.stargate.biome_overlay.frost=Givrée
+gui.stargate.biome_overlay.mossy=Mousse
+gui.stargate.biome_overlay.aged=Agée
+gui.stargate.biome_overlay.sooty=Suie
+gui.stargate.capacitors=Condensateurs
+gui.stargate.energyBuffer=Tampon d'énergie
 
-gui.capacitor.name=Batterie
+gui.capacitor.name=Banque de condensateurs
 
 tile.aunis.beamer_block.name=Block de Beamer 
 item.aunis.beamer_crystal_power.name=Cristal du Beamer (puissance)
@@ -302,7 +311,8 @@ gui.beamer.invalid=Invalide
 
 chat.orlins.energyStored=Énergie stockée: %s RF (Obligatoire: %s RF, %s s)
 
-item.aunis.universe_dialer.name=dial Univers
+item.aunis.universe_dialer.name=Composeur de l'univers
+item.aunis.universe_dialer.saved_gates=Portes sauvées : %s
 item.aunis.universe_dialer.not_linked=Non lié
 item.aunis.universe_dialer.gate_busy=La porte est occupée
 item.aunis.universe_dialer.mode_scan=Proche
@@ -310,6 +320,7 @@ item.aunis.universe_dialer.mode_saved=Mémoire
 item.aunis.universe_dialer.mode_rings=Anneaux
 item.aunis.universe_dialer.mode_oc=OpnCom
 item.aunis.universe_dialer.aborting=Abandon de la composition
+item.aunis.universe_dialer.not_dialing=Ne pas composer
 item.aunis.universe_dialer.oc_name=Nom de l'entrée
 item.aunis.universe_dialer.oc_address=L'adresse du modem d'OpenComputers (laissez vide pour la diffusion)
 item.aunis.universe_dialer.oc_port=Port du modem
@@ -317,6 +328,17 @@ item.aunis.universe_dialer.oc_data=Paramètres OpenComputers (séparés par des 
 item.aunis.universe_dialer.oc_save=Sauvegarder
 item.aunis.universe_dialer.oc_port_invalid=Port invalide
 item.aunis.universe_dialer.oc_message_received=Réponse reçue: 
+item.aunis.notebook.name=Carnet de notes
+item.aunis.notebook.rename_gui=Nouveau nom
+item.aunis.notebook.unnamed=<sans nom>
+item.aunis.gui.name=Nom
+item.aunis.gui.address=Addresse
+item.aunis.gui.rename=Renommer
+item.aunis.gui.oc_address=Adresse du modem
+item.aunis.gui.oc_port=Port
+item.aunis.gui.oc_params=Paramètres
+item.aunis.gui.oc_port_invalid=Port invalide
+
 config.aunis.mode_scroll=Défilement du mode dial univers
 config.aunis.mode_up=Mode du dialer de l'Universe vers le haut
 config.aunis.mode_down=Mode du dialer de l'univers vers le bas
@@ -326,3 +348,33 @@ config.aunis.address_down=Adresse du dial univers vers le bas
 config.aunis.address_remove=Supprimer l'adresse du dial univers
 config.aunis.universe_dialer.abort=Le dialer de l'univers annule la numérotation
 config.aunis.universe_dialer.oc_program=Message OC du programme du dial univers
+config.aunis.page_notebook.rename=Renommer la page du carnet
+
+
+aunis.subtitle.dhd_milkyway_press=Symbole du DHD enfoncé
+aunis.subtitle.dhd_milkyway_press_brb=Bouton rouge vif du DHD enfoncé
+aunis.subtitle.gate_milkyway_open=Le vortex de la Porte des étoiles s'ouvre
+aunis.subtitle.gate_milkyway_close=Fermeture du vortex de la Porte des étoiles
+aunis.subtitle.gate_milkyway_ring_roll=Roulement de l'anneau de la Porte des étoiles
+aunis.subtitle.gate_milkyway_dial_fail=La Porte des étoiles n'arrive pas à se connecter
+aunis.subtitle.gate_milkyway_dial_fail_computer=Échec de la numérotation informatique de la Porte des étoiles
+aunis.subtitle.gate_milkyway_incoming=Verrouillage des chevrons de la porte des étoiles
+aunis.subtitle.wormhole_loop=Ondulations du vortex de la Porte des étoiles
+aunis.subtitle.wormhole_go=Le vortex de la Porte des étoiles accueille un voyageur
+aunis.subtitle.wormhole_flicker=Le vortex de la porte des étoiles vacille
+aunis.subtitle.rings_transport=Les anneaux de transport s'activent
+aunis.subtitle.rings_controller_button=Bouton du contrôleur des anneaux de transport enfoncé
+aunis.subtitle.gate_milkyway_chevron_shut=Le chevron de la porte des étoiles se ferme
+aunis.subtitle.gate_milkyway_chevron_open=Ouverture du chevron de la porte des étoiles
+aunis.subtitle.gate_orlin_dial=Cadrans de porte d'Orlin
+aunis.subtitle.gate_universe_dial_start=La porte de l'univers commence à composer
+aunis.subtitle.gate_universe_roll=Roulement de la portes de l'univers
+aunis.subtitle.gate_universe_chevron_lock=le chevron de la porte de l'univers est verrouillé.
+aunis.subtitle.gate_universe_fail=La porte de l'univers ne se connecte pas
+aunis.subtitle.gate_universe_chevron_top_lock=Verrouillage du chevron en haut de la porte de l'Univers
+aunis.subtitle.gate_universe_open=Le vortex de la porte de l'univers s'ouvre
+aunis.subtitle.gate_universe_close=Fermeture du vortex de la porte de l'univers
+aunis.subtitle.beamer_start=Démarrage du Beamer
+aunis.subtitle.beamer_stop=Arrêt du Beamer
+aunis.subtitle.beamer_loop=Faisceaux du Beamer
+aunis.subtitle.page_flip=Feuillets de page
