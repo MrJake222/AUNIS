@@ -76,7 +76,8 @@ public class AunisConfig {
 
 		@Name("Temperature threshold for frosty overlay")
 		@Comment({
-			"Below this biome temperature the gate will receive frosty texture"
+			"Below this biome temperature the gate will receive frosty texture.",
+			"Set to negative value to disable."
 		})
 		public float frostyTemperatureThreshold = 0.1f;
 		
@@ -104,22 +105,46 @@ public class AunisConfig {
 		
 		// ---------------------------------------------------------------------------------------
 		// Jungle biomes
-		@Name("Biomes in which Stargates should be mossy")
+		@Name("Biome overlay biome matches")
+		@SuppressWarnings("serial")
 		@Comment({
+			"This check comes last (after block is directly under sky (except Nether) and temperature is high enough).",
+			"You can disable the temperature check by setting it to a negative value.",
 			"Format: \"modid:biomename\", for example: ",
 			"\"minecraft:dark_forest\"",
 			"\"minecraft:forest\""
 		})
-		public String[] jungleBiomes = {"minecraft:jungle", "minecraft:jungle_hills", "minecraft:jungle_edge", "minecraft:mutated_jungle", "minecraft:mutated_jungle_edge"};
+		public Map<String, String[]> biomeMatches = new HashMap<String, String[]>() {
+			{
+				put(BiomeOverlayEnum.NORMAL.toString(), new String[] {});
+				put(BiomeOverlayEnum.FROST.toString(), new String[] {});
+				put(BiomeOverlayEnum.MOSSY.toString(), new String[] {"minecraft:jungle", "minecraft:jungle_hills", "minecraft:jungle_edge", "minecraft:mutated_jungle", "minecraft:mutated_jungle_edge"});
+				put(BiomeOverlayEnum.AGED.toString(), new String[] {});
+				put(BiomeOverlayEnum.SOOTY.toString(), new String[] {"minecraft:hell"});
+			}
+		};
 		
-		private List<Biome> cachedJungleBiomes = null;
+		private Map<Biome, BiomeOverlayEnum> cachedBiomeMatchesReverse = null;
 		
-		public boolean isJungleBiome(Biome biome) {
-			if (cachedJungleBiomes == null) {
-				cachedJungleBiomes = BiomeParser.parseConfig(jungleBiomes);
+		private void genBiomeOverrideBiomeCache() {
+			cachedBiomeMatchesReverse = new HashMap<>();
+			
+			for (Map.Entry<String, String[]> entry : biomeMatches.entrySet()) {
+				List<Biome> parsedList = BiomeParser.parseConfig(entry.getValue());
+				BiomeOverlayEnum biomeOverlay = BiomeOverlayEnum.fromString(entry.getKey());
+								
+				for (Biome biome : parsedList) {
+					cachedBiomeMatchesReverse.put(biome, biomeOverlay);
+				}
+			}
+		}
+		
+		public Map<Biome, BiomeOverlayEnum> getBiomeOverrideBiomes() {
+			if (cachedBiomeMatchesReverse == null) {
+				genBiomeOverrideBiomeCache();
 			}
 			
-			return cachedJungleBiomes.contains(biome);
+			return cachedBiomeMatchesReverse;
 		}
 		
 		
@@ -363,7 +388,7 @@ public class AunisConfig {
 	
 	public static void resetCache() {
 		stargateConfig.cachedInvincibleBlocks = null;
-		stargateConfig.cachedJungleBiomes = null;
+		stargateConfig.cachedBiomeMatchesReverse = null;
 		stargateConfig.cachedBiomeOverrideBlocks = null;
 		stargateConfig.cachedBiomeOverrideBlocksReverse = null;
 	}

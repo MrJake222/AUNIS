@@ -13,7 +13,6 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.items.SlotItemHandler;
 
 public class TabBiomeOverlay extends Tab {
@@ -55,8 +54,7 @@ public class TabBiomeOverlay extends Tab {
 					if (!supportedOverlays.contains(biomeOverlay))
 						continue;
 					
-					String line = "";
-					line += biomeOverlay.color + biomeOverlay.name() + ": " + TextFormatting.ITALIC;
+					String line = biomeOverlay.getLocalizedColorizedName() + ": ";
 					
 					for (ItemMetaPair itemMeta : AunisConfig.stargateConfig.getBiomeOverrideBlocks().get(biomeOverlay)) {
 						line += itemMeta.getDisplayName() + ", ";

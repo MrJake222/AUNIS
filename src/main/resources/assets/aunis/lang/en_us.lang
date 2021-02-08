@@ -258,6 +258,11 @@ gui.stargate.pegasus_address=Pegasus address
 gui.stargate.universe_address=Universe address
 gui.stargate.biome_overlay=Biome overlay
 gui.stargate.biome_overlay.help=Insert blocks to override
+gui.stargate.biome_overlay.normal=Normal
+gui.stargate.biome_overlay.frost=Frosty
+gui.stargate.biome_overlay.mossy=Mossy
+gui.stargate.biome_overlay.aged=Aged
+gui.stargate.biome_overlay.sooty=Sooty
 gui.stargate.capacitors=Capacitors
 gui.stargate.energyBuffer=Energy buffer
 

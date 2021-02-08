@@ -211,7 +211,8 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 			BiomeOverlayEnum.NORMAL,
 			BiomeOverlayEnum.FROST,
 			BiomeOverlayEnum.MOSSY,
-			BiomeOverlayEnum.SOOTY);
+			BiomeOverlayEnum.SOOTY,
+			BiomeOverlayEnum.AGED);
 	
 	public static EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
 		return SUPPORTED_OVERLAYS;

@@ -210,10 +210,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 				}
 			}
 			
-			else {
-				// Client
-//				Aunis.info("lock: " + lockPage);
-					
+			else {					
 				if (lockPage && itemStackHandler.getStackInSlot(pageSlotId).isEmpty()) {
 					lockPage = false;
 				}
@@ -232,11 +229,15 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 						}
 					}
 				}
-				
-				// Each 2s check for the biome overlay
-				if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null && getRendererStateClient().biomeOverride == null) {
-					rendererStateClient.setBiomeOverlay(BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos), getSupportedOverlays()));
-				}
+			}
+		}
+		
+		else {
+			// Client
+			
+			// Each 2s check for the biome overlay
+			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null && getRendererStateClient().biomeOverride == null) {
+				rendererStateClient.setBiomeOverlay(BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos), getSupportedOverlays()));
 			}
 		}
 	}
