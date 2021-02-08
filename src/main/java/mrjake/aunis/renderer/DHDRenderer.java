@@ -12,6 +12,8 @@ import net.minecraft.util.math.BlockPos;
 
 public class DHDRenderer extends TileEntitySpecialRenderer<DHDTile> {
 
+	private static final BlockPos ZERO_BLOCKPOS = new BlockPos(0, 0, 0);
+	
 	@Override
 	public void render(DHDTile te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		DHDRendererState rendererState = te.getRendererStateClient();
@@ -21,9 +23,9 @@ public class DHDRenderer extends TileEntitySpecialRenderer<DHDTile> {
 			GlStateManager.translate(x, y, z);
 			
 			if (te.getWorld().getBlockState(te.getPos()).getActualState(te.getWorld(), te.getPos()).getValue(AunisProps.SNOWY)) {
-				BlockRenderer.render(getWorld(), new BlockPos(0, 0, 0), Blocks.SNOW_LAYER.getDefaultState());
+				BlockRenderer.render(getWorld(), ZERO_BLOCKPOS, Blocks.SNOW_LAYER.getDefaultState(), te.getPos());
 			}
-
+			
 			GlStateManager.translate(0.5, 0, 0.5);
 			GlStateManager.rotate(rendererState.horizontalRotation, 0, 1, 0);
 			
