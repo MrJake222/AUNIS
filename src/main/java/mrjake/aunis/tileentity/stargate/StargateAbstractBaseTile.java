@@ -29,6 +29,7 @@ import mrjake.aunis.api.event.StargateDialFailEvent;
 import mrjake.aunis.api.event.StargateOpenedEvent;
 import mrjake.aunis.api.event.StargateOpeningEvent;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.chunkloader.ChunkManager;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateDimensionConfig;
@@ -754,8 +755,12 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				for (AunisAxisAlignedBB lBox : localInnerBlockBoxes) {
 					AunisAxisAlignedBB gBox = lBox.offset(pos);
 					
-					for (BlockPos bPos : BlockPos.getAllInBox((int)gBox.minX, (int)gBox.minY, (int)gBox.minZ, (int)gBox.maxX-1, (int)gBox.maxY-1, (int)gBox.maxZ-1))
-						blocks.add(bPos);
+					for (BlockPos bPos : BlockPos.getAllInBox((int)gBox.minX, (int)gBox.minY, (int)gBox.minZ, (int)gBox.maxX-1, (int)gBox.maxY-1, (int)gBox.maxZ-1)) {
+						// If not snow layer
+						if (!DHDBlock.SNOW_MATCHER.apply(world.getBlockState(bPos))) {
+							blocks.add(bPos);
+						}
+					}
 				}
 				
 				// Kill them
