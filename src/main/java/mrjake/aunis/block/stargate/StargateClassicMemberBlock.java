@@ -121,6 +121,10 @@ public abstract class StargateClassicMemberBlock extends StargateAbstractMemberB
 	// ------------------------------------------------------------------------		
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+		// Optifine shit
+		if (world.getBlockState(pos).getBlock() != this)
+			return state;
+		
 		StargateClassicMemberTile memberTile = (StargateClassicMemberTile) world.getTileEntity(pos);
 
 		if (memberTile != null) {
