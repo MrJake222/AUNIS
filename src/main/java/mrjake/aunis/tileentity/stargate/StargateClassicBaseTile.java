@@ -89,7 +89,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 		super.engageGate();
 		
 		for (BlockPos beamerPos : linkedBeamers) {
-			((BeamerTile) world.getTileEntity(beamerPos)).gateEngaged(targetGatePos, gatePosMap.get(getSymbolType()));
+			((BeamerTile) world.getTileEntity(beamerPos)).gateEngaged(targetGatePos);
 		}
 	}
 	
@@ -786,7 +786,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 	
 	public void addLinkedBeamer(BlockPos pos) {
 		if (stargateState.engaged()) {
-			((BeamerTile) world.getTileEntity(pos)).gateEngaged(targetGatePos, gatePosMap.get(getSymbolType()));
+			((BeamerTile) world.getTileEntity(pos)).gateEngaged(targetGatePos);
 		}
 		
 		linkedBeamers.add(pos.toImmutable());
@@ -801,7 +801,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 	private void updateBeamers() {
 		if (stargateState.engaged()) {
 			for (BlockPos beamerPos : linkedBeamers) {
-				((BeamerTile) world.getTileEntity(beamerPos)).gateEngaged(targetGatePos, gatePosMap.get(getSymbolType()));
+				((BeamerTile) world.getTileEntity(beamerPos)).gateEngaged(targetGatePos);
 			}
 		}
 	}

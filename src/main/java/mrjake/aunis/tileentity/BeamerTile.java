@@ -550,20 +550,34 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 		sendState(StateTypeEnum.RENDERER_ACTION, new BeamerRendererActionState(action));
 	}
 	
-	public void gateEngaged(StargatePos targetGatePos, StargatePos sourceGatePos) {
-		updateTargetBeamerPos(targetGatePos, sourceGatePos);
+	public void gateEngaged(StargatePos targetGatePos) {
+		BlockPos remoteBeamerPos = findTargetBeamerPos(targetGatePos);
+		
+		if (remoteBeamerPos != null) {
+			// Beamer found
+			targetBeamerWorld = targetGatePos.getWorld();
+			targetBeamerPos = remoteBeamerPos;
+			
+			// Link remote
+			BeamerTile remoteBeamerTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
+			remoteBeamerTile.targetBeamerWorld = this.world;
+			remoteBeamerTile.targetBeamerPos = this.pos;
+		}
 	}
 	
 	public void gateClosed() {
 		clearTargetBeamerPos();
 	}
 	
-	private void updateTargetBeamerPos(StargatePos targetGatePos, StargatePos sourceGatePos) {		
-		if (targetBeamerPos != null)
-			return;
-		
-		targetBeamerWorld = targetGatePos.getWorld();
-		EnumFacing targetFacing = targetBeamerWorld.getBlockState(targetGatePos.gatePos).getValue(AunisProps.FACING_HORIZONTAL);		
+	/**
+	 * Searches for the first beamer block linked to the targetGatePos gate
+	 * @param targetGatePos
+	 * @return {@link BlockPos} of the beamer block or {@code null} if no beamer found
+	 */
+	@Nullable
+	private BlockPos findTargetBeamerPos(StargatePos targetGatePos) {		
+		World targetWorld = targetGatePos.getWorld();
+		EnumFacing targetFacing = targetWorld.getBlockState(targetGatePos.gatePos).getValue(AunisProps.FACING_HORIZONTAL);		
 		Rotation rotation = FacingToRotation.get(targetFacing);
 		
 		BlockPos origVec = baseVect.rotate(rotation);
@@ -584,21 +598,25 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 		
 		BlockPos beamerPos = targetGatePos.gatePos.add(startingVec);
 		
+		// Finds any beamer inside the range at the other side
 		for (int i=1; i<=AunisConfig.beamerConfig.reach; i++) {
 			beamerPos = beamerPos.offset(targetFacing);
-//			 Aunis.info("checking " + beamerPos);
 			
-			if (BEAMER_MATCHER.apply(targetBeamerWorld.getBlockState(beamerPos))) {
-				targetBeamerPos = beamerPos.toImmutable();
-				BeamerTile targetBeamerTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
+			if (BEAMER_MATCHER.apply(targetWorld.getBlockState(beamerPos))) {
+				// Beamer block found
+				BeamerTile targetBeamerTile = (BeamerTile) targetWorld.getTileEntity(beamerPos);
 				
-				if (targetBeamerTile.targetBeamerPos == null) {
-					targetBeamerTile.updateTargetBeamerPos(sourceGatePos, targetGatePos); // Intentionally swaped
+				if (targetGatePos.gatePos.equals(targetBeamerTile.basePos)) {
+					// Beamer linked to the gate we're connecting to
+					return beamerPos.toImmutable();
+//					targetBeamerTile.updateTargetBeamerPos(sourceGatePos, targetGatePos); // Intentionally swaped
 				}
 				
-				break;
+				// break;
 			}
 		}
+		
+		return null;
 	}
 	
 	public void clearTargetBeamerPos() {
