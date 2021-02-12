@@ -245,6 +245,8 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	private List<FluidStack> fluidsTransferredSinceLastSignal = new ArrayList<>();
 	private List<ItemStack> itemsTransferredSinceLastSignal = new ArrayList<>();
 	
+	private boolean firstCheck = true;
+	
 	@Override
 	public void update() {
 		if (!world.isRemote) {
@@ -259,7 +261,9 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 			
 			BeamerStatusEnum lastBeamerStatus = beamerStatus;
 			
-			if (world.getTotalWorldTime() % 20 == 0) {
+			if (firstCheck || world.getTotalWorldTime() % 20 == 0) {
+				firstCheck = false;
+				
 				int lastComp = comparatorOutput;
 				comparatorOutput = updateComparatorOutput();
 				
@@ -267,7 +271,7 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 					world.updateComparatorOutputLevel(pos, AunisBlocks.BEAMER_BLOCK);
 				}
 				
-				if (beamerMode != BeamerModeEnum.NONE && isLinked()) {
+				if (isLinked()) {
 					StargateClassicBaseTile gateTile = getLinkedGateTile();
 					
 					if (gateTile.getStargateState().engaged()) {
