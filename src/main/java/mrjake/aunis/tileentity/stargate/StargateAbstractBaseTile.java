@@ -183,7 +183,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	protected void onGateMerged() {}
 	
 	public boolean canAcceptConnectionFrom(StargatePos targetGatePos) {
-		return isMerged && stargateState.idle();
+		return isMerged && (stargateState.idle() || stargateState.dialing() || stargateState.dialingComputer());
 	}
 		
 	protected void sendRenderingUpdate(EnumGateAction gateAction, int chevronCount, boolean modifyFinal) {
