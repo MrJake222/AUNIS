@@ -62,6 +62,8 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 	// Gate linking
 	
 	private BlockPos linkedGate = null;
+
+	private int linkId = -1;
 	
 	@Override
 	public void rotate(Rotation rotation) {
@@ -71,8 +73,9 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 		world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, rotation.rotate(rotationOrig, 16)));
 	}
 	
-	public void setLinkedGate(BlockPos gate) {		
+	public void setLinkedGate(BlockPos gate, int linkId) {		
 		this.linkedGate = gate;
+		this.linkId = linkId;
 		
 		markDirty();
 	}
@@ -92,6 +95,24 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 	public boolean canLinkTo() {
 		return !isLinked();
 	}
+
+	@Override
+	public int getLinkId() {
+		return linkId;
+	}
+
+	public void updateLinkStatus(World world, BlockPos pos) {
+		BlockPos closestGate = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK, this.getLinkId());
+		int linkId = -1;
+
+		if (closestGate != null) {
+			linkId = LinkingHelper.getLinkId();
+			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(closestGate);
+			gateTile.setLinkedDHD(pos, linkId);
+		}
+
+		setLinkedGate(closestGate, linkId);
+	}
 	
 	// ---------------------------------------------------------------------------------------------------
 	// Renderer state
@@ -105,6 +126,8 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 	// ---------------------------------------------------------------------------------------------------
 	// Loading and ticking
 	
+	private BlockPos lastPos = BlockPos.ORIGIN;
+
 	private TargetPoint targetPoint;
 	private ReactorStateEnum reactorState = ReactorStateEnum.STANDBY;
 	
@@ -127,13 +150,17 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 	@Override
 	public void update() {
 		if (!world.isRemote) {
-			
+			if (!lastPos.equals(pos)) {
+				lastPos = pos;
+				this.updateLinkStatus(world, pos);
+			}
+
 			// Has crystal
 			if (hasControlCrystal()) {
 				if (isLinked()) {
 					StargateAbstractBaseTile gateTile = getLinkedGate(world);
 					if (gateTile == null) {
-						setLinkedGate(null);
+						setLinkedGate(null, -1);
 						Aunis.logger.error("Gate didn't unlink properly, forcing...");
 						return;
 					}
@@ -527,8 +554,10 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {		
-		if (linkedGate != null)
+		if (linkedGate != null) {
 			compound.setLong("linkedGate", linkedGate.toLong());
+			compound.setInteger("linkId", linkId);
+		}
 		
 		compound.setTag("itemStackHandler", itemStackHandler.serializeNBT());
 		
@@ -547,6 +576,10 @@ public class DHDTile extends TileEntity implements ILinkable, IUpgradable, State
 			linkedGate = BlockPos.fromLong(compound.getLong("linkedGate"));
 			if (linkedGate.equals(new BlockPos(0, 0, 0))) // 1.8 fix
 				linkedGate = null;
+		}
+
+		if (compound.hasKey("linkId")) {
+			linkId = compound.getInteger("linkId");
 		}
 		
 		itemStackHandler.deserializeNBT(compound.getCompoundTag("itemStackHandler"));
