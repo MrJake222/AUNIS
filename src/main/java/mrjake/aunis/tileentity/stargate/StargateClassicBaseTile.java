@@ -180,12 +180,23 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 			updatePowerTier();
 		}
 	}
+
+	private BlockPos lastPos = BlockPos.ORIGIN;
 	
 	@Override
 	public void update() {
 		super.update();
 		
 		if (!world.isRemote) {
+			if (!lastPos.equals(pos)) {
+        lastPos = pos;
+        generateAddresses(!hasUpgrade(StargateClassicBaseTile.StargateUpgradeEnum.CHEVRON_UPGRADE));
+
+        if (isMerged()) {
+          updateMergeState(onGateMergeRequested(), facing);
+        }
+      }
+
 			if (givePageTask != null) {
 				if (givePageTask.update(world.getTotalWorldTime())) {
 					givePageTask = null;

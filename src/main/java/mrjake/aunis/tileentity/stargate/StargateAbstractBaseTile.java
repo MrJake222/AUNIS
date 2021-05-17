@@ -428,6 +428,10 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		markDirty();
 	}
+
+	public void refreshGateAddress() {
+    this.setGateAddress(this.getSymbolType(), this.getStargateAddress(this.getSymbolType()));
+  }
 	
 	public StargateAddressDynamic getDialedAddress() {
 		return dialedAddress;
@@ -661,28 +665,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			network = StargateNetwork.get(world);
 			
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);			
-			Random random = new Random(pos.hashCode() * 31 + world.provider.getDimension());
 			
-			for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
-				
-				StargatePos stargatePos;
-				
-				if (gateAddressMap.get(symbolType) == null) {
-					StargateAddress address = new StargateAddress(symbolType);
-					address.generate(random);
-					
-					stargatePos = new StargatePos(world.provider.getDimension(), pos, address);
-					network.addStargate(address, stargatePos);
-					gateAddressMap.put(symbolType, address);
-//					Aunis.info(address.toString());
-				}
-				
-				else {
-					stargatePos = new StargatePos(world.provider.getDimension(), pos, gateAddressMap.get(symbolType));
-				}
-				
-				gatePosMap.put(symbolType, stargatePos);
-			}
+			generateAddresses(false);
 			
 			if (stargateState.engaged()) {
 				verifyConnection();
@@ -693,6 +677,21 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_STATE));
 		}
 	}
+
+	 public void generateAddresses(boolean reset) {
+    Random random = new Random(pos.hashCode() * 31 + world.provider.getDimension());
+
+    for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
+      StargateAddress address = getStargateAddress(symbolType);
+
+      if (gateAddressMap.get(symbolType) == null || reset) {
+        address = new StargateAddress(symbolType);
+        address.generate(random);
+      }
+
+      this.setGateAddress(symbolType, address);
+    }
+  }
 	
 	private boolean addedToNetwork;
 	
@@ -1043,6 +1042,15 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		else {
 			onGateMerged();
 		}
+
+		// If the gate has already been merged, there is no need to merge it again.
+		// However, when the gate position changes, the members base pos should be updated as well.
+		if (this.isMerged == shouldBeMerged) {
+      if (shouldBeMerged) {
+        getMergeHelper().updateMembersBasePos(world, pos, facing);
+      }
+      return;
+    }
 		
 		this.isMerged = shouldBeMerged;
 		IBlockState actualState = world.getBlockState(pos);
