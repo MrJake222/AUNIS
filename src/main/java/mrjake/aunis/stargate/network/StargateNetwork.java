@@ -61,12 +61,14 @@ public class StargateNetwork extends WorldSavedData {
 	}
 	
 	public void addStargate(StargateAddress gateAddress, StargatePos stargatePos) {		
+		if (gateAddress == null) return;
 		getMapFromAddress(gateAddress).put(gateAddress, stargatePos);
 		
 		markDirty();
 	}
 	
 	public void removeStargate(StargateAddress gateAddress) {
+		if (gateAddress == null) return;
 		getMapFromAddress(gateAddress).remove(gateAddress);
 		
 		markDirty();
