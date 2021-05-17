@@ -177,6 +177,7 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 		super.onLoad();
 		
 		if (!world.isRemote) {
+			lastPos = pos;
 			updateBeamers();
 			updatePowerTier();
 		}

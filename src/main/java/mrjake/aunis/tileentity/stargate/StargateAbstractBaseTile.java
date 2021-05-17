@@ -685,7 +685,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				address.generate(random);
 			}
 
-			this.setGateAddress(symbolType, address);
+			if (address != null) this.setGateAddress(symbolType, address);
 		}
 	}
 	
@@ -1026,6 +1026,16 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * @param facing Facing of the base block.
 	 */
 	public final void updateMergeState(boolean shouldBeMerged, EnumFacing facing) {
+		// If the gate has already been merged, there is no need to merge it again.
+		// However, the gate position might have changed in that case, so we should
+		// update the members base position.
+		if (this.isMerged == shouldBeMerged) {
+			if (shouldBeMerged) {
+				getMergeHelper().updateMembersBasePos(world, pos, facing);
+			}
+			return;
+		}
+
 		if (!shouldBeMerged) {
 			if (isMerged)
 				onGateBroken();
@@ -1037,15 +1047,6 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		else {
 			onGateMerged();
-		}
-
-		// If the gate has already been merged, there is no need to merge it again.
-		// However, when the gate position changes, the members base pos should be updated as well.
-		if (this.isMerged == shouldBeMerged) {
-			if (shouldBeMerged) {
-				getMergeHelper().updateMembersBasePos(world, pos, facing);
-			}
-			return;
 		}
 		
 		this.isMerged = shouldBeMerged;
