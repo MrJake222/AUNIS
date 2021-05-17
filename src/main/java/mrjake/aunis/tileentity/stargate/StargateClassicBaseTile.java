@@ -189,13 +189,13 @@ public abstract class StargateClassicBaseTile extends StargateAbstractBaseTile i
 		
 		if (!world.isRemote) {
 			if (!lastPos.equals(pos)) {
-        lastPos = pos;
-        generateAddresses(!hasUpgrade(StargateClassicBaseTile.StargateUpgradeEnum.CHEVRON_UPGRADE));
+				lastPos = pos;
+				generateAddresses(!hasUpgrade(StargateClassicBaseTile.StargateUpgradeEnum.CHEVRON_UPGRADE));
 
-        if (isMerged()) {
-          updateMergeState(onGateMergeRequested(), facing);
-        }
-      }
+				if (isMerged()) {
+					updateMergeState(onGateMergeRequested(), facing);
+				}
+			}
 
 			if (givePageTask != null) {
 				if (givePageTask.update(world.getTotalWorldTime())) {
