@@ -31,7 +31,9 @@ public class LinkingHelper {
 		for (BlockPos target : BlockPos.getAllInBoxMutable(startPos.subtract(radius), startPos.add(radius))) {
 			if (world.getBlockState(target).getBlock() == targetBlock) {
 				ILinkable linkedTile = (ILinkable) world.getTileEntity(target);
-									
+				
+				// Check whether a tile can be linked to, or whether the link id is matching, 
+				// so that it can link once again to the exact same tile (i.e when the tile position changes).
 				if (linkedTile.canLinkTo() || linkId == linkedTile.getLinkId()) {
 					double distanceSq = startPos.distanceSq(target);
 					
@@ -69,6 +71,9 @@ public class LinkingHelper {
         }
     }
 
+	/**
+	* @return id for the next connection.
+	*/
 	public static int getLinkId() {
 		return ++nextLinkId;
 	}

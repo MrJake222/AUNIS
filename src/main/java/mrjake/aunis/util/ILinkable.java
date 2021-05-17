@@ -15,5 +15,11 @@ public interface ILinkable {
 	 */
 	boolean canLinkTo();
 
+	/**
+	* Returns the link id. Normally when e.g. a gate with DHD is being moved to a place where
+	* a DHD is already present, it tries to connect to the DHD regardless of its previous connection.
+	* linkId property is meant to solve that problem.
+	* @return linkId.
+	*/
 	int getLinkId();
 }
