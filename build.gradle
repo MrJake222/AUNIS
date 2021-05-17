@@ -1,60 +1,90 @@
 buildscript {
     repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        jcenter()
         mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
     }
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 version = "${mc_version}-${mod_version}"
 group = "mrjake.aunis"
 archivesBaseName = "aunis"
 
-sourceCompatibility = targetCompatibility = '1.8'
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
+sourceSets {
+    main { output.resourcesDir = output.classesDir }
 }
 
 minecraft {
-    version = "${mc_version}-${forge_version}"
-    mappings = mappings_version
+    // The mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   Snapshot are built nightly.
+    // stable_#            Stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    //mappings channel: 'snapshot', version: '20171003-1.12'
+    mappings channel: 'snapshot', version: '20171003-1.12'
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 
-    replaceIn "src/main/java/mrjake/aunis/Aunis.java"
-    replace '${version}', mod_version
+    accessTransformer = file('src/main/resources/META-INF/jei_at.cfg')
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+        }
+
+        server {
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+        }
+    }
 }
 
 repositories {
     maven {
         name = "CoFH Maven"
-        url = "http://maven.covers1624.net"
+        url = "https://maven.covers1624.net/"
     }
 
     maven {
-        name = "JEI Maven"
-        url = "http://dvs1.progwml6.com/files/maven"
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
     }
 
     maven {
         name = "OpenComputers Maven"
-        url = "http://maven.cil.li/"
+        url = "https://maven.cil.li/"
     }
 }
 
 dependencies {
-    deobfCompile "cofh:RedstoneFlux:${rf_mc_version}-${rf_version}:universal"
-    deobfCompile "cofh:CoFHCore:${mc_version}-${cofh_core_version}:universal"
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2855'
 
-    deobfCompile "mezz.jei:jei_${jei_mc_version}:${jei_version}"
-    runtimeOnly "mezz.jei:jei_${mc_version}:${jei_version}"
+    implementation fg.deobf("cofh:RedstoneFlux:${rf_mc_version}-${rf_version}:universal")
+    implementation fg.deobf("cofh:CoFHCore:${mc_version}-${cofh_core_version}:universal")
 
-    deobfCompile "li.cil.oc:OpenComputers:MC1.12.2-1.7.+"
+    compileOnly fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}")
+
+    compile "li.cil.oc:OpenComputers:MC1.12.2-1.7.5.213:api"
 }
 
 processResources {
@@ -67,28 +97,29 @@ processResources {
         include 'mcmod.info'
 
         // replace version and mcversion
-        expand 'version':mod_version, 'mcversion':mc_version
+        expand 'version': mod_version, 'mcversion': mc_version
     }
 
     // copy everything else except the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+
+    rename '(.+_at.cfg)', 'META-INF/$1'
 }
 
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    classifier = 'deobf'
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : "AUNIS",
+                "Specification-Vendor"    : "AUNIS",
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : "${version}",
+                "Implementation-Vendor"   : "AUNIS",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
 }
 
-artifacts {
-    archives deobfJar
-}
-
-runClient {
-    workingDir = "run"
-}
-
-runServer {
-    workingDir = "run-server"
-}
+jar.finalizedBy('reobfJar')
