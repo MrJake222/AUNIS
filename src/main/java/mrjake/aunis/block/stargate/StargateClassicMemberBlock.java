@@ -13,6 +13,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -378,5 +379,17 @@ public abstract class StargateClassicMemberBlock extends StargateAbstractMemberB
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess access, BlockPos pos) {
 		return CamoPropertiesHelper.getStargateBlockBoundingBox(state, access, pos, true);
+	}
+
+	@Override
+	public BlockFaceShape getBlockFaceShape(IBlockAccess world, IBlockState state, BlockPos pos, EnumFacing facing) {
+		if (state.getValue(AunisProps.RENDER_BLOCK)) {
+			// Rendering camouflage block
+			StargateClassicMemberTile memberTile = (StargateClassicMemberTile) world.getTileEntity(pos);
+			if (memberTile != null && memberTile.getCamoState() != null) {
+				return memberTile.getCamoState().getBlockFaceShape(world, pos, facing);
+			}
+		}
+		return super.getBlockFaceShape(world, state, pos, facing);
 	}
 }
