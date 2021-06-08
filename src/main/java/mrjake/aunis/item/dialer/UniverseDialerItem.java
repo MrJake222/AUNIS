@@ -36,6 +36,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -51,7 +52,7 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 		setUnlocalizedName(Aunis.ModID + "." + ITEM_NAME);
 		
 		setCreativeTab(Aunis.aunisCreativeTab);
-		setMaxStackSize(1);
+		// setMaxStackSize(1);
 	}
 
 	// TODO replace with capabilities. If item will have NBT like "display:Name" it will not init custom NBT! -- slava110
@@ -110,7 +111,16 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 	@Override
 	public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag flagIn) {
 		if (stack.hasTagCompound()) {
-			tooltip.add("Saved gates: " + stack.getTagCompound().getTagList("saved", NBT.TAG_COMPOUND).tagCount());
+			NBTTagList list = stack.getTagCompound().getTagList("saved", NBT.TAG_COMPOUND);
+			tooltip.add(TextFormatting.GRAY + Aunis.proxy.localize("item.aunis.universe_dialer.saved_gates", list.tagCount()));
+
+			for (int i=0; i<list.tagCount(); i++) {
+				NBTTagCompound compound = list.getCompoundTagAt(i);
+				
+				if (compound.hasKey("name")) {
+					tooltip.add(TextFormatting.AQUA + compound.getString("name"));
+				}
+			}
 		}
 	}
 	
@@ -270,11 +280,29 @@ public class UniverseDialerItem extends Item implements CustomModelItemInterface
 					
 				case OC:
 					UniverseDialerOCMessage message = new UniverseDialerOCMessage(selectedCompound);					
+					Aunis.logger.debug("Sending OC message: " + message.toString());
 					Aunis.ocWrapper.sendWirelessPacketPlayer(player, player.getHeldItem(hand), message.address, message.port, message.getData());
 					break;
 			}
 		}
 		
 		return super.onItemRightClick(world, player, hand);
+	}
+	
+	// ------------------------------------------------------------------------------------------------------------
+	// NBT handles
+	
+	public static void setMemoryNameForIndex(NBTTagList list, int index, String name) {
+		list.getCompoundTagAt(index).setString("name", name);
+	}
+	
+	public static void changeOCMessageAtIndex(NBTTagList list, int index, ChangeMessage changeMessage) {
+		UniverseDialerOCMessage message = new UniverseDialerOCMessage(list.getCompoundTagAt(index));
+		changeMessage.change(message);
+		list.set(index, message.serializeNBT());
+	}
+	
+	public static interface ChangeMessage {
+		public void change(UniverseDialerOCMessage message);
 	}
 }

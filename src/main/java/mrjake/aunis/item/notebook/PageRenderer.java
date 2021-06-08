@@ -17,7 +17,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class PageRenderer {
 	
-	private static void renderSymbol(float x, float y, float w, float h, SymbolInterface symbol) {
+	public static void renderSymbol(float x, float y, float w, float h, SymbolInterface symbol) {
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableBlend();
 		GlStateManager.color(0, 0, 0, (float) AunisConfig.avConfig.glyphTransparency);
@@ -104,10 +104,10 @@ public class PageRenderer {
 			}
 		}
 		
-		if (symbolType == SymbolTypeEnum.UNIVERSE)
-			renderSymbol(0.26f, 0.74f, 0.095f, 0.2f, symbolType.getOrigin());
-		else
-			renderSymbol(0.21f, 0.74f, 0.2f, 0.2f, symbolType.getOrigin());
+//		if (symbolType == SymbolTypeEnum.UNIVERSE)
+//			renderSymbol(0.26f, 0.74f, 0.095f, 0.2f, symbolType.getOrigin());
+//		else
+//			renderSymbol(0.21f, 0.74f, 0.2f, 0.2f, symbolType.getOrigin());
 		
 		String name = PageNotebookItem.getNameFromCompound(compound);
 		
@@ -117,8 +117,6 @@ public class PageRenderer {
 		
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0.10f + (0.61f - width)/2, 0.935f, 0.011f);
-//		GlStateManager.translate(0.71f, 0.935f, 0.011f);
-//		GlStateManager.rotate(180, 0, 1, 0);
 		GlStateManager.rotate(180, 0, 0, 1);
 		GlStateManager.scale(scale, scale, scale);
 		AunisFontRenderer.getFontRenderer().drawString(name, 0, 0, 0x383228, false);

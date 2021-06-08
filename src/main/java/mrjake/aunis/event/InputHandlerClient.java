@@ -7,22 +7,20 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.input.Keyboard;
 
-import mrjake.aunis.gui.OCMessageGui;
 import mrjake.aunis.gui.PageRenameGui;
+import mrjake.aunis.gui.entry.NotebookEntryChangeGui;
+import mrjake.aunis.gui.entry.UniverseEntryChangeGui;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.dialer.UniverseDialerActionEnum;
 import mrjake.aunis.item.dialer.UniverseDialerActionPacketToServer;
 import mrjake.aunis.item.notebook.NotebookActionEnum;
 import mrjake.aunis.item.notebook.NotebookActionPacketToServer;
-import mrjake.aunis.item.notebook.NotebookItem;
-import mrjake.aunis.item.notebook.PageNotebookItem;
 import mrjake.aunis.packet.AunisPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -44,14 +42,9 @@ public class InputHandlerClient {
 	private static final KeyBinding MODE_DOWN 		= new KeyBinding("config.aunis.mode_down", 0, "Aunis");
 	private static final KeyBinding ADDRESS_UP 		= new KeyBinding("config.aunis.address_up", 0, "Aunis");
 	private static final KeyBinding ADDRESS_DOWN 	= new KeyBinding("config.aunis.address_down", 0, "Aunis");
-	private static final KeyBinding ADDRESS_REMOVE	= new KeyBinding("config.aunis.address_remove", Keyboard.KEY_DELETE, "Aunis");
 	
-	// Universe dialer bindings
-	private static final KeyBinding DIALER_ABORT		= new KeyBinding("config.aunis.universe_dialer.abort", Keyboard.KEY_K, "Aunis");
-	private static final KeyBinding DIALER_OC_PROGRAM	= new KeyBinding("config.aunis.universe_dialer.oc_program", Keyboard.KEY_O, "Aunis");
-	
-	// Notebook page bindings
-	private static final KeyBinding PAGE_RENAME = new KeyBinding("config.aunis.page_notebook.rename", Keyboard.KEY_R, "Aunis");
+	// Used to open common gui on Notebook/Universe dialer 
+	private static final KeyBinding ADDRESS_EDIT	= new KeyBinding("config.aunis.address_edit", Keyboard.KEY_INSERT, "Aunis");
 	
 	// Unpress
 	private static final Method METHOD_UNPRESS = ObfuscationReflectionHelper.findMethod(KeyBinding.class, "func_74505_d", void.class);
@@ -65,31 +58,15 @@ public class InputHandlerClient {
 			MODE_DOWN,
 			ADDRESS_UP,
 			ADDRESS_DOWN,
-			ADDRESS_REMOVE,
 			
-			// Universe dialer bindings
-			DIALER_ABORT,
-			DIALER_OC_PROGRAM,
-			
-			// Notebook page bindings
-			PAGE_RENAME
+			ADDRESS_EDIT
 	};
 	
 	// Init function, call from preInit
 	public static void registerKeybindings() {
-		ClientRegistry.registerKeyBinding(MODE_SCROLL);
-		ClientRegistry.registerKeyBinding(ADDRESS_SCROLL);
-		
-		ClientRegistry.registerKeyBinding(MODE_UP);
-		ClientRegistry.registerKeyBinding(MODE_DOWN);
-		ClientRegistry.registerKeyBinding(ADDRESS_UP);
-		ClientRegistry.registerKeyBinding(ADDRESS_DOWN);
-		ClientRegistry.registerKeyBinding(ADDRESS_REMOVE);
-		
-		ClientRegistry.registerKeyBinding(DIALER_ABORT);
-		ClientRegistry.registerKeyBinding(DIALER_OC_PROGRAM);
-		
-		ClientRegistry.registerKeyBinding(PAGE_RENAME);
+		for (KeyBinding keyb : KEY_BINDINGS) {
+			ClientRegistry.registerKeyBinding(keyb);
+		}
 	}
 	
 	
@@ -110,19 +87,20 @@ public class InputHandlerClient {
 		return hand;
 	}
 	
+	@Nullable
+	public static ItemStack getItemStack(EntityPlayer player, Item item) {
+		EnumHand hand = getHand(item);
+		
+		if (hand != null) {
+			return player.getHeldItem(hand);
+		}
+		
+		return null;
+	}
+	
 	// Check for item in both hands
 	public static boolean checkForItem(Item item) {
-		EntityPlayer player = Minecraft.getMinecraft().player;
-		
-		if (player == null)
-			return false;
-		
-		if (player.getHeldItemMainhand().getItem() == item)
-			return true;
-		else if (player.getHeldItemOffhand().getItem() == item)
-			return true;
-		
-		return false;
+		return getHand(item) != null;
 	}
 	
 	// ------------------------------------------------------------------------------------
@@ -179,6 +157,8 @@ public class InputHandlerClient {
 		if (event.phase != Phase.END)
 			return;
 		
+		EntityPlayer player = Minecraft.getMinecraft().player;
+		
 		if (checkForItem(AunisItems.UNIVERSE_DIALER)) {
 			EnumHand hand = getHand(AunisItems.UNIVERSE_DIALER);
 			UniverseDialerActionEnum action = null;
@@ -204,16 +184,6 @@ public class InputHandlerClient {
 				next = true;
 			}
 			
-			else if (ADDRESS_REMOVE.isPressed())
-				action = UniverseDialerActionEnum.ADDRESS_REMOVE;
-			
-			else if (DIALER_ABORT.isPressed())
-				action = UniverseDialerActionEnum.ABORT;
-			
-			else if (DIALER_OC_PROGRAM.isPressed())
-				Minecraft.getMinecraft().displayGuiScreen(new OCMessageGui());
-			
-			
 			// ---------------------------------------------
 			if (action != null) {
 				AunisPacketHandler.INSTANCE.sendToServer(new UniverseDialerActionPacketToServer(action, hand, next));
@@ -222,7 +192,6 @@ public class InputHandlerClient {
 		
 		else if (checkForItem(AunisItems.NOTEBOOK_ITEM)) {
 			EnumHand hand = getHand(AunisItems.NOTEBOOK_ITEM);
-			ItemStack stack = Minecraft.getMinecraft().player.getHeldItem(hand);
 			NotebookActionEnum action = null;
 			boolean next = false;
 			
@@ -236,39 +205,14 @@ public class InputHandlerClient {
 				next = true;
 			}
 			
-			else if (ADDRESS_REMOVE.isPressed())
-				action = NotebookActionEnum.ADDRESS_REMOVE;
-			
-			else if (PAGE_RENAME.isPressed()) {
-				String name = "";
-				
-				if (stack.hasTagCompound()) {
-					NBTTagCompound pageTag = NotebookItem.getSelectedPageFromCompound(stack.getTagCompound());
-					name = PageNotebookItem.getNameFromCompound(pageTag);
-				}
-				
-				Minecraft.getMinecraft().displayGuiScreen(new PageRenameGui(name, hand, true));
-			}
-			
 			// ---------------------------------------------
 			if (action != null) {
 				AunisPacketHandler.INSTANCE.sendToServer(new NotebookActionPacketToServer(action, hand, next));
 			}
 		}
 		
-		else if (checkForItem(AunisItems.PAGE_NOTEBOOK_ITEM)) {
-			EnumHand hand = getHand(AunisItems.PAGE_NOTEBOOK_ITEM);
-			ItemStack stack = Minecraft.getMinecraft().player.getHeldItem(hand);
-			
-			if (PAGE_RENAME.isPressed() && stack.getMetadata() == 1) {
-				String name = "";
-				
-				if (stack.hasTagCompound()) {
-					name = PageNotebookItem.getNameFromCompound(stack.getTagCompound());
-				}
-				
-				Minecraft.getMinecraft().displayGuiScreen(new PageRenameGui(name, hand, false));
-			}
+		if (ADDRESS_EDIT.isPressed()) {
+			tryOpenAddressGui(player);
 		}
 		
 		for (KeyBinding keyBinding : KEY_BINDINGS) {
@@ -277,6 +221,32 @@ public class InputHandlerClient {
 				continue;
 			
 			METHOD_UNPRESS.invoke(keyBinding);
+		}
+	}
+	
+	private static void tryOpenAddressGui(EntityPlayer player) {
+		EnumHand hand = getHand(AunisItems.PAGE_NOTEBOOK_ITEM);
+		if (hand != null) {
+			ItemStack stack = player.getHeldItem(hand);
+			
+			if (stack.getMetadata() == 1) {
+				// Full page (not empty)
+				Minecraft.getMinecraft().displayGuiScreen(new PageRenameGui(hand, stack));
+			}
+			
+			return;
+		}
+		
+		hand = getHand(AunisItems.NOTEBOOK_ITEM);
+		if (hand != null) {
+			Minecraft.getMinecraft().displayGuiScreen(new NotebookEntryChangeGui(hand, player.getHeldItem(hand).getTagCompound()));
+			return;
+		}
+		
+		hand = getHand(AunisItems.UNIVERSE_DIALER);
+		if (hand != null) {
+			Minecraft.getMinecraft().displayGuiScreen(new UniverseEntryChangeGui(hand, player.getHeldItem(hand).getTagCompound()));
+			return;
 		}
 	}
 }

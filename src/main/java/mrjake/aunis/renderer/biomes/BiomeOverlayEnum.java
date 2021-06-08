@@ -2,25 +2,35 @@ package mrjake.aunis.renderer.biomes;
 
 import java.util.EnumSet;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.util.BlockHelpers;
-import net.minecraft.init.Biomes;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
 public enum BiomeOverlayEnum {
-	NORMAL(""),
-	FROST("_frost"),
-	MOSSY("_mossy"),
-	AGED("_aged"),
-	SOOTY("_sooty");
+	NORMAL("", TextFormatting.GRAY),
+	FROST("_frost", TextFormatting.DARK_AQUA),
+	MOSSY("_mossy", TextFormatting.DARK_GREEN),
+	AGED("_aged", TextFormatting.GRAY),
+	SOOTY("_sooty", TextFormatting.DARK_GRAY);
 	
 	public String suffix;
+	private TextFormatting color;
+	private String unlocalizedName;
 
-	BiomeOverlayEnum(String suffix) {
+	BiomeOverlayEnum(String suffix, TextFormatting color) {
 		this.suffix = suffix;
+		this.color = color;
+		this.unlocalizedName = "gui.stargate.biome_overlay." + name().toLowerCase();
+	}
+	
+	public String getLocalizedColorizedName() {
+		return color + Aunis.proxy.localize(unlocalizedName);
 	}
 	
 	/**
@@ -44,18 +54,28 @@ public enum BiomeOverlayEnum {
 	private static BiomeOverlayEnum getBiomeOverlay(World world, BlockPos topmostBlock) {
 		Biome biome = world.getBiome(topmostBlock);
 
-		if (biome == Biomes.HELL)
-			return SOOTY;
-
-		if (!BlockHelpers.isBlockDirectlyUnderSky(world, topmostBlock))
+		// If not Nether and block not under sky
+		if (world.provider.getDimensionType() != DimensionType.NETHER && !BlockHelpers.isBlockDirectlyUnderSky(world, topmostBlock))
 			return NORMAL;
-		
-		if (AunisConfig.stargateConfig.isJungleBiome(biome))
-			return MOSSY;
 		
 		if (biome.getTemperature(topmostBlock) <= AunisConfig.stargateConfig.frostyTemperatureThreshold)
 			return FROST;
 		
+		BiomeOverlayEnum overlay = AunisConfig.stargateConfig.getBiomeOverrideBiomes().get(biome);
+		
+		if (overlay != null)
+			return overlay;
+		
 		return NORMAL;
+	}
+
+	public static BiomeOverlayEnum fromString(String name) {
+		for (BiomeOverlayEnum biomeOverlay : values()) {
+			if (biomeOverlay.toString().equals(name)) {
+				return biomeOverlay;
+			}
+		}
+		
+		return null;
 	}
 }

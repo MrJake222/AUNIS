@@ -35,7 +35,7 @@ public interface IUpgradable {
 
         while (iter.hasNext()) {
             int slot = iter.next();
-            if(itemHandler.getStackInSlot(slot).getItem().equals(item)) {
+            if(itemHandler.getStackInSlot(slot).getItem() == item) {
                 return true;
             }
         }

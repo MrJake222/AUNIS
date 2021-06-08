@@ -8,7 +8,6 @@ public class BeamerRendererUpdate extends State {
 	
 	public BeamerStatusEnum beamerStatus;
 
-
 	public BeamerRendererUpdate(BeamerStatusEnum beamerStatus) {
 		this.beamerStatus = beamerStatus;
 	}

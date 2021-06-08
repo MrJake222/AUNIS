@@ -19,37 +19,32 @@ public class UniverseDialerOCProgramToServer implements IMessage {
 	public UniverseDialerOCProgramToServer() {}
 	
 	private EnumHand hand;
-	private String name;
-	private String address;
-	private short port;
-	private String data;
+	private UniverseDialerOCMessage message;
 		
-	public UniverseDialerOCProgramToServer(EnumHand hand, String name, String address, short port, String data) {
+	public UniverseDialerOCProgramToServer(EnumHand hand, UniverseDialerOCMessage message) {
 		this.hand = hand;
-		this.name = name;
-		this.address = address;
-		this.port = port;
-		this.data = data;
+		this.message = message;
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeInt(hand == EnumHand.MAIN_HAND ? 0 : 1);
-		buf.writeShort(port);
 		
-		writeString(buf, name);
-		writeString(buf, address);
-		writeString(buf, data);
+		buf.writeShort(message.port);
+		writeString(buf, message.name);
+		writeString(buf, message.address);
+		writeString(buf, message.dataStr);
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		hand = buf.readInt() == 0 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
-		port = buf.readShort();
 		
-		name = readString(buf);
-		address = readString(buf);
-		data = readString(buf);
+		short port = buf.readShort();
+		String name = readString(buf);
+		String address = readString(buf);
+		String data = readString(buf);
+		message = new UniverseDialerOCMessage(name, address, port, data);
 	}
 	
 	private static void writeString(ByteBuf buf, String string) {
@@ -74,11 +69,9 @@ public class UniverseDialerOCProgramToServer implements IMessage {
 				
 				if (stack.getItem() == AunisItems.UNIVERSE_DIALER && stack.hasTagCompound()) {
 					NBTTagCompound compound = stack.getTagCompound();
-					UniverseDialerOCMessage ocMessage = new UniverseDialerOCMessage(message.name, message.address, message.port, message.data);
 					
 					NBTTagList ocList = compound.getTagList(UniverseDialerMode.OC.tagListName, NBT.TAG_COMPOUND);
-					ocList.appendTag(ocMessage.serializeNBT());
-					compound.setTag(UniverseDialerMode.OC.tagListName, ocList);
+					ocList.appendTag(message.message.serializeNBT());
 				}
 			});
 			

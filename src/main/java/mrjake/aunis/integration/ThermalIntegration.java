@@ -2,28 +2,18 @@ package mrjake.aunis.integration;
 
 import cofh.api.util.ThermalExpansionHelper;
 import mrjake.aunis.block.AunisBlocks;
-import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.fluid.AunisFluids;
 import mrjake.aunis.item.AunisItems;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.oredict.OreDictionary;
 
 public class ThermalIntegration {
 
 	public static void registerRecipes() {
 		// Silicons
-		if (OreDictionary.getOres("itemSilicon").isEmpty() || !AunisConfig.recipeConfig.enableSiliconRecipes) {
-			ThermalExpansionHelper.addCrucibleRecipe(2500, new ItemStack(Blocks.SAND), new FluidStack(AunisFluids.moltenSiliconBlack, 50));
-		}
-		
-		else {
-			for (ItemStack itemStack : OreDictionary.getOres("itemSilicon")) {
-				ThermalExpansionHelper.addCrucibleRecipe(2500, itemStack, new FluidStack(AunisFluids.moltenSiliconBlack, 100));
-			}
-		}
+		ThermalExpansionHelper.addCrucibleRecipe(2500, new ItemStack(Blocks.SAND), new FluidStack(AunisFluids.moltenSiliconBlack, 50));
 		
 		ThermalExpansionHelper.addBrewerRecipe(2000, new ItemStack(Items.REDSTONE), new FluidStack(AunisFluids.moltenSiliconBlack, 200), new FluidStack(AunisFluids.moltenSiliconRed, 250));
 		ThermalExpansionHelper.addBrewerRecipe(2000, new ItemStack(Items.DYE, 1, 4), new FluidStack(AunisFluids.moltenSiliconBlack, 200), new FluidStack(AunisFluids.moltenSiliconBlue, 250));

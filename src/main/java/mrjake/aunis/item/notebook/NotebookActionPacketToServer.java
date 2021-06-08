@@ -7,9 +7,7 @@ import mrjake.aunis.sound.SoundEventEnum;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -71,28 +69,6 @@ public class NotebookActionPacketToServer implements IMessage {
 								compound.setInteger("selected", (byte) (selected-1));
 								AunisSoundHelper.playSoundEvent(world, player.getPosition(), SoundEventEnum.PAGE_FLIP);
 							}
-							
-							break;
-							
-							
-						case ADDRESS_REMOVE:
-							// Create page
-							NBTTagCompound pageTag = NotebookItem.getSelectedPageFromCompound(compound);
-							ItemStack page = new ItemStack(AunisItems.PAGE_NOTEBOOK_ITEM, 1, 1);
-							page.setTagCompound(pageTag);
-							
-							// Remove page
-							NBTTagList addressList = compound.getTagList("addressList", NBT.TAG_COMPOUND);
-							
-							if (addressList.tagCount() == 1)
-								player.setHeldItem(message.hand, ItemStack.EMPTY);
-							else if (selected < addressList.tagCount()) {
-								addressList.removeTag(selected);
-								compound.setInteger("selected", MathHelper.clamp(selected, 0, addressList.tagCount()-1));
-							}
-							
-							// Add page
-							player.addItemStackToInventory(page);
 							
 							break;
 					}

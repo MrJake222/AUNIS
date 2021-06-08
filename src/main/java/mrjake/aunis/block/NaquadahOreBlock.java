@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -37,6 +38,12 @@ public class NaquadahOreBlock extends Block {
 		int quantity = 5 + random.nextInt(4) + (fortune * random.nextInt(3));
 		
 		drops.add(new ItemStack(AunisItems.NAQUADAH_SHARD, quantity));
+	}
+	
+	@Override
+	public int getExpDrop(IBlockState state, IBlockAccess world, BlockPos pos, int fortune) {
+        Random rand = world instanceof World ? ((World)world).rand : new Random();
+        return MathHelper.getInt(rand, 5, 10);
 	}
 	
 	@Override

@@ -2,9 +2,12 @@ package mrjake.aunis.tileentity;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import com.google.common.collect.Iterators;
 
@@ -36,6 +39,7 @@ import mrjake.aunis.stargate.EnumScheduledTask;
 import mrjake.aunis.stargate.EnumStargateState;
 import mrjake.aunis.stargate.network.StargatePos;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
+import mrjake.aunis.state.BeamerFluidUpdate;
 import mrjake.aunis.state.BeamerRendererActionState;
 import mrjake.aunis.state.BeamerRendererState;
 import mrjake.aunis.state.BeamerRendererUpdate;
@@ -50,6 +54,7 @@ import mrjake.aunis.tileentity.util.ScheduledTask;
 import mrjake.aunis.tileentity.util.ScheduledTaskExecutorInterface;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.FacingToRotation;
+import mrjake.aunis.util.NBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
@@ -66,8 +71,10 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -88,14 +95,16 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	
 	private EnumFacing facing;
 	private TargetPoint targetPoint;
-	private AxisAlignedBB renderBox = TileEntity.INFINITE_EXTENT_AABB;
+	private AunisAxisAlignedBB renderBox = new AunisAxisAlignedBB(0, 0, 0, 1, 1, 1); // To be replaced in updateFacing()
+	private AunisAxisAlignedBB renderBoxOffsetted = renderBox;
 	
 	public EnumFacing getFacing() {
 		return facing;
 	}
 	
 	public AunisAxisAlignedBB getRenderBoxForDisplay() {
-		return new AunisAxisAlignedBB(-0.5, 0, -0.5, 0.5, 1, 9).rotate(facing).offset(0.5, 0, 0.5);
+//		return new AunisAxisAlignedBB(-0.5, 0, -0.5, 0.5, 1, AunisConfig.beamerConfig.reach).rotate(facing).offset(0.5, 0, 0.5);
+		return renderBox;
 	}
 	
 	@Override
@@ -118,7 +127,8 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	
 	public void updateFacing(EnumFacing facing) {
 		this.facing = facing;
-		this.renderBox = new AunisAxisAlignedBB(-0.5, 0, -0.5, 0.5, 1, 9).rotate(facing).offset(0.5, 0, 0.5).offset(pos);
+		this.renderBox = new AunisAxisAlignedBB(-0.5, 0, -0.5, 0.5, 1, AunisConfig.beamerConfig.reach).rotate(facing).offset(0.5, 0, 0.5);
+		this.renderBoxOffsetted = this.renderBox.offset(pos);
 	}
 	
 	private static final BlockMatcher BEAMER_MATCHER = BlockMatcher.forBlock(AunisBlocks.BEAMER_BLOCK);
@@ -231,6 +241,12 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	
 	private boolean addedToNetwork = false;
 	
+	private int powerTransferredSinceLastSignal = 0;
+	private List<FluidStack> fluidsTransferredSinceLastSignal = new ArrayList<>();
+	private List<ItemStack> itemsTransferredSinceLastSignal = new ArrayList<>();
+	
+	private boolean firstCheck = true;
+	
 	@Override
 	public void update() {
 		if (!world.isRemote) {
@@ -245,7 +261,9 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 			
 			BeamerStatusEnum lastBeamerStatus = beamerStatus;
 			
-			if (world.getTotalWorldTime() % 20 == 0) {
+			if (firstCheck || world.getTotalWorldTime() % 20 == 0) {
+				firstCheck = false;
+				
 				int lastComp = comparatorOutput;
 				comparatorOutput = updateComparatorOutput();
 				
@@ -253,7 +271,7 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 					world.updateComparatorOutputLevel(pos, AunisBlocks.BEAMER_BLOCK);
 				}
 				
-				if (beamerMode != BeamerModeEnum.NONE && isLinked()) {
+				if (isLinked()) {
 					StargateClassicBaseTile gateTile = getLinkedGateTile();
 					
 					if (gateTile.getStargateState().engaged()) {
@@ -266,6 +284,10 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 			
 			if (beamerStatus == BeamerStatusEnum.OK) {
 				
+				// TODO Deal damage to entities in the beam
+//				List<Entity> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, );
+				
+				// Push the items into target beamer
 				if (beamerRole == BeamerRoleEnum.TRANSMIT) {
 					BeamerTile targetBeamerTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
 					
@@ -274,12 +296,30 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 							int tx = energyStorage.extractEnergy(AunisConfig.beamerConfig.energyTransfer, true);
 							tx = targetBeamerTile.energyStorage.receiveEnergyInternal(tx, false);
 							energyStorage.extractEnergy(tx, false);
+							powerTransferredSinceLastSignal += tx;							
 							break;
 							
 						case FLUID:
 							FluidStack fluid = fluidHandler.drainInternal(AunisConfig.beamerConfig.fluidTransfer, false);
 							int filled = targetBeamerTile.fluidHandler.fillInternal(fluid, true);
 							fluidHandler.drainInternal(filled, true);
+							
+							if (filled > 0) {
+								// FluidStack equals does not check amount
+								int index = fluidsTransferredSinceLastSignal.indexOf(fluid);
+								
+								if (index != -1) {
+									// Fluid exists
+									FluidStack fluidStack = fluidsTransferredSinceLastSignal.get(index);
+									fluidStack.amount += filled;
+								}
+								
+								else {
+									// Does not exists
+									fluidsTransferredSinceLastSignal.add(fluid.copy());
+								}
+							}
+														
 							break;
 							
 						case ITEMS:
@@ -294,6 +334,25 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 								for (int k=1; k<5; k++) {									
 									int accepted = stack.getCount() - targetBeamerTile.itemStackHandler.insertItemInternal(k, stack.copy(), false).getCount();
 									itemStackHandler.extractItem(i, accepted, false);
+
+									if (accepted > 0) {
+										boolean found = false;
+										for (ItemStack itemStack : itemsTransferredSinceLastSignal) {
+											if (itemStack.isItemEqual(stack)) {
+												// Equals - stack exists
+												itemStack.grow(accepted);
+												found = true;
+												break;
+											}
+										}
+										
+										if (!found) {
+											// Does not exists
+											ItemStack itemStack = stack.copy();
+											itemStack.setCount(accepted);
+											itemsTransferredSinceLastSignal.add(itemStack);
+										}
+									}
 									
 									toTransfer -= accepted;
 									timeWithoutItemTransfer = 0;
@@ -320,9 +379,59 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 						default:
 							break;
 					}
-				}
-			}
+					
+					if (world.getTotalWorldTime() % AunisConfig.beamerConfig.signalIntervalTicks == 0) {
+						// Every second send signal about transferred power/fluids/items
+						
+//						Aunis.info(String.format("power=%d, fluids=%s, items=%s", powerTransferredSinceLastSignal, fluidsTransferredSinceLastSignal.toString(), itemsTransferredSinceLastSignal.toString()));
+						
+						Map<String, Integer> map = new HashMap<>();
+						
+						switch (beamerMode) {
+							case POWER:
+								if (powerTransferredSinceLastSignal > 0) {
+									map.put("power", powerTransferredSinceLastSignal);
+									sendSignal(null, "beamer_transfers", map);
+									powerTransferredSinceLastSignal = 0;
+								}
+								
+								break;
+								
+							case FLUID:
+								if (!fluidsTransferredSinceLastSignal.isEmpty()) {
+									for (FluidStack stack : fluidsTransferredSinceLastSignal) {
+										map.put(stack.getLocalizedName(), stack.amount);
+									}
+									
+									sendSignal(null, "beamer_transfers", map);
+									fluidsTransferredSinceLastSignal.clear();
+								}
+								
+								break;
+							
+							case ITEMS:
+								if (!itemsTransferredSinceLastSignal.isEmpty()) {
+									for (ItemStack stack : itemsTransferredSinceLastSignal) {
+										map.put(stack.getDisplayName(), stack.getCount());
+									}
+									
+									sendSignal(null, "beamer_transfers", map);
+									itemsTransferredSinceLastSignal.clear();
+								}
+								
+								break;
+								
+							case NONE:
+								break;
+						}
+						
+						markDirty();
+					}
+					
+				} // end transmit role
+			} // end ok state
 				
+			// Push item into other power/fluid/item storages
 			if (beamerRole == BeamerRoleEnum.RECEIVE) {
 				for (EnumFacing side : EnumFacing.values()) {
 					TileEntity tileEntity = world.getTileEntity(pos.offset(side));
@@ -438,31 +547,41 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	}
 	
 	private void syncToClient() {
-		if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_STATE, getState(StateTypeEnum.RENDERER_STATE)), targetPoint);
-		}
+		sendState(StateTypeEnum.RENDERER_STATE, getState(StateTypeEnum.RENDERER_STATE));
 	}
 	
 	private void sendRenderingAction(BeamerRendererAction action) {
-		if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_ACTION, new BeamerRendererActionState(action)), targetPoint);
-		}
+		sendState(StateTypeEnum.RENDERER_ACTION, new BeamerRendererActionState(action));
 	}
 	
-	public void gateEngaged(StargatePos targetGatePos, StargatePos sourceGatePos) {
-		updateTargetBeamerPos(targetGatePos, sourceGatePos);
+	public void gateEngaged(StargatePos targetGatePos) {
+		BlockPos remoteBeamerPos = findTargetBeamerPos(targetGatePos);
+		
+		if (remoteBeamerPos != null) {
+			// Beamer found
+			targetBeamerWorld = targetGatePos.getWorld();
+			targetBeamerPos = remoteBeamerPos;
+			
+			// Link remote
+			BeamerTile remoteBeamerTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
+			remoteBeamerTile.targetBeamerWorld = this.world;
+			remoteBeamerTile.targetBeamerPos = this.pos;
+		}
 	}
 	
 	public void gateClosed() {
 		clearTargetBeamerPos();
 	}
 	
-	private void updateTargetBeamerPos(StargatePos targetGatePos, StargatePos sourceGatePos) {		
-		if (targetBeamerPos != null)
-			return;
-		
-		targetBeamerWorld = targetGatePos.getWorld();
-		EnumFacing targetFacing = targetBeamerWorld.getBlockState(targetGatePos.gatePos).getValue(AunisProps.FACING_HORIZONTAL);		
+	/**
+	 * Searches for the first beamer block linked to the targetGatePos gate
+	 * @param targetGatePos
+	 * @return {@link BlockPos} of the beamer block or {@code null} if no beamer found
+	 */
+	@Nullable
+	private BlockPos findTargetBeamerPos(StargatePos targetGatePos) {		
+		World targetWorld = targetGatePos.getWorld();
+		EnumFacing targetFacing = targetWorld.getBlockState(targetGatePos.gatePos).getValue(AunisProps.FACING_HORIZONTAL);		
 		Rotation rotation = FacingToRotation.get(targetFacing);
 		
 		BlockPos origVec = baseVect.rotate(rotation);
@@ -483,21 +602,25 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 		
 		BlockPos beamerPos = targetGatePos.gatePos.add(startingVec);
 		
-		for (int i=1; i<=9; i++) {
+		// Finds any beamer inside the range at the other side
+		for (int i=1; i<=AunisConfig.beamerConfig.reach; i++) {
 			beamerPos = beamerPos.offset(targetFacing);
-//			 Aunis.info("checking " + beamerPos);
 			
-			if (BEAMER_MATCHER.apply(targetBeamerWorld.getBlockState(beamerPos))) {
-				targetBeamerPos = beamerPos.toImmutable();
-				BeamerTile targetBeamerTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
+			if (BEAMER_MATCHER.apply(targetWorld.getBlockState(beamerPos))) {
+				// Beamer block found
+				BeamerTile targetBeamerTile = (BeamerTile) targetWorld.getTileEntity(beamerPos);
 				
-				if (targetBeamerTile.targetBeamerPos == null) {
-					targetBeamerTile.updateTargetBeamerPos(sourceGatePos, targetGatePos); // Intentionally swaped
+				if (targetGatePos.gatePos.equals(targetBeamerTile.basePos)) {
+					// Beamer linked to the gate we're connecting to
+					return beamerPos.toImmutable();
+//					targetBeamerTile.updateTargetBeamerPos(sourceGatePos, targetGatePos); // Intentionally swaped
 				}
 				
-				break;
+				// break;
 			}
 		}
+		
+		return null;
 	}
 	
 	public void clearTargetBeamerPos() {
@@ -763,9 +886,26 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	// -----------------------------------------------------------------------------
 	// Fluid handler
 	
+	private Fluid previouslyStoredFluid = null;
+	
 	private FluidTank fluidHandler = new FluidTank(null, AunisConfig.beamerConfig.fluidCapacity) {
 		
 		protected void onContentsChanged() {
+			if (beamerRole == BeamerRoleEnum.TRANSMIT && (fluid == null || fluid.getFluid() != previouslyStoredFluid)) {
+				// Transmitting and has fluid
+				Fluid fluidContained = fluid != null ? fluid.getFluid() : null;
+				BeamerFluidUpdate update = new BeamerFluidUpdate(fluidContained);
+				
+				sendState(StateTypeEnum.BEAMER_FLUID_UPDATE, update);
+				
+				// Sync update to target beamer
+				if (targetBeamerWorld != null && targetBeamerPos != null) {
+					BeamerTile targetTile = (BeamerTile) targetBeamerWorld.getTileEntity(targetBeamerPos);
+					targetTile.sendState(StateTypeEnum.BEAMER_FLUID_UPDATE, update);
+				}
+				previouslyStoredFluid = fluidContained;
+			}
+			
 			markDirty();
 		}
 		
@@ -874,10 +1014,27 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	// ---------------------------------------------------------------------------------------------------
 	// States
 	
+	@Nullable
+	public Fluid lastFluidTransferred;
+	
 	public int beamLengthClient;
 	public float beamRadiusClient;
 	private boolean beamRadiusWiden;
 	private boolean beamRadiusShrink;
+	
+	// TODO Convert to using sendState
+	protected void sendState(StateTypeEnum type, State state) {
+		if (world.isRemote)
+			return;
+		
+		if (targetPoint != null) {
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, type, state), targetPoint);
+		}
+		
+		else {
+			Aunis.logger.debug("targetPoint was null trying to send " + type + " from " + this.getClass().getCanonicalName());
+		}
+	}
 	
 	@Override
 	public State getState(StateTypeEnum stateType) {
@@ -897,6 +1054,10 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 		
 			case GUI_UPDATE:
 				return new BeamerContainerGuiUpdate(energyStorage.getEnergyStored(), energyTransferredLastTick, fluidHandler.getFluid(), beamerRole, redstoneMode, start, stop, inactivity);
+			
+			case BEAMER_FLUID_UPDATE:
+				FluidStack fluidStack = fluidHandler.getFluid();
+				return new BeamerFluidUpdate(fluidStack != null ? fluidStack.getFluid() : null);
 				
 			default:
 				return null;
@@ -917,6 +1078,9 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 		
 			case GUI_UPDATE:
 				return new BeamerContainerGuiUpdate();
+				
+			case BEAMER_FLUID_UPDATE:
+				return new BeamerFluidUpdate();
 				
 			default:
 				return null;
@@ -983,6 +1147,14 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 				
 				break;
 				
+			case BEAMER_FLUID_UPDATE:
+				BeamerFluidUpdate fluidUpdate = (BeamerFluidUpdate) state;
+				
+				lastFluidTransferred = fluidUpdate.fluidContained;
+				Aunis.logger.debug("Received beamer fluid update: " + lastFluidTransferred);
+				
+				break;
+				
 			default:
 				break;
 		}
@@ -1024,6 +1196,10 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 			compound.setTag("node", nodeCompound);
 		}
 		
+		compound.setInteger("powerTransferredSinceLastSignal", powerTransferredSinceLastSignal);
+		compound.setTag("fluidsTransferredSinceLastSignal", NBTHelper.serializeFluidStackList(fluidsTransferredSinceLastSignal));
+		compound.setTag("itemsTransferredSinceLastSignal", NBTHelper.serializeItemStackList(itemsTransferredSinceLastSignal));
+		
 		return super.writeToNBT(compound);
 	}
 	
@@ -1049,6 +1225,12 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 		ocLocked = compound.getBoolean("ocLocked");
 		loopSoundPlaying = compound.getBoolean("loopSoundPlaying");
 		
+		powerTransferredSinceLastSignal = compound.getInteger("powerTransferredSinceLastSignal");
+		fluidsTransferredSinceLastSignal.clear();
+		itemsTransferredSinceLastSignal.clear();
+		NBTHelper.deserializeFluidStackList(compound.getTagList("fluidsTransferredSinceLastSignal", NBT.TAG_COMPOUND), fluidsTransferredSinceLastSignal);
+		NBTHelper.deserializeItemStackList(compound.getTagList("itemsTransferredSinceLastSignal", NBT.TAG_COMPOUND), itemsTransferredSinceLastSignal);
+		
 		if (node != null && compound.hasKey("node"))
 			node.load(compound.getCompoundTag("node"));
 		
@@ -1056,12 +1238,14 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	}
 	
 	
+	
+	
 	// ---------------------------------------------------------------------------------------------------
 	// Rendering distance
 	
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
-		return renderBox;
+		return renderBoxOffsetted;
 	}
 	
 	@Override
@@ -1109,6 +1293,8 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	public void onMessage(Message message) {}
 	
 	public void sendSignal(Object context, String name, Object... params) {
+//		if (params.length > 0)
+//			Aunis.info("sending signal " + name + ", params: " + params[0].toString());
 		Aunis.ocWrapper.sendSignalToReachable(node, (Context) context, name, params);
 	}
 	
@@ -1164,10 +1350,32 @@ public class BeamerTile extends TileEntity implements ITickable, IUpgradable, St
 	public Object[] setBeamerRole(Context context, Arguments args) {
 		try {
 			beamerRole = BeamerRoleEnum.valueOf(args.checkString(0).toUpperCase());
+			markDirty();
 		}
 		
 		catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Wrong Role name");
+		}
+		
+		return new Object[] {};
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getBeamerRedstoneMode(Context context, Arguments args) {		
+		return new Object[] { redstoneMode.toString().toLowerCase() };
+	}
+	
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] setBeamerRedstoneMode(Context context, Arguments args) {
+		try {
+			redstoneMode = RedstoneModeEnum.valueOf(args.checkString(0).toUpperCase());
+			markDirty();
+		}
+		
+		catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Wrong Mode name");
 		}
 		
 		return new Object[] {};

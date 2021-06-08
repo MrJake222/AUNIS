@@ -22,7 +22,6 @@ import li.cil.oc.api.network.WirelessEndpoint;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisDamageSources;
 import mrjake.aunis.AunisProps;
-import mrjake.aunis.api.event.StargateCheckAdressEvent;
 import mrjake.aunis.api.event.StargateChevronEngagedEvent;
 import mrjake.aunis.api.event.StargateClosedEvent;
 import mrjake.aunis.api.event.StargateClosingEvent;
@@ -30,6 +29,7 @@ import mrjake.aunis.api.event.StargateDialFailEvent;
 import mrjake.aunis.api.event.StargateOpenedEvent;
 import mrjake.aunis.api.event.StargateOpeningEvent;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.chunkloader.ChunkManager;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.config.StargateDimensionConfig;
@@ -187,8 +187,20 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 		
 	protected void sendRenderingUpdate(EnumGateAction gateAction, int chevronCount, boolean modifyFinal) {
+		sendState(StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(gateAction, chevronCount, modifyFinal));
+	}
+	
+	// TODO Convert to using sendState
+	protected void sendState(StateTypeEnum type, State state) {
+		if (world.isRemote)
+			return;
+		
 		if (targetPoint != null) {
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.RENDERER_UPDATE, new StargateRendererActionState(gateAction, chevronCount, modifyFinal)), targetPoint);
+			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, type, state), targetPoint);
+		}
+		
+		else {
+			Aunis.logger.debug("targetPoint was null trying to send " + type + " from " + this.getClass().getCanonicalName());
 		}
 	}
 	
@@ -221,10 +233,16 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		eventHorizon.setMotion(entityId, motionVector);
 	}
 	
+	/**
+	 * Called to immediately teleport the entity (after entity has received motion from the client)
+	 */
 	public void teleportEntity(int entityId) {
 		eventHorizon.teleportEntity(entityId);
 	}
 	
+	/**
+	 * Called when entity tries to come through the gate on the back side
+	 */
 	public void removeEntity(int entityId) {
 		eventHorizon.removeEntity(entityId);
 	}
@@ -234,29 +252,49 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	// Stargate connection
 	
 	/**
-	 * Attempts to open the connection to gatepointed by {@link StargateAbstractBaseTile#dialedAddress}.
-	 * @return
+	 * Wrapper for {@link this#attemptOpenDialed()} which calls {@link this#dialingFailed(StargateOpenResult)}
+	 * when the checks fail.
+	 * 
+	 * @return {@link StargateOpenResult} returned by {@link this#attemptOpenDialed()}.
 	 */
-	public StargateOpenResult attemptOpenDialed() {
+	public StargateOpenResult attemptOpenAndFail() {
+		ResultTargetValid resultTarget = attemptOpenDialed();
+		
+		if (!resultTarget.result.ok()) {
+			dialingFailed(resultTarget.result);
+			
+			// TODO Find a test case for resultTarget.targetVaild
+//			if (resultTarget.targetVaild) {
+//				// We can call dialing failed on the target gate
+//				network.getStargate(dialedAddress).getTileEntity().dialingFailed(StargateOpenResult.CALLER_HUNG_UP);
+//			}
+		}
+		
+		return resultTarget.result;
+	}
+	
+	/**
+	 * Attempts to open the connection to gate pointed by {@link StargateAbstractBaseTile#dialedAddress}.
+	 * This performs all the checks.
+	 */
+	protected ResultTargetValid attemptOpenDialed() {
+				
+		boolean targetValid = false;
 		StargateOpenResult result = checkAddressAndEnergy(dialedAddress);
 		
-		if (result.ok()) {		
+		if (result.ok()) {	
+			targetValid = true;
+			
 			StargatePos targetGatePos = network.getStargate(dialedAddress);
 			StargateAbstractBaseTile targetTile = targetGatePos.getTileEntity();
 
-			final StargateCheckAdressEvent event = new StargateCheckAdressEvent(this, targetTile);
-			event.post();
-			result = event.getOpenResult();
-
-			if(!result.ok()) {
-				return result;
+			if(new StargateOpeningEvent(this, targetGatePos.getTileEntity(), isInitiating).post()) {
+				// Gate open cancelled by event
+				return new ResultTargetValid(StargateOpenResult.ABORTED_BY_EVENT, targetValid);
 			}
 				
 			if (!targetTile.canAcceptConnectionFrom(gatePosMap.get(getSymbolType())))
-				return StargateOpenResult.ADDRESS_MALFORMED;
-			
-			if (!hasEnergyToDial(targetGatePos))
-				return StargateOpenResult.NOT_ENOUGH_POWER;
+				return new ResultTargetValid(StargateOpenResult.ADDRESS_MALFORMED, targetValid);
 			
 			openGate(targetGatePos, true);
 			targetTile.openGate(gatePosMap.get(targetGatePos.symbolType), false);
@@ -265,7 +303,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			targetTile.dialedAddress.addOrigin();
 		}
 			
-		return result;
+		return new ResultTargetValid(result, targetValid);
 	}
 	
 	/**
@@ -347,6 +385,16 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			targetGatePos.getTileEntity().closeGate(reason);
 		
 		closeGate(reason);
+	}
+	
+	private static class ResultTargetValid {
+		public final StargateOpenResult result;
+		public final boolean targetVaild;
+		
+		public ResultTargetValid(StargateOpenResult result, boolean targetVaild) {
+			this.result = result;
+			this.targetVaild = targetVaild;
+		}
 	}
 	
 	// ------------------------------------------------------------------------
@@ -468,21 +516,13 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	}
 	
 	/**
-	 * Called on BRB press. Initializes renderer's state
+	 * Called from {@link this#attemptOpenDialed()}. The address is valid here.
+	 * It opens the gate unconditionally. Called only internally.
 	 * 
-	 * @param targetGatePos {@link StargatePos} pointing to the other Gate.
+	 * @param targetGatePos Valid {@link StargatePos} pointing to the other Gate.
 	 * @param isInitiating True if gate is initializing the connection, false otherwise.
 	 */
-	public void openGate(StargatePos targetGatePos, boolean isInitiating) {
-		if(new StargateOpeningEvent(this, targetGatePos.getTileEntity(), isInitiating).post()) {
-			if(isInitiating) {
-				dialingFailed(StargateOpenResult.ABORTED);
-			} else {
-				targetGatePos.getTileEntity().dialingFailed(StargateOpenResult.ABORTED);
-			}
-			return;
-		}
-
+	protected void openGate(StargatePos targetGatePos, boolean isInitiating) {
 		this.isInitiating = isInitiating;
 		this.targetGatePos = targetGatePos;
 		this.stargateState = EnumStargateState.UNSTABLE;
@@ -510,9 +550,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	/**
 	 * Called either on pressing BRB on open gate or close command from a computer.
 	 */
-	public void closeGate(StargateClosedReasonEnum reason) {
-//		Aunis.info("closeGate init=" + isInitiating + ", targetGatePos: " + targetGatePos);
-		
+	protected void closeGate(StargateClosedReasonEnum reason) {		
 		stargateState = EnumStargateState.UNSTABLE;
 		energySecondsToClose = 0;
 		
@@ -537,15 +575,11 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	/**
 	 * Called on the failed dialing.
 	 */
-	public void dialingFailed(StargateOpenResult reason) {
+	protected void dialingFailed(StargateOpenResult reason) {
 		sendSignal(null, "stargate_failed", new Object[] { reason.toString().toLowerCase() });
 		horizonFlashTask = null;
 
 		new StargateDialFailEvent(this, reason).post();
-
-		if(!reason.equals(StargateOpenResult.ADDRESS_MALFORMED) && dialedAddress != null) {
-			network.getStargate(dialedAddress).getTileEntity().addTask(new ScheduledTask(EnumScheduledTask.STARGATE_FAIL, 53));
-		}
 		
 		addFailedTaskAndPlaySound();		
 		stargateState = EnumStargateState.FAILING;
@@ -721,8 +755,12 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 				for (AunisAxisAlignedBB lBox : localInnerBlockBoxes) {
 					AunisAxisAlignedBB gBox = lBox.offset(pos);
 					
-					for (BlockPos bPos : BlockPos.getAllInBox((int)gBox.minX, (int)gBox.minY, (int)gBox.minZ, (int)gBox.maxX-1, (int)gBox.maxY-1, (int)gBox.maxZ-1))
-						blocks.add(bPos);
+					for (BlockPos bPos : BlockPos.getAllInBox((int)gBox.minX, (int)gBox.minY, (int)gBox.minZ, (int)gBox.maxX-1, (int)gBox.maxY-1, (int)gBox.maxZ-1)) {
+						// If not snow layer
+						if (!DHDBlock.SNOW_MATCHER.apply(world.getBlockState(bPos))) {
+							blocks.add(bPos);
+						}
+					}
 				}
 				
 				// Kill them
@@ -794,18 +832,9 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			energyTransferedLastTick = getEnergyStorage().getEnergyStored() - energyStoredLastTick;
 			energyStoredLastTick = getEnergyStorage().getEnergyStored();
 		}
-		
-		else {
-			// Client
-			
-			// Each 2s check for the sky
-			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null) {
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos), getSupportedOverlays());
-			}
-		}
 	}
 	
-	protected abstract EnumSet<BiomeOverlayEnum> getSupportedOverlays();
+	public abstract EnumSet<BiomeOverlayEnum> getSupportedOverlays();
 	
 	/**
 	 * Method for closing the gate using Autoclose mechanism.
@@ -1114,8 +1143,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			case RENDERER_STATE:
 				EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 				
-				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing));
-				rendererStateClient.biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, getSupportedOverlays());
+				setRendererStateClient(((StargateAbstractRendererState) state).initClient(pos, facing, BiomeOverlayEnum.updateBiomeOverlay(world, pos, getSupportedOverlays())));
 
 				updateFacing(facing, false);
 				

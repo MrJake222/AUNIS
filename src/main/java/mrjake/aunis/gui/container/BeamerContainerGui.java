@@ -1,9 +1,11 @@
 package mrjake.aunis.gui.container;
 
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import mrjake.aunis.Aunis;
 import mrjake.aunis.beamer.BeamerModeEnum;
@@ -13,6 +15,8 @@ import mrjake.aunis.gui.element.Diode.DiodeStatus;
 import mrjake.aunis.gui.element.FluidTankElement;
 import mrjake.aunis.gui.element.Tab;
 import mrjake.aunis.gui.element.TabRedstone;
+import mrjake.aunis.gui.element.TabSideEnum;
+import mrjake.aunis.gui.element.TabbedContainerInterface;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.BeamerChangeRoleToServer;
 import mrjake.aunis.stargate.power.StargateAbstractEnergyStorage;
@@ -25,7 +29,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.SlotItemHandler;
 
-public class BeamerContainerGui extends GuiContainer {
+public class BeamerContainerGui extends GuiContainer implements TabbedContainerInterface {
 
 	private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/gui/container_beamer.png");
 	
@@ -183,16 +187,18 @@ public class BeamerContainerGui extends GuiContainer {
 				.setRedstoneModeGetter(() -> container.beamerTile.getRedstoneMode())
 				.setBeamerModeGetter(() -> container.beamerTile.getMode())
 				.setBlockPos(container.pos)
+				.setGuiSize(xSize, ySize)
 				.setGuiPosition(guiLeft, guiTop)
 				.setTabPosition(-21, 2)
-				.setOpenPosition(-128)
+				.setOpenX(-128)
 				.setTabSize(128, 80)
 				.setTabTitle(I18n.format("gui.beamer.activation"))
+				.setTabSide(TabSideEnum.LEFT)
 				.setTexture(BACKGROUND_TEXTURE, 256)
 				.setBackgroundTextureLocation(0, 176)
 				.setIconRenderPos(1, 7)
 				.setIconSize(20, 18)
-				.setIconTextureLocation(128, 0).build();
+				.setIconTextureLocation(128, 176).build();
 		
 		updated = false;
 		
@@ -371,6 +377,13 @@ public class BeamerContainerGui extends GuiContainer {
 		}
 		
 		tabRedstone.mouseClicked(mouseX, mouseY, mouseButton);
+	}
+	
+	@Override
+	public List<Rectangle> getGuiExtraAreas() {
+		return tabs.stream()
+				.map(tab -> tab.getArea())
+				.collect(Collectors.toList());
 	}
 	
 	private class BeamerSlot extends SlotItemHandler {

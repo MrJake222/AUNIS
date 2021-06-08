@@ -138,6 +138,12 @@ public class PageNotebookItem extends Item implements CustomModelItemInterface {
 		return Aunis.proxy.localize(UNNAMED);
 	}
 	
+	public static void setName(NBTTagCompound page, String name) {
+		NBTTagCompound display = new NBTTagCompound();
+		display.setString("Name", name);
+		page.setTag("display", display);
+	}
+	
 	public static String getNameFromCompound(NBTTagCompound compound) {		
 		if (compound.hasKey("display")) {
 			NBTTagCompound display = compound.getCompoundTag("display");

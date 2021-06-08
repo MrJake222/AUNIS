@@ -82,6 +82,11 @@ public class BeamerBlock extends Block {
 		return beamerTile.getComparatorOutput();
 	}
 	
+	@Override
+	public boolean canConnectRedstone(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side) {
+		return true;
+	}
+	
 	// ------------------------------------------------------------------------
 	// Block actions
 

@@ -22,32 +22,48 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
-public class DHDContainer extends Container {
+public class DHDContainer extends Container implements OpenTabHolderInterface {
 
 	public Slot slotCrystal;
 	public FluidTank tankNaquadah;
 	public DHDTile dhdTile;
-
+		
 	private BlockPos pos;
 	private int tankLastAmount;
 	private ReactorStateEnum lastReactorState;
 	private boolean lastLinked;
+	private int openTabId = -1;
+	
+	@Override
+	public int getOpenTabId() {
+		return openTabId;
+	}
+	
+	@Override
+	public void setOpenTabId(int tabId) {
+		openTabId = tabId;
+	}
 	
 	public DHDContainer(IInventory playerInventory, World world, int x, int y, int z) {	
 		pos = new BlockPos(x, y, z);
 		dhdTile = (DHDTile) world.getTileEntity(pos);
 		IItemHandler itemHandler = dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 		
+		// Crystal slot (index 0)
 		slotCrystal = new SlotItemHandler(itemHandler, 0, 80, 35);
 		addSlotToContainer(slotCrystal);
 		
 		tankNaquadah = (FluidTank) dhdTile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
 		
+		// Upgrades (index 1-4)
 		for (int row=0; row<2; row++) {
 			for (int col=0; col<2; col++) {				
 				addSlotToContainer(new SlotItemHandler(itemHandler, row*2+col+1, 9+18*col, 18+18*row));
 			}
 		}
+		
+		// Biome overlay slot (index 5)
+		addSlotToContainer(new SlotItemHandler(itemHandler, 5, 0, 0));
 		
 		for (Slot slot : ContainerHelper.generatePlayerSlots(playerInventory, 86))
 			addSlotToContainer(slot);
@@ -63,7 +79,7 @@ public class DHDContainer extends Container {
 		ItemStack stack = getSlot(index).getStack();
 		
 		// Transfering from DHD to player's inventory
-        if (index < 5) {
+        if (index < 6) {
         	if (!mergeItemStack(stack, 5, inventorySlots.size(), false)) {
         		return ItemStack.EMPTY;
         	}
@@ -96,6 +112,19 @@ public class DHDContainer extends Container {
         				
         				return stack;
         			}
+        		}
+        	}
+        	
+        	// Biome override blocks
+        	else if (openTabId == 0 && getSlot(5).isItemValid(stack)) {
+        		if (!getSlot(5).getHasStack()) {
+        			ItemStack stack1 = stack.copy();
+    				stack1.setCount(1);
+    				
+    				putStackInSlot(5, stack1);
+    				stack.shrink(1);
+    				
+    				return ItemStack.EMPTY;
         		}
         	}
         	

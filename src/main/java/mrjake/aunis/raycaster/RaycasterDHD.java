@@ -126,6 +126,15 @@ public class RaycasterDHD extends Raycaster {
 		
 		if (button != -1 && hand == EnumHand.MAIN_HAND) {
 			player.swingArm(hand);
+			
+			// DHD inner ring rotation
+			if (button >= 19 && button < 38) {
+				// Inner ring
+				button += 11;
+				
+				if (button >= 38)
+					button -= 19;
+			}
 
 			if (player.getEntityWorld().isRemote)
 				AunisPacketHandler.INSTANCE.sendToServer(new DHDButtonClickedToServer(pos, SymbolMilkyWayEnum.valueOf(button)));

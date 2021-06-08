@@ -4,6 +4,8 @@ import mrjake.aunis.beamer.BeamerModeEnum;
 import mrjake.aunis.beamer.BeamerRoleEnum;
 import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.tileentity.BeamerTile;
+import mrjake.aunis.util.FluidColors;
+import mrjake.aunis.util.FluidColors.FloatColors;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.tileentity.TileEntityBeaconRenderer;
@@ -31,8 +33,22 @@ public class BeamerRenderer extends TileEntitySpecialRenderer<BeamerTile> {
 			GlStateManager.rotate(180-te.getFacing().getHorizontalAngle(), 0, 1, 0);
 			GlStateManager.rotate(-90, 1, 0, 0);
 			
+	        float[] colors = te.getMode().colors;
+			
+	        if (te.getMode() == BeamerModeEnum.FLUID && AunisConfig.beamerConfig.enableFluidBeamColorization) {
+//				FluidTank tank = (FluidTank) te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+			
+				if (te.lastFluidTransferred != null) {
+					FloatColors fluidColors = FluidColors.getAverageColor(te.lastFluidTransferred);
+					
+					if (fluidColors != null) {
+						colors = fluidColors.colors;
+					}
+				}
+	        }
+			
 			float mul = 1;
-	        TileEntityBeaconRenderer.renderBeamSegment(-0.5, -1.07, -0.5, partialTicks*mul, (te.getRole() == BeamerRoleEnum.TRANSMIT ? 1 : -1), getWorld().getTotalWorldTime()*mul, 1, te.beamLengthClient, te.getMode().colors, te.beamRadiusClient, te.beamRadiusClient+0.05f);
+			TileEntityBeaconRenderer.renderBeamSegment(-0.5, -1.07, -0.5, partialTicks*mul, (te.getRole() == BeamerRoleEnum.TRANSMIT ? 1 : -1), getWorld().getTotalWorldTime()*mul, 1, te.beamLengthClient, colors, te.beamRadiusClient, te.beamRadiusClient+0.05f);
 	        GlStateManager.popMatrix();
 	        GlStateManager.enableCull();
 		}

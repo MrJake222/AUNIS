@@ -12,6 +12,7 @@ import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
@@ -57,6 +58,15 @@ public final class StargateOrlinMemberBlock extends StargateAbstractMemberBlock 
 	// Block states
 	
 	@Override
+	public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items) {
+		ItemStack stack = new ItemStack(this);
+		NBTTagCompound compound = new NBTTagCompound();
+		compound.setInteger("openCount", 0);
+		stack.setTagCompound(compound);
+		items.add(stack);
+	}
+	
+	@Override
 	protected BlockStateContainer createBlockState() {
 		return new BlockStateContainer(this, AunisProps.RENDER_BLOCK, AunisProps.ORLIN_VARIANT);
 	}
@@ -100,9 +110,9 @@ public final class StargateOrlinMemberBlock extends StargateAbstractMemberBlock 
 	
 	@Override
 	public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
-		StargateOrlinMemberTile gateTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
+		StargateOrlinMemberTile memberTile = (StargateOrlinMemberTile) world.getTileEntity(pos);
 		
-		gateTile.addDrops(drops);
+		memberTile.addDrops(drops);
 	}
 	
 	// ------------------------------------------------------------------------

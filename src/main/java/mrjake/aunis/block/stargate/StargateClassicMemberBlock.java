@@ -3,12 +3,10 @@ package mrjake.aunis.block.stargate;
 import mrjake.aunis.Aunis;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
+import mrjake.aunis.block.DHDBlock;
 import mrjake.aunis.gui.GuiIdEnum;
-import mrjake.aunis.packet.AunisPacketHandler;
-import mrjake.aunis.packet.StateUpdatePacketToClient;
 import mrjake.aunis.stargate.CamoPropertiesHelper;
 import mrjake.aunis.stargate.EnumMemberVariant;
-import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateClassicMemberTile;
 import net.minecraft.block.Block;
@@ -41,7 +39,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 public abstract class StargateClassicMemberBlock extends StargateAbstractMemberBlock {
 	
@@ -124,13 +121,17 @@ public abstract class StargateClassicMemberBlock extends StargateAbstractMemberB
 	// ------------------------------------------------------------------------		
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+		// Optifine shit
+		if (world.getBlockState(pos).getBlock() != this)
+			return state;
+		
 		StargateClassicMemberTile memberTile = (StargateClassicMemberTile) world.getTileEntity(pos);
 
 		if (memberTile != null) {
-			IBlockState doubleSlabState = memberTile.getCamoState();
-			
-			if (doubleSlabState != null) {
-				return ((IExtendedBlockState) state).withProperty(AunisProps.CAMO_BLOCKSTATE, doubleSlabState);
+			IBlockState camoBlockState = memberTile.getCamoState();
+						
+			if (camoBlockState != null) {
+				return ((IExtendedBlockState) state).withProperty(AunisProps.CAMO_BLOCKSTATE, camoBlockState);
 			}
 		}
 		
@@ -161,6 +162,23 @@ public abstract class StargateClassicMemberBlock extends StargateAbstractMemberB
 		}
 	}
 	
+	@Override
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
+		StargateClassicMemberTile memberTile = (StargateClassicMemberTile) world.getTileEntity(pos);
+
+		if (!world.isRemote && memberTile != null) {
+			// Server and tile entity exists
+			
+			if (memberTile.isMerged() && memberTile.getCamoState() == null || DHDBlock.SNOW_MATCHER.apply(memberTile.getCamoState())) {
+				// Merged and camo is empty or it's snow
+				boolean snowAround = DHDBlock.isSnowAroundBlock(world, pos);
+				
+				// Set camo to snow or null
+				memberTile.setCamoState(snowAround ? Blocks.SNOW_LAYER.getDefaultState() : null);
+				world.setBlockState(pos, state.withProperty(AunisProps.RENDER_BLOCK, snowAround));
+			}
+		}
+	}
 	
 
 	// ------------------------------------------------------------------------	
@@ -299,14 +317,11 @@ public abstract class StargateClassicMemberBlock extends StargateAbstractMemberB
 			else {						
 				world.setBlockState(pos, state.withProperty(AunisProps.RENDER_BLOCK, false), 0);
 			}
-			
-			TargetPoint point = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);
-			AunisPacketHandler.INSTANCE.sendToAllTracking(new StateUpdatePacketToClient(pos, StateTypeEnum.CAMO_STATE, memberTile.getState(StateTypeEnum.CAMO_STATE)), point);
 		
 			return true;
 		}
 		
-		else {			
+		else {
 			return 	heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK) &&
 					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK) &&
 					heldItem != Item.getItemFromBlock(AunisBlocks.STARGATE_UNIVERSE_BASE_BLOCK) &&

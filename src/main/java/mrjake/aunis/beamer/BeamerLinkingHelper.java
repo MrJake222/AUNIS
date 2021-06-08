@@ -3,6 +3,7 @@ package mrjake.aunis.beamer;
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.block.AunisBlocks;
 import mrjake.aunis.block.stargate.StargateClassicBaseBlock;
+import mrjake.aunis.config.AunisConfig;
 import mrjake.aunis.tileentity.BeamerTile;
 import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
 import mrjake.aunis.util.FacingToRotation;
@@ -22,7 +23,7 @@ public class BeamerLinkingHelper {
 		EnumFacing left = blockFacing.rotateYCCW();
 		EnumFacing right = blockFacing.rotateY();
 		
-		Iterable<MutableBlockPos> blocks = BlockPos.getAllInBoxMutable(pos.offset(left, SIDE).down(DOWN).offset(blockFacing, 1), pos.offset(right, SIDE).down().offset(blockFacing, 9));
+		Iterable<MutableBlockPos> blocks = BlockPos.getAllInBoxMutable(pos.offset(left, SIDE).down(DOWN).offset(blockFacing, 1), pos.offset(right, SIDE).down().offset(blockFacing, AunisConfig.beamerConfig.reach));
 		
 		for (MutableBlockPos scanPos : blocks) {
 			IBlockState state = world.getBlockState(scanPos);

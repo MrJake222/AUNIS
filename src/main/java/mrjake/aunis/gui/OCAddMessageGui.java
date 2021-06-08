@@ -4,23 +4,35 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import mrjake.aunis.event.InputHandlerClient;
-import mrjake.aunis.item.AunisItems;
+import javax.annotation.Nullable;
+
+import mrjake.aunis.gui.entry.OCUpdatable;
+import mrjake.aunis.item.dialer.UniverseDialerOCMessage;
 import mrjake.aunis.item.dialer.UniverseDialerOCProgramToServer;
 import mrjake.aunis.packet.AunisPacketHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
 
-public class OCMessageGui extends GuiScreen {
+public class OCAddMessageGui extends GuiScreen {
 
 	private int guiLeft;
 	private int guiTop;
-		
+	
+	private EnumHand hand;
+	private GuiScreen parentScreen;
+	
 	private List<LabeledTextBox> textBoxes = new ArrayList<>(4);
 	private GuiButton saveButton;
 	private boolean isPortInvalid = false;
+	
+	public OCAddMessageGui(EnumHand hand, @Nullable GuiScreen parentScreen) {
+		this.hand = hand;
+		this.parentScreen = parentScreen;
+	}
 	
 	@Override
 	public void initGui() {		
@@ -63,11 +75,17 @@ public class OCMessageGui extends GuiScreen {
 			textBox.draw();
 		
 		if (isPortInvalid)
-			drawString(fontRenderer, TextFormatting.DARK_RED + I18n.format("item.aunis.universe_dialer.oc_port_invalid"), guiLeft+230, guiTop+103, 0x00FFFFFF);
+			drawString(fontRenderer, TextFormatting.DARK_RED + I18n.format("item.aunis.universe_dialer.oc_port_invalid"), guiLeft+245, guiTop+103, 0x00FFFFFF);
 	}
 	
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
+		// ESC
+		if (keyCode == 1 && parentScreen != null) {
+			Minecraft.getMinecraft().displayGuiScreen(parentScreen);
+			return;
+		}
+		
 		super.keyTyped(typedChar, keyCode);
 		
 		for (LabeledTextBox tf : textBoxes)
@@ -109,7 +127,13 @@ public class OCMessageGui extends GuiScreen {
 		
 		isPortInvalid = false;
 		
-		AunisPacketHandler.INSTANCE.sendToServer(new UniverseDialerOCProgramToServer(InputHandlerClient.getHand(AunisItems.UNIVERSE_DIALER), name, address, (short) port, data));
+		UniverseDialerOCMessage message = new UniverseDialerOCMessage(name, address, (short) port, data);
+		
+		if (parentScreen instanceof OCUpdatable) {
+			((OCUpdatable) parentScreen).entryAdded(message);
+		}
+		
+		AunisPacketHandler.INSTANCE.sendToServer(new UniverseDialerOCProgramToServer(hand, message));
 		keyTyped(' ', 1); // close GUI
 	}
 }

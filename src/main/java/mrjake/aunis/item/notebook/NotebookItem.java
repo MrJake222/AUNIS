@@ -26,6 +26,8 @@ public class NotebookItem extends Item implements CustomModelItemInterface {
 	public NotebookItem() {
 		setRegistryName(Aunis.ModID + ":" + ITEM_NAME);
 		setUnlocalizedName(Aunis.ModID + "." + ITEM_NAME);
+		
+		// setMaxStackSize(1);
 	}
 	
 	@Override
@@ -59,9 +61,32 @@ public class NotebookItem extends Item implements CustomModelItemInterface {
 		return new NotebookTEISR();
 	}
 	
+	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		if (oldStack.getItem() != newStack.getItem())
+			return true;
+		
+		if (!oldStack.hasTagCompound() || !newStack.hasTagCompound())
+			return true;
+		
+		int oldSelected = oldStack.getTagCompound().getInteger("selected");
+		int newSelected = newStack.getTagCompound().getInteger("selected");
+		
+		return oldSelected != newSelected;
+	}
+	
+	
+	// ------------------------------------------------------------------------------------------------------------
+	// NBT handles
+	
 	public static NBTTagCompound getSelectedPageFromCompound(NBTTagCompound compound) {
 		int selected = compound.getInteger("selected");
 		NBTTagList list = compound.getTagList("addressList", NBT.TAG_COMPOUND);
 		return list.getCompoundTagAt(selected);
+	}
+	
+	public static void setNameForIndex(NBTTagList list, int index, String name) {
+		NBTTagCompound page = list.getCompoundTagAt(index);
+		PageNotebookItem.setName(page, name);
 	}
 }

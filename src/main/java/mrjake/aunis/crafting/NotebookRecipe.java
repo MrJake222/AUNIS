@@ -1,6 +1,7 @@
 package mrjake.aunis.crafting;
 
 import mrjake.aunis.item.AunisItems;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,7 +16,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry.Impl;
 public class NotebookRecipe extends Impl<IRecipe> implements IRecipe {
 
 	public NotebookRecipe() {
-		setRegistryName(AunisItems.NOTEBOOK_ITEM.getRegistryName());
+		setRegistryName("notebook_creation");
 	}
 	
 	@Override
@@ -27,8 +28,10 @@ public class NotebookRecipe extends Impl<IRecipe> implements IRecipe {
 			ItemStack stack = inv.getStackInSlot(i);
 			Item item = stack.getItem();
 			
-			if ((item == AunisItems.PAGE_NOTEBOOK_ITEM && stack.getMetadata() == 1) || item == AunisItems.NOTEBOOK_ITEM)
+			if ((item == AunisItems.PAGE_NOTEBOOK_ITEM && stack.getMetadata() == 1) || item == AunisItems.NOTEBOOK_ITEM || item == Items.BOOK)
 				matchCount++;
+			else if (!stack.isEmpty())
+				return false;
 		}
 		
 		return matchCount >= 2;
@@ -41,25 +44,33 @@ public class NotebookRecipe extends Impl<IRecipe> implements IRecipe {
 		
 		for (int i=0; i<inv.getSizeInventory(); i++) {
 			ItemStack stack = inv.getStackInSlot(i);
-			if(stack.hasTagCompound()) {
-				NBTTagCompound compound = stack.getTagCompound();
-
-				if (stack.getItem() == AunisItems.NOTEBOOK_ITEM && compound.hasKey("addressList", NBT.TAG_LIST)) {
-					NBTTagList notebookTags = compound.getTagList("addressList", NBT.TAG_COMPOUND);
-
+			Item item = stack.getItem();
+			
+			if (item == AunisItems.NOTEBOOK_ITEM) {
+				if (stack.hasTagCompound()) {
+					NBTTagList notebookTags = stack.getTagCompound().getTagList("addressList", NBT.TAG_COMPOUND);
+					
 					for (NBTBase tag : notebookTags) {
 						if (!tagListContains(tagList, (NBTTagCompound) tag)) {
 							tagList.appendTag(tag);
 						}
 					}
-
-					outputCount++;
-				} else if (stack.getItem() == AunisItems.PAGE_NOTEBOOK_ITEM) {
-					// TODO change NBT to capability + filter NBT values
-					if (!tagListContains(tagList, compound)) {
-						tagList.appendTag(compound);
-					}
 				}
+				
+				outputCount++;
+			}
+			
+			else if (item == AunisItems.PAGE_NOTEBOOK_ITEM) {
+				NBTTagCompound compound = stack.getTagCompound();
+				
+				// TODO change NBT to capability + filter NBT values
+				if (!tagListContains(tagList, compound)) {
+					tagList.appendTag(compound);
+				}
+			}
+			
+			else if (item == Items.BOOK) {
+				outputCount++;
 			}
 		}
 		

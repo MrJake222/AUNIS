@@ -1,7 +1,11 @@
 package mrjake.aunis.config;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import mrjake.aunis.renderer.biomes.BiomeOverlayEnum;
+import mrjake.aunis.util.ItemMetaPair;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.config.Config;
@@ -9,7 +13,6 @@ import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
 import net.minecraftforge.common.config.Config.RangeDouble;
 import net.minecraftforge.common.config.Config.RangeInt;
-import net.minecraftforge.common.config.Config.RequiresMcRestart;
 import net.minecraftforge.common.config.Config.RequiresWorldRestart;
 
 @Config(modid="aunis", name="aunis")
@@ -73,7 +76,8 @@ public class AunisConfig {
 
 		@Name("Temperature threshold for frosty overlay")
 		@Comment({
-			"Below this biome temperature the gate will receive frosty texture"
+			"Below this biome temperature the gate will receive frosty texture.",
+			"Set to negative value to disable."
 		})
 		public float frostyTemperatureThreshold = 0.1f;
 		
@@ -101,23 +105,104 @@ public class AunisConfig {
 		
 		// ---------------------------------------------------------------------------------------
 		// Jungle biomes
-		@Name("Biomes in which blocks should be mossy")
+		@Name("Biome overlay biome matches")
+		@SuppressWarnings("serial")
 		@Comment({
+			"This check comes last (after block is directly under sky (except Nether) and temperature is high enough).",
+			"You can disable the temperature check by setting it to a negative value.",
 			"Format: \"modid:biomename\", for example: ",
 			"\"minecraft:dark_forest\"",
 			"\"minecraft:forest\""
 		})
-		public String[] jungleBiomes = {"minecraft:jungle", "minecraft:jungle_hills", "minecraft:jungle_edge", "minecraft:mutated_jungle", "minecraft:mutated_jungle_edge"};
+		public Map<String, String[]> biomeMatches = new HashMap<String, String[]>() {
+			{
+				put(BiomeOverlayEnum.NORMAL.toString(), new String[] {});
+				put(BiomeOverlayEnum.FROST.toString(), new String[] {});
+				put(BiomeOverlayEnum.MOSSY.toString(), new String[] {"minecraft:jungle", "minecraft:jungle_hills", "minecraft:jungle_edge", "minecraft:mutated_jungle", "minecraft:mutated_jungle_edge"});
+				put(BiomeOverlayEnum.AGED.toString(), new String[] {});
+				put(BiomeOverlayEnum.SOOTY.toString(), new String[] {"minecraft:hell"});
+			}
+		};
 		
-		private List<Biome> cachedJungleBiomes = null;
+		private Map<Biome, BiomeOverlayEnum> cachedBiomeMatchesReverse = null;
 		
-		public boolean isJungleBiome(Biome biome) {
-			if (cachedJungleBiomes == null) {
-				cachedJungleBiomes = BiomeParser.parseConfig(jungleBiomes);
+		private void genBiomeOverrideBiomeCache() {
+			cachedBiomeMatchesReverse = new HashMap<>();
+			
+			for (Map.Entry<String, String[]> entry : biomeMatches.entrySet()) {
+				List<Biome> parsedList = BiomeParser.parseConfig(entry.getValue());
+				BiomeOverlayEnum biomeOverlay = BiomeOverlayEnum.fromString(entry.getKey());
+								
+				for (Biome biome : parsedList) {
+					cachedBiomeMatchesReverse.put(biome, biomeOverlay);
+				}
+			}
+		}
+		
+		public Map<Biome, BiomeOverlayEnum> getBiomeOverrideBiomes() {
+			if (cachedBiomeMatchesReverse == null) {
+				genBiomeOverrideBiomeCache();
 			}
 			
-			return cachedJungleBiomes.contains(biome);
+			return cachedBiomeMatchesReverse;
 		}
+		
+		
+		// ---------------------------------------------------------------------------------------
+		// Biome overlay override blocks
+		
+		@Name("Biome overlay override blocks")
+		@SuppressWarnings("serial")
+		@Comment({
+			"Format: \"modid:blockid[:meta]\", for example: ",
+			"\"minecraft:wool:7\"",
+			"\"minecraft:stone\""
+		})
+		public Map<String, String[]> biomeOverrideBlocks = new HashMap<String, String[]>() {
+			{
+				put(BiomeOverlayEnum.NORMAL.toString(), new String[] {"minecraft:stone"});
+				put(BiomeOverlayEnum.FROST.toString(), new String[] {"minecraft:ice"});
+				put(BiomeOverlayEnum.MOSSY.toString(), new String[] {"minecraft:vine"});
+				put(BiomeOverlayEnum.AGED.toString(), new String[] {"minecraft:cobblestone"});
+				put(BiomeOverlayEnum.SOOTY.toString(), new String[] {"minecraft:coal_block"});
+			}
+		};
+		
+		private Map<BiomeOverlayEnum, List<ItemMetaPair>> cachedBiomeOverrideBlocks = null;
+		private Map<ItemMetaPair, BiomeOverlayEnum> cachedBiomeOverrideBlocksReverse = null;
+		
+		private void genBiomeOverrideCache() {
+			cachedBiomeOverrideBlocks = new HashMap<>();
+			cachedBiomeOverrideBlocksReverse = new HashMap<>();
+			
+			for (Map.Entry<String, String[]> entry : biomeOverrideBlocks.entrySet()) {
+				List<ItemMetaPair> parsedList = ItemMetaParser.parseConfig(entry.getValue());
+				BiomeOverlayEnum biomeOverlay = BiomeOverlayEnum.fromString(entry.getKey());
+				
+				cachedBiomeOverrideBlocks.put(biomeOverlay, parsedList);
+				
+				for (ItemMetaPair stack : parsedList) {
+					cachedBiomeOverrideBlocksReverse.put(stack, biomeOverlay);
+				}
+			}
+		}
+		
+		public Map<BiomeOverlayEnum, List<ItemMetaPair>> getBiomeOverrideBlocks() {
+			if (cachedBiomeOverrideBlocks == null) {
+				genBiomeOverrideCache();
+			}
+			
+			return cachedBiomeOverrideBlocks;
+		}
+		
+		public Map<ItemMetaPair, BiomeOverlayEnum> getBiomeOverrideItemMetaPairs() {
+			if (cachedBiomeOverrideBlocksReverse == null) {
+				genBiomeOverrideCache();
+			}
+			
+			return cachedBiomeOverrideBlocksReverse;
+		}
+				
 	}
 	
 	public static class PowerConfig {
@@ -148,6 +233,9 @@ public class AunisConfig {
 		@Name("Universe gate energy multiplier")
 		@RangeDouble(min=0)
 		public double stargateUniverseEnergyMul = 1.5;
+		
+		@Name("Capacitors supported by Universe gates")
+		public int universeCapacitors = 0;
 	}
 	
 	public static class RingsConfig {
@@ -198,9 +286,6 @@ public class AunisConfig {
 	public static class DebugConfig {
 		@Name("Check gate merge")
 		public boolean checkGateMerge = true;
-		
-		@Name("Allow charging the crystal by hand")
-		public boolean allowHandCrystalCharging = false;
 		
 		@Name("Render bounding boxes")
 		public boolean renderBoundingBoxes = false;
@@ -256,16 +341,20 @@ public class AunisConfig {
 		@Name("Item max transfer")
 		@RangeInt(min=1)
 		public int itemTransfer = 4;
+
+		@Name("Max gate-beamer distance")
+		public int reach = 10;
+		
+		@Name("Should the beam be responsive to fluid color")
+		public boolean enableFluidBeamColorization = true;
+
+		@Name("Interval of signals being send to OC about transfers (in ticks)")
+		@RangeInt(min=1)
+		public int signalIntervalTicks = 20;
 	}
 	
 	public static class RecipeConfig {
-		@Name("Enable silicon recipes")
-		@RequiresMcRestart
-		@Comment({
-			"Should Molten Silicon require Silicon (provided by other mods)",
-			"or just plain sand. Disable if having balance issues with AE/EnderIO silicon."
-		})
-		public boolean enableSiliconRecipes = true;
+		
 	}
 	
 	public static class AudioVideoConfig {
@@ -299,6 +388,8 @@ public class AunisConfig {
 	
 	public static void resetCache() {
 		stargateConfig.cachedInvincibleBlocks = null;
-		stargateConfig.cachedJungleBiomes = null;
+		stargateConfig.cachedBiomeMatchesReverse = null;
+		stargateConfig.cachedBiomeOverrideBlocks = null;
+		stargateConfig.cachedBiomeOverrideBlocksReverse = null;
 	}
 }

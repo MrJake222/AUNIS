@@ -2,6 +2,7 @@ package mrjake.aunis.item.dialer;
 
 import org.lwjgl.opengl.GL11;
 
+import mrjake.aunis.Aunis;
 import mrjake.aunis.item.AunisItems;
 import mrjake.aunis.item.renderer.AunisFontRenderer;
 import mrjake.aunis.item.renderer.ItemRenderHelper;
@@ -15,12 +16,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHandSide;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants.NBT;
 
 public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
@@ -90,14 +91,21 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 			NBTTagCompound compound = stack.getTagCompound();
 			UniverseDialerMode mode = UniverseDialerMode.valueOf(compound.getByte("mode"));
 			
-			drawStringWithShadow(-0.47f, 0.916f, mode.localize(), true);
-			drawStringWithShadow(0.22f, 0.916f, mode.next().localize(), false);
+			drawStringWithShadow(-0.47f, 0.916f, mode.localize(), true, false);
+			drawStringWithShadow(0.22f, 0.916f, mode.next().localize(), false, false);
 			
-			if (mode.linkable && !compound.hasKey(mode.tagPosName)) {
-				drawStringWithShadow(0.22f, 0.71f, I18n.format("item.aunis.universe_dialer.not_linked"), false);
+			boolean notLinked = mode.linkable && !compound.hasKey(mode.tagPosName);
+			
+			if (notLinked) {
+				Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(Aunis.ModID, "textures/gui/universe_warning.png"));
+				GlStateManager.enableTexture2D();
+				GlStateManager.enableBlend();
+				GlStateManager.color(0.91f, 1, 1, 1);
+				drawTexturedRect(0.72f, 0.26f, 0, 0.24f, 0.24f);
+				
 			}
 				
-			else {
+			if (!notLinked || mode == UniverseDialerMode.MEMORY) {
 				int selected = compound.getByte("selected");
 				NBTTagList tagList = compound.getTagList(mode.tagListName, NBT.TAG_COMPOUND);
 				
@@ -111,26 +119,34 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 						switch (mode) {
 							case MEMORY:
 							case NEARBY:
-								drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
-								StargateAddress address = new StargateAddress(entryCompound);
-								int symbolCount = SymbolUniverseEnum.getMaxSymbolsDisplay(entryCompound.getBoolean("hasUpgrade")); 
+								drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active, false);
 								
-								for (int i=0; i<symbolCount; i++)
-									renderSymbol(offset, i, address.get(i), active, symbolCount == 8);
+								if (entryCompound.hasKey("name")) {
+									drawStringWithShadow(-0.05f, 0.32f - 0.32f*offset, entryCompound.getString("name"), active, false);
+								}
 								
-								renderSymbol(offset, symbolCount, SymbolUniverseEnum.getOrigin(), active, symbolCount == 8);
+								else {
+									StargateAddress address = new StargateAddress(entryCompound);
+									int symbolCount = SymbolUniverseEnum.getMaxSymbolsDisplay(entryCompound.getBoolean("hasUpgrade")); 
+									
+									for (int i=0; i<symbolCount; i++)
+										renderSymbol(offset, i, address.get(i), active, symbolCount == 8);
+									
+									renderSymbol(offset, symbolCount, SymbolUniverseEnum.getOrigin(), active, symbolCount == 8);
+								}
+								
 								break;
 								
 							case RINGS:
 								TransportRings rings = new TransportRings(entryCompound);
-								drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, rings.getAddress() + ".", active);
-								drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, rings.getName(), active);
+								drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, rings.getAddress() + ".", active, false);
+								drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, rings.getName(), active, false);
 								break;
 								
 							case OC:
 								UniverseDialerOCMessage message = new UniverseDialerOCMessage(entryCompound);
-								drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active);
-								drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, message.name, active);
+								drawStringWithShadow(-0.32f, 0.32f - 0.32f*offset, (index+1) + ".", active, false);
+								drawStringWithShadow(-0.10f, 0.32f - 0.32f*offset, message.name, active, false);
 								break;
 						}
 					}
@@ -143,13 +159,18 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		GlStateManager.popMatrix();
 	}
 	
-	private static void drawStringWithShadow(float x, float y, String text, boolean active) {		
+	private static void drawStringWithShadow(float x, float y, String text, boolean active, boolean red) {		
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, 0);
 		GlStateManager.rotate(180, 0,0,1);
 		GlStateManager.scale(0.015f, 0.015f, 0.015f);
 		
-		AunisFontRenderer.getFontRenderer().drawString(text, -6, 19, active ? 0xFFFFFF : 0x006060, false);
+		int color = active ? 0xFFFFFF : 0x006060;
+		if (red) {
+			color = 0xA01010;
+		}
+		
+		AunisFontRenderer.getFontRenderer().drawString(text, -6, 19, color, false);
 		
 		if (active) {
 			GlStateManager.translate(-0.4, 0.6, -0.1);
@@ -172,27 +193,25 @@ public class UniverseDialerTEISR extends TileEntityItemStackRenderer {
 		Minecraft.getMinecraft().getTextureManager().bindTexture(symbol.getIconResource());
 		GlStateManager.enableTexture2D();
 		GlStateManager.enableBlend();
-		GL11.glBegin(GL11.GL_QUADS);
 		
 		if (isActive)
 			GlStateManager.color(0.91f, 1, 1, 1);
 		else
 			GlStateManager.color(0.0f, 0.38f, 0.40f, 1f);
 		
-		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(x,   y,   0);
-		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(x+w, y,   0);
-		GL11.glTexCoord2f(0, 0); GL11.glVertex3f(x+w, y+h, 0);
-		GL11.glTexCoord2f(1, 0); GL11.glVertex3f(x,   y+h, 0);
-		
+		drawTexturedRect(x, y, 0, w, h);
 		float shadow = 0.008f;
-		x += shadow;
-		y -= shadow;
-		GlStateManager.color(0, 0, 0, 0.15f);
-		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(x,   y,   -0.01f);
-		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(x+w, y,   -0.01f);
-		GL11.glTexCoord2f(0, 0); GL11.glVertex3f(x+w, y+h, -0.01f);
-		GL11.glTexCoord2f(1, 0); GL11.glVertex3f(x,   y+h, -0.01f);
 		
+		GlStateManager.color(0, 0, 0, 0.15f);
+		drawTexturedRect(x+shadow, y-shadow, -0.01f, w, h);
+	}
+	
+	private static void drawTexturedRect(float x, float y, float z, float w, float h) {
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glTexCoord2f(1, 1); GL11.glVertex3f(x,   y,   z);
+		GL11.glTexCoord2f(0, 1); GL11.glVertex3f(x+w, y,   z);
+		GL11.glTexCoord2f(0, 0); GL11.glVertex3f(x+w, y+h, z);
+		GL11.glTexCoord2f(1, 0); GL11.glVertex3f(x,   y+h, z);
 		GL11.glEnd();
 	}
 	

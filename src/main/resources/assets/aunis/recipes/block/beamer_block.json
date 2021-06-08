@@ -1,12 +1,16 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
-		"F F",
+		"FGF",
 		"BAR",
 		"OIO"
 	],
 	
 	"key": {
+	    "G": {
+            "item": "minecraft:glass_pane"
+        },
+	
 		"O": {
 			"item": "aunis:naquadah_block"
 		},
@@ -16,7 +20,7 @@
 		},
 		
 		"A": {
-			"item": "minecraft:beacon"
+			"item": "minecraft:ghast_tear"
 		},
 		
 		"R": {
@@ -34,7 +38,6 @@
 	
 	"result": {
 		"item": "aunis:beamer_block",
-		"count": 1,
-		"data": 0
+		"count": 1
 	}
 }

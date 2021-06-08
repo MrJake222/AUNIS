@@ -2,7 +2,7 @@
 	"type": "minecraft:crafting_shaped",
 	"pattern": [
 		"NNN",
-		"BIE",
+		"BIR",
 		"NNN"
 	],
 	
@@ -19,14 +19,13 @@
 			"item": "aunis:crystal_blue"
 		},
 		
-		"E": {
-			"item": "aunis:crystal_ender"
-		}		
+		"R": {
+            "item": "aunis:crystal_red"
+        }		
 	},
 	
 	"result": {
 		"item": "aunis:transportrings_ring_fragment",
-		"count": 1,
-		"data": 0
+		"count": 2
 	}
 }

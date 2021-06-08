@@ -44,4 +44,9 @@ public class UniverseDialerOCMessage implements INBTSerializable<NBTTagCompound>
 	public Object[] getData() {
 		return dataStr.split(",");
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("{name=%s, addr='%s':%d, data='%s'}", name, address, port, dataStr);
+	}
 }

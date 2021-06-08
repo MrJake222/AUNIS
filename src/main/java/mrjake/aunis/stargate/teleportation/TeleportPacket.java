@@ -30,6 +30,14 @@ public class TeleportPacket {
 		this.rotation = rotation;
 	}
 	
+	public StargatePos getTargetGatePos() {
+		return targetGatePos;
+	}
+	
+	public Entity getEntity() {
+		return entity;
+	}
+	
 	public void teleport() {
 		TeleportHelper.teleportEntity(entity, sourceGatePos, targetGatePos, rotation, motionVector);
 		

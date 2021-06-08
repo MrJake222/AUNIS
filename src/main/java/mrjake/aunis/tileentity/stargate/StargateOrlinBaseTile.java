@@ -177,6 +177,11 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 		if (world.isRemote) {
 			if (!world.getBlockState(pos).getValue(AunisProps.RENDER_BLOCK) && rendererStateClient != null)
 				Aunis.proxy.orlinRendererSpawnParticles(world, getRendererStateClient());
+			
+			// Each 2s check for the biome overlay
+			if (world.getTotalWorldTime() % 40 == 0 && rendererStateClient != null) {
+				rendererStateClient.setBiomeOverlay(BiomeOverlayEnum.updateBiomeOverlay(world, getMergeHelper().getTopBlock().add(pos), getSupportedOverlays()));
+			}
 		}
 	}
 	
@@ -186,7 +191,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 			BiomeOverlayEnum.MOSSY);
 	
 	@Override
-	protected EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
+	public EnumSet<BiomeOverlayEnum> getSupportedOverlays() {
 		return SUPPORTED_OVERLAYS;
 	}
 	
@@ -223,6 +228,8 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 						break;
 						
 					case ABORTED:
+					case ABORTED_BY_EVENT:
+					case CALLER_HUNG_UP:
 						break;
 				}
 			}
@@ -363,7 +370,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 					targetGatePos.getTileEntity().incomingWormhole(dialedAddress.size());
 				}
 				
-				attemptOpenDialed();
+				attemptOpenAndFail();
 				break;
 				
 			case STARGATE_ORLIN_SPARK:				
@@ -413,7 +420,7 @@ public class StargateOrlinBaseTile extends StargateAbstractBaseTile {
 //		return !isBroken();
 //	}
 	
-	public static final AunisAxisAlignedBB RENDER_BOX = new AunisAxisAlignedBB(-5.5, 0, -0.5, 5.5, 10.5, 0.5);
+	public static final AunisAxisAlignedBB RENDER_BOX = new AunisAxisAlignedBB(-1.5, 0, -0.6, 1.5, 3, 1.5);
 	
 	@Override
 	protected AunisAxisAlignedBB getRenderBoundingBoxRaw() {
