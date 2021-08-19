@@ -53,8 +53,10 @@ public class UniverseEntryChangeGui extends AbstractEntryChangeGui {
 	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		ocButton.x = dispx+guiWidth+3;
-		ocButton.y = dispy+guiHeight+3;
+		if (ocButton != null) {
+			ocButton.x = dispx + guiWidth + 3;
+			ocButton.y = dispy + guiHeight + 3;
+		}
 
 		abortButton.visible = mainCompound.hasKey("linkedGate");
 		abortButton.x = dispx-AbstractEntryChangeGui.PADDING+2;
