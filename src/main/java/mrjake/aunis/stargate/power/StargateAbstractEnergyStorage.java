@@ -9,11 +9,15 @@ import net.minecraftforge.energy.EnergyStorage;
 public class StargateAbstractEnergyStorage extends EnergyStorage implements INBTSerializable<NBTTagCompound> {
 
 	public StargateAbstractEnergyStorage() {
-		super(AunisConfig.powerConfig.stargateEnergyStorage/4, AunisConfig.powerConfig.stargateMaxEnergyTransfer, 0);
+		this(AunisConfig.powerConfig.stargateEnergyStorage/4, AunisConfig.powerConfig.stargateMaxEnergyTransfer, 0);
+	}
+
+	public StargateAbstractEnergyStorage(int capacity, int maxTransfer) {
+		this(capacity, maxTransfer, maxTransfer);
 	}
 	
-	public StargateAbstractEnergyStorage(int capacity, int maxTransfer) {
-		super(capacity, maxTransfer);
+	public StargateAbstractEnergyStorage(int capacity, int maxReceive, int maxExtract) {
+		super(capacity, maxReceive, maxExtract);
 	}
 	
 	@Override

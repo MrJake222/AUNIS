@@ -5,29 +5,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public final class StargateItemEnergyStorage implements IEnergyStorage {
+public final class StargateItemEnergyStorage extends StargateAbstractEnergyStorage {
     private final ItemStack stack;
 
     public StargateItemEnergyStorage(ItemStack stack) {
+        super(AunisConfig.powerConfig.stargateEnergyStorage/4, AunisConfig.powerConfig.stargateMaxEnergyTransfer);
         this.stack = stack;
-    }
-
-    @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        int energyStored = getEnergyStored();
-        int energyReceived = Math.min(getMaxEnergyStored() - energyStored, Math.min(AunisConfig.powerConfig.stargateMaxEnergyTransfer, maxReceive));
-        if (!simulate)
-            setEnergyStored(energyStored + energyReceived);
-        return energyReceived;
-    }
-
-    @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
-        return 0;
-    }
-
-    public void setEnergyStored(int energy){
-        getOrCreateCompound(stack).setInteger("energy", energy);
+        this.energy = getEnergyStored();
     }
 
     @Override
@@ -36,21 +20,11 @@ public final class StargateItemEnergyStorage implements IEnergyStorage {
     }
 
     @Override
-    public int getMaxEnergyStored() {
-        return AunisConfig.powerConfig.stargateEnergyStorage/4;
+    protected void onEnergyChanged() {
+        getOrCreateCompound(stack).setInteger("energy", energy);
     }
 
-    @Override
-    public boolean canExtract() {
-        return false;
-    }
-
-    @Override
-    public boolean canReceive() {
-        return true;
-    }
-
-    private final NBTTagCompound getOrCreateCompound(ItemStack stack) {
+    private NBTTagCompound getOrCreateCompound(ItemStack stack) {
         if(!stack.hasTagCompound())
             stack.setTagCompound(new NBTTagCompound());
         return stack.getTagCompound();
