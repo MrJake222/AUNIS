@@ -49,15 +49,19 @@ public class AunisFontRenderer extends FontRenderer {
 		
 		GlStateManager.glTexCoord2f(((float)i + f - 1.0F) / 128.0F, (float)j / 128.0F); // 3
 		GlStateManager.glVertex3f(this.posX + (float)k, this.posY, 0.0F);  // 1
+		GlStateManager.glNormal3f(0, 0, 1);
 		
 		GlStateManager.glTexCoord2f((float)i / 128.0F, (float)j / 128.0F); // 1
 		GlStateManager.glVertex3f(this.posX + f - 1.0F + (float)k, this.posY, 0.0F); // 3
+		GlStateManager.glNormal3f(0, 0, 1);
 		
 		GlStateManager.glTexCoord2f(((float)i + f - 1.0F) / 128.0F, ((float)j + 7.99F) / 128.0F); // 4
 		GlStateManager.glVertex3f(this.posX - (float)k, this.posY + 7.99F, 0.0F); // 2
+		GlStateManager.glNormal3f(0, 0, 1);
 		
 		GlStateManager.glTexCoord2f((float)i / 128.0F, ((float)j + 7.99F) / 128.0F); // 2
 		GlStateManager.glVertex3f(this.posX + f - 1.0F - (float)k, this.posY + 7.99F, 0.0F); // 4
+		GlStateManager.glNormal3f(0, 0, 1);
 		
 		GlStateManager.glEnd();
 		

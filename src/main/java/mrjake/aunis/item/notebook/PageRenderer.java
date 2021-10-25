@@ -77,10 +77,10 @@ public class PageRenderer {
 		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("aunis:textures/gui/notebook_background.png"));		
 	    GL11.glBegin(GL11.GL_QUADS);
 		
-	    GL11.glTexCoord2f(0, 0); GL11.glVertex3f(0.0f, 0.0f, 0.0f);
-	    GL11.glTexCoord2f(0.5f, 0); GL11.glVertex3f(0.7f, 0.0f, 0.0f);
-	    GL11.glTexCoord2f(0.5f, 0.71875f); GL11.glVertex3f(0.7f, 1.0f, 0.0f);
-	    GL11.glTexCoord2f(0, 0.71875f); GL11.glVertex3f(0.0f, 1.0f, 0.0f);
+	    GL11.glTexCoord2f(0, 0); GL11.glVertex3f(0.0f, 0.0f, 0.0f); GlStateManager.glNormal3f(0, 0, 1);
+	    GL11.glTexCoord2f(0.5f, 0); GL11.glVertex3f(0.7f, 0.0f, 0.0f); GlStateManager.glNormal3f(0, 0, 1);
+	    GL11.glTexCoord2f(0.5f, 0.71875f); GL11.glVertex3f(0.7f, 1.0f, 0.0f); GlStateManager.glNormal3f(0, 0, 1);
+	    GL11.glTexCoord2f(0, 0.71875f); GL11.glVertex3f(0.0f, 1.0f, 0.0f); GlStateManager.glNormal3f(0, 0, 1);
 		
 	    GL11.glEnd();
 			
@@ -119,9 +119,13 @@ public class PageRenderer {
 		GlStateManager.translate(0.10f + (0.61f - width)/2, 0.935f, 0.011f);
 		GlStateManager.rotate(180, 0, 0, 1);
 		GlStateManager.scale(scale, scale, scale);
-		AunisFontRenderer.getFontRenderer().drawString(name, 0, 0, 0x383228, false);
+		int clr[] = {0xD3, 0xBC, 0x94}; // Page color
+		for (int i=0; i<3; i++) clr[i] *= (1 - AunisConfig.avConfig.glyphTransparency - 0.07);
+		int color = (clr[0] << 16) | (clr[1] << 8) | clr[2];
+		AunisFontRenderer.getFontRenderer().drawString(name, 0, 0, color, false);
 		GlStateManager.popMatrix();
 		
 	    GlStateManager.popMatrix();
+	    GlStateManager.enableLighting();
 	}
 }
