@@ -1,3 +1,7 @@
+## UNMAINTAINED
+This project is currently unmaintained, for a successor see [Just Stargate Mod](https://www.curseforge.com/minecraft/mc-mods/jsg).
+<br><br><br>
+
 # AUNIS
 
 [![Aunis Curse statistics](http://cf.way2muchnoise.eu/aunis.svg)](http://minecraft.curseforge.com/projects/aunis)
