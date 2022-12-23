@@ -58,14 +58,7 @@ private static final String blockName = "transportrings_block";
 		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {			
-			BlockPos closestController = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.TR_CONTROLLER_BLOCK);
-			
-			if (closestController != null) {
-				TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(closestController);
-				
-				controllerTile.setLinkedRings(pos);
-				ringsTile.setLinkedController(closestController);
-			}
+			ringsTile.updateLinkStatus();
 		}
 	}
 	
@@ -74,7 +67,7 @@ private static final String blockName = "transportrings_block";
 		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
 
 		if (ringsTile.isLinked())
-			ringsTile.getLinkedControllerTile(world).setLinkedRings(null);
+			ringsTile.getLinkedControllerTile(world).setLinkedRings(null, -1);
 		
 		ringsTile.removeAllRings();
 	}

@@ -11,7 +11,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class LinkingHelper {
-	
+	private static int nextLinkId = 0;
+
 	/**
 	 * Finds closest block of the given type within given radius.
 	 * 
@@ -23,16 +24,17 @@ public class LinkingHelper {
 	 */
 	
 	@Nullable
-	public static BlockPos findClosestUnlinked(World world, BlockPos startPos, BlockPos radius, Block targetBlock) {		
+	public static BlockPos findClosestUnlinked(World world, BlockPos startPos, BlockPos radius, Block targetBlock, int linkId) {		
 		double closestDistance = Double.MAX_VALUE;
 		BlockPos closest = null;
 		
 		for (BlockPos target : BlockPos.getAllInBoxMutable(startPos.subtract(radius), startPos.add(radius))) {
 			if (world.getBlockState(target).getBlock() == targetBlock) {
-				
 				ILinkable linkedTile = (ILinkable) world.getTileEntity(target);
-									
-				if (linkedTile.canLinkTo()) {
+				
+				// Check whether a tile can be linked to, or whether the link id is matching, 
+				// so that it can link once again to the exact same tile (i.e when the tile position changes).
+				if (linkedTile.canLinkTo() || linkId == linkedTile.getLinkId()) {
 					double distanceSq = startPos.distanceSq(target);
 					
 					if (distanceSq < closestDistance) {
@@ -63,8 +65,16 @@ public class LinkingHelper {
         DHDTile dhdTile = (DHDTile) world.getTileEntity(dhdPos);
 
         if (dhdTile != null) {
-            dhdTile.setLinkedGate(gatePos);
-            gateTile.setLinkedDHD(dhdPos);
+			int linkId = getLinkId();
+            dhdTile.setLinkedGate(gatePos, linkId);
+            gateTile.setLinkedDHD(dhdPos, linkId);
         }
     }
+
+	/**
+	* @return id for the next connection.
+	*/
+	public static int getLinkId() {
+		return ++nextLinkId;
+	}
 }

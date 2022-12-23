@@ -37,6 +37,13 @@ public class TRControllerTile extends TileEntity implements ITickable, ILinkable
 			if (world.getTotalWorldTime() % 40 == 0) {
 				biomeOverlay = BiomeOverlayEnum.updateBiomeOverlay(world, pos, SUPPORTED_OVERLAYS);
 			}
+
+			if (!lastPos.equals(pos)) {
+				lastPos = pos;
+
+				updateLinkStatus();
+				markDirty();
+			}
 		}
 	}
 	
@@ -48,9 +55,11 @@ public class TRControllerTile extends TileEntity implements ITickable, ILinkable
 	// ------------------------------------------------------------------------
 	// Rings 
 	private BlockPos linkedRings;
+	private int linkId = -1;
 	
-	public void setLinkedRings(BlockPos pos) {
+	public void setLinkedRings(BlockPos pos, int linkId) {
 		this.linkedRings = pos;
+		this.linkId = linkId;
 		
 		markDirty();
 	}
@@ -71,22 +80,44 @@ public class TRControllerTile extends TileEntity implements ITickable, ILinkable
 	public boolean canLinkTo() {
 		return !isLinked();
 	}
-	
+
+	@Override
+	public int getLinkId() {
+		return linkId;
+	}
+
+	public void updateLinkStatus() {
+		BlockPos closestRings = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.TRANSPORT_RINGS_BLOCK, linkId);
+		int linkId = -1;
+
+		if (closestRings != null) {
+			linkId = LinkingHelper.getLinkId();
+			TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(closestRings);
+			ringsTile.setLinkedController(pos, linkId);
+		}
+
+		setLinkedRings(closestRings, linkId);
+	}
+
 	// ------------------------------------------------------------------------
 	// NBT
 	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-		if (linkedRings != null)
+		if (linkedRings != null) {
 			compound.setLong("linkedRings", linkedRings.toLong());
+			compound.setInteger("linkId", linkId);
+		}
 		
 		return super.writeToNBT(compound);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
-		if (compound.hasKey("linkedRings"))
+		if (compound.hasKey("linkedRings")) {
 			linkedRings = BlockPos.fromLong(compound.getLong("linkedRings"));
+			linkId = compound.getInteger("linkId");
+		}
 		
 		super.readFromNBT(compound);
 	}

@@ -105,14 +105,7 @@ public class DHDBlock extends Block {
 			world.setBlockState(pos, state.withProperty(AunisProps.ROTATION_HORIZONTAL, facing), 3);
 			
 			DHDTile dhdTile = (DHDTile) world.getTileEntity(pos);
-			BlockPos closestGate = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK);
-			
-			if (closestGate != null) {
-				StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) world.getTileEntity(closestGate);
-				
-				dhdTile.setLinkedGate(closestGate);
-				gateTile.setLinkedDHD(pos);
-			}	
+			dhdTile.updateLinkStatus(world, pos);
 		}
 	}
 	
@@ -149,7 +142,7 @@ public class DHDBlock extends Block {
 			StargateMilkyWayBaseTile gateTile = (StargateMilkyWayBaseTile) dhdTile.getLinkedGate(world);
 			
 			if (gateTile != null)
-				gateTile.setLinkedDHD(null);
+				gateTile.setLinkedDHD(null, -1);
 			
 			ItemHandlerHelper.dropInventoryItems(world, pos, dhdTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null));
 		}

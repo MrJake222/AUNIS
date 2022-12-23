@@ -91,14 +91,7 @@ public class TRControllerBlock extends Block {
 		TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote) {			
-			BlockPos closestRings = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.TRANSPORT_RINGS_BLOCK);
-			
-			if (closestRings != null) {
-				TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(closestRings);
-				
-				controllerTile.setLinkedRings(closestRings);
-				ringsTile.setLinkedController(pos);
-			}
+			controllerTile.updateLinkStatus();
 		}
 	}
 	
@@ -107,7 +100,7 @@ public class TRControllerBlock extends Block {
 		TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(pos);
 		
 		if (!world.isRemote && controllerTile.isLinked())
-			controllerTile.getLinkedRingsTile(world).setLinkedController(null);
+			controllerTile.getLinkedRingsTile(world).setLinkedController(null, -1);
 		
 		super.breakBlock(world, pos, state);
 	}

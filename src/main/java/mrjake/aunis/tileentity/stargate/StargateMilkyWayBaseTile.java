@@ -165,23 +165,15 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		
 		if (isLinked()) {
 			getLinkedDHD(world).clearSymbols();
-			getLinkedDHD(world).setLinkedGate(null);
-			setLinkedDHD(null);
+			getLinkedDHD(world).setLinkedGate(null, -1);
+			setLinkedDHD(null, -1);
 		}
 	}
 	
 	@Override
 	protected void onGateMerged() {
 		super.onGateMerged();
-		BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.DHD_BLOCK);
-		
-		if (closestDhd != null) {
-			DHDTile dhdTile = (DHDTile) world.getTileEntity(closestDhd);
-			
-			dhdTile.setLinkedGate(pos);
-			setLinkedDHD(closestDhd);
-			markDirty();
-		}
+		this.updateLinkStatus();
 	}
 	
 	@Override
@@ -195,6 +187,8 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	
 	private BlockPos linkedDHD = null;
 	
+	private int linkId = -1;
+
 	@Nullable
 	public DHDTile getLinkedDHD(World world) {
 		if (linkedDHD == null)
@@ -204,7 +198,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	}
 	
 	public boolean isLinked() {
-		return linkedDHD != null;
+		return linkedDHD != null && world.getTileEntity(linkedDHD) instanceof DHDTile;
 	}
 	
 	public boolean isLinkedAndDHDOperational() {
@@ -218,8 +212,9 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 		return true;
 	}
 	
-	public void setLinkedDHD(BlockPos dhdPos) {		
+	public void setLinkedDHD(BlockPos dhdPos, int linkId) {		
 		this.linkedDHD = dhdPos;
+		this.linkId = linkId;
 		
 		markDirty();
 	}
@@ -228,14 +223,34 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	public boolean canLinkTo() {
 		return isMerged() && !isLinked();
 	}
+
+	@Override
+	public int getLinkId() {
+		return linkId;
+	}
+
+	public void updateLinkStatus() {
+		BlockPos closestDhd = LinkingHelper.findClosestUnlinked(world, pos, LinkingHelper.getDhdRange(), AunisBlocks.DHD_BLOCK, this.getLinkId());
+
+		if (closestDhd != null) {
+			int linkId = LinkingHelper.getLinkId();
+			DHDTile dhdTile = (DHDTile) world.getTileEntity(closestDhd);
+
+			dhdTile.setLinkedGate(pos, linkId);
+			setLinkedDHD(closestDhd, linkId);
+			markDirty();
+		}
+	}
 	
 	// ------------------------------------------------------------------------
 	// NBT
 		
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {		
-		if (isLinked())
+		if (isLinked()) {
 			compound.setLong("linkedDHD", linkedDHD.toLong());
+			compound.setInteger("linkId", linkId);
+		}
 						
 		compound.setInteger("stargateSize", stargateSize.id);
 				
@@ -246,6 +261,8 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	public void readFromNBT(NBTTagCompound compound) {
 		if (compound.hasKey("linkedDHD"))
 			this.linkedDHD = BlockPos.fromLong( compound.getLong("linkedDHD") );
+		if (compound.hasKey("linkId")) 
+			this.linkId = compound.getInteger("linkId");
 				
 		if (compound.hasKey("patternVersion"))
 			stargateSize = StargateSizeEnum.SMALL;
@@ -261,7 +278,7 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	
 	@Override
 	public boolean prepare(ICommandSender sender, ICommand command) {
-		setLinkedDHD(null);
+		setLinkedDHD(null, -1);
 		
 		return super.prepare(sender, command);
 	}
@@ -304,11 +321,20 @@ public class StargateMilkyWayBaseTile extends StargateClassicBaseTile implements
 	
 	private boolean firstTick = true;
 	
+	private BlockPos lastPos = BlockPos.ORIGIN;
+
 	@Override
 	public void update() {
 		super.update();
 		
 		if (!world.isRemote) {
+			if (!lastPos.equals(pos)) {
+				lastPos = pos;
+
+				updateLinkStatus();
+				markDirty();
+			}
+
 			if (firstTick) {
 				firstTick = false;
 				

@@ -78,6 +78,16 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	public void update() {		
 		if (!world.isRemote) {
 			ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());
+
+			if (!lastPos.equals(pos)) {
+				lastPos = pos;
+
+				getRings().setPos(pos);
+				setRingsParams(getRings().getAddress(), getRings().getName());
+				updateLinkStatus();
+
+				markDirty();
+			}
 		}
 	}
 	
@@ -314,9 +324,11 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	// ---------------------------------------------------------------------------------
 	// Controller
 	private BlockPos linkedController;
-	
-	public void setLinkedController(BlockPos pos) {
+	private int linkId = -1;
+
+	public void setLinkedController(BlockPos pos, int linkId) {
 		this.linkedController = pos;
+		this.linkId = linkId;
 		
 		markDirty();
 	}
@@ -326,7 +338,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	}
 	
 	public boolean isLinked() {
-		return linkedController != null;
+		return linkedController != null && world.getTileEntity(linkedController) instanceof TRControllerTile;
 	}
 	
 	public TRControllerTile getLinkedControllerTile(World world) {
@@ -337,7 +349,25 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	public boolean canLinkTo() {
 		return !isLinked();
 	}
+
+	@Override
+	public int getLinkId() {
+		return linkId;
+	}
 	
+	public void updateLinkStatus() {
+		BlockPos closestController = LinkingHelper.findClosestUnlinked(world, pos, new BlockPos(10, 5, 10), AunisBlocks.TR_CONTROLLER_BLOCK, linkId);
+		int linkId = -1;
+
+		if (closestController != null) {
+			linkId = LinkingHelper.getLinkId();
+			TRControllerTile controllerTile = (TRControllerTile) world.getTileEntity(closestController);
+			controllerTile.setLinkedRings(pos, linkId);
+		}
+
+		setLinkedController(closestController, linkId);
+	}
+
 	// ---------------------------------------------------------------------------------
 	// Rings network
 	private TransportRings rings;
@@ -380,16 +410,24 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		}
 	}
 	
-	public void removeRings(int address) {	
-		if (ringsMap.remove(address) != null)
-			markDirty();
+	public void removeRingsFromMap(int address) {
+		if (ringsMap.remove(address) != null) markDirty();
 	}
-	
+
+	public void removeRings(int address) {
+		TransportRings rings = ringsMap.get(address);
+		if (rings != null) {
+			TileEntity tile = world.getTileEntity(rings.getPos());
+			if (tile instanceof TransportRingsTile) {
+				((TransportRingsTile) tile).removeRingsFromMap(getRings().getAddress());
+			}
+		}
+		removeRingsFromMap(address);
+	}
+
 	public void removeAllRings() {
-		for (TransportRings rings : ringsMap.values()) {
-			
-			TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(rings.getPos());
-			ringsTile.removeRings(getRings().getAddress());
+		for (int address : new ArrayList<>(ringsMap.keySet())) {
+			removeRings(address);
 		}
 	}
 	
@@ -445,8 +483,10 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		compound.setTag("rendererState", rendererState.serializeNBT());
 		
 		compound.setTag("ringsData", getRings().serializeNBT());
-		if (linkedController != null)
+		if (linkedController != null) {
 			compound.setLong("linkedController", linkedController.toLong());
+			compound.setInteger("linkId", linkId);
+		}
 		
 		compound.setInteger("ringsMapLength", ringsMap.size());
 		
@@ -510,8 +550,10 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		if (compound.hasKey("ringsData"))
 			getRings().deserializeNBT(compound.getCompoundTag("ringsData"));
 		
-		if (compound.hasKey("linkedController"))
+		if (compound.hasKey("linkedController")) {
 			linkedController = BlockPos.fromLong(compound.getLong("linkedController"));
+			linkId = compound.getInteger("linkId");
+		}
 		
 		if (compound.hasKey("ringsMapLength")) {
 			int len = compound.getInteger("ringsMapLength");
