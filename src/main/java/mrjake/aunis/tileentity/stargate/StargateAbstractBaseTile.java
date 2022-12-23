@@ -428,7 +428,7 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		markDirty();
 	}
-	
+
 	public StargateAddressDynamic getDialedAddress() {
 		return dialedAddress;
 	}
@@ -661,28 +661,8 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 			network = StargateNetwork.get(world);
 			
 			targetPoint = new TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 512);			
-			Random random = new Random(pos.hashCode() * 31 + world.provider.getDimension());
 			
-			for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
-				
-				StargatePos stargatePos;
-				
-				if (gateAddressMap.get(symbolType) == null) {
-					StargateAddress address = new StargateAddress(symbolType);
-					address.generate(random);
-					
-					stargatePos = new StargatePos(world.provider.getDimension(), pos, address);
-					network.addStargate(address, stargatePos);
-					gateAddressMap.put(symbolType, address);
-//					Aunis.info(address.toString());
-				}
-				
-				else {
-					stargatePos = new StargatePos(world.provider.getDimension(), pos, gateAddressMap.get(symbolType));
-				}
-				
-				gatePosMap.put(symbolType, stargatePos);
-			}
+			generateAddresses(false);
 			
 			if (stargateState.engaged()) {
 				verifyConnection();
@@ -691,6 +671,21 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 		
 		else {
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_STATE));
+		}
+	}
+
+	public void generateAddresses(boolean reset) {
+		Random random = new Random(pos.hashCode() * 31 + world.provider.getDimension());
+
+		for (SymbolTypeEnum symbolType : SymbolTypeEnum.values()) {
+			StargateAddress address = getStargateAddress(symbolType);
+
+			if (gateAddressMap.get(symbolType) == null || reset) {
+				address = new StargateAddress(symbolType);
+				address.generate(random);
+			}
+
+			if (address != null) this.setGateAddress(symbolType, address);
 		}
 	}
 	
@@ -1031,6 +1026,16 @@ public abstract class StargateAbstractBaseTile extends TileEntity implements Sta
 	 * @param facing Facing of the base block.
 	 */
 	public final void updateMergeState(boolean shouldBeMerged, EnumFacing facing) {
+		// If the gate has already been merged, there is no need to merge it again.
+		// However, the gate position might have changed in that case, so we should
+		// update the members base position.
+		if (this.isMerged == shouldBeMerged) {
+			if (shouldBeMerged) {
+				getMergeHelper().updateMembersBasePos(world, pos, facing);
+			}
+			return;
+		}
+
 		if (!shouldBeMerged) {
 			if (isMerged)
 				onGateBroken();

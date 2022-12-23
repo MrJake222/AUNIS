@@ -361,6 +361,10 @@ public class StargateUniverseBaseTile extends StargateClassicBaseTile {
 		return StargateUniverseMergeHelper.INSTANCE;
 	}
 
+	@Override
+	protected boolean onGateMergeRequested() {
+		return StargateUniverseMergeHelper.INSTANCE.checkBlocks(world, pos, facing);
+	}
 	
 	// --------------------------------------------------------------------------------
 	// Renderer states
