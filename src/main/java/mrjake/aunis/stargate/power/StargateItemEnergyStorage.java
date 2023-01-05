@@ -23,7 +23,15 @@ public final class StargateItemEnergyStorage implements IEnergyStorage {
 
     @Override
     public int extractEnergy(int maxExtract, boolean simulate) {
-        return 0;
+        int energy = this.getEnergyStored();
+        int energyExtracted = Math.min(energy, maxExtract);
+
+        if (!simulate && energyExtracted > 0) {
+            energy -= energyExtracted;
+            this.setEnergyStored(energy);
+        }
+
+        return energyExtracted;
     }
 
     public void setEnergyStored(int energy){
