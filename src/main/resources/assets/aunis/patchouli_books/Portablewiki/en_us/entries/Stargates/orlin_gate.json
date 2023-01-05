@@ -1,0 +1,11 @@
+{
+    "name": "Orlin's Stargate",
+    "icon": "aunis:orlin_icon",
+    "category": "Portablewiki:Stargates",
+    "pages": [
+        {
+            "type": "text",
+            "text": "Orlin's Stargate, also known as the Minigate, is a$(br)small, limited use stargate. In the AUNIS mod, you$(br)can use this minigate to access a stargate located$(br)in the Nether, where you can find $(item)Naquadah$() to$(br)create the other stargates. To get back to Orlin's$(br)Stargate, dial the $(l:https://stargate.fandom.com/wiki/Earth)Earth address$(/l)"
+        }
+    ]
+}
